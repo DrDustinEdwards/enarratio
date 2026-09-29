@@ -1,6 +1,6 @@
 /**
  * A color in hexadecimal notation (`#rgb` or `#rrggbb`). Themes use hex, not arbitrary CSS, so
- * that Abscissa can measure contrast and color-vision differences before anything is drawn.
+ * that Enarratio can measure contrast and color-vision differences before anything is drawn.
  */
 export type HexColor = `#${string}`;
 

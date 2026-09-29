@@ -1,6 +1,6 @@
 name: Deploy gallery
 
-# Publishes the gallery to https://abscissa.dustinedwards.info when main changes. It needs two
+# Publishes the gallery to https://enarratio.dustinedwards.info when main changes. It needs two
 # repository secrets, CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID; without them it says so and
 # stops, rather than failing every push to main.
 on:

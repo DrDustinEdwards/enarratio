@@ -28,7 +28,7 @@ const PAYLOADS = [
   "&lt;b&gt; & \" '",
 ];
 
-/** Elements Abscissa itself emits; anything else in the parse came from the payload. */
+/** Elements Enarratio itself emits; anything else in the parse came from the payload. */
 const EMITTED = new Set([
   "div",
   "figure",

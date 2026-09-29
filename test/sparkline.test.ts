@@ -31,7 +31,7 @@ describe("sparkline", () => {
   it("shades the area when asked and applies a color override", () => {
     const svg = parse(sparkline({ values: [1, 3], area: true, color: "#123456" }));
     expect(svg.querySelectorAll("path")).toHaveLength(2);
-    expect(svg.getAttribute("style")).toBe("--abscissa-series-1: #123456");
+    expect(svg.getAttribute("style")).toBe("--enarratio-series-1: #123456");
   });
 
   it("refuses empty or non-finite data", () => {

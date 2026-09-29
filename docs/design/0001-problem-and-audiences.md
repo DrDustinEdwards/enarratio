@@ -23,7 +23,7 @@ ticks and legends, some stretched their text, and most had no text alternative
 beyond a nearby number. Colors were set five different ways. None could draw
 the figures a virology lab publishes.
 
-**Author's decision.** "Abscissa, one shared charts package used by all of
+**Author's decision.** "Enarratio, one shared charts package used by all of
 Dustin's websites, so no site hand-draws a chart again, and research software
 for accessible, server-rendered scientific figures on the web."
 
@@ -36,7 +36,7 @@ types to the caller. Browser libraries (Recharts, Chart.js, ECharts, Vega-Lite
 in the browser) need script to show anything. Domain tools (genome browsers,
 phylogeny viewers) are large interactive applications, not figures for a page.
 
-Abscissa is the layer between: a small, typed API over Plot and d3-force that
+Enarratio is the layer between: a small, typed API over Plot and d3-force that
 makes the accessible, themed, server-rendered result the default, adds an
 optional interaction layer, and adds scientific chart types that share all of
 it.
@@ -51,7 +51,7 @@ it.
    match their site and work in dark mode.
 3. **Readers of those sites**, including people using screen readers,
    keyboards, high zoom, reduced motion or no JavaScript, and people with
-   color vision deficiencies. They never install Abscissa but are the reason
+   color vision deficiencies. They never install Enarratio but are the reason
    for most of its rules.
 4. **Machines that read the web**: search engines and language models, which
    read the HTML without running scripts. **Author's rule** (from the

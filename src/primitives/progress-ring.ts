@@ -72,8 +72,8 @@ export function progressRing(options: ProgressRingOptions): string {
   return element(
     "svg",
     {
-      class: "abscissa abscissa-progress-ring",
-      "data-abscissa": "progress-ring",
+      class: "enarratio enarratio-progress-ring",
+      "data-enarratio": "progress-ring",
       xmlns: "http://www.w3.org/2000/svg",
       viewBox: `0 0 ${size} ${size}`,
       width: size,
@@ -89,7 +89,7 @@ export function progressRing(options: ProgressRingOptions): string {
         cy: c,
         r: round(radius),
         fill: "none",
-        stroke: "var(--abscissa-grid)",
+        stroke: "var(--enarratio-grid)",
         "stroke-width": round(thickness),
       }),
       fraction > 0
@@ -98,7 +98,7 @@ export function progressRing(options: ProgressRingOptions): string {
             cy: c,
             r: round(radius),
             fill: "none",
-            stroke: "var(--abscissa-series-1)",
+            stroke: "var(--enarratio-series-1)",
             "stroke-width": round(thickness),
             "stroke-linecap": fraction < 1 ? "round" : "butt",
             "stroke-dasharray": `${round(circumference * fraction)} ${round(circumference)}`,
@@ -113,9 +113,9 @@ export function progressRing(options: ProgressRingOptions): string {
               y: c,
               "text-anchor": "middle",
               "dominant-baseline": "central",
-              fill: "var(--abscissa-text)",
+              fill: "var(--enarratio-text)",
               "font-size": round(size * 0.28),
-              class: "abscissa-numeric",
+              class: "enarratio-numeric",
             },
             `${percent}%`,
           )

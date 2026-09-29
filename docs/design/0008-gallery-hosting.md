@@ -1,11 +1,12 @@
 # 0008. Hosting the gallery, and its Content-Security-Policy
 
-Status: accepted, 2026-09-28. Amended by [0009](0009-review-fixes.md) after the two reviews.
+Status: accepted, 2026-09-28. Amended by [0009](0009-review-fixes.md) after the two reviews,
+and by [0010](0010-rename-to-enarratio.md) for the new name and address.
 
 ## Decision
 
 **Author's decision.** The documentation and gallery live at
-abscissa.dustinedwards.info, hosted on Cloudflare, where the dustinedwards.info
+enarratio.dustinedwards.info, hosted on Cloudflare, where the dustinedwards.info
 zone already is.
 
 **Implementation choices.**
@@ -55,7 +56,7 @@ zone already is.
    keep analytics on the gallery (2026-09-28), so both allowances stay; excluding
    this hostname in the zone's Web Analytics settings would let them be removed. Inline styles cannot run
    code, and scripts stay limited to `'self'`, so the risk this admits is
-   small. Sites embedding Abscissa charts need the same allowance for styles.
+   small. Sites embedding Enarratio charts need the same allowance for styles.
 4. **Deploys.** `npm run deploy:gallery` builds the package and the gallery
    and runs a pinned wrangler (`npx --yes wrangler@4.143.0 deploy`, not a
    dependency). The "Deploy gallery" workflow runs it on pushes to `main`

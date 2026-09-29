@@ -25,10 +25,10 @@ export interface UptimeStripOptions {
 
 const STATUS: Readonly<Record<UptimeStatus, { color: string; height: number; word: string }>> = {
   // Height encodes status as well as color, so the strip reads without hue: a shorter tick is worse.
-  up: { color: "var(--abscissa-status-good)", height: 1, word: "up" },
-  degraded: { color: "var(--abscissa-status-warning)", height: 0.66, word: "degraded" },
-  down: { color: "var(--abscissa-status-bad)", height: 0.33, word: "down" },
-  unknown: { color: "var(--abscissa-status-unknown)", height: 1, word: "no data" },
+  up: { color: "var(--enarratio-status-good)", height: 1, word: "up" },
+  degraded: { color: "var(--enarratio-status-warning)", height: 0.66, word: "degraded" },
+  down: { color: "var(--enarratio-status-bad)", height: 0.33, word: "down" },
+  unknown: { color: "var(--enarratio-status-unknown)", height: 1, word: "no data" },
 };
 
 const round = (n: number): number => Math.round(n * 100) / 100;
@@ -111,8 +111,8 @@ export function uptimeStrip(options: UptimeStripOptions): string {
   return element(
     "svg",
     {
-      class: "abscissa abscissa-uptime-strip",
-      "data-abscissa": "uptime-strip",
+      class: "enarratio enarratio-uptime-strip",
+      "data-enarratio": "uptime-strip",
       xmlns: "http://www.w3.org/2000/svg",
       viewBox: `0 0 ${width} ${height}`,
       width,

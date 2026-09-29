@@ -1,6 +1,6 @@
 /**
- * Runs Observable Plot on the server and turns its SVG into Abscissa markup: no inline styles,
- * no per-chart `<style>`, marks named by `data-abscissa-mark`, every drawn datum keyed so the
+ * Runs Observable Plot on the server and turns its SVG into Enarratio markup: no inline styles,
+ * no per-chart `<style>`, marks named by `data-enarratio-mark`, every drawn datum keyed so the
  * enhancement layer can find it, and coordinates rounded so output is stable across engines.
  */
 
@@ -11,7 +11,7 @@ import { escapeHtml } from "../html.js";
 /** A document for Plot to draw into. linkedom, because it runs in Node, Workers, Deno and Bun. */
 function createDocument(): Document {
   const { document } = parseHTML("<!doctype html><html><body></body></html>");
-  // linkedom implements the subset of the DOM that Plot and Abscissa use; its types differ.
+  // linkedom implements the subset of the DOM that Plot and Enarratio use; its types differ.
   return document as unknown as Document;
 }
 
@@ -76,15 +76,15 @@ export function keyed<T>(
 
 /** Writes a datum's keys onto an element. */
 export function tag(el: Element, datum: MarkDatum): void {
-  el.setAttribute("data-abscissa-key", datum.key);
+  el.setAttribute("data-enarratio-key", datum.key);
   if (datum.filter) {
-    el.setAttribute("data-abscissa-field", datum.filter.field);
-    el.setAttribute("data-abscissa-value", datum.filter.value);
+    el.setAttribute("data-enarratio-field", datum.filter.field);
+    el.setAttribute("data-enarratio-value", datum.filter.value);
   }
-  if (datum.x !== undefined) el.setAttribute("data-abscissa-x", datum.x);
-  if (datum.series !== undefined) el.setAttribute("data-abscissa-series", datum.series);
-  if (datum.column !== undefined) el.setAttribute("data-abscissa-col", String(datum.column));
-  if (datum.row !== undefined) el.setAttribute("data-abscissa-row", String(datum.row));
+  if (datum.x !== undefined) el.setAttribute("data-enarratio-x", datum.x);
+  if (datum.series !== undefined) el.setAttribute("data-enarratio-series", datum.series);
+  if (datum.column !== undefined) el.setAttribute("data-enarratio-col", String(datum.column));
+  if (datum.row !== undefined) el.setAttribute("data-enarratio-row", String(datum.row));
 }
 
 /** A scale as the enhancement layer needs it to turn a pointer position back into data. */
@@ -184,7 +184,7 @@ export function renderPlot(
   }
   if (svg.localName !== "svg") {
     throw new Error(
-      "Abscissa charts must draw a single SVG; remove Plot options that add a legend or caption",
+      "Enarratio charts must draw a single SVG; remove Plot options that add a legend or caption",
     );
   }
 
@@ -193,11 +193,11 @@ export function renderPlot(
   // Plot names groups with aria-label, which is invalid on a <g> without a role and hidden anyway
   // inside role="img". The name moves to a data attribute for CSS and the enhancement layer.
   for (const group of svg.querySelectorAll("[aria-label]")) {
-    group.setAttribute("data-abscissa-mark", group.getAttribute("aria-label") ?? "");
+    group.setAttribute("data-enarratio-mark", group.getAttribute("aria-label") ?? "");
     group.removeAttribute("aria-label");
     // Axes repeat what the text alternative and the data table say; once enhanced, loose tick
     // text would be read before the marks (A12).
-    if (/axis/.test(group.getAttribute("data-abscissa-mark") ?? "")) {
+    if (/axis/.test(group.getAttribute("data-enarratio-mark") ?? "")) {
       group.setAttribute("aria-hidden", "true");
     }
   }

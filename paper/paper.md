@@ -1,5 +1,5 @@
 ---
-title: "Abscissa: accessible, server-rendered charts and scientific figures for the web"
+title: "Enarratio: accessible, server-rendered charts and scientific figures for the web"
 tags:
   - TypeScript
   - data visualization
@@ -21,7 +21,7 @@ bibliography: paper.bib
 
 # Summary
 
-Abscissa is a TypeScript library that draws charts and scientific figures on
+Enarratio is a TypeScript library that draws charts and scientific figures on
 the server, as HTML and SVG that are complete before any script runs. Each
 figure carries a required written description, an equivalent data table and
 hover details that work without JavaScript, and takes its colors from a site
@@ -29,7 +29,7 @@ theme through CSS custom properties, so one rendering follows light and dark
 mode. An optional browser module adds keyboard navigation, click-to-filter
 events, range brushing and animated updates, all announced to screen readers
 and disabled under reduced-motion preferences. Alongside bar, line, area,
-scatter, heatmap and network charts, Abscissa includes figures common in
+scatter, heatmap and network charts, Enarratio includes figures common in
 virology and immunology, beginning with antibody titer plots and genome
 tracks, which share the same theming, accessibility and interaction.
 
@@ -55,7 +55,7 @@ interaction to each user. Domain tools such as genome browsers and phylogeny
 viewers are full interactive applications rather than figures for a page, and
 general libraries do not include titer plots or genome maps.
 
-Abscissa addresses both gaps for developers of research, teaching and
+Enarratio addresses both gaps for developers of research, teaching and
 small-organization websites. It makes the accessible result the default
 rather than an option: a figure cannot be drawn without a text alternative,
 its data table is generated from the values it draws, series are
@@ -67,7 +67,7 @@ runtimes such as Cloudflare Workers.
 
 # Software design
 
-Abscissa builds on Observable Plot [@plot] for scales, axes and marks,
+Enarratio builds on Observable Plot [@plot] for scales, axes and marks,
 rendering into a lightweight server-side DOM, and on d3-force [@d3] for
 deterministic network layouts. Every chart is a function from typed options to
 a string; field names are checked by TypeScript against the data's type, and
@@ -87,7 +87,7 @@ visual regression comparisons.
 
 # Research impact statement
 
-Abscissa was built for the websites of a virology research and teaching
+Enarratio was built for the websites of a virology research and teaching
 program, starting with an interactive curriculum vitae and laboratory
 dashboards. Planned scientific figures include dose-response and growth
 curves, endpoint dilution titrations, gel-style band plots, phylogenetic

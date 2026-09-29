@@ -1,5 +1,5 @@
 // Stacked areas: parts of a whole over time.
-import { areaChart } from "abscissa";
+import { areaChart } from "enarratio";
 
 const activities = ["Research", "Teaching", "Service"] as const;
 const hours = {

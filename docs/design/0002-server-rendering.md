@@ -21,7 +21,7 @@ network chart."
    Bun. dustinedwards.info had already established that Plot works inside a
    Worker with linkedom (jsdom and domino do not: domino uses `with`, which
    strict ESM bundles forbid).
-3. **Abscissa serializes the SVG itself** and escapes every attribute and text
+3. **Enarratio serializes the SVG itself** and escapes every attribute and text
    node, so markup is valid as HTML and as XML whatever the data holds.
    linkedom's own serializer leaves `<` unescaped in attributes.
 4. **Output is deterministic.** Coordinates are rounded to two decimals, Plot's
@@ -30,19 +30,19 @@ network chart."
    the same, which makes stored-output tests possible and lets a site cache
    rendered charts.
 5. **Plot's warnings are errors.** Plot marks a chart it thinks is wrong (for
-   example, numbers passed as strings) with a small warning glyph. Abscissa
+   example, numbers passed as strings) with a small warning glyph. Enarratio
    throws instead, because a chart that renders with a warning is a chart
    that says something other than what the author meant.
 
 ## The accessible structure
 
 ```html
-<figure class="abscissa">
-  <p class="abscissa-title">...</p>
-  <ul class="abscissa-legend">...</ul>
+<figure class="enarratio">
+  <p class="enarratio-title">...</p>
+  <ul class="enarratio-legend">...</ul>
   <svg role="img" aria-label="{alt}">...</svg>
   <figcaption>...</figcaption>
-  <details class="abscissa-data"><summary>Data table</summary><table>...</table></details>
+  <details class="enarratio-data"><summary>Data table</summary><table>...</table></details>
 </figure>
 ```
 
@@ -61,7 +61,7 @@ same values it draws, so the table cannot disagree with the picture.
 
 - Charts cost the reader no JavaScript. The enhancement layer
   ([0004](0004-enhancement-layer.md)) is a separate, optional import.
-- Text is laid out by the browser, not measured on the server, so Abscissa
+- Text is laid out by the browser, not measured on the server, so Enarratio
   cannot wrap long labels precisely. It sizes margins from label lengths and
   prefers layouts that avoid the problem (horizontal bars for long names,
   direct labels at line ends).

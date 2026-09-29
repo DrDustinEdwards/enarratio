@@ -11,7 +11,7 @@ export type Rgb = readonly [number, number, number];
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
-/** Whether a string is a hex color Abscissa can measure. */
+/** Whether a string is a hex color Enarratio can measure. */
 export function isHexColor(value: string): value is HexColor {
   return HEX.test(value);
 }
@@ -59,7 +59,7 @@ export function contrastRatio(a: string, b: string): number {
   return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }
 
-/** The kinds of color vision deficiency Abscissa simulates, each at full severity. */
+/** The kinds of color vision deficiency Enarratio simulates, each at full severity. */
 export type ColorVision = "protanopia" | "deuteranopia" | "tritanopia";
 
 type Matrix = readonly [Rgb, Rgb, Rgb];

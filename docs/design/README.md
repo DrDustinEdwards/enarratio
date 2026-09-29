@@ -1,6 +1,6 @@
 # Design records
 
-These records explain why Abscissa is built the way it is: the problem, who it
+These records explain why Enarratio is built the way it is: the problem, who it
 is for, and the choices that shape the code. They are written for reviewers,
 contributors and future maintainers, and for the Journal of Open Source
 Software review, which asks authors to show the human framing of the problem
@@ -23,9 +23,10 @@ Each record says where a decision came from:
 | [0004](0004-enhancement-layer.md) | The optional enhancement layer |
 | [0005](0005-scientific-charts.md) | Scientific chart types and the plan for the rest |
 | [0006](0006-api-and-quality.md) | API shape, errors, dependencies and tests |
-| [0007](0007-site-migrations.md) | What moving each existing site onto Abscissa involves |
+| [0007](0007-site-migrations.md) | What moving each existing site onto Enarratio involves |
 | [0008](0008-gallery-hosting.md) | Hosting the gallery, and its Content-Security-Policy |
 | [0009](0009-review-fixes.md) | What the two reviews changed, and why |
+| [0010](0010-rename-to-enarratio.md) | The rename from Abscissa to Enarratio |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

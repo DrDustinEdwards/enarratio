@@ -97,7 +97,7 @@ export function sparkline(options: SparklineOptions): string {
     areaPath
       ? element("path", {
           d: areaPath,
-          fill: "var(--abscissa-series-1)",
+          fill: "var(--enarratio-series-1)",
           "fill-opacity": 0.15,
           stroke: "none",
         })
@@ -105,7 +105,7 @@ export function sparkline(options: SparklineOptions): string {
     element("path", {
       d: line,
       fill: "none",
-      stroke: "var(--abscissa-series-1)",
+      stroke: "var(--enarratio-series-1)",
       "stroke-width": 1.5,
       "stroke-linejoin": "round",
       "stroke-linecap": "round",
@@ -115,7 +115,7 @@ export function sparkline(options: SparklineOptions): string {
           cx: xOf(lastIndex),
           cy: yOf(lastValue),
           r: 2.25,
-          fill: "var(--abscissa-series-1)",
+          fill: "var(--enarratio-series-1)",
         })
       : "",
   ];
@@ -123,8 +123,8 @@ export function sparkline(options: SparklineOptions): string {
   return element(
     "svg",
     {
-      class: "abscissa abscissa-sparkline",
-      "data-abscissa": "sparkline",
+      class: "enarratio enarratio-sparkline",
+      "data-enarratio": "sparkline",
       xmlns: "http://www.w3.org/2000/svg",
       viewBox: `0 0 ${width} ${height}`,
       width,

@@ -1,5 +1,5 @@
 // Weekly counts over time, with a gap, a threshold and an event marker.
-import { lineChart } from "abscissa";
+import { lineChart } from "enarratio";
 
 const counties = ["Travis", "Hays", "Williamson"] as const;
 const base = { Travis: 42, Hays: 18, Williamson: 27 };

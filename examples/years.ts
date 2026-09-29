@@ -1,5 +1,5 @@
 // Selecting a year: bars filter by category, link to a filtered page without script, and thin their labels.
-import { barChart } from "abscissa";
+import { barChart } from "enarratio";
 
 const types = ["Publications", "Grants", "Talks"] as const;
 const entries = Array.from({ length: 22 }, (_, i) => 2005 + i).flatMap((year, i) =>

@@ -58,15 +58,15 @@ const HIDDEN_GRIDS: Readonly<Record<Gridlines, readonly string[]>> = {
 
 /** Rules that do not depend on the theme: layout, legend, data table and the enhancement layer. */
 const BASE_RULES = `
-.abscissa {
+.enarratio {
   margin: 0;
-  color: var(--abscissa-text);
-  font-family: var(--abscissa-font);
+  color: var(--enarratio-text);
+  font-family: var(--enarratio-font);
   font-size: 1rem;
 }
-.abscissa-frame { overflow-x: auto; }
-.abscissa-frame-wide > svg { min-width: 30rem; }
-.abscissa svg {
+.enarratio-frame { overflow-x: auto; }
+.enarratio-frame-wide > svg { min-width: 30rem; }
+.enarratio svg {
   display: block;
   max-width: 100%;
   height: auto;
@@ -74,18 +74,18 @@ const BASE_RULES = `
   font-family: inherit;
   font-size: 12px;
 }
-svg.abscissa { display: inline-block; vertical-align: middle; }
-.abscissa [data-abscissa-mark$="tick label"],
-.abscissa .abscissa-numeric {
-  font-family: var(--abscissa-font-numeric);
+svg.enarratio { display: inline-block; vertical-align: middle; }
+.enarratio [data-enarratio-mark$="tick label"],
+.enarratio .enarratio-numeric {
+  font-family: var(--enarratio-font-numeric);
   font-variant-numeric: tabular-nums;
 }
-.abscissa [data-abscissa-mark*="axis"] { color: var(--abscissa-text-muted); }
-.abscissa [data-abscissa-mark$="grid"] { stroke: var(--abscissa-grid); stroke-opacity: 1; }
-.abscissa [data-abscissa-mark="rule"] { stroke: var(--abscissa-text-muted); }
-.abscissa-title { margin: 0 0 0.5em; font-weight: 600; }
-.abscissa-caption { margin: 0.5em 0 0; color: var(--abscissa-text-muted); font-size: 0.875em; }
-.abscissa-legend {
+.enarratio [data-enarratio-mark*="axis"] { color: var(--enarratio-text-muted); }
+.enarratio [data-enarratio-mark$="grid"] { stroke: var(--enarratio-grid); stroke-opacity: 1; }
+.enarratio [data-enarratio-mark="rule"] { stroke: var(--enarratio-text-muted); }
+.enarratio-title { margin: 0 0 0.5em; font-weight: 600; }
+.enarratio-caption { margin: 0.5em 0 0; color: var(--enarratio-text-muted); font-size: 0.875em; }
+.enarratio-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25em 1em;
@@ -94,8 +94,8 @@ svg.abscissa { display: inline-block; vertical-align: middle; }
   list-style: none;
   font-size: 0.875em;
 }
-.abscissa-legend li, .abscissa-legend button { display: inline-flex; align-items: center; gap: 0.4em; }
-.abscissa-legend button {
+.enarratio-legend li, .enarratio-legend button { display: inline-flex; align-items: center; gap: 0.4em; }
+.enarratio-legend button {
   margin: 0;
   padding: 0.125em 0.25em;
   border: 1px solid transparent;
@@ -105,8 +105,8 @@ svg.abscissa { display: inline-block; vertical-align: middle; }
   font: inherit;
   cursor: pointer;
 }
-.abscissa-legend button[aria-pressed="true"] { border-color: currentColor; font-weight: 600; }
-.abscissa-swatch {
+.enarratio-legend button[aria-pressed="true"] { border-color: currentColor; font-weight: 600; }
+.enarratio-swatch {
   display: inline-block;
   width: 0.8em;
   height: 0.8em;
@@ -116,24 +116,24 @@ svg.abscissa { display: inline-block; vertical-align: middle; }
 ${Array.from(
   { length: 8 },
   (_, i) =>
-    `.abscissa [data-slot="${i + 1}"] { --abscissa-slot: var(--abscissa-series-${i + 1}); }`,
+    `.enarratio [data-slot="${i + 1}"] { --enarratio-slot: var(--enarratio-series-${i + 1}); }`,
 ).join("\n")}
 ${Array.from(
   { length: 5 },
   (_, i) =>
-    `.abscissa [data-step="${i + 1}"] { --abscissa-slot: var(--abscissa-sequential-${i + 1}); }`,
+    `.enarratio [data-step="${i + 1}"] { --enarratio-slot: var(--enarratio-sequential-${i + 1}); }`,
 ).join("\n")}
-.abscissa-swatch { background: var(--abscissa-slot); }
-.abscissa-data { margin: 0.5em 0 0; font-size: 0.875em; }
-.abscissa-data summary { cursor: pointer; color: var(--abscissa-text-muted); }
-.abscissa-data table { border-collapse: collapse; margin-top: 0.5em; }
-.abscissa-data th, .abscissa-data td {
+.enarratio-swatch { background: var(--enarratio-slot); }
+.enarratio-data { margin: 0.5em 0 0; font-size: 0.875em; }
+.enarratio-data summary { cursor: pointer; color: var(--enarratio-text-muted); }
+.enarratio-data table { border-collapse: collapse; margin-top: 0.5em; }
+.enarratio-data th, .enarratio-data td {
   padding: 0.2em 0.75em 0.2em 0;
-  border-bottom: 1px solid var(--abscissa-grid);
+  border-bottom: 1px solid var(--enarratio-grid);
   text-align: left;
 }
-.abscissa-data td { font-variant-numeric: tabular-nums; text-align: right; }
-.abscissa-visually-hidden {
+.enarratio-data td { font-variant-numeric: tabular-nums; text-align: right; }
+.enarratio-visually-hidden {
   position: absolute !important;
   width: 1px;
   height: 1px;
@@ -144,70 +144,70 @@ ${Array.from(
   white-space: nowrap;
   border: 0;
 }
-.abscissa-tooltip {
+.enarratio-tooltip {
   position: absolute;
   z-index: 10;
   max-width: 18em;
   padding: 0.35em 0.6em;
-  border: 1px solid var(--abscissa-grid);
+  border: 1px solid var(--enarratio-grid);
   border-radius: 0.3em;
-  background: var(--abscissa-background);
-  color: var(--abscissa-text);
-  font-family: var(--abscissa-font);
+  background: var(--enarratio-background);
+  color: var(--enarratio-text);
+  font-family: var(--enarratio-font);
   font-size: 0.8125rem;
   line-height: 1.35;
   box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
 }
-.abscissa-tooltip[hidden] { display: none; }
-.abscissa [data-abscissa-key] { transition: opacity 150ms ease-out; }
-.abscissa[data-abscissa-interactive] [data-abscissa-field] { cursor: pointer; }
-.abscissa [data-abscissa-dimmed] { opacity: 0.25; }
-.abscissa [data-abscissa-key]:focus { outline: none; }
+.enarratio-tooltip[hidden] { display: none; }
+.enarratio [data-enarratio-key] { transition: opacity 150ms ease-out; }
+.enarratio[data-enarratio-interactive] [data-enarratio-field] { cursor: pointer; }
+.enarratio [data-enarratio-dimmed] { opacity: 0.25; }
+.enarratio [data-enarratio-key]:focus { outline: none; }
 /* The focus ring: a background-colored ring inside a focus-colored one, so one of the two always
    contrasts with whatever mark or background is next to it. */
-.abscissa-focus-ring { pointer-events: none; fill: none; }
-.abscissa-focus-ring-inner { stroke: var(--abscissa-background); stroke-width: 5px; }
-.abscissa-focus-ring-outer { stroke: var(--abscissa-focus); stroke-width: 2.5px; }
+.enarratio-focus-ring { pointer-events: none; fill: none; }
+.enarratio-focus-ring-inner { stroke: var(--enarratio-background); stroke-width: 5px; }
+.enarratio-focus-ring-outer { stroke: var(--enarratio-focus); stroke-width: 2.5px; }
 /* Invisible targets that make small marks at least 24 CSS pixels to point at. */
-.abscissa-hit { fill: transparent; stroke: none; }
-.abscissa svg:focus-visible, .abscissa-legend button:focus-visible {
-  outline: 3px solid var(--abscissa-focus);
+.enarratio-hit { fill: transparent; stroke: none; }
+.enarratio svg:focus-visible, .enarratio-legend button:focus-visible {
+  outline: 3px solid var(--enarratio-focus);
   outline-offset: 2px;
 }
-.abscissa-brush { fill: var(--abscissa-focus); fill-opacity: 0.15; stroke: var(--abscissa-focus); }
-@keyframes abscissa-grow { from { transform: scaleY(0); } }
-@keyframes abscissa-grow-x { from { transform: scaleX(0); } }
-@keyframes abscissa-draw { from { stroke-dashoffset: var(--abscissa-length); } }
-@keyframes abscissa-fade { from { opacity: 0; } }
-.abscissa[data-abscissa-entering] [data-abscissa-mark="bar"] > * {
+.enarratio-brush { fill: var(--enarratio-focus); fill-opacity: 0.15; stroke: var(--enarratio-focus); }
+@keyframes enarratio-grow { from { transform: scaleY(0); } }
+@keyframes enarratio-grow-x { from { transform: scaleX(0); } }
+@keyframes enarratio-draw { from { stroke-dashoffset: var(--enarratio-length); } }
+@keyframes enarratio-fade { from { opacity: 0; } }
+.enarratio[data-enarratio-entering] [data-enarratio-mark="bar"] > * {
   transform-box: fill-box;
   transform-origin: bottom;
-  animation: abscissa-grow 600ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation: enarratio-grow 600ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
-.abscissa[data-abscissa-entering][data-abscissa-orientation="horizontal"] [data-abscissa-mark="bar"] > * {
+.enarratio[data-enarratio-entering][data-enarratio-orientation="horizontal"] [data-enarratio-mark="bar"] > * {
   transform-origin: left;
-  animation-name: abscissa-grow-x;
+  animation-name: enarratio-grow-x;
 }
-.abscissa[data-abscissa-entering] [data-abscissa-mark="dot"] > *,
-.abscissa[data-abscissa-entering] [data-abscissa-mark="area"] > *,
-.abscissa[data-abscissa-entering] [data-abscissa-mark="cell"] > * {
-  animation: abscissa-fade 500ms ease-out both;
+.enarratio[data-enarratio-entering] [data-enarratio-mark="dot"] > *,
+.enarratio[data-enarratio-entering] [data-enarratio-mark="area"] > *,
+.enarratio[data-enarratio-entering] [data-enarratio-mark="cell"] > * {
+  animation: enarratio-fade 500ms ease-out both;
 }
-.abscissa[data-abscissa-entering] [data-abscissa-mark="line"] > path {
-  stroke-dasharray: var(--abscissa-length);
-  animation: abscissa-draw 800ms ease-out both;
+.enarratio[data-enarratio-entering] [data-enarratio-mark="line"] > path {
+  stroke-dasharray: var(--enarratio-length);
+  animation: enarratio-draw 800ms ease-out both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .abscissa *, .abscissa-tooltip { animation: none !important; transition: none !important; }
+  .enarratio *, .enarratio-tooltip { animation: none !important; transition: none !important; }
 }
 `;
 
 function declarations(entries: ReadonlyArray<readonly [string, string]>, indent = "  "): string {
-  return entries.map(([name, value]) => `${indent}--abscissa-${name}: ${value};`).join("\n");
+  return entries.map(([name, value]) => `${indent}--enarratio-${name}: ${value};`).join("\n");
 }
 
 /**
- * The CSS a page includes once to style every Abscissa chart with a theme. Charts contain no
+ * The CSS a page includes once to style every Enarratio chart with a theme. Charts contain no
  * colors of their own, only references to the custom properties defined here, so the same
  * server-rendered markup follows the theme and switches between light and dark without a re-render.
  *
@@ -228,23 +228,23 @@ export function stylesheet(theme: Theme, options: StylesheetOptions = {}): strin
     ["font-numeric", theme.fonts.numeric ?? theme.fonts.body],
   ];
   const hidden = HIDDEN_GRIDS[theme.gridlines]
-    .map((grid) => `.abscissa [data-abscissa-mark="${grid}"] { display: none; }`)
+    .map((grid) => `.enarratio [data-enarratio-mark="${grid}"] { display: none; }`)
     .join("\n");
   const schemeRules = [
     options.colorScheme?.dark
-      ? `:where(${options.colorScheme.dark}) .abscissa { color-scheme: dark; }`
+      ? `:where(${options.colorScheme.dark}) .enarratio { color-scheme: dark; }`
       : "",
     options.colorScheme?.light
-      ? `:where(${options.colorScheme.light}) .abscissa { color-scheme: light; }`
+      ? `:where(${options.colorScheme.light}) .enarratio { color-scheme: light; }`
       : "",
   ].filter(Boolean);
 
   return [
-    `/* Abscissa theme: ${theme.name} */`, // safe: defineTheme refused comment and tag syntax
-    `.abscissa, .abscissa-tooltip {\n${declarations(fonts)}\n${declarations(
+    `/* Enarratio theme: ${theme.name} */`, // safe: defineTheme refused comment and tag syntax
+    `.enarratio, .enarratio-tooltip {\n${declarations(fonts)}\n${declarations(
       variables.map(([name, light]) => [name, light]),
     )}\n}`,
-    `@supports (color: light-dark(#000, #fff)) {\n  .abscissa, .abscissa-tooltip {\n${declarations(
+    `@supports (color: light-dark(#000, #fff)) {\n  .enarratio, .enarratio-tooltip {\n${declarations(
       variables.map(([name, light, dark]) => [name, `light-dark(${light}, ${dark})`]),
       "    ",
     )}\n  }\n}`,

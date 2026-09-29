@@ -1,12 +1,12 @@
-# Contributing to Abscissa
+# Contributing to Enarratio
 
-Thank you for helping. Abscissa welcomes bug reports, questions, chart
+Thank you for helping. Enarratio welcomes bug reports, questions, chart
 requests, documentation fixes and code. Everyone taking part follows the
 [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Asking a question or reporting a problem
 
-Open an [issue](https://github.com/DrDustinEdwards/abscissa/issues/new/choose).
+Open an [issue](https://github.com/DrDustinEdwards/enarratio/issues/new/choose).
 For a bug, include the chart function, the options (with a small dataset that
 shows the problem), what you expected and what you got. The templates ask for
 exactly this. Report security problems privately, as described in
@@ -17,7 +17,7 @@ exactly this. Report security problems privately, as described in
 Open an issue first and describe the figure: who uses it, a published example,
 and what its data looks like. New chart types follow the architecture in
 [docs/design/0005-scientific-charts.md](docs/design/0005-scientific-charts.md).
-A change to how Abscissa works (not just what it draws) gets a new design
+A change to how Enarratio works (not just what it draws) gets a new design
 record in `docs/design/`.
 
 ## Making a change

@@ -22,12 +22,12 @@ describe("scatterPlot", () => {
 
   it("does not offer a filter when there are no series", () => {
     const fig = parse(scatterPlot({ data: points, x: "x", y: "y", alt: "a" }));
-    expect(keyedMarks(fig).some((m) => m.hasAttribute("data-abscissa-field"))).toBe(false);
+    expect(keyedMarks(fig).some((m) => m.hasAttribute("data-enarratio-field"))).toBe(false);
   });
 
   it("draws a regression band and refuses non-positive values on a log axis", () => {
     const markup = scatterPlot({ data: points, x: "x", y: "y", regression: true, alt: "a" });
-    expect(markup).toContain('data-abscissa-mark="linear-regression"');
+    expect(markup).toContain('data-enarratio-mark="linear-regression"');
     expect(() =>
       scatterPlot({ data: [{ x: 0, y: 1 }], x: "x", y: "y", xType: "log", alt: "a" }),
     ).toThrow(/log axis/);
@@ -45,28 +45,28 @@ describe("heatmap", () => {
   it("fills cells from the sequential ramp by threshold, and outlines empty cells", () => {
     const fig = parse(heatmap({ data: cells, x: "c", y: "r", value: "v", alt: "a" }));
     const fills = keyedMarks(fig).map((m) => [
-      m.getAttribute("data-abscissa-key"),
+      m.getAttribute("data-enarratio-key"),
       m.getAttribute("fill"),
     ]);
     expect(fills).toEqual([
-      ['["1","A"]', "var(--abscissa-sequential-1)"],
-      ['["2","A"]', "var(--abscissa-sequential-3)"],
-      ['["1","B"]', "var(--abscissa-sequential-5)"],
+      ['["1","A"]', "var(--enarratio-sequential-1)"],
+      ['["2","A"]', "var(--enarratio-sequential-3)"],
+      ['["1","B"]', "var(--enarratio-sequential-5)"],
     ]);
-    const empty = fig.querySelector('g[stroke="var(--abscissa-status-unknown)"] rect');
+    const empty = fig.querySelector('g[stroke="var(--enarratio-status-unknown)"] rect');
     expect(empty?.querySelector("title")?.textContent).toBe("r B, c 2: no data");
     expect(empty?.parentElement?.getAttribute("stroke-dasharray")).toBe("3,2");
   });
 
   it("prints values in text colors chosen for their step", () => {
     const fig = parse(heatmap({ data: cells, x: "c", y: "r", value: "v", alt: "a" }));
-    const text = [...fig.querySelectorAll('[data-abscissa-mark="text"] text')].map((t) =>
+    const text = [...fig.querySelectorAll('[data-enarratio-mark="text"] text')].map((t) =>
       t.getAttribute("fill"),
     );
     expect(text).toEqual([
-      "var(--abscissa-sequential-text-1)",
-      "var(--abscissa-sequential-text-3)",
-      "var(--abscissa-sequential-text-5)",
+      "var(--enarratio-sequential-text-1)",
+      "var(--enarratio-sequential-text-3)",
+      "var(--enarratio-sequential-text-5)",
     ]);
   });
 
@@ -74,7 +74,7 @@ describe("heatmap", () => {
     const fig = parse(
       heatmap({ data: cells, x: "c", y: "r", value: "v", thresholds: [10, 20, 30, 40], alt: "a" }),
     );
-    expect([...fig.querySelectorAll(".abscissa-ramp li")].map((li) => li.textContent)).toEqual([
+    expect([...fig.querySelectorAll(".enarratio-ramp li")].map((li) => li.textContent)).toEqual([
       "below 10",
       "10 to 20",
       "20 to 30",
@@ -111,8 +111,8 @@ describe("networkChart", () => {
   it("keys nodes, filters by group, and tabulates connections", () => {
     const fig = parse(networkChart({ nodes, links, alt: "a" }));
     const marks = keyedMarks(fig);
-    expect(marks.map((m) => m.getAttribute("data-abscissa-key"))).toEqual(["a", "b", "c"]);
-    expect(marks[2]?.getAttribute("data-abscissa-value")).toBe("y");
+    expect(marks.map((m) => m.getAttribute("data-enarratio-key"))).toEqual(["a", "b", "c"]);
+    expect(marks[2]?.getAttribute("data-enarratio-value")).toBe("y");
     expect(marks[1]?.querySelector("title")?.textContent).toBe("b (x): 2 connections");
     const rows = [...fig.querySelectorAll("tbody tr")].map((tr) =>
       [...tr.children].map((c) => c.textContent),

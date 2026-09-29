@@ -1,7 +1,7 @@
 # AI usage record
 
 The Journal of Open Source Software asks authors to disclose the use of
-generative AI in the software and the paper. This is Abscissa's record. It is
+generative AI in the software and the paper. This is Enarratio's record. It is
 updated whenever AI tools are used on the project.
 
 ## Tools and models

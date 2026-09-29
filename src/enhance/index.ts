@@ -1,7 +1,7 @@
 /**
  * The enhancement layer: optional browser code that adds hover details, keyboard navigation,
  * click-to-filter events, a range brush, animated updates and an entrance animation to charts
- * Abscissa rendered on the server. Charts are complete without it.
+ * Enarratio rendered on the server. Charts are complete without it.
  *
  * Every interaction works by pointer and by keyboard, is announced to screen readers, and
  * respects `prefers-reduced-motion`. It has no dependencies and imports nothing from the
@@ -10,7 +10,7 @@
  * @packageDocumentation
  */
 
-/** Detail of the `abscissa:select` event, fired when a reader selects or clears a filter. */
+/** Detail of the `enarratio:select` event, fired when a reader selects or clears a filter. */
 export interface SelectDetail {
   /** The figure's `id`, or null when the chart was rendered without one. */
   readonly chartId: string | null;
@@ -22,7 +22,7 @@ export interface SelectDetail {
   readonly x?: string;
 }
 
-/** Detail of the `abscissa:brush` event, fired when a reader picks or clears a range. */
+/** Detail of the `enarratio:brush` event, fired when a reader picks or clears a range. */
 export interface BrushDetail {
   readonly chartId: string | null;
   /**
@@ -36,8 +36,8 @@ export interface BrushDetail {
 
 declare global {
   interface HTMLElementEventMap {
-    "abscissa:select": CustomEvent<SelectDetail>;
-    "abscissa:brush": CustomEvent<BrushDetail>;
+    "enarratio:select": CustomEvent<SelectDetail>;
+    "enarratio:brush": CustomEvent<BrushDetail>;
   }
 }
 
@@ -63,14 +63,14 @@ export interface EnhancedChart {
    * share a key from their old shape to their new one. The filter, the tab stop and keyboard
    * focus stay on the mark with the same key, or the nearest one if it is gone.
    *
-   * The markup should come from Abscissa. It is parsed inertly and sanitized before it touches
-   * the page: only the elements and attributes Abscissa emits are kept, and event handlers,
+   * The markup should come from Enarratio. It is parsed inertly and sanitized before it touches
+   * the page: only the elements and attributes Enarratio emits are kept, and event handlers,
    * scripts and unsafe links are dropped (F11).
    */
   update(markup: string): void;
   /**
    * Shows a filter the page chose (from its own controls, or a URL) without firing
-   * `abscissa:select`: the page already knows. A filter on the series field emphasizes that
+   * `enarratio:select`: the page already knows. A filter on the series field emphasizes that
    * series even where clicks filter by x. `null` clears it.
    */
   setFilter(filter: { readonly field: string; readonly value: string } | null): void;
@@ -89,7 +89,7 @@ interface XScale {
   readonly range: readonly number[];
 }
 
-const MARK = "[data-abscissa-key]";
+const MARK = "[data-enarratio-key]";
 const DURATION = 450;
 const ANIMATED = ["x", "y", "width", "height", "cx", "cy", "r", "x1", "x2", "y1", "y2"] as const;
 
@@ -118,8 +118,8 @@ function center(mark: SVGGraphicsElement): { x: number; y: number } {
  * facets compare correctly (F9).
  */
 function place(mark: Element): { column: number; row: number } {
-  const column = mark.getAttribute("data-abscissa-col");
-  const row = mark.getAttribute("data-abscissa-row");
+  const column = mark.getAttribute("data-enarratio-col");
+  const row = mark.getAttribute("data-enarratio-row");
   if (column !== null && row !== null) return { column: Number(column), row: Number(row) };
   const box = mark.getBoundingClientRect();
   return {
@@ -138,7 +138,7 @@ function readingOrder(marks: SVGGraphicsElement[]): SVGGraphicsElement[] {
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-/** The elements Abscissa's server markup is made of; update() keeps only these (F11). */
+/** The elements Enarratio's server markup is made of; update() keeps only these (F11). */
 const ALLOWED_ELEMENTS = new Set([
   "figure",
   "p",
@@ -174,7 +174,7 @@ const ALLOWED_ELEMENTS = new Set([
   "clippath",
 ]);
 const LINK_ATTRIBUTES = new Set(["href", "xlink:href"]);
-const SAFE_STYLE = /^(\s*--abscissa-[a-z0-9-]+\s*:\s*[^;{}<>]*;?)*\s*$/i;
+const SAFE_STYLE = /^(\s*--enarratio-[a-z0-9-]+\s*:\s*[^;{}<>]*;?)*\s*$/i;
 
 /** Relative and http(s) links only, as the server allows (A11). */
 function safeLink(value: string): boolean {
@@ -208,7 +208,7 @@ function sanitize(root: Element): void {
 }
 
 function parseScale(figure: HTMLElement): XScale | null {
-  const raw = figure.getAttribute("data-abscissa-x-scale");
+  const raw = figure.getAttribute("data-enarratio-x-scale");
   if (!raw) return null;
   const scale = JSON.parse(raw) as XScale;
   return ["linear", "utc", "time", "log", "sqrt", "pow"].includes(scale.type) ? scale : null;
@@ -272,11 +272,11 @@ class Chart implements EnhancedChart {
   private attach(): void {
     const svg = this.svg;
     if (!svg) return;
-    this.figure.setAttribute("data-abscissa-enhanced", "");
-    if (this.options.filter) this.figure.setAttribute("data-abscissa-interactive", "");
+    this.figure.setAttribute("data-enarratio-enhanced", "");
+    if (this.options.filter) this.figure.setAttribute("data-enarratio-interactive", "");
 
     const live = document.createElement("p");
-    live.className = "abscissa-visually-hidden";
+    live.className = "enarratio-visually-hidden";
     live.setAttribute("aria-live", "polite");
     this.figure.append(live);
     this.live = live;
@@ -290,14 +290,14 @@ class Chart implements EnhancedChart {
       const text = label(mark);
       mark.querySelector("title")?.remove();
       // A bar that is a link without script becomes a filter button with it; the page can read the
-      // link from data-abscissa-href and follow it on abscissa:select if it wants to.
+      // link from data-enarratio-href and follow it on enarratio:select if it wants to.
       const href = mark.getAttribute("href");
       if (href !== null) {
-        mark.setAttribute("data-abscissa-href", href);
+        mark.setAttribute("data-enarratio-href", href);
         mark.removeAttribute("href");
       }
       mark.setAttribute("aria-label", text);
-      const filterable = this.options.filter && mark.hasAttribute("data-abscissa-field");
+      const filterable = this.options.filter && mark.hasAttribute("data-enarratio-field");
       mark.setAttribute("role", filterable ? "button" : "img");
       if (filterable) mark.setAttribute("aria-pressed", "false");
       mark.setAttribute("tabindex", i === 0 ? "0" : "-1");
@@ -305,7 +305,7 @@ class Chart implements EnhancedChart {
 
     if (this.options.tooltips) {
       const tip = document.createElement("div");
-      tip.className = "abscissa-tooltip";
+      tip.className = "enarratio-tooltip";
       tip.hidden = true;
       tip.setAttribute("aria-hidden", "true");
       document.body.append(tip);
@@ -358,7 +358,7 @@ class Chart implements EnhancedChart {
     const width = Math.max(box.width, side);
     const height = Math.max(box.height, side);
     const hit = document.createElementNS(SVG_NS, "rect");
-    hit.setAttribute("class", "abscissa-hit");
+    hit.setAttribute("class", "enarratio-hit");
     hit.setAttribute("aria-hidden", "true");
     hit.setAttribute("x", String(box.x + box.width / 2 - width / 2));
     hit.setAttribute("y", String(box.y + box.height / 2 - height / 2));
@@ -381,11 +381,11 @@ class Chart implements EnhancedChart {
     const scale = mark.getScreenCTM()?.a || 1;
     const pad = 2 / scale;
     const ring = document.createElementNS(SVG_NS, "g");
-    ring.setAttribute("class", "abscissa-focus-ring");
+    ring.setAttribute("class", "enarratio-focus-ring");
     ring.setAttribute("aria-hidden", "true");
     for (const [cls, extra] of [
-      ["abscissa-focus-ring-inner", pad],
-      ["abscissa-focus-ring-outer", pad + 3.5 / scale],
+      ["enarratio-focus-ring-inner", pad],
+      ["enarratio-focus-ring-outer", pad + 3.5 / scale],
     ] as const) {
       const rect = document.createElementNS(SVG_NS, "rect");
       rect.setAttribute("class", cls);
@@ -401,10 +401,10 @@ class Chart implements EnhancedChart {
   }
 
   private attachLegend(): void {
-    const field = this.figure.getAttribute("data-abscissa-series-field");
+    const field = this.figure.getAttribute("data-enarratio-series-field");
     if (!field) return;
-    for (const item of this.figure.querySelectorAll<HTMLElement>(".abscissa-legend li")) {
-      const value = item.getAttribute("data-abscissa-series") ?? "";
+    for (const item of this.figure.querySelectorAll<HTMLElement>(".enarratio-legend li")) {
+      const value = item.getAttribute("data-enarratio-series") ?? "";
       const button = document.createElement("button");
       button.type = "button";
       button.setAttribute("aria-pressed", "false");
@@ -422,7 +422,7 @@ class Chart implements EnhancedChart {
     const view = svg.viewBox.baseVal;
     let start: number | null = null;
     const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute("class", "abscissa-brush");
+    rect.setAttribute("class", "enarratio-brush");
     rect.setAttribute("y", "0");
     rect.setAttribute("height", String(view.height || svg.height.baseVal.value));
     rect.setAttribute("aria-hidden", "true");
@@ -474,7 +474,7 @@ class Chart implements EnhancedChart {
         return;
       }
       const target = event.target as Element | null;
-      if (target?.closest(`${MARK}, .abscissa-hit`)) return;
+      if (target?.closest(`${MARK}, .enarratio-hit`)) return;
       const x = svgPoint(svg, event).x;
       if (x < Math.min(r0, r1) || x > Math.max(r0, r1)) return;
       if (this.rangeStart === null) {
@@ -507,7 +507,7 @@ class Chart implements EnhancedChart {
       range ? `Range selected: ${format(range[0])} to ${format(range[1])}` : "Range cleared",
     );
     this.figure.dispatchEvent(
-      new CustomEvent<BrushDetail>("abscissa:brush", {
+      new CustomEvent<BrushDetail>("enarratio:brush", {
         bubbles: true,
         detail: { chartId: this.chartId, range, time },
       }),
@@ -518,15 +518,17 @@ class Chart implements EnhancedChart {
     if (reducedMotion() || typeof IntersectionObserver !== "function") return;
     const svg = this.svg;
     if (!svg) return;
-    for (const path of svg.querySelectorAll<SVGPathElement>('[data-abscissa-mark="line"] > path')) {
-      path.style.setProperty("--abscissa-length", String(Math.ceil(path.getTotalLength())));
+    for (const path of svg.querySelectorAll<SVGPathElement>(
+      '[data-enarratio-mark="line"] > path',
+    )) {
+      path.style.setProperty("--enarratio-length", String(Math.ceil(path.getTotalLength())));
     }
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
-        this.figure.setAttribute("data-abscissa-entering", "");
-        const done = setTimeout(() => this.figure.removeAttribute("data-abscissa-entering"), 1000);
+        this.figure.setAttribute("data-enarratio-entering", "");
+        const done = setTimeout(() => this.figure.removeAttribute("data-enarratio-entering"), 1000);
         this.cleanup.push(() => clearTimeout(done));
       },
       { threshold: 0.25 },
@@ -649,10 +651,10 @@ class Chart implements EnhancedChart {
    * first mark in the same category, else the mark at the nearest position in reading order.
    */
   private successor(key: string, x: string | null, index: number): number {
-    const same = this.marks.findIndex((m) => m.getAttribute("data-abscissa-key") === key);
+    const same = this.marks.findIndex((m) => m.getAttribute("data-enarratio-key") === key);
     if (same !== -1) return same;
     const column =
-      x === null ? -1 : this.marks.findIndex((m) => m.getAttribute("data-abscissa-x") === x);
+      x === null ? -1 : this.marks.findIndex((m) => m.getAttribute("data-enarratio-x") === x);
     if (column !== -1) return column;
     return Math.min(index, this.marks.length - 1);
   }
@@ -669,10 +671,10 @@ class Chart implements EnhancedChart {
   }
 
   private toggleMark(mark: Element): void {
-    const field = mark.getAttribute("data-abscissa-field");
-    const value = mark.getAttribute("data-abscissa-value");
+    const field = mark.getAttribute("data-enarratio-field");
+    const value = mark.getAttribute("data-enarratio-value");
     if (field === null || value === null) return;
-    this.toggle(field, value, mark.getAttribute("data-abscissa-x") ?? undefined);
+    this.toggle(field, value, mark.getAttribute("data-enarratio-x") ?? undefined);
   }
 
   private toggle(field: string, value: string, x?: string): void {
@@ -683,7 +685,7 @@ class Chart implements EnhancedChart {
   private select(next: { field: string; value: string } | null, notify: boolean, x?: string): void {
     const previous = this.selected;
     this.selected = next;
-    const seriesField = this.figure.getAttribute("data-abscissa-series-field");
+    const seriesField = this.figure.getAttribute("data-enarratio-series-field");
     // A filter on the series field matches by series even where a click filters by x, so a
     // legend entry or setFilter can emphasize one series on a chart that selects years.
     const bySeries = next !== null && next.field === seriesField;
@@ -691,23 +693,23 @@ class Chart implements EnhancedChart {
       const match =
         next !== null &&
         (bySeries
-          ? mark.getAttribute("data-abscissa-series") === next.value
-          : mark.getAttribute("data-abscissa-field") === next.field &&
-            mark.getAttribute("data-abscissa-value") === next.value);
-      mark.toggleAttribute("data-abscissa-dimmed", next !== null && !match);
+          ? mark.getAttribute("data-enarratio-series") === next.value
+          : mark.getAttribute("data-enarratio-field") === next.field &&
+            mark.getAttribute("data-enarratio-value") === next.value);
+      mark.toggleAttribute("data-enarratio-dimmed", next !== null && !match);
       if (mark.hasAttribute("aria-pressed")) mark.setAttribute("aria-pressed", String(match));
     }
     for (const button of this.figure.querySelectorAll<HTMLButtonElement>(
-      ".abscissa-legend button",
+      ".enarratio-legend button",
     )) {
-      const value = button.parentElement?.getAttribute("data-abscissa-series");
+      const value = button.parentElement?.getAttribute("data-enarratio-series");
       button.setAttribute("aria-pressed", String(bySeries && value === next?.value));
     }
     const field = next?.field ?? previous?.field;
     if (field === undefined || !notify) return;
     this.announce(next ? `Filtered to ${next.value}` : "Filter cleared");
     this.figure.dispatchEvent(
-      new CustomEvent<SelectDetail>("abscissa:select", {
+      new CustomEvent<SelectDetail>("enarratio:select", {
         bubbles: true,
         detail: {
           chartId: this.chartId,
@@ -745,8 +747,8 @@ class Chart implements EnhancedChart {
     // DOMParser builds an inert document: nothing in it loads or runs while it is checked.
     const parsed = new DOMParser().parseFromString(markup.trim(), "text/html");
     const candidate = parsed.body.firstElementChild;
-    if (!candidate?.matches("figure.abscissa")) {
-      throw new Error("update() needs the markup of one Abscissa figure");
+    if (!candidate?.matches("figure.enarratio")) {
+      throw new Error("update() needs the markup of one Enarratio figure");
     }
     sanitize(candidate);
     const incoming = document.importNode(candidate, true);
@@ -757,13 +759,13 @@ class Chart implements EnhancedChart {
         const value = shape(mark).getAttribute(name);
         if (value !== null) attrs[name] = value;
       }
-      before.set(mark.getAttribute("data-abscissa-key") ?? "", attrs);
+      before.set(mark.getAttribute("data-enarratio-key") ?? "", attrs);
     }
     const selected = this.selected;
     // The tab stop (and focus, if a reader is in the chart) moves to the same mark after the swap.
     const stop = this.marks[this.focusIndex];
-    const stopKey = stop?.getAttribute("data-abscissa-key") ?? null;
-    const stopX = stop?.getAttribute("data-abscissa-x") ?? null;
+    const stopKey = stop?.getAttribute("data-enarratio-key") ?? null;
+    const stopX = stop?.getAttribute("data-enarratio-x") ?? null;
     const stopIndex = this.focusIndex;
     const hadFocus = stop !== undefined && document.activeElement === stop;
     this.teardown();
@@ -782,7 +784,7 @@ class Chart implements EnhancedChart {
 
     const tweens: { mark: Element; name: string; from: number; to: number }[] = [];
     for (const mark of this.figure.querySelectorAll(MARK)) {
-      const old = before.get(mark.getAttribute("data-abscissa-key") ?? "");
+      const old = before.get(mark.getAttribute("data-enarratio-key") ?? "");
       if (!old) {
         mark.animate?.([{ opacity: 0 }, { opacity: 1 }], {
           duration: DURATION,
@@ -836,12 +838,12 @@ class Chart implements EnhancedChart {
       if (this.serverRole !== "group") svg.removeAttribute("aria-roledescription");
       for (const mark of svg.querySelectorAll(MARK)) {
         const text = mark.getAttribute("aria-label");
-        const href = mark.getAttribute("data-abscissa-href");
+        const href = mark.getAttribute("data-enarratio-href");
         if (href !== null) {
           mark.setAttribute("href", href);
-          mark.removeAttribute("data-abscissa-href");
+          mark.removeAttribute("data-enarratio-href");
         }
-        for (const name of ["role", "aria-pressed", "tabindex", "data-abscissa-dimmed"]) {
+        for (const name of ["role", "aria-pressed", "tabindex", "data-enarratio-dimmed"]) {
           mark.removeAttribute(name);
         }
         // Links keep their name, as the server rendered them; other marks get their title back.
@@ -854,9 +856,9 @@ class Chart implements EnhancedChart {
       }
     }
     for (const name of [
-      "data-abscissa-enhanced",
-      "data-abscissa-interactive",
-      "data-abscissa-entering",
+      "data-enarratio-enhanced",
+      "data-enarratio-interactive",
+      "data-enarratio-entering",
     ]) {
       this.figure.removeAttribute(name);
     }
@@ -867,14 +869,14 @@ class Chart implements EnhancedChart {
 const enhanced = new WeakMap<HTMLElement, Chart>();
 
 /**
- * Enhances every Abscissa figure under `root` (the whole document by default) and returns them.
+ * Enhances every Enarratio figure under `root` (the whole document by default) and returns them.
  * Calling it again is safe: a figure is enhanced once, and calling it with different options
  * re-applies the chart with the new ones (F18).
  *
  * @example
- * import { enhance } from "abscissa/enhance";
+ * import { enhance } from "enarratio/enhance";
  * enhance();
- * document.addEventListener("abscissa:select", (e) => filterList(e.detail.field, e.detail.value));
+ * document.addEventListener("enarratio:select", (e) => filterList(e.detail.field, e.detail.value));
  */
 export function enhance(
   root: ParentNode = document,
@@ -886,8 +888,8 @@ export function enhance(
     brush: options.brush ?? true,
     entrance: options.entrance ?? true,
   };
-  const figures = [...root.querySelectorAll<HTMLElement>("figure.abscissa")];
-  if (root instanceof HTMLElement && root.matches("figure.abscissa")) figures.unshift(root);
+  const figures = [...root.querySelectorAll<HTMLElement>("figure.enarratio")];
+  if (root instanceof HTMLElement && root.matches("figure.enarratio")) figures.unshift(root);
   return figures.map((figure) => {
     const existing = enhanced.get(figure);
     if (existing && JSON.stringify(existing.options) === JSON.stringify(resolved)) return existing;

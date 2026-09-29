@@ -26,7 +26,7 @@ minimal."
   threshold, a ninth series or a Plot warning all throw. `checkTheme` is the
   one function that reports instead, because which findings block a build is
   the site's decision.
-- **The enhancement layer is a second entry point** (`abscissa/enhance`), so
+- **The enhancement layer is a second entry point** (`enarratio/enhance`), so
   server code never imports browser code or the reverse.
 
 ## Dependencies

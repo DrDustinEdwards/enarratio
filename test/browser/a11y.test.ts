@@ -67,7 +67,7 @@ describe.each(pages)("%s", (file) => {
 
   it.each(schemes)("has no axe violations without scripts, %s", async (scheme) => {
     const page = await harness.open(file, scheme, { scripts: false });
-    expect(await page.$("[data-abscissa-enhanced]")).toBeNull();
+    expect(await page.$("[data-enarratio-enhanced]")).toBeNull();
     expect(await audit(page)).toEqual([]);
     await page.close();
   });

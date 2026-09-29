@@ -7,14 +7,14 @@ findings A1 to A17; Claude Opus 5.5, findings F1 to F23; see
 [AI_USAGE.md](../AI_USAGE.md)) found problems the tests had missed. Dustin
 Edwards set the order of the fixes (**author's decision**); they ship as
 0.1.0-alpha.6. The CHANGELOG maps every change to its finding. This record
-keeps the decisions that changed how Abscissa works.
+keeps the decisions that changed how Enarratio works.
 
 ## Rendering (amends 0002)
 
 - **Keys are JSON** (`["2022","Talks"]`), not parts joined by `|`, so no data
   can make two marks share a key (A9, F14). Keys are documented as opaque.
 - **Reading order comes from the data.** The server writes each mark's
-  category and position (`data-abscissa-col`, `data-abscissa-row`); the
+  category and position (`data-enarratio-col`, `data-enarratio-row`); the
   enhancement layer sorts by those instead of SVG geometry, which is local to a
   facet and zero for a chart enhanced while hidden (F9).
 - **Plot's warning is recognized by its structure**, a top-level `<text>` whose
@@ -67,7 +67,7 @@ keeps the decisions that changed how Abscissa works.
 - **The tooltip is dismissible and hoverable** (F6, SC 1.4.13): Escape hides
   it, and it stays while the pointer moves onto it.
 - **`update()` parses inertly and sanitizes** (F11): only the elements and
-  attributes Abscissa emits survive; handlers, scripts, unsafe links and
+  attributes Enarratio emits survive; handlers, scripts, unsafe links and
   styles other than palette custom properties are removed.
 - **Enhancing again with other options re-applies them** (F18).
 

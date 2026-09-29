@@ -1,5 +1,5 @@
 // A grid of values on the theme's sequential ramp.
-import { heatmap } from "abscissa";
+import { heatmap } from "enarratio";
 
 const cohorts = ["Jan", "Feb", "Mar", "Apr", "May"];
 const retention = cohorts.flatMap((cohort, c) =>

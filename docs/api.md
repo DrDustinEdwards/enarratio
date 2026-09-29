@@ -1,7 +1,7 @@
 # API reference
 
-Abscissa has two entry points. `abscissa` runs anywhere (server, build step,
-browser) and returns HTML strings. `abscissa/enhance` runs in the browser and
+Enarratio has two entry points. `enarratio` runs anywhere (server, build step,
+browser) and returns HTML strings. `enarratio/enhance` runs in the browser and
 adds interaction to charts already on the page.
 
 Every chart function takes one options object and returns a string. Options
@@ -38,14 +38,14 @@ Every chart (not the primitives) accepts these.
 A chart returns:
 
 ```html
-<figure class="abscissa" data-abscissa="bar" id="...">
-  <p class="abscissa-title">...</p>
-  <ul class="abscissa-legend">...</ul>
-  <div class="abscissa-frame">
+<figure class="enarratio" data-enarratio="bar" id="...">
+  <p class="enarratio-title">...</p>
+  <ul class="enarratio-legend">...</ul>
+  <div class="enarratio-frame">
     <svg role="img" aria-label="{alt}">... one keyed element per datum ...</svg>
   </div>
-  <figcaption class="abscissa-caption">...</figcaption>
-  <details class="abscissa-data"><summary>Data table</summary><table>...</table></details>
+  <figcaption class="enarratio-caption">...</figcaption>
+  <details class="enarratio-data"><summary>Data table</summary><table>...</table></details>
 </figure>
 ```
 
@@ -59,8 +59,8 @@ Given in a chart's `colors` option, keyed by series name. A chart with no
 area charts; "Points" for a scatter plot; "Samples" for a titer plot with
 `colorByGroup: false`.
 
-Each drawn datum carries `data-abscissa-key`, which is opaque (compare keys,
-never parse them), and `data-abscissa-col` and `data-abscissa-row`, its place
+Each drawn datum carries `data-enarratio-key`, which is opaque (compare keys,
+never parse them), and `data-enarratio-col` and `data-enarratio-row`, its place
 in keyboard reading order.
 
 ## Charts
@@ -83,7 +83,7 @@ one row per item (a CV entry, a case) is enough.
 - `href`: a function from category to link. Without script each bar is a link
   (and the SVG a named group rather than one image, so the links stay
   reachable); with the enhancement layer the bar filters instead, and the link
-  is kept in `data-abscissa-href`. Only relative and `http(s)` links are
+  is kept in `data-enarratio-href`. Only relative and `http(s)` links are
   allowed.
 - `maxXTicks`: the most category labels to print; with more categories, every
   nth label is printed from the first.
@@ -230,7 +230,7 @@ a single value.
 
 ## Primitives
 
-Primitives return an `<svg class="abscissa">` sized for inline use, named by a
+Primitives return an `<svg class="enarratio">` sized for inline use, named by a
 text alternative. They use the same theme. As on charts, `alt` is the text
 alternative; `label` names what is measured and is used to generate one when
 `alt` is not given. One of the two is required.
@@ -330,7 +330,7 @@ refuses.
 
 ### `defaultTheme`
 
-Abscissa's own theme: neutral surfaces, system fonts.
+Enarratio's own theme: neutral surfaces, system fonts.
 
 ### `dustinedwardsTheme`
 
@@ -387,12 +387,12 @@ Oliveira and Fernandes (2009), at full severity.
 
 `readonly [number, number, number]`: sRGB channels from 0 to 1.
 
-## Enhancement layer: `abscissa/enhance`
+## Enhancement layer: `enarratio/enhance`
 
 ### `enhance`
 
 `enhance(root?: ParentNode, options?: EnhanceOptions): EnhancedChart[]`.
-Enhances every `figure.abscissa` under `root` (default `document`). Safe to
+Enhances every `figure.enarratio` under `root` (default `document`). Safe to
 call again: a figure is enhanced once, and calling again with different options
 re-applies them.
 
@@ -415,24 +415,24 @@ re-applies them.
   that series and presses its legend entry, even on a chart whose clicks
   filter by x.
 - `clear()` removes the filter and range.
-- The markup given to `update` should come from Abscissa. It is parsed inertly
-  and sanitized first: only elements and attributes Abscissa emits survive,
+- The markup given to `update` should come from Enarratio. It is parsed inertly
+  and sanitized first: only elements and attributes Enarratio emits survive,
   with event handlers, scripts, unsafe links and non-custom-property styles
   removed.
 - `destroy()` restores the server markup.
 
 Calls the page makes (`update`, `setFilter`, `clear`) fire no events, since
 the page already knows; only a reader's clicks and keys fire
-`abscissa:select` and `abscissa:brush`.
+`enarratio:select` and `enarratio:brush`.
 
 ### `SelectDetail`
 
-The detail of `abscissa:select`: `{ chartId; field; value; x? }`. `value` is
+The detail of `enarratio:select`: `{ chartId; field; value; x? }`. `value` is
 `null` when the filter is cleared.
 
 ### `BrushDetail`
 
-The detail of `abscissa:brush`: `{ chartId; range; time }`. `range` is
+The detail of `enarratio:brush`: `{ chartId; range; time }`. `range` is
 `[low, high]` in data units (epoch milliseconds on a time axis), or `null`
 when cleared.
 

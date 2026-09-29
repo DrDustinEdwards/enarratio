@@ -1,6 +1,6 @@
 /**
  * Builds the gallery: one page per theme showing every example in examples/, its source, and the
- * events the enhancement layer fires. Run after `npm run build`; the examples import "abscissa",
+ * events the enhancement layer fires. Run after `npm run build`; the examples import "enarratio",
  * which resolves to this package's own dist.
  *
  *   node scripts/gallery.ts [outDir]
@@ -9,7 +9,7 @@
 import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { checkTheme, defaultTheme, dustinedwardsTheme, stylesheet, type Theme } from "abscissa";
+import { checkTheme, defaultTheme, dustinedwardsTheme, stylesheet, type Theme } from "enarratio";
 
 const root = resolve(import.meta.dirname, "..");
 const outDir = resolve(process.argv[2] ?? join(root, "site", "dist"));
@@ -74,7 +74,7 @@ body {
   margin: 0;
   background: var(--page-bg);
   color: var(--page-text);
-  font-family: var(--abscissa-font, system-ui, sans-serif);
+  font-family: var(--enarratio-font, system-ui, sans-serif);
   line-height: 1.5;
 }
 main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
@@ -119,15 +119,15 @@ function page(theme: Theme, css: string, examples: readonly Example[], nav: stri
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Abscissa gallery: ${escapeText(theme.name)} theme</title>
-<meta name="description" content="Every Abscissa chart, server-rendered, in the ${escapeText(theme.name)} theme.">
+<title>Enarratio gallery: ${escapeText(theme.name)} theme</title>
+<meta name="description" content="Every Enarratio chart, server-rendered, in the ${escapeText(theme.name)} theme.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="${css}">
 </head>
 <body>
 <main>
 <header>
-<h1>Abscissa gallery</h1>
+<h1>Enarratio gallery</h1>
 <nav aria-label="Themes">${nav}</nav>
 <button type="button" class="scheme" aria-pressed="false">Dark</button>
 </header>
@@ -182,14 +182,14 @@ writeFileSync(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Not found: Abscissa gallery</title>
+<title>Not found: Enarratio gallery</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/index.css">
 </head>
 <body>
 <main>
 <h1>Not found</h1>
-<p>There is no page at this address. The gallery is at <a href="/">abscissa.dustinedwards.info</a>, and the code at <a href="https://github.com/DrDustinEdwards/abscissa">github.com/DrDustinEdwards/abscissa</a>.</p>
+<p>There is no page at this address. The gallery is at <a href="/">enarratio.dustinedwards.info</a>, and the code at <a href="https://github.com/DrDustinEdwards/enarratio">github.com/DrDustinEdwards/enarratio</a>.</p>
 </main>
 </body>
 </html>

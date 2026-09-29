@@ -4,11 +4,11 @@ import { defineConfig } from "vitest/config";
 const src = resolve(import.meta.dirname, "src");
 
 export default defineConfig({
-  // Examples import "abscissa" as a reader would; in tests that means the source, not dist.
+  // Examples import "enarratio" as a reader would; in tests that means the source, not dist.
   resolve: {
     alias: [
-      { find: /^abscissa\/enhance$/, replacement: resolve(src, "enhance", "index.ts") },
-      { find: /^abscissa$/, replacement: resolve(src, "index.ts") },
+      { find: /^enarratio\/enhance$/, replacement: resolve(src, "enhance", "index.ts") },
+      { find: /^enarratio$/, replacement: resolve(src, "index.ts") },
     ],
   },
   test: {

@@ -20,7 +20,7 @@ const STACKED = '[data-example="stacked-bar"]';
 const focused = (p: Page): Promise<string> =>
   p.evaluate(() => {
     const el = document.activeElement;
-    return `${el?.getAttribute("data-abscissa-x")}|${el?.getAttribute("data-abscissa-series")}`;
+    return `${el?.getAttribute("data-enarratio-x")}|${el?.getAttribute("data-enarratio-series")}`;
   });
 
 const eventLog = (p: Page, example: string): Promise<string> =>
@@ -32,7 +32,7 @@ describe("enhance: stacked bar", () => {
   });
 
   it("turns marks into named buttons with one tab stop", async () => {
-    const marks = await page.$$eval(`${STACKED} [data-abscissa-key]`, (els) =>
+    const marks = await page.$$eval(`${STACKED} [data-enarratio-key]`, (els) =>
       els.map((el) => [
         el.getAttribute("role"),
         el.getAttribute("tabindex"),
@@ -43,12 +43,12 @@ describe("enhance: stacked bar", () => {
     expect(marks.filter(([, tab]) => tab === "0")).toHaveLength(1);
     expect(marks[0]?.[2]).toBe("Year 2019, Publications: 3");
     expect(await page.$eval(`${STACKED} svg`, (svg) => svg.getAttribute("role"))).toBe("group");
-    expect(await page.$(`${STACKED} [data-abscissa-key] title`)).toBeNull();
+    expect(await page.$(`${STACKED} [data-enarratio-key] title`)).toBeNull();
   });
 
   it("moves by column with left and right, and through a stack with up and down", async () => {
     // SVG elements take focus from script; Puppeteer's page.focus() accepts only HTML elements.
-    await page.$eval(`${STACKED} [data-abscissa-key][tabindex="0"]`, (el) =>
+    await page.$eval(`${STACKED} [data-enarratio-key][tabindex="0"]`, (el) =>
       (el as SVGElement).focus(),
     );
     expect(await focused(page)).toBe("2019|Publications");
@@ -65,17 +65,17 @@ describe("enhance: stacked bar", () => {
   });
 
   it("shows hover details for the focused mark", async () => {
-    const tip = await page.$eval(".abscissa-tooltip:not([hidden])", (el) => el.textContent);
+    const tip = await page.$eval(".enarratio-tooltip:not([hidden])", (el) => el.textContent);
     expect(tip).toBe("Year 2024, Talks: 2");
   });
 
   it("filters with Enter, dims other series, and clears with Escape", async () => {
     await page.keyboard.press("Enter");
     expect(await eventLog(page, STACKED)).toBe(
-      'abscissa:select {"chartId":"entries-by-year","field":"type","value":"Talks","x":"2024"}',
+      'enarratio:select {"chartId":"entries-by-year","field":"type","value":"Talks","x":"2024"}',
     );
-    const dimmed = await page.$$eval(`${STACKED} [data-abscissa-dimmed]`, (els) =>
-      els.map((el) => el.getAttribute("data-abscissa-series")),
+    const dimmed = await page.$$eval(`${STACKED} [data-enarratio-dimmed]`, (els) =>
+      els.map((el) => el.getAttribute("data-enarratio-series")),
     );
     expect(dimmed.length).toBeGreaterThan(0);
     expect(dimmed).not.toContain("Talks");
@@ -84,22 +84,22 @@ describe("enhance: stacked bar", () => {
     );
     await page.keyboard.press("Escape");
     expect(await eventLog(page, STACKED)).toContain('"value":null');
-    expect(await page.$(`${STACKED} [data-abscissa-dimmed]`)).toBeNull();
+    expect(await page.$(`${STACKED} [data-enarratio-dimmed]`)).toBeNull();
   });
 
   it("filters from the legend by pointer", async () => {
-    await page.click(`${STACKED} .abscissa-legend li[data-abscissa-series="Grants"] button`);
+    await page.click(`${STACKED} .enarratio-legend li[data-enarratio-series="Grants"] button`);
     expect(await eventLog(page, STACKED)).toBe(
-      'abscissa:select {"chartId":"entries-by-year","field":"type","value":"Grants"}',
+      'enarratio:select {"chartId":"entries-by-year","field":"type","value":"Grants"}',
     );
-    const pressed = await page.$$eval(`${STACKED} .abscissa-legend button`, (els) =>
+    const pressed = await page.$$eval(`${STACKED} .enarratio-legend button`, (els) =>
       els.map((el) => el.getAttribute("aria-pressed")),
     );
     expect(pressed).toEqual(["false", "true", "false"]);
   });
 
   it("filters by clicking a mark, and a second click clears it", async () => {
-    const mark = `${STACKED} [data-abscissa-x="2021"][data-abscissa-series="Talks"]`;
+    const mark = `${STACKED} [data-enarratio-x="2021"][data-enarratio-series="Talks"]`;
     await page.click(mark);
     expect(await eventLog(page, STACKED)).toContain('"value":"Talks"');
     await page.click(mark);
@@ -107,7 +107,7 @@ describe("enhance: stacked bar", () => {
   });
 
   it("does not animate under reduced motion", async () => {
-    expect(await page.$("[data-abscissa-entering]")).toBeNull();
+    expect(await page.$("[data-enarratio-entering]")).toBeNull();
   });
 
   afterAll(async () => {
@@ -133,22 +133,22 @@ describe("enhance: update and destroy", () => {
       const server = figure.outerHTML;
       const [chart] = enhance(section);
       if (!chart) throw new Error("no chart");
-      const before = figure.querySelector('[data-abscissa-x="Contact"]')?.getAttribute("width");
+      const before = figure.querySelector('[data-enarratio-x="Contact"]')?.getAttribute("width");
       const template = document.createElement("template");
       template.innerHTML = server;
-      template.content.querySelector('[data-abscissa-x="Contact"]')?.setAttribute("width", "100");
+      template.content.querySelector('[data-enarratio-x="Contact"]')?.setAttribute("width", "100");
       const next = template.innerHTML;
       chart.update(next);
-      const during = figure.querySelector('[data-abscissa-x="Contact"]')?.getAttribute("width");
+      const during = figure.querySelector('[data-enarratio-x="Contact"]')?.getAttribute("width");
       await new Promise((r) => setTimeout(r, 700));
-      const after = figure.querySelector('[data-abscissa-x="Contact"]')?.getAttribute("width");
+      const after = figure.querySelector('[data-enarratio-x="Contact"]')?.getAttribute("width");
       chart.destroy();
       return {
         before,
         during,
         after,
         role: figure.querySelector("svg")?.getAttribute("role"),
-        titles: figure.querySelectorAll("[data-abscissa-key] > title").length,
+        titles: figure.querySelectorAll("[data-enarratio-key] > title").length,
       };
     });
     expect(Number(result.during)).toBeLessThan(100);
@@ -175,8 +175,8 @@ describe("enhance: brush on a time axis", () => {
     await p.mouse.move(box.x + box.width * 0.6, box.y + box.height / 2, { steps: 5 });
     await p.mouse.up();
     const log = await eventLog(p, LINE);
-    expect(log.startsWith('abscissa:brush {"chartId":"weekly-cases","range":[')).toBe(true);
-    const detail = JSON.parse(log.slice("abscissa:brush ".length)) as {
+    expect(log.startsWith('enarratio:brush {"chartId":"weekly-cases","range":[')).toBe(true);
+    const detail = JSON.parse(log.slice("enarratio:brush ".length)) as {
       range: [number, number];
       time: boolean;
     };
@@ -184,7 +184,7 @@ describe("enhance: brush on a time axis", () => {
     expect(detail.range[0]).toBeLessThan(detail.range[1]);
     expect(detail.range[0]).toBeGreaterThan(Date.UTC(2025, 9, 1));
     expect(detail.range[1]).toBeLessThan(Date.UTC(2026, 1, 1));
-    expect(await p.$eval(`${LINE} .abscissa-brush`, (r) => (r as SVGElement).style.display)).toBe(
+    expect(await p.$eval(`${LINE} .enarratio-brush`, (r) => (r as SVGElement).style.display)).toBe(
       "",
     );
     await p.close();
@@ -192,19 +192,19 @@ describe("enhance: brush on a time axis", () => {
 
   it("picks a range with Shift and the arrow keys, and clears it with Escape", async () => {
     const p = await harness.open("index.html", "light");
-    await p.$eval(`${LINE} [data-abscissa-key][tabindex="0"]`, (el) => (el as SVGElement).focus());
+    await p.$eval(`${LINE} [data-enarratio-key][tabindex="0"]`, (el) => (el as SVGElement).focus());
     await p.keyboard.down("Shift");
     await p.keyboard.press("ArrowRight");
     await p.keyboard.press("ArrowRight");
     await p.keyboard.up("Shift");
-    const detail = JSON.parse((await eventLog(p, LINE)).slice("abscissa:brush ".length)) as {
+    const detail = JSON.parse((await eventLog(p, LINE)).slice("enarratio:brush ".length)) as {
       range: [number, number];
     };
     // Two steps of one week each, from the first week plotted.
     expect(Math.round((detail.range[1] - detail.range[0]) / 86_400_000)).toBe(14);
     await p.keyboard.press("Escape");
     expect(await eventLog(p, LINE)).toBe(
-      'abscissa:brush {"chartId":"weekly-cases","range":null,"time":true}',
+      'enarratio:brush {"chartId":"weekly-cases","range":null,"time":true}',
     );
     await p.close();
   });
@@ -216,12 +216,12 @@ describe("enhance: selecting a year, page-set filters and links", () => {
   it("selects the bar's year, and fires nothing for filters the page sets itself", async () => {
     const p = await harness.open("index.html", "light");
     await p.$eval(`${YEARS} svg`, (svg) => svg.scrollIntoView({ block: "center" }));
-    await p.click(`${YEARS} [data-abscissa-x="2012"][data-abscissa-series="Grants"]`);
+    await p.click(`${YEARS} [data-enarratio-x="2012"][data-enarratio-series="Grants"]`);
     expect(await eventLog(p, YEARS)).toBe(
-      'abscissa:select {"chartId":"entries-by-year-select","field":"year","value":"2012","x":"2012"}',
+      'enarratio:select {"chartId":"entries-by-year-select","field":"year","value":"2012","x":"2012"}',
     );
-    const dimmedYears = await p.$$eval(`${YEARS} [data-abscissa-dimmed]`, (els) => [
-      ...new Set(els.map((el) => el.getAttribute("data-abscissa-x"))),
+    const dimmedYears = await p.$$eval(`${YEARS} [data-enarratio-dimmed]`, (els) => [
+      ...new Set(els.map((el) => el.getAttribute("data-enarratio-x"))),
     ]);
     expect(dimmedYears).not.toContain("2012");
 
@@ -238,19 +238,19 @@ describe("enhance: selecting a year, page-set filters and links", () => {
       const [chart] = enhance(section);
       if (!chart) throw new Error("no chart");
       let events = 0;
-      chart.figure.addEventListener("abscissa:select", () => {
+      chart.figure.addEventListener("enarratio:select", () => {
         events += 1;
       });
       chart.setFilter({ field: "year", value: "2020" });
       const pressed = chart.figure
         .querySelector('[aria-pressed="true"]')
-        ?.getAttribute("data-abscissa-x");
+        ?.getAttribute("data-enarratio-x");
       chart.update(server);
       const stillPressed = chart.figure
         .querySelector('[aria-pressed="true"]')
-        ?.getAttribute("data-abscissa-x");
+        ?.getAttribute("data-enarratio-x");
       chart.clear();
-      const afterClear = chart.figure.querySelectorAll("[data-abscissa-dimmed]").length;
+      const afterClear = chart.figure.querySelectorAll("[data-enarratio-dimmed]").length;
       return { events, pressed, stillPressed, afterClear };
     });
     expect(result).toEqual({ events: 0, pressed: "2020", stillPressed: "2020", afterClear: 0 });
@@ -260,7 +260,7 @@ describe("enhance: selecting a year, page-set filters and links", () => {
   it("keeps bars as links without script, and turns them into filter buttons with it", async () => {
     const off = await harness.open("index.html", "light", { scripts: false });
     expect(
-      await off.$eval(`${YEARS} [data-abscissa-x="2012"][data-abscissa-series="Grants"]`, (a) => [
+      await off.$eval(`${YEARS} [data-enarratio-x="2012"][data-enarratio-series="Grants"]`, (a) => [
         a.tagName,
         a.getAttribute("href"),
       ]),
@@ -268,9 +268,9 @@ describe("enhance: selecting a year, page-set filters and links", () => {
     await off.close();
     const on = await harness.open("index.html", "light");
     expect(
-      await on.$eval(`${YEARS} [data-abscissa-x="2012"][data-abscissa-series="Grants"]`, (a) => [
+      await on.$eval(`${YEARS} [data-enarratio-x="2012"][data-enarratio-series="Grants"]`, (a) => [
         a.getAttribute("href"),
-        a.getAttribute("data-abscissa-href"),
+        a.getAttribute("data-enarratio-href"),
         a.getAttribute("role"),
       ]),
     ).toEqual([null, "?year=2012", "button"]);
@@ -290,7 +290,7 @@ describe("enhance: series filters on a year chart, and focus across update()", (
     window.__server = section.querySelector("figure").outerHTML;
     window.__chart = enhance(section)[0];
     window.__events = [];
-    window.__chart.figure.addEventListener("abscissa:select", (e) => window.__events.push(e.detail));
+    window.__chart.figure.addEventListener("enarratio:select", (e) => window.__events.push(e.detail));
   `;
 
   const prepare = async (p: Page): Promise<void> => {
@@ -302,11 +302,11 @@ describe("enhance: series filters on a year chart, and focus across update()", (
     await prepare(p);
     const result = (await p.evaluate(`(() => {
       window.__chart.setFilter({ field: "type", value: "Grants" });
-      const marks = [...window.__chart.figure.querySelectorAll("[data-abscissa-key]")];
+      const marks = [...window.__chart.figure.querySelectorAll("[data-enarratio-key]")];
       return {
-        dimmedSeries: [...new Set(marks.filter((m) => m.hasAttribute("data-abscissa-dimmed")).map((m) => m.getAttribute("data-abscissa-series")))].sort(),
-        litSeries: [...new Set(marks.filter((m) => !m.hasAttribute("data-abscissa-dimmed")).map((m) => m.getAttribute("data-abscissa-series")))],
-        legend: [...window.__chart.figure.querySelectorAll(".abscissa-legend button")].map((b) => b.getAttribute("aria-pressed")),
+        dimmedSeries: [...new Set(marks.filter((m) => m.hasAttribute("data-enarratio-dimmed")).map((m) => m.getAttribute("data-enarratio-series")))].sort(),
+        litSeries: [...new Set(marks.filter((m) => !m.hasAttribute("data-enarratio-dimmed")).map((m) => m.getAttribute("data-enarratio-series")))],
+        legend: [...window.__chart.figure.querySelectorAll(".enarratio-legend button")].map((b) => b.getAttribute("aria-pressed")),
         events: window.__events.length,
       };
     })()`)) as { dimmedSeries: string[]; litSeries: string[]; legend: string[]; events: number };
@@ -319,7 +319,7 @@ describe("enhance: series filters on a year chart, and focus across update()", (
     // A year filter still works on the same chart.
     const yearDimmed = (await p.evaluate(`(() => {
       window.__chart.setFilter({ field: "year", value: "2012" });
-      return [...window.__chart.figure.querySelectorAll("[data-abscissa-key]:not([data-abscissa-dimmed])")].map((m) => m.getAttribute("data-abscissa-x"));
+      return [...window.__chart.figure.querySelectorAll("[data-enarratio-key]:not([data-enarratio-dimmed])")].map((m) => m.getAttribute("data-enarratio-x"));
     })()`)) as string[];
     expect(new Set(yearDimmed)).toEqual(new Set(["2012"]));
     await p.close();
@@ -328,7 +328,7 @@ describe("enhance: series filters on a year chart, and focus across update()", (
   it("keeps keyboard focus and the tab stop on the same mark through update(), so Escape still works", async () => {
     const p = await harness.open("index.html", "light");
     await prepare(p);
-    await p.$eval(`${YEARS} [data-abscissa-x="2012"][data-abscissa-series="Grants"]`, (el) =>
+    await p.$eval(`${YEARS} [data-enarratio-x="2012"][data-enarratio-series="Grants"]`, (el) =>
       (el as SVGElement).focus(),
     );
     await p.keyboard.press("Enter");
@@ -336,8 +336,8 @@ describe("enhance: series filters on a year chart, and focus across update()", (
     const after = (await p.evaluate(`(() => {
       const figure = window.__chart.figure;
       return {
-        focused: document.activeElement?.getAttribute("data-abscissa-key") ?? null,
-        stops: [...figure.querySelectorAll('[data-abscissa-key][tabindex="0"]')].map((m) => m.getAttribute("data-abscissa-key")),
+        focused: document.activeElement?.getAttribute("data-enarratio-key") ?? null,
+        stops: [...figure.querySelectorAll('[data-enarratio-key][tabindex="0"]')].map((m) => m.getAttribute("data-enarratio-key")),
       };
     })()`)) as { focused: string | null; stops: string[] };
     const key = JSON.stringify(["2012", "Grants"]);
@@ -351,19 +351,19 @@ describe("enhance: series filters on a year chart, and focus across update()", (
   it("moves focus to the same year when the focused mark is gone after update()", async () => {
     const p = await harness.open("index.html", "light");
     await prepare(p);
-    await p.$eval(`${YEARS} [data-abscissa-x="2012"][data-abscissa-series="Grants"]`, (el) =>
+    await p.$eval(`${YEARS} [data-enarratio-x="2012"][data-enarratio-series="Grants"]`, (el) =>
       (el as SVGElement).focus(),
     );
     const focused = await p.evaluate(`(() => {
       const template = document.createElement("template");
       template.innerHTML = window.__server;
-      const gone = template.content.querySelector('[data-abscissa-x="2012"][data-abscissa-series="Grants"]');
+      const gone = template.content.querySelector('[data-enarratio-x="2012"][data-enarratio-series="Grants"]');
       if (!gone) throw new Error("mark not found");
       gone.remove();
       const next = template.innerHTML;
       window.__chart.update(next);
       const el = document.activeElement;
-      return [el?.getAttribute("data-abscissa-x"), el?.getAttribute("tabindex")];
+      return [el?.getAttribute("data-enarratio-x"), el?.getAttribute("tabindex")];
     })()`);
     expect(focused).toEqual(["2012", "0"]);
     await p.close();

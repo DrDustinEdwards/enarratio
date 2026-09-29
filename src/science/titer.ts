@@ -171,7 +171,7 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
       x2: (r: (typeof intervalRows)[number]) => r.i,
       y1: (r: (typeof intervalRows)[number]) => r.s.lower ?? r.s.mean,
       y2: (r: (typeof intervalRows)[number]) => r.s.upper ?? r.s.mean,
-      stroke: "var(--abscissa-text)",
+      stroke: "var(--enarratio-text)",
       strokeWidth: 1.5,
     }),
     Plot.link(summaryRows, {
@@ -179,7 +179,7 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
       x2: (r: (typeof summaryRows)[number]) => r.i + 0.28,
       y1: (r: (typeof summaryRows)[number]) => r.s.mean,
       y2: (r: (typeof summaryRows)[number]) => r.s.mean,
-      stroke: "var(--abscissa-text)",
+      stroke: "var(--enarratio-text)",
       strokeWidth: 2.5,
     }),
     Plot.dot(samples, {
@@ -203,7 +203,7 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
         }),
         // Below the limit of detection is hollow: a shape difference, not only a color one.
         (el, s) => {
-          if (s.belowLimit) el.setAttribute("fill", "var(--abscissa-background)");
+          if (s.belowLimit) el.setAttribute("fill", "var(--enarratio-background)");
         },
       ),
     }),

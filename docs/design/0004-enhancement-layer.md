@@ -12,15 +12,15 @@ readers."
 
 **Implementation choices.**
 
-1. **A separate entry point, `abscissa/enhance`, with no dependencies.** It
+1. **A separate entry point, `enarratio/enhance`, with no dependencies.** It
    imports nothing from the server-side package, so a page ships only the
    interaction code (a few kilobytes), never Plot or d3.
 2. **It reads the markup, it does not re-render.** The server tags each drawn
-   datum with `data-abscissa-key` and, where filtering makes sense,
-   `data-abscissa-field` and `data-abscissa-value`. Continuous charts carry
+   datum with `data-enarratio-key` and, where filtering makes sense,
+   `data-enarratio-field` and `data-enarratio-value`. Continuous charts carry
    their x scale's domain and range. The layer needs nothing else.
 3. **Events are DOM `CustomEvent`s that bubble** from the figure:
-   `abscissa:select` and `abscissa:brush`. Any framework, or none, can listen.
+   `enarratio:select` and `enarratio:brush`. Any framework, or none, can listen.
    The layer changes only the chart's own appearance (dimming, a brush
    rectangle); what a filter means for the rest of the page is the page's job.
 4. **Keyboard model: one tab stop per chart, arrow keys inside it.** Left and
@@ -38,7 +38,7 @@ readers."
    script and in CSS. Entrance runs once, when a chart first scrolls into
    view.
 7. **Events report readers, not the page.** A click or key fires
-   `abscissa:select` or `abscissa:brush`; `update()`, `setFilter()` and
+   `enarratio:select` or `enarratio:brush`; `update()`, `setFilter()` and
    `clear()`, which the page calls itself, fire nothing, so a page never
    hears its own changes echoed back. (Changed after the first customer, the
    interactive CV, had to suppress those echoes.)
@@ -58,7 +58,7 @@ readers."
    each bar as a link, so a reader without script can still reach the
    filtered view. The SVG is then a named group, not one image, because
    `role="img"` would hide the links. The enhancement layer turns the links
-   into filter buttons and keeps the address in `data-abscissa-href`.
+   into filter buttons and keeps the address in `data-enarratio-href`.
 11. **`destroy()` restores the server markup**, so a page can hand a chart back
    to server rendering, and tests can check the round trip.
 

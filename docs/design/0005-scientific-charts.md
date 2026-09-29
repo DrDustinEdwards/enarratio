@@ -14,7 +14,7 @@ The first version ships **both** titer plots and genome tracks.
 
 ## The architecture they share
 
-A scientific chart is an ordinary Abscissa chart. It:
+A scientific chart is an ordinary Enarratio chart. It:
 
 1. takes typed options with a required `alt` (`FigureOptions`);
 2. validates domain rules and throws with the row and field (a titer must be
@@ -53,7 +53,7 @@ Ordered by how many sites and papers need them, and by how much they reuse.
 | 0.3 | **Dilution plots** (endpoint titration, plaque counts across dilutions) | `titerPlot` axis and the heatmap's cells | Reed-Muench and Spearman-Karber TCID50 in `src/science/`, with the plate drawn as a grid. |
 | 0.3 | **Gel-style band plots** | Custom marks on a band scale | Lanes as columns, bands at log-scaled molecular weights against a ladder; for showing PCR and Western results as data, not photographs. |
 | 0.4 | **Phylogenetic trees** | d3-hierarchy layout, Plot links and dots | Newick parser; rectangular and radial layouts; tips colored by metadata; keyboard traversal of the tree. Adds d3-hierarchy as a dependency. |
-| 0.5 | **County-level surveillance maps** | Plot `geo` mark, the sequential ramp | Choropleths from caller-supplied TopoJSON (Abscissa will not bundle boundaries); the data table lists every county; a small-multiples form for weeks. |
+| 0.5 | **County-level surveillance maps** | Plot `geo` mark, the sequential ramp | Choropleths from caller-supplied TopoJSON (Enarratio will not bundle boundaries); the data table lists every county; a small-multiples form for weeks. |
 
 Each stage adds its tests (unit, stored output, accessibility, visual), a
 gallery example, an API section and a changelog entry before release.

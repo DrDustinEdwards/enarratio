@@ -1,5 +1,5 @@
 // Entries per year by type, counted from one row per entry: the CV's overview chart.
-import { barChart } from "abscissa";
+import { barChart } from "enarratio";
 
 const entries = [
   ...Array.from({ length: 3 }, () => ({ year: 2019, type: "Publications" })),

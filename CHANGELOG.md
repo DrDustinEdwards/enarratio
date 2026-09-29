@@ -1,11 +1,48 @@
 # Changelog
 
-All notable changes to Abscissa are recorded here. The format follows
+All notable changes to Enarratio (named Abscissa until 0.1.0-alpha.7) are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/). Before 1.0.0, a minor version may
 change the public API; every such change is listed here.
 
 ## [Unreleased]
+
+## [0.1.0-alpha.8] - 2026-09-29
+
+### Changed
+
+- The rename reaches the code and the markup (design record 0010). Every
+  name that carried `abscissa` now carries `enarratio`; a page that styles or
+  listens for the old names needs the new ones:
+  - the figure's `class="enarratio"` and its `data-enarratio` chart type;
+  - every `data-abscissa-*` attribute, now `data-enarratio-*` (for example
+    `data-enarratio-mark`, `data-enarratio-key`, `data-enarratio-x`,
+    `data-enarratio-series`, `data-enarratio-enhanced`);
+  - every `abscissa-*` class, now `enarratio-*` (for example
+    `enarratio-frame`, `enarratio-legend`, `enarratio-tooltip`,
+    `enarratio-visually-hidden`), and the `enarratio-grow`, `enarratio-draw`
+    and `enarratio-fade` animations;
+  - every `--abscissa-*` custom property, now `--enarratio-*`;
+  - the `abscissa:select` and `abscissa:brush` events, now `enarratio:select`
+    and `enarratio:brush`.
+  No exported function or type changed its name.
+- The repository is `DrDustinEdwards/enarratio` and the gallery is at
+  `https://enarratio.dustinedwards.info`; the old gallery address redirects to
+  the new one with a 301. The code of conduct's contact is
+  `enarratio@dustinedwards.info`.
+
+## [0.1.0-alpha.7] - 2026-09-29
+
+### Changed
+
+- Renamed from Abscissa to Enarratio. The npm package is now `enarratio`;
+  `abscissa` is unpublished. Enarratio is the Roman
+  grammarian's reading aloud and explanation of a text, which is what the
+  toolkit does for a figure: it renders it on the server and explains it to
+  people, screen readers and AI agents. This release is the alpha.6 code under
+  the new package name, published first to reserve it; the names inside the
+  code (the `data-abscissa-*` attributes, CSS classes and custom properties)
+  and the rest of the repository are renamed in the next release.
 
 ## [0.1.0-alpha.6] - 2026-09-28
 
