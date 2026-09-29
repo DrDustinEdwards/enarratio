@@ -43,8 +43,8 @@ describe("titerPlot", () => {
     const fig = parse(titerPlot({ data: sera, group: "day", titer: "titer", alt: "a" }));
     const marks = keyedMarks(fig);
     expect(marks).toHaveLength(5);
-    expect(marks[0]?.getAttribute("fill")).toBe("var(--abscissa-background)");
-    expect(marks[1]?.getAttribute("fill")).toBe("var(--abscissa-series-1)");
+    expect(marks[0]?.getAttribute("fill")).toBe("var(--enarratio-background)");
+    expect(marks[1]?.getAttribute("fill")).toBe("var(--enarratio-series-1)");
     expect(marks[0]?.querySelector("title")?.textContent).toBe(
       "day D0: below the limit of detection (<1:10)",
     );
@@ -59,7 +59,7 @@ describe("titerPlot", () => {
 
   it("labels the axis in dilution steps", () => {
     const fig = parse(titerPlot({ data: sera, group: "day", titer: "titer", alt: "a" }));
-    const ticks = [...fig.querySelectorAll('[data-abscissa-mark="y-axis tick label"] text')].map(
+    const ticks = [...fig.querySelectorAll('[data-enarratio-mark="y-axis tick label"] text')].map(
       (t) => t.textContent,
     );
     expect(ticks).toEqual(["1:5", "1:10", "1:20", "1:40", "1:80", "1:160", "1:320", "1:640"]);
@@ -122,7 +122,7 @@ describe("genomeTrack", () => {
 
   it("colors and legends by type, and tabulates coordinates", () => {
     const fig = parse(genomeTrack({ length: 1000, features, alt: "a" }));
-    expect([...fig.querySelectorAll(".abscissa-legend li")].map((li) => li.textContent)).toEqual([
+    expect([...fig.querySelectorAll(".enarratio-legend li")].map((li) => li.textContent)).toEqual([
       "Gene",
       "Repeat",
     ]);

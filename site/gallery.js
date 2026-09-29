@@ -18,7 +18,7 @@ button?.addEventListener("click", () => {
   sync();
 });
 
-for (const type of ["abscissa:select", "abscissa:brush"]) {
+for (const type of ["enarratio:select", "enarratio:brush"]) {
   document.addEventListener(type, (event) => {
     const log = event.target.closest("section")?.querySelector(".events");
     if (log) log.textContent = `${type} ${JSON.stringify(event.detail)}`;

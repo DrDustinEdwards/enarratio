@@ -27,7 +27,7 @@ import { labelColor } from "../src/theme/color.js";
 import { keyedMarks, parse } from "./helpers.js";
 
 const tickLabels = (fig: Element, axis: "x" | "y"): string[] =>
-  [...fig.querySelectorAll(`[data-abscissa-mark="${axis}-axis tick label"] text`)].map(
+  [...fig.querySelectorAll(`[data-enarratio-mark="${axis}-axis tick label"] text`)].map(
     (t) => t.textContent ?? "",
   );
 
@@ -59,12 +59,12 @@ describe("A1: the default palette and direct labels", () => {
       type: i < 8 ? "Papers" : "Talks",
     }));
     const fig = parse(barChart({ data, x: "year", series: "type", directLabels: true, alt: "a" }));
-    const labels = [...fig.querySelectorAll('[data-abscissa-mark="bar label"] text')];
+    const labels = [...fig.querySelectorAll('[data-enarratio-mark="bar label"] text')];
     expect(labels.map((t) => t.textContent)).toContain("Papers");
-    expect(labels[0]?.getAttribute("fill")).toMatch(/^var\(--abscissa-series-text-\d\)$/);
-    expect(fig.querySelector('[data-abscissa-mark="bar label"]')?.getAttribute("aria-hidden")).toBe(
-      "true",
-    );
+    expect(labels[0]?.getAttribute("fill")).toMatch(/^var\(--enarratio-series-text-\d\)$/);
+    expect(
+      fig.querySelector('[data-enarratio-mark="bar label"]')?.getAttribute("aria-hidden"),
+    ).toBe("true");
     expect(() =>
       barChart({
         data,
@@ -83,8 +83,8 @@ describe("A2: count axes end at their last tick", () => {
     const fig = parse(
       barChart({ data: Array.from({ length: n }, () => ({ k: "a" })), x: "k", alt: "a" }),
     );
-    const ys = [...fig.querySelectorAll('[data-abscissa-mark="y-axis tick label"] text')].map((t) =>
-      Number(/translate\([\d.]+,(-?[\d.]+)\)/.exec(t.getAttribute("transform") ?? "")?.[1]),
+    const ys = [...fig.querySelectorAll('[data-enarratio-mark="y-axis tick label"] text')].map(
+      (t) => Number(/translate\([\d.]+,(-?[\d.]+)\)/.exec(t.getAttribute("transform") ?? "")?.[1]),
     );
     for (const y of ys) expect(y).toBeGreaterThanOrEqual(0);
   });
@@ -185,7 +185,7 @@ describe("A9 and F14: keys cannot collide", () => {
         alt: "a",
       }),
     );
-    const keys = keyedMarks(fig).map((m) => m.getAttribute("data-abscissa-key"));
+    const keys = keyedMarks(fig).map((m) => m.getAttribute("data-enarratio-key"));
     expect(new Set(keys).size).toBe(2);
   });
 });
@@ -243,7 +243,7 @@ describe("A11: protocol-relative links are refused", () => {
 describe("A12: axes are hidden from assistive technology", () => {
   it("marks every axis group aria-hidden", () => {
     const fig = parse(barChart({ data: [{ k: "a" }], x: "k", alt: "a" }));
-    const axes = [...fig.querySelectorAll('[data-abscissa-mark*="axis"]')];
+    const axes = [...fig.querySelectorAll('[data-enarratio-mark*="axis"]')];
     expect(axes.length).toBeGreaterThan(0);
     for (const g of axes) expect(g.getAttribute("aria-hidden")).toBe("true");
   });
@@ -252,12 +252,12 @@ describe("A12: axes are hidden from assistive technology", () => {
 describe("A13: wide drawings scroll instead of shrinking their text", () => {
   it("wraps the SVG in a frame that keeps a minimum width for wide drawings only", () => {
     const wide = parse(barChart({ data: [{ k: "a" }], x: "k", alt: "a" }));
-    expect(wide.querySelector(".abscissa-frame")?.getAttribute("class")).toContain(
-      "abscissa-frame-wide",
+    expect(wide.querySelector(".enarratio-frame")?.getAttribute("class")).toContain(
+      "enarratio-frame-wide",
     );
     const narrow = parse(barChart({ data: [{ k: "a" }], x: "k", width: 300, alt: "a" }));
-    expect(narrow.querySelector(".abscissa-frame")?.getAttribute("class")).toBe("abscissa-frame");
-    expect(stylesheet(defaultTheme)).toContain(".abscissa-frame-wide > svg { min-width: 30rem; }");
+    expect(narrow.querySelector(".enarratio-frame")?.getAttribute("class")).toBe("enarratio-frame");
+    expect(stylesheet(defaultTheme)).toContain(".enarratio-frame-wide > svg { min-width: 30rem; }");
   });
 });
 
@@ -385,8 +385,8 @@ describe("F9: marks carry their reading order from the data", () => {
     );
     expect(
       keyedMarks(fig).map((m) => [
-        m.getAttribute("data-abscissa-col"),
-        m.getAttribute("data-abscissa-row"),
+        m.getAttribute("data-enarratio-col"),
+        m.getAttribute("data-enarratio-row"),
       ]),
     ).toEqual([
       ["0", "0"],
@@ -412,7 +412,7 @@ describe("F9: marks carry their reading order from the data", () => {
       }),
     );
     const places = keyedMarks(fig).map(
-      (m) => `${m.getAttribute("data-abscissa-col")}${m.getAttribute("data-abscissa-row")}`,
+      (m) => `${m.getAttribute("data-enarratio-col")}${m.getAttribute("data-enarratio-row")}`,
     );
     expect(places.sort()).toEqual(["00", "11"]);
   });

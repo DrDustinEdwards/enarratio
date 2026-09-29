@@ -1,9 +1,9 @@
 /**
- * Abscissa: accessible, server-rendered charts and scientific figures for the web.
+ * Enarratio: accessible, server-rendered charts and scientific figures for the web.
  *
  * Every chart function returns HTML (a `<figure>`, or an `<svg>` for primitives) that reads
  * without scripts. Include {@link stylesheet} once per page for the theme, and optionally
- * `enhance()` from `abscissa/enhance` for hover, keyboard and filter interactions.
+ * `enhance()` from `enarratio/enhance` for hover, keyboard and filter interactions.
  *
  * @packageDocumentation
  */

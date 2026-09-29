@@ -1,5 +1,5 @@
 // A force-directed network, laid out on the server.
-import { networkChart } from "abscissa";
+import { networkChart } from "enarratio";
 
 const people = [
   ["Edwards", "Virology"],

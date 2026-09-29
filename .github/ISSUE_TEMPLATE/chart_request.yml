@@ -1,5 +1,5 @@
 name: Chart or feature request
-description: Propose a chart type, an option, or a change to how Abscissa works.
+description: Propose a chart type, an option, or a change to how Enarratio works.
 labels: [enhancement]
 body:
   - type: textarea

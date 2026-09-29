@@ -1,5 +1,5 @@
 // Two measurements per category, side by side.
-import { barChart } from "abscissa";
+import { barChart } from "enarratio";
 
 const results = [
   { assay: "Plaque", method: "Manual", hours: 72 },

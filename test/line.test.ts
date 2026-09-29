@@ -16,7 +16,7 @@ describe("lineChart", () => {
     const fig = parse(
       lineChart({ data: weekly, x: "week", y: "cases", series: "county", alt: "a" }),
     );
-    const keys = keyedMarks(fig).map((m) => m.getAttribute("data-abscissa-key"));
+    const keys = keyedMarks(fig).map((m) => m.getAttribute("data-enarratio-key"));
     expect(keys).toHaveLength(5);
     expect(keys).not.toContain(JSON.stringify([Date.UTC(2025, 0, 13), "Travis"]));
     expect(keyedMarks(fig)[0]?.querySelector("title")?.textContent).toBe(
@@ -33,7 +33,7 @@ describe("lineChart", () => {
         alt: "a",
       }),
     );
-    const d = fig.querySelector('[data-abscissa-mark="line"] path')?.getAttribute("d") ?? "";
+    const d = fig.querySelector('[data-enarratio-mark="line"] path')?.getAttribute("d") ?? "";
     expect(d.match(/M/g)?.length).toBe(2);
   });
 
@@ -41,7 +41,7 @@ describe("lineChart", () => {
     const fig = parse(
       lineChart({ data: weekly, x: "week", y: "cases", series: "county", alt: "a" }),
     );
-    const scale = JSON.parse(fig.getAttribute("data-abscissa-x-scale") ?? "{}");
+    const scale = JSON.parse(fig.getAttribute("data-enarratio-x-scale") ?? "{}");
     expect(scale.type).toBe("utc");
     expect(scale.domain).toEqual([Date.UTC(2025, 0, 6), Date.UTC(2025, 0, 20)]);
   });
@@ -89,7 +89,7 @@ describe("lineChart", () => {
         alt: "a",
       }),
     );
-    expect(JSON.parse(fig.getAttribute("data-abscissa-x-scale") ?? "{}").type).toBe("linear");
+    expect(JSON.parse(fig.getAttribute("data-enarratio-x-scale") ?? "{}").type).toBe("linear");
   });
 
   it("refuses duplicate points and bad dates", () => {
@@ -111,7 +111,7 @@ describe("areaChart", () => {
       areaChart({ data: weekly, x: "week", y: "cases", series: "county", alt: "a" }),
     );
     expect(keyedMarks(fig)).toHaveLength(5);
-    expect(fig.querySelector('[data-abscissa-mark="area"]')?.children).toHaveLength(2);
+    expect(fig.querySelector('[data-enarratio-mark="area"]')?.children).toHaveLength(2);
   });
 
   it("refuses negative values, which cannot stack", () => {

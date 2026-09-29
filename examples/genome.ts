@@ -1,5 +1,5 @@
 // A viral genome map: features to scale, arrows by strand, overlaps stacked into lanes.
-import { genomeTrack } from "abscissa";
+import { genomeTrack } from "enarratio";
 
 export default genomeTrack({
   length: 9719,

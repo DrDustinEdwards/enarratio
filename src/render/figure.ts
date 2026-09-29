@@ -116,7 +116,7 @@ export function slotStyle(
         typeof color === "string"
           ? cssColor(color)
           : `light-dark(${cssColor(color.light)}, ${cssColor(color.dark)})`;
-      return `--abscissa-series-${slot}: ${value}`;
+      return `--enarratio-series-${slot}: ${value}`;
     })
     .join("; ");
 }
@@ -145,16 +145,16 @@ function tableMarkup(table: DataTable, caption: string): string {
   return element(
     "table",
     {},
-    `${element("caption", { class: "abscissa-visually-hidden" }, escapeHtml(caption))}${element("thead", {}, head)}${element("tbody", {}, body)}`,
+    `${element("caption", { class: "enarratio-visually-hidden" }, escapeHtml(caption))}${element("thead", {}, head)}${element("tbody", {}, body)}`,
   );
 }
 
 function legendMarkup(parts: FigureParts): string {
-  const swatch = element("span", { class: "abscissa-swatch", "aria-hidden": "true" });
+  const swatch = element("span", { class: "enarratio-swatch", "aria-hidden": "true" });
   if (parts.ramp && parts.ramp.length > 0) {
     return element(
       "ul",
-      { class: "abscissa-legend abscissa-ramp" },
+      { class: "enarratio-legend enarratio-ramp" },
       parts.ramp
         .map((item) =>
           element("li", { "data-step": item.step }, `${swatch}${escapeHtml(item.label)}`),
@@ -165,12 +165,12 @@ function legendMarkup(parts: FigureParts): string {
   if (!parts.legend || parts.legend.length === 0) return "";
   return element(
     "ul",
-    { class: "abscissa-legend" },
+    { class: "enarratio-legend" },
     parts.legend
       .map((item) =>
         element(
           "li",
-          { "data-abscissa-series": item.label, "data-slot": item.slot },
+          { "data-enarratio-series": item.label, "data-slot": item.slot },
           `${swatch}${escapeHtml(item.label)}`,
         ),
       )
@@ -188,26 +188,26 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
   const table = tableMarkup(parts.table, `Data for: ${title ?? alt}`);
   const tableBlock =
     options.dataTable === "visually-hidden"
-      ? element("div", { class: "abscissa-data abscissa-visually-hidden" }, table)
+      ? element("div", { class: "enarratio-data enarratio-visually-hidden" }, table)
       : element(
           "details",
-          { class: "abscissa-data" },
+          { class: "enarratio-data" },
           `${element("summary", {}, "Data table")}${table}`,
         );
 
   return element(
     "figure",
     {
-      class: "abscissa",
+      class: "enarratio",
       id: options.id,
-      "data-abscissa": parts.kind,
-      "data-abscissa-orientation": parts.orientation,
-      "data-abscissa-x-scale": parts.x ? JSON.stringify(parts.x) : undefined,
-      "data-abscissa-series-field": parts.seriesField,
+      "data-enarratio": parts.kind,
+      "data-enarratio-orientation": parts.orientation,
+      "data-enarratio-x-scale": parts.x ? JSON.stringify(parts.x) : undefined,
+      "data-enarratio-series-field": parts.seriesField,
       style: slotStyle(parts.slotColors),
     },
     [
-      title ? element("p", { class: "abscissa-title" }, escapeHtml(title)) : "",
+      title ? element("p", { class: "enarratio-title" }, escapeHtml(title)) : "",
       legend,
       // A frame that scrolls sideways on narrow screens instead of shrinking the text (A13).
       // Drawings 30rem or wider keep that width and scroll; narrower ones scale as usual.
@@ -215,11 +215,13 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
         "div",
         {
           class:
-            (options.width ?? 640) >= 480 ? "abscissa-frame abscissa-frame-wide" : "abscissa-frame",
+            (options.width ?? 640) >= 480
+              ? "enarratio-frame enarratio-frame-wide"
+              : "enarratio-frame",
         },
         parts.svg,
       ),
-      caption ? element("figcaption", { class: "abscissa-caption" }, escapeHtml(caption)) : "",
+      caption ? element("figcaption", { class: "enarratio-caption" }, escapeHtml(caption)) : "",
       tableBlock,
     ].join(""),
   );

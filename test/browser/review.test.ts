@@ -32,12 +32,12 @@ async function mouseClick(p: Page, selector: string): Promise<void> {
 
 describe("F1: marks on continuous charts can be clicked with a real pointer", () => {
   it.each([
-    ["line", '[data-example="line"] [data-abscissa-series="Travis"][data-abscissa-col="5"]'],
-    ["scatter", '[data-example="scatter"] [data-abscissa-key]'],
+    ["line", '[data-example="line"] [data-enarratio-series="Travis"][data-enarratio-col="5"]'],
+    ["scatter", '[data-example="scatter"] [data-enarratio-key]'],
   ])("filters the %s chart from a mouse click on a mark", async (example, selector) => {
     const p = await harness.open("index.html", "light");
     await mouseClick(p, selector);
-    expect(await eventLog(p, example)).toMatch(/^abscissa:select .*"value":"[^"]+"/);
+    expect(await eventLog(p, example)).toMatch(/^enarratio:select .*"value":"[^"]+"/);
     expect(await p.$eval(selector, (el) => el.getAttribute("aria-pressed"))).toBe("true");
     await p.close();
   });
@@ -59,8 +59,8 @@ describe("A4: a range can be picked without dragging", () => {
     ).toMatch(/Range start set/);
     await p.mouse.click(box.x + box.width * 0.4, box.y + box.height * 0.12);
     const log = await eventLog(p, "line");
-    expect(log.startsWith('abscissa:brush {"chartId":"weekly-cases","range":[')).toBe(true);
-    const { range } = JSON.parse(log.slice("abscissa:brush ".length)) as {
+    expect(log.startsWith('enarratio:brush {"chartId":"weekly-cases","range":[')).toBe(true);
+    const { range } = JSON.parse(log.slice("enarratio:brush ".length)) as {
       range: [number, number];
     };
     expect(range[0]).toBeLessThan(range[1]);
@@ -71,7 +71,7 @@ describe("A4: a range can be picked without dragging", () => {
 describe("A5: small marks get 24 pixel targets", () => {
   it("gives every point on the line chart a pointer target at least 24 by 24 CSS pixels", async () => {
     const p = await harness.open("index.html", "light");
-    const sizes = await p.$$eval('[data-example="line"] .abscissa-hit', (hits) =>
+    const sizes = await p.$$eval('[data-example="line"] .enarratio-hit', (hits) =>
       hits.map((h) => {
         const r = h.getBoundingClientRect();
         return [r.width, r.height];
@@ -83,13 +83,13 @@ describe("A5: small marks get 24 pixel targets", () => {
       expect(h).toBeGreaterThanOrEqual(23.9);
     }
     // A click on the target, off the point itself, still filters.
-    const target = await p.$eval('[data-example="line"] .abscissa-hit', (h) => {
+    const target = await p.$eval('[data-example="line"] .enarratio-hit', (h) => {
       h.scrollIntoView({ block: "center" });
       const r = h.getBoundingClientRect();
       return { x: r.x + 2, y: r.y + 2 };
     });
     await p.mouse.click(target.x, target.y);
-    expect(await eventLog(p, "line")).toMatch(/^abscissa:select/);
+    expect(await eventLog(p, "line")).toMatch(/^enarratio:select/);
     await p.close();
   });
 });
@@ -97,14 +97,14 @@ describe("A5: small marks get 24 pixel targets", () => {
 describe("F6: the tooltip can be dismissed and hovered", () => {
   it("hides on Escape and stays while the pointer is over it", async () => {
     const p = await harness.open("index.html", "light");
-    const mark = '[data-example="stacked-bar"] [data-abscissa-key]';
+    const mark = '[data-example="stacked-bar"] [data-enarratio-key]';
     await p.$eval(mark, (el) => el.scrollIntoView({ block: "center" }));
     const box = await p.$eval(mark, (el) => {
       const r = el.getBoundingClientRect();
       return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
     });
     await p.mouse.move(box.x, box.y);
-    const tip = ".abscissa-tooltip:not([hidden])";
+    const tip = ".enarratio-tooltip:not([hidden])";
     expect(await p.$(tip)).not.toBeNull();
     const tipBox = await p.$eval(tip, (el) => {
       const r = el.getBoundingClientRect();
@@ -125,26 +125,26 @@ describe("F6: the tooltip can be dismissed and hovered", () => {
 describe("F7: the focus ring has two tones", () => {
   it("draws a background ring inside a focus ring around the focused mark", async () => {
     const p = await harness.open("index.html", "light");
-    await p.$eval('[data-example="stacked-bar"] [data-abscissa-key]', (el) =>
+    await p.$eval('[data-example="stacked-bar"] [data-enarratio-key]', (el) =>
       (el as SVGElement).focus(),
     );
     const strokes = await p.$$eval(
-      '[data-example="stacked-bar"] .abscissa-focus-ring rect',
+      '[data-example="stacked-bar"] .enarratio-focus-ring rect',
       (rects) => rects.map((r) => getComputedStyle(r).stroke),
     );
     const colors = await p.evaluate(() => {
       const figure = document.querySelector('[data-example="stacked-bar"] figure') as Element;
       const css = getComputedStyle(figure);
       return [
-        css.getPropertyValue("--abscissa-background"),
-        css.getPropertyValue("--abscissa-focus"),
+        css.getPropertyValue("--enarratio-background"),
+        css.getPropertyValue("--enarratio-focus"),
       ];
     });
     expect(strokes).toHaveLength(2);
     expect(strokes[0]).not.toBe(strokes[1]);
     expect(colors.every((c) => c.trim() !== "")).toBe(true);
     await p.$eval("button.scheme", (el) => (el as HTMLElement).focus());
-    expect(await p.$('[data-example="stacked-bar"] .abscissa-focus-ring')).toBeNull();
+    expect(await p.$('[data-example="stacked-bar"] .enarratio-focus-ring')).toBeNull();
     await p.close();
   });
 });
@@ -153,12 +153,12 @@ describe("F9: keyboard order follows the data, in facets and when enhanced while
   const focusedPlace = (p: Page): Promise<string> =>
     p.evaluate(
       () =>
-        `${document.activeElement?.getAttribute("data-abscissa-x")}|${document.activeElement?.getAttribute("data-abscissa-series")}`,
+        `${document.activeElement?.getAttribute("data-enarratio-x")}|${document.activeElement?.getAttribute("data-enarratio-series")}`,
     );
 
   it("steps through every category of a grouped chart and up within a group", async () => {
     const p = await harness.open("index.html", "light");
-    await p.$eval('[data-example="grouped-bar"] [data-abscissa-key][tabindex="0"]', (el) =>
+    await p.$eval('[data-example="grouped-bar"] [data-enarratio-key][tabindex="0"]', (el) =>
       (el as SVGElement).focus(),
     );
     expect(await focusedPlace(p)).toBe("Plaque|Manual");
@@ -186,7 +186,7 @@ describe("F9: keyboard order follows the data, in facets and when enhanced while
       enhance(section);
       section.style.display = "";
     });
-    await p.$eval('[data-example="stacked-bar"] [data-abscissa-key][tabindex="0"]', (el) =>
+    await p.$eval('[data-example="stacked-bar"] [data-enarratio-key][tabindex="0"]', (el) =>
       (el as SVGElement).focus(),
     );
     expect(await focusedPlace(p)).toBe("2019|Publications");
@@ -198,7 +198,7 @@ describe("F9: keyboard order follows the data, in facets and when enhanced while
   });
 });
 
-describe("F11: update() keeps only what Abscissa emits", () => {
+describe("F11: update() keeps only what Enarratio emits", () => {
   it("drops handlers, scripts and foreign elements from the markup it is given", async () => {
     const p = await harness.open("index.html", "light");
     const result = await p.evaluate(async () => {
@@ -211,8 +211,8 @@ describe("F11: update() keeps only what Abscissa emits", () => {
       if (!chart) throw new Error("no chart");
       const win = window as unknown as { pwned?: number };
       chart.update(
-        '<figure class="abscissa" onmouseover="window.pwned=2"><img src="data:," onerror="window.pwned=1">' +
-          '<script>window.pwned=3</script><svg role="img" aria-label="x"><a href="javascript:alert(1)"><rect data-abscissa-key="k" onclick="window.pwned=4" width="10" height="10"></rect></a></svg></figure>',
+        '<figure class="enarratio" onmouseover="window.pwned=2"><img src="data:," onerror="window.pwned=1">' +
+          '<script>window.pwned=3</script><svg role="img" aria-label="x"><a href="javascript:alert(1)"><rect data-enarratio-key="k" onclick="window.pwned=4" width="10" height="10"></rect></a></svg></figure>',
       );
       await new Promise((r) => setTimeout(r, 300));
       chart.figure.dispatchEvent(new MouseEvent("mouseover"));
@@ -260,7 +260,7 @@ describe("F18: enhancing again with other options re-applies them", () => {
       const section = document.querySelector('[data-example="stacked-bar"]') as HTMLElement;
       const [again] = enhance(section, { filter: false });
       return {
-        mark: section.querySelector("[data-abscissa-key]")?.getAttribute("role"),
+        mark: section.querySelector("[data-enarratio-key]")?.getAttribute("role"),
         filter: again?.options.filter,
       };
     });
@@ -275,10 +275,10 @@ describe("A13: text stays readable on a narrow screen", () => {
     await p.setViewport({ width: 320, height: 800, deviceScaleFactor: 1 });
     const measures = await p.evaluate(() => {
       const text = document.querySelector(
-        '[data-example="stacked-bar"] [data-abscissa-mark="x-axis tick label"] text',
+        '[data-example="stacked-bar"] [data-enarratio-mark="x-axis tick label"] text',
       );
       const frame = document.querySelector(
-        '[data-example="stacked-bar"] .abscissa-frame',
+        '[data-example="stacked-bar"] .enarratio-frame',
       ) as HTMLElement;
       return {
         textHeight: text?.getBoundingClientRect().height ?? 0,

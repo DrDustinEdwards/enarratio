@@ -116,7 +116,7 @@ export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
       x: "x",
       y: "y",
       fill: "none",
-      stroke: "var(--abscissa-status-unknown)",
+      stroke: "var(--enarratio-status-unknown)",
       strokeDasharray: "3,2",
       inset: 1.5,
       title: describe,
@@ -135,7 +135,7 @@ export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
           column: xNames.indexOf(c.x),
           row: yNames.indexOf(c.y),
         }),
-        (el, c) => el.setAttribute("fill", `var(--abscissa-sequential-${c.step})`),
+        (el, c) => el.setAttribute("fill", `var(--enarratio-sequential-${c.step})`),
       ),
     }),
   ];
@@ -146,7 +146,7 @@ export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
         y: "y",
         text: (c: Cell) => (c.value === null ? "" : format(c.value)),
         render: decorate(filledCells, (el, c) =>
-          el.setAttribute("fill", `var(--abscissa-sequential-text-${c.step})`),
+          el.setAttribute("fill", `var(--enarratio-sequential-text-${c.step})`),
         ),
       }),
     );

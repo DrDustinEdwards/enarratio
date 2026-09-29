@@ -1,11 +1,14 @@
 {
-  // The gallery at https://abscissa.dustinedwards.info: an assets-only Worker serving site/dist,
+  // The gallery at https://enarratio.dustinedwards.info: an assets-only Worker serving site/dist,
   // which `npm run gallery` builds. No account id here: wrangler takes it from the login or from
   // CLOUDFLARE_ACCOUNT_ID. Deploy with `npm run deploy:gallery`.
   "$schema": "https://unpkg.com/wrangler@4.143.0/config-schema.json",
+  // The Worker keeps its first name: a new name would deploy a second Worker beside this one,
+  // and the old hostname would stay attached to the first. Renaming it is a dashboard change.
   "name": "abscissa-gallery",
   "compatibility_date": "2026-09-28",
-  // A tiny Worker in front of the assets redirects http: to https: (worker/index.ts).
+  // A tiny Worker in front of the assets redirects http: to https: and the old hostname to the
+  // new one (worker/index.ts).
   "main": "./worker/index.ts",
   "assets": {
     "directory": "./site/dist",
@@ -14,7 +17,11 @@
     // Pages are served at clean addresses (/dustinedwards); /dustinedwards.html redirects there.
     "not_found_handling": "404-page"
   },
-  "routes": [{ "pattern": "abscissa.dustinedwards.info", "custom_domain": true }],
+  // The gallery's address before the rename redirects to the new one (design record 0010).
+  "routes": [
+    { "pattern": "enarratio.dustinedwards.info", "custom_domain": true },
+    { "pattern": "abscissa.dustinedwards.info", "custom_domain": true }
+  ],
   "workers_dev": false,
   "preview_urls": false
 }

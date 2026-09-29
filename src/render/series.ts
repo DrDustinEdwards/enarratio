@@ -15,7 +15,7 @@ export interface SeriesPlan {
 
 /** A CSS reference to a palette slot. */
 function slotColor(slot: number): string {
-  return `var(--abscissa-series-${slot})`;
+  return `var(--enarratio-series-${slot})`;
 }
 
 /**

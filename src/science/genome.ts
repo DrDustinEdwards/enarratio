@@ -213,7 +213,7 @@ export function genomeTrack(options: GenomeTrackOptions): string {
       y: (r: string) => r,
       x1: 1,
       x2: length,
-      stroke: "var(--abscissa-grid)",
+      stroke: "var(--enarratio-grid)",
       strokeWidth: 2,
     }),
     Plot.rectX(placed, {
@@ -247,7 +247,7 @@ export function genomeTrack(options: GenomeTrackOptions): string {
         y: "row",
         text: (p: Placed) => p.feature.name,
         render: decorate(labelled, (el, p) => {
-          el.setAttribute("fill", `var(--abscissa-series-text-${plan.slot(p.type)})`);
+          el.setAttribute("fill", `var(--enarratio-series-text-${plan.slot(p.type)})`);
         }),
       }),
     );

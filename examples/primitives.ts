@@ -1,5 +1,5 @@
 // Small primitives with the same styling: progress rings and an uptime strip.
-import { progressRing, type UptimeStatus, uptimeStrip } from "abscissa";
+import { progressRing, type UptimeStatus, uptimeStrip } from "enarratio";
 
 const hours = Array.from({ length: 48 }, (_, i): UptimeStatus => {
   if (i < 4) return "unknown";

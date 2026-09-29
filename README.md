@@ -1,11 +1,11 @@
-# Abscissa
+# Enarratio
 
 **Accessible, server-rendered charts and scientific figures for the web.**
 
-> **Status: in active development.** Abscissa is an alpha. The API may change
+> **Status: in active development.** Enarratio is an alpha. The API may change
 > before 1.0, and every change is recorded in the [changelog](CHANGELOG.md).
 
-Abscissa draws charts on the server, into the HTML. A chart is complete before
+Enarratio draws charts on the server, into the HTML. A chart is complete before
 any JavaScript runs: readers see it at once, screen readers get a written
 description and an equivalent data table, search engines and language models
 read the same numbers people do, and the page downloads no charting library.
@@ -17,13 +17,13 @@ heatmaps, networks, sparklines, progress rings and uptime strips) and the
 figures a laboratory needs, starting with antibody titer plots and genome
 tracks. Charts are built on [Observable Plot](https://observablehq.com/plot/)
 and [d3-force](https://d3js.org/d3-force), and return plain HTML strings, so
-Abscissa works with any server framework. It is tested on Node.js 20, 22 and 24
+Enarratio works with any server framework. It is tested on Node.js 20, 22 and 24
 and runs on Cloudflare Workers (the gallery's first site renders charts in a
 Worker); Deno and Bun should work, since it uses only standard modules, but are
 not yet tested.
 
 **Gallery:** every chart, in two themes, light and dark:
-[abscissa.dustinedwards.info](https://abscissa.dustinedwards.info)
+[enarratio.dustinedwards.info](https://enarratio.dustinedwards.info)
 (built by `npm run gallery`).
 
 ## Statement of need
@@ -41,7 +41,7 @@ phylogenies, surveillance maps) are not in general-purpose charting libraries,
 so each lab site redraws them by hand, inconsistently, and usually without
 text alternatives.
 
-Abscissa is for developers of research, teaching and small-organization
+Enarratio is for developers of research, teaching and small-organization
 websites who want charts that:
 
 - **render on the server** as inline SVG inside semantic HTML, with no client
@@ -57,10 +57,10 @@ websites who want charts that:
 ## Install
 
 ```sh
-npm install abscissa@next
+npm install enarratio@next
 ```
 
-Abscissa is ESM only and needs Node.js 20 or later (or any runtime with
+Enarratio is ESM only and needs Node.js 20 or later (or any runtime with
 standard ES modules). TypeScript types are included.
 
 ## Five-minute start
@@ -69,7 +69,7 @@ standard ES modules). TypeScript types are included.
 plot, and `alt`: a sentence saying what the chart shows.
 
 ```ts
-import { barChart, defaultTheme, stylesheet } from "abscissa";
+import { barChart, defaultTheme, stylesheet } from "enarratio";
 
 const entries = [
   { year: 2022, type: "Publications" },
@@ -110,29 +110,29 @@ light or dark preference.
 **3. Optionally, enhance it in the browser.**
 
 ```ts
-import { enhance } from "abscissa/enhance";
+import { enhance } from "enarratio/enhance";
 
-enhance(); // every Abscissa chart on the page
-document.addEventListener("abscissa:select", (event) => {
+enhance(); // every Enarratio chart on the page
+document.addEventListener("enarratio:select", (event) => {
   const { chartId, field, value } = event.detail; // e.g. "entries", "type", "Talks"
   console.log(chartId, field, value); // value is null when the filter is cleared
 });
 ```
 
 Now bars show details on hover and focus, arrow keys move between them,
-Enter or a click filters by the bar's series (and fires `abscissa:select`),
+Enter or a click filters by the bar's series (and fires `enarratio:select`),
 legend entries become toggle buttons, and a drag or Shift with the arrow keys
-picks a range on time axes (`abscissa:brush`). Escape clears. Everything is
+picks a range on time axes (`enarratio:brush`). Escape clears. Everything is
 announced to screen readers and motion stops under `prefers-reduced-motion`.
 
-Without a bundler, serve `node_modules/abscissa/dist/enhance/index.js` as a
+Without a bundler, serve `node_modules/enarratio/dist/enhance/index.js` as a
 file (it has no imports of its own) and load it with
 `<script type="module">import { enhance } from "/enhance.js"; enhance();</script>`,
 or from a CDN such as
-`https://cdn.jsdelivr.net/npm/abscissa@0.1.0-alpha.6/dist/enhance/index.js`.
+`https://cdn.jsdelivr.net/npm/enarratio@0.1.0-alpha.6/dist/enhance/index.js`.
 
 To redraw a chart in place, pass new server markup to `update()` on the chart
-`enhance()` returns. That markup should come from Abscissa: it is sanitized
+`enhance()` returns. That markup should come from Enarratio: it is sanitized
 before use, but it is not a way to insert arbitrary HTML.
 
 The [examples](examples/) directory holds a runnable file for every chart in
@@ -167,7 +167,7 @@ with eight series colors, a five-step sequential ramp and status colors.
 those properties, so one server render serves every theme and both schemes.
 
 ```ts
-import { checkTheme, defaultTheme, defineTheme, stylesheet } from "abscissa";
+import { checkTheme, defaultTheme, defineTheme, stylesheet } from "enarratio";
 
 const theme = defineTheme({
   ...defaultTheme,
@@ -184,7 +184,7 @@ const report = checkTheme(theme);
 
 Any chart can override a series color with `colors: { Talks: "#8a4a1b" }` or a
 light and dark pair. Two themes ship with the package: `defaultTheme`, and
-`dustinedwardsTheme`, the theme of the first site to use Abscissa.
+`dustinedwardsTheme`, the theme of the first site to use Enarratio.
 
 ## Accessibility
 
@@ -212,7 +212,7 @@ npm run test:browser                              # accessibility, interaction, 
 
 Development needs Node.js 24, which runs the TypeScript scripts directly.
 
-The gallery is hosted at https://abscissa.dustinedwards.info as an assets-only
+The gallery is hosted at https://enarratio.dustinedwards.info as an assets-only
 Cloudflare Worker (`wrangler.jsonc`), with a strict Content-Security-Policy
 and security headers from `site/_headers`. `npm run deploy:gallery` builds and
 deploys it; the "Deploy gallery" workflow does the same on every push to
@@ -220,16 +220,16 @@ deploys it; the "Deploy gallery" workflow does the same on every push to
 `CLOUDFLARE_ACCOUNT_ID` secrets. See
 [docs/design/0008-gallery-hosting.md](docs/design/0008-gallery-hosting.md). See
 [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and
-[docs/design](docs/design/) for why Abscissa is built the way it is.
+[docs/design](docs/design/) for why Enarratio is built the way it is.
 
 ## Citing
 
-If you use Abscissa in research, please cite it using the metadata in
+If you use Enarratio in research, please cite it using the metadata in
 [CITATION.cff](CITATION.cff).
 
 ## AI use
 
-Abscissa was designed by Dustin Edwards and written with an AI coding
+Enarratio was designed by Dustin Edwards and written with an AI coding
 assistant. What was done by whom is recorded in [docs/AI_USAGE.md](docs/AI_USAGE.md).
 
 ## License

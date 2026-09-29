@@ -131,21 +131,21 @@ describe("stylesheet", () => {
 
   it("defines every palette slot with a light fallback and a light-dark() pair", () => {
     for (let i = 1; i <= 8; i += 1) {
-      expect(css).toContain(`--abscissa-series-${i}: ${defaultTheme.light.series[i - 1]};`);
+      expect(css).toContain(`--enarratio-series-${i}: ${defaultTheme.light.series[i - 1]};`);
       expect(css).toContain(
-        `--abscissa-series-${i}: light-dark(${defaultTheme.light.series[i - 1]}, ${defaultTheme.dark.series[i - 1]});`,
+        `--enarratio-series-${i}: light-dark(${defaultTheme.light.series[i - 1]}, ${defaultTheme.dark.series[i - 1]});`,
       );
     }
   });
 
   it("hides the gridlines the theme does not show", () => {
-    expect(css).toContain('[data-abscissa-mark="x-grid"] { display: none; }');
-    expect(css).not.toContain('[data-abscissa-mark="y-grid"] { display: none; }');
+    expect(css).toContain('[data-enarratio-mark="x-grid"] { display: none; }');
+    expect(css).not.toContain('[data-enarratio-mark="y-grid"] { display: none; }');
   });
 
   it("switches scheme under caller selectors", () => {
     const attr = stylesheet(defaultTheme, { colorScheme: { dark: '[data-theme="dark"]' } });
-    expect(attr).toContain(':where([data-theme="dark"]) .abscissa { color-scheme: dark; }');
+    expect(attr).toContain(':where([data-theme="dark"]) .enarratio { color-scheme: dark; }');
   });
 
   it("turns animation off under reduced motion", () => {

@@ -1,5 +1,5 @@
 // A trend beside a number, with a text alternative generated from the data.
-import { sparkline } from "abscissa";
+import { sparkline } from "enarratio";
 
 export default sparkline({
   values: [4, 5, 7, 11, 8, 10],

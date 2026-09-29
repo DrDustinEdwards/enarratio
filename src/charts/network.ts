@@ -134,7 +134,7 @@ export function networkChart(options: NetworkChartOptions): string {
       y1: (e: (typeof edges)[number]) => e.a.y ?? 0,
       x2: (e: (typeof edges)[number]) => e.b.x ?? 0,
       y2: (e: (typeof edges)[number]) => e.b.y ?? 0,
-      stroke: "var(--abscissa-text-muted)",
+      stroke: "var(--enarratio-text-muted)",
       strokeOpacity: 0.5,
     }),
     Plot.dot(laidOut, {
@@ -142,7 +142,7 @@ export function networkChart(options: NetworkChartOptions): string {
       y: (n: LaidOutNode) => n.y ?? 0,
       r: RADIUS,
       fill: "group",
-      stroke: "var(--abscissa-background)",
+      stroke: "var(--enarratio-background)",
       strokeWidth: 1.5,
       title: describe,
       render: keyed(laidOut, (n) => ({
@@ -163,8 +163,8 @@ export function networkChart(options: NetworkChartOptions): string {
         text: "label",
         dx: RADIUS + 3,
         textAnchor: "start",
-        fill: "var(--abscissa-text)",
-        stroke: "var(--abscissa-background)",
+        fill: "var(--enarratio-text)",
+        stroke: "var(--enarratio-background)",
         strokeWidth: 3,
         paintOrder: "stroke",
       }),

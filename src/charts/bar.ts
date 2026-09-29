@@ -55,7 +55,7 @@ export interface BarChartOptions<T extends object> extends FigureOptions {
   readonly filterBy?: "series" | "x";
   /**
    * A link for each category, so that with scripts off a bar is a link (to a filtered page, say).
-   * Once enhanced, bars filter instead and the link moves to `data-abscissa-href`. Only relative,
+   * Once enhanced, bars filter instead and the link moves to `data-enarratio-href`. Only relative,
    * `http:` and `https:` links are allowed.
    */
   readonly href?: (x: string) => string;
@@ -323,21 +323,21 @@ const CHAR_WIDTH = 6.6;
  * on that series. Drawn after Plot lays out the bars, from their final geometry.
  */
 function labelSegments(svg: SVGSVGElement, horizontal: boolean): void {
-  const group = svg.querySelector('[data-abscissa-mark="bar"]');
+  const group = svg.querySelector('[data-enarratio-mark="bar"]');
   if (!group) return;
   const document = svg.ownerDocument;
   const labels = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  labels.setAttribute("data-abscissa-mark", "bar label");
+  labels.setAttribute("data-enarratio-mark", "bar label");
   labels.setAttribute("aria-hidden", "true");
   // Labels sit on the bars they name; pointer events go through them to the bar.
   labels.setAttribute("pointer-events", "none");
   labels.setAttribute("text-anchor", "middle");
   labels.setAttribute("font-size", "11");
-  for (const mark of group.querySelectorAll("[data-abscissa-key]")) {
+  for (const mark of group.querySelectorAll("[data-enarratio-key]")) {
     const shape = mark.localName === "rect" ? mark : mark.querySelector("rect");
-    const name = mark.getAttribute("data-abscissa-series");
+    const name = mark.getAttribute("data-enarratio-series");
     const fill = shape?.getAttribute("fill") ?? "";
-    const slot = /--abscissa-series-(\d)/.exec(fill)?.[1];
+    const slot = /--enarratio-series-(\d)/.exec(fill)?.[1];
     if (!shape || !name || !slot) continue;
     const [bx, by, bw, bh] = ["x", "y", "width", "height"].map((a) =>
       Number(shape.getAttribute(a)),
@@ -351,7 +351,7 @@ function labelSegments(svg: SVGSVGElement, horizontal: boolean): void {
     text.setAttribute("x", String(bx + bw / 2));
     text.setAttribute("y", String(by + bh / 2));
     text.setAttribute("dy", "0.35em");
-    text.setAttribute("fill", `var(--abscissa-series-text-${slot})`);
+    text.setAttribute("fill", `var(--enarratio-series-text-${slot})`);
     text.textContent = name;
     labels.append(text);
   }

@@ -5,13 +5,13 @@ Status: accepted, 2026-09-28. Amended by [0009](0009-review-fixes.md) after the 
 ## Decision
 
 **Author's decision.** "Each site passes a theme (palette, fonts, gridlines,
-light and dark); any chart can override colors. Abscissa checks palettes for
+light and dark); any chart can override colors. Enarratio checks palettes for
 colorblind-safe differences and readable contrast in light and dark."
 
 **Implementation choices.**
 
 1. **Charts contain no colors, only references.** A bar's fill is
-   `var(--abscissa-series-2)`, never a hex value. `stylesheet(theme)` defines
+   `var(--enarratio-series-2)`, never a hex value. `stylesheet(theme)` defines
    the properties once per page. One rendered chart therefore serves every
    theme, both color schemes and forced-colors mode, and a site can cache
    rendered charts independently of the reader's preference. (dustinedwards.info

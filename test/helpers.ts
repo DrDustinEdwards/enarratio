@@ -10,5 +10,5 @@ export function parse(markup: string): Element {
 
 /** Every element carrying a datum key, in document order. */
 export function keyedMarks(root: Element): Element[] {
-  return [...root.querySelectorAll("[data-abscissa-key]")];
+  return [...root.querySelectorAll("[data-enarratio-key]")];
 }
