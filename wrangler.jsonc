@@ -3,9 +3,9 @@
   // which `npm run gallery` builds. No account id here: wrangler takes it from the login or from
   // CLOUDFLARE_ACCOUNT_ID. Deploy with `npm run deploy:gallery`.
   "$schema": "https://unpkg.com/wrangler@4.143.0/config-schema.json",
-  // The Worker keeps its first name: a new name would deploy a second Worker beside this one,
-  // and the old hostname would stay attached to the first. Renaming it is a dashboard change.
-  "name": "abscissa-gallery",
+  // The name matches the Worker's name in the dashboard, where it was renamed from
+  // abscissa-gallery (design record 0010). A name that did not match would deploy a second Worker.
+  "name": "enarratio-gallery",
   "compatibility_date": "2026-09-28",
   // A tiny Worker in front of the assets redirects http: to https: and the old hostname to the
   // new one (worker/index.ts).

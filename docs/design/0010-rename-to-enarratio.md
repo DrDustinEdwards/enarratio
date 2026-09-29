@@ -27,6 +27,11 @@ yet, so the rename is clean, with redirects rather than duplicates.
 - **The gallery** is at `enarratio.dustinedwards.info`. The old hostname,
   `abscissa.dustinedwards.info`, stays attached to the same Worker, which
   answers it with a 301 to the same path on the new one (amends 0008).
+- **The gallery Worker** is `enarratio-gallery`. It was renamed from
+  `abscissa-gallery` in the Cloudflare dashboard first, and `wrangler.jsonc`
+  followed, because deploying a new name before the dashboard rename would
+  have created a second Worker beside the first and left the old hostname
+  attached to it.
 - **The contact address** in the code of conduct is
   `enarratio@dustinedwards.info`.
 - **The older design records** use the new name. This is the one exception to
@@ -37,10 +42,6 @@ yet, so the rename is clean, with redirects rather than duplicates.
 
 - **The CHANGELOG's entries for 0.1.0-alpha.0 to alpha.7**: they record the
   names those releases shipped with.
-- **The gallery Worker's name**, `abscissa-gallery`: a new name would deploy
-  a second Worker beside the first and leave the old hostname attached to the
-  first. Renaming a Worker is a change in the Cloudflare dashboard, outside
-  the repository.
 - **The old hostname in `wrangler.jsonc` and `worker/index.ts`**, and in the
   test of its redirect, because the Worker has to recognize it to redirect it.
 - **This record**, which has to name what was renamed.

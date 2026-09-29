@@ -13,7 +13,7 @@ zone already is.
 
 1. **An assets Worker.** (Since 0009, a few lines of Worker code in
    `worker/index.ts` run first, only to redirect `http:` to `https:`.) `wrangler.jsonc` names a Worker,
-   `abscissa-gallery`, that serves `site/dist` (built by `npm run gallery`) on
+   `enarratio-gallery` (named `abscissa-gallery` until 0010), that serves `site/dist` (built by `npm run gallery`) on
    the custom domain, with no `workers.dev` address and no
    preview URLs. A missing path gets `404.html`. The file carries no account
    id, because the repository is public; wrangler takes it from the login or
