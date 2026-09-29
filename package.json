@@ -1,6 +1,6 @@
 {
   "name": "abscissa",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.6",
   "description": "Accessible, server-rendered charts and scientific figures for the web",
   "keywords": [
     "charts",
@@ -28,6 +28,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./enhance": {
+      "types": "./dist/enhance/index.d.ts",
+      "default": "./dist/enhance/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -43,18 +47,29 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "check": "npm run typecheck && npm run lint && npm test",
     "lint": "biome check .",
     "format": "biome format --write .",
     "test": "vitest run",
-    "prepack": "npm run build"
+    "gallery": "node scripts/gallery.ts",
+    "deploy:gallery": "npm run build && npm run gallery && npx --yes wrangler@4.143.0 deploy",
+    "test:browser": "vitest run --config vitest.browser.config.ts",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "@observablehq/plot": "0.6.17",
+    "d3-force": "3.0.0",
     "linkedom": "0.18.13"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
+    "@types/d3-force": "3.0.10",
     "@types/node": "22.20.0",
+    "@types/pngjs": "6.0.5",
+    "axe-core": "4.13.0",
+    "pixelmatch": "7.2.0",
+    "pngjs": "7.0.0",
+    "puppeteer": "25.4.0",
     "typescript": "5.9.3",
     "vitest": "4.1.11"
   }

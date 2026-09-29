@@ -1,0 +1,40 @@
+name: Bug report
+description: A chart draws something wrong, throws when it should not, or fails an accessibility check.
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Abscissa version
+      placeholder: 0.1.0-alpha.6
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime and browser
+      description: Where the chart was rendered, and where it was viewed.
+      placeholder: Node.js 22, Chrome 150
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Code that shows the problem
+      description: The chart function and its options, with the smallest dataset that shows it.
+      render: ts
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: The error message, or a screenshot and the markup of the wrong chart.
+    validations:
+      required: true

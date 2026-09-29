@@ -1,5 +1,5 @@
 import { element, escapeHtml } from "../html.js";
-import { defaultFormat } from "../render/data.js";
+import { defaultFormat, maxOf, minOf } from "../render/data.js";
 import { type SeriesColor, slotStyle } from "../render/figure.js";
 
 /** Options for {@link sparkline}. */
@@ -36,6 +36,14 @@ export function sparkline(options: SparklineOptions): string {
   const { values } = options;
   const width = options.width ?? 120;
   const height = options.height ?? 32;
+  for (const [name, n] of [
+    ["width", width],
+    ["height", height],
+  ] as const) {
+    if (!(Number.isFinite(n) && n > 0)) {
+      throw new Error(`sparkline: ${name} must be a positive number, is ${n}`);
+    }
+  }
   const format = options.formatValue ?? defaultFormat;
   values.forEach((v, i) => {
     if (v !== null && !Number.isFinite(v)) {
@@ -45,8 +53,8 @@ export function sparkline(options: SparklineOptions): string {
   const present = values.filter((v): v is number => v !== null);
   if (present.length === 0) throw new Error("sparkline: needs at least one value");
 
-  const min = Math.min(...present);
-  const max = Math.max(...present);
+  const min = minOf(present);
+  const max = maxOf(present);
   const xOf = (i: number): number =>
     round(
       values.length === 1 ? width / 2 : INSET + (i * (width - 2 * INSET)) / (values.length - 1),
@@ -81,7 +89,7 @@ export function sparkline(options: SparklineOptions): string {
   const firstValue = present[0] as number;
   const lastIndex = values.length - 1;
   const lastValue = values[lastIndex];
-  const generated = `${options.label ? `${options.label}: ` : ""}${values.length} values, from ${format(firstValue)} to ${format(present[present.length - 1] as number)}; lowest ${format(min)}, highest ${format(max)}.`;
+  const generated = `${options.label ? `${options.label}: ` : ""}${defaultFormat(values.length)} values, from ${format(firstValue)} to ${format(present[present.length - 1] as number)}; lowest ${format(min)}, highest ${format(max)}.`;
   const alt = options.alt?.trim() || generated;
 
   const parts = [

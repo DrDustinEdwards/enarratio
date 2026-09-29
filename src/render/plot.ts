@@ -9,7 +9,7 @@ import { parseHTML } from "linkedom";
 import { escapeHtml } from "../html.js";
 
 /** A document for Plot to draw into. linkedom, because it runs in Node, Workers, Deno and Bun. */
-export function createDocument(): Document {
+function createDocument(): Document {
   const { document } = parseHTML("<!doctype html><html><body></body></html>");
   // linkedom implements the subset of the DOM that Plot and Abscissa use; its types differ.
   return document as unknown as Document;
@@ -25,31 +25,53 @@ export interface MarkDatum {
   readonly x?: string;
   /** The series name, when the chart has series. */
   readonly series?: string;
+  /**
+   * The mark's place for keyboard reading order: its category (column) and its position within
+   * the category (row). Taken from the data, not the drawing, so order is right in facets and in
+   * charts enhanced while hidden (F9).
+   */
+  readonly column?: number;
+  readonly row?: number;
 }
 
 /**
- * A Plot render transform that tags each element a mark draws with its datum's key. Plot draws
- * one element per index entry, in index order, for the marks Abscissa keys (bar, dot, cell, rect).
+ * A Plot render transform that calls `apply` on each element a mark draws with the datum it
+ * draws. Plot draws one element per index entry, in index order, for bar, dot, cell, rect and text.
  */
-export function keyed<T>(
+export function decorate<T>(
   items: readonly T[],
-  describe: (item: T) => MarkDatum,
+  apply: (el: Element, item: T) => void,
 ): Plot.RenderFunction {
   return (index, scales, values, dimensions, context, next) => {
-    if (!next) throw new Error("keyed() must be used as a render transform");
+    if (!next) throw new Error("decorate() must be used as a render transform");
     const group = next(index, scales, values, dimensions, context);
     if (!group) return group;
     const children = [...group.children];
     if (children.length !== index.length) {
-      throw new Error(`a keyed mark drew ${children.length} elements for ${index.length} data`);
+      throw new Error(`a decorated mark drew ${children.length} elements for ${index.length} data`);
     }
     children.forEach((child, i) => {
       const item = items[index[i] as number];
-      if (item === undefined) throw new Error(`keyed mark index ${index[i]} has no datum`);
-      tag(child, describe(item));
+      if (item === undefined) throw new Error(`decorated mark index ${index[i]} has no datum`);
+      apply(child, item);
     });
     return group;
   };
+}
+
+/**
+ * A render transform that tags each element with its datum's keys for the enhancement layer, and
+ * optionally decorates it further.
+ */
+export function keyed<T>(
+  items: readonly T[],
+  describe: (item: T) => MarkDatum,
+  also?: (el: Element, item: T) => void,
+): Plot.RenderFunction {
+  return decorate(items, (el, item) => {
+    tag(el, describe(item));
+    also?.(el, item);
+  });
 }
 
 /** Writes a datum's keys onto an element. */
@@ -61,6 +83,8 @@ export function tag(el: Element, datum: MarkDatum): void {
   }
   if (datum.x !== undefined) el.setAttribute("data-abscissa-x", datum.x);
   if (datum.series !== undefined) el.setAttribute("data-abscissa-series", datum.series);
+  if (datum.column !== undefined) el.setAttribute("data-abscissa-col", String(datum.column));
+  if (datum.row !== undefined) el.setAttribute("data-abscissa-row", String(datum.row));
 }
 
 /** A scale as the enhancement layer needs it to turn a pointer position back into data. */
@@ -110,7 +134,7 @@ const TEXT_NODE = 3;
  * Serializes an SVG tree with every attribute and text node escaped, so the markup is valid in
  * HTML and XML alike whatever the data contains. Childless elements self-close, as SVG allows.
  */
-export function serialize(node: Node): string {
+function serialize(node: Node): string {
   if (node.nodeType === TEXT_NODE) return escapeHtml(node.textContent ?? "");
   if (node.nodeType !== ELEMENT_NODE) return "";
   const el = node as Element;
@@ -131,16 +155,32 @@ export interface RenderedPlot {
 }
 
 /**
- * Draws a Plot specification into SVG markup named by `alt`. Throws if Plot warns, because a
- * warning means the chart shown would not be the chart intended.
+ * Draws a Plot specification into SVG markup named by `alt`: one image, or a group when its
+ * marks are links. Throws if Plot warns, because a warning means the chart shown would not be the
+ * chart intended.
  */
-export function renderPlot(options: Plot.PlotOptions, alt: string): RenderedPlot {
+export function renderPlot(
+  options: Plot.PlotOptions,
+  alt: string,
+  role: "img" | "group" = "img",
+  after?: (svg: SVGSVGElement) => void,
+): RenderedPlot {
   const document = createDocument();
   const svg = Plot.plot({ ...options, document }) as unknown as SVGSVGElement & Plot.Plot;
 
-  const warning = [...svg.querySelectorAll("text")].find((t) => t.textContent?.includes("⚠"));
+  // Plot's warning is its own node: a top-level <text> whose <title> counts the warnings. Found by
+  // that structure, not by the glyph, which data may contain (F13).
+  const warning = [...svg.children].find(
+    (el) =>
+      el.localName === "text" &&
+      /^\d+ warnings?\. Please check the console\.$/.test(
+        el.querySelector("title")?.textContent ?? "",
+      ),
+  );
   if (warning) {
-    throw new Error(`Observable Plot warned while drawing "${alt}": ${warning.textContent ?? ""}`);
+    throw new Error(
+      `Observable Plot warned while drawing "${alt}": ${warning.querySelector("title")?.textContent ?? ""}`,
+    );
   }
   if (svg.localName !== "svg") {
     throw new Error(
@@ -155,9 +195,17 @@ export function renderPlot(options: Plot.PlotOptions, alt: string): RenderedPlot
   for (const group of svg.querySelectorAll("[aria-label]")) {
     group.setAttribute("data-abscissa-mark", group.getAttribute("aria-label") ?? "");
     group.removeAttribute("aria-label");
+    // Axes repeat what the text alternative and the data table say; once enhanced, loose tick
+    // text would be read before the marks (A12).
+    if (/axis/.test(group.getAttribute("data-abscissa-mark") ?? "")) {
+      group.setAttribute("aria-hidden", "true");
+    }
   }
+  after?.(svg);
   roundCoordinates(svg);
-  svg.setAttribute("role", "img");
+  // A chart whose marks are links cannot be one image: role="img" would hide the links.
+  svg.setAttribute("role", role);
+  if (role === "group") svg.setAttribute("aria-roledescription", "chart");
   svg.setAttribute("aria-label", alt);
 
   let x: ScaleDescription | undefined;

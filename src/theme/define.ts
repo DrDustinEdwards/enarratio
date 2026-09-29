@@ -3,6 +3,21 @@ import type { ColorScheme, Theme } from "./types.js";
 
 const GRIDLINES = new Set(["none", "x", "y", "both"]);
 
+/**
+ * Characters that could end a CSS comment, declaration, rule or the surrounding <style> element.
+ * A theme's name and fonts are written into CSS, and themes may come from data (F10, A10).
+ */
+const UNSAFE_CSS_TEXT = /[<>{};\\]|\/\*|\*\//;
+
+/** Throws unless `text` can be written into CSS as it is. */
+export function assertCssText(where: string, text: string): void {
+  if (UNSAFE_CSS_TEXT.test(text)) {
+    throw new Error(
+      `${where}: "${text}" contains a character not allowed in CSS text (<, >, {, }, ;, \\, /* or */)`,
+    );
+  }
+}
+
 function assertScheme(themeName: string, which: "light" | "dark", scheme: ColorScheme): void {
   const where = `theme "${themeName}" ${which}`;
   const colors: [string, string][] = [
@@ -40,7 +55,12 @@ function assertScheme(themeName: string, which: "light" | "dark", scheme: ColorS
  */
 export function defineTheme(theme: Theme): Theme {
   if (theme.name.trim() === "") throw new Error("a theme needs a non-empty name");
+  assertCssText("theme name", theme.name);
   if (theme.fonts.body.trim() === "") throw new Error(`theme "${theme.name}": fonts.body is empty`);
+  assertCssText(`theme "${theme.name}" fonts.body`, theme.fonts.body);
+  if (theme.fonts.numeric !== undefined) {
+    assertCssText(`theme "${theme.name}" fonts.numeric`, theme.fonts.numeric);
+  }
   if (!GRIDLINES.has(theme.gridlines)) {
     throw new Error(`theme "${theme.name}": gridlines must be none, x, y or both`);
   }

@@ -10,6 +10,7 @@ import {
   stylesheet,
   type Theme,
 } from "../src/index.js";
+import { deltaE2000 } from "../src/theme/color.js";
 
 describe("contrastRatio", () => {
   it("is 21 for black on white and 1 for a color on itself", () => {
@@ -24,6 +25,19 @@ describe("contrastRatio", () => {
 
   it("rejects colors it cannot measure", () => {
     expect(() => contrastRatio("red", "#fff")).toThrow(/not a hex color/);
+  });
+});
+
+describe("deltaE2000", () => {
+  // Test pairs 1, 7, 17 and 25 of Sharma, Wu and Dalal (2005), Color Res. Appl. 30(1), Table 1.
+  it.each([
+    [[50, 2.6772, -79.7751], [50, 0, -82.7485], 2.0425],
+    [[50, 0, 0], [50, -1, 2], 2.3669],
+    [[50, 2.5, 0], [73, 25, -18], 27.1492],
+    [[60.2574, -34.0099, 36.2677], [60.4626, -34.1751, 39.4387], 1.2644],
+  ] as const)("matches the published difference for %j and %j", (a, b, expected) => {
+    expect(deltaE2000(a, b)).toBeCloseTo(expected, 3);
+    expect(deltaE2000(b, a)).toBeCloseTo(expected, 3);
   });
 });
 

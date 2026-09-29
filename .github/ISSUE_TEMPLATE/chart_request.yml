@@ -1,0 +1,27 @@
+name: Chart or feature request
+description: Propose a chart type, an option, or a change to how Abscissa works.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: The need
+      description: Who needs this figure or feature, and what they cannot do today.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: A published example
+      description: A link or citation to the figure as it appears in papers or on sites.
+  - type: textarea
+    id: data
+    attributes:
+      label: The data
+      description: What one row of input looks like.
+      render: ts
+  - type: textarea
+    id: accessibility
+    attributes:
+      label: Reading it without seeing it
+      description: What should the text alternative and data table say?

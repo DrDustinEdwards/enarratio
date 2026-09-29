@@ -1,7 +1,7 @@
 import type { LegendItem, SeriesColor } from "./figure.js";
 
 /** The number of palette slots every theme defines, and so the most series one chart can show. */
-export const MAX_SERIES = 8;
+const MAX_SERIES = 8;
 
 /** How a chart's series map onto palette slots. */
 export interface SeriesPlan {
@@ -14,7 +14,7 @@ export interface SeriesPlan {
 }
 
 /** A CSS reference to a palette slot. */
-export function slotColor(slot: number): string {
+function slotColor(slot: number): string {
   return `var(--abscissa-series-${slot})`;
 }
 

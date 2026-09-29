@@ -2,16 +2,57 @@
 
 **Accessible, server-rendered charts and scientific figures for the web.**
 
-> **Status: in active development.** This is an early alpha, published so the
-> name is reserved while the first version is built. The API will change
-> before 0.1.0. Do not depend on it in production yet.
+> **Status: in active development.** Abscissa is an alpha. The API may change
+> before 1.0, and every change is recorded in the [changelog](CHANGELOG.md).
 
-Abscissa draws charts on the server, into the HTML, so they appear without
-JavaScript, are readable by search engines and assistive technology, and cost
-the reader nothing to download. It is built on
-[Observable Plot](https://observablehq.com/plot/) and returns plain HTML
-strings, so it works in any server framework and any JavaScript runtime
-(Node.js, Cloudflare Workers, Deno, Bun).
+Abscissa draws charts on the server, into the HTML. A chart is complete before
+any JavaScript runs: readers see it at once, screen readers get a written
+description and an equivalent data table, search engines and language models
+read the same numbers people do, and the page downloads no charting library.
+An optional enhancement layer adds hover details, keyboard navigation,
+click-to-filter events and range brushing on top.
+
+It covers the charts a website needs (bars, lines, areas, scatter plots,
+heatmaps, networks, sparklines, progress rings and uptime strips) and the
+figures a laboratory needs, starting with antibody titer plots and genome
+tracks. Charts are built on [Observable Plot](https://observablehq.com/plot/)
+and [d3-force](https://d3js.org/d3-force), and return plain HTML strings, so
+Abscissa works with any server framework. It is tested on Node.js 20, 22 and 24
+and runs on Cloudflare Workers (the gallery's first site renders charts in a
+Worker); Deno and Bun should work, since it uses only standard modules, but are
+not yet tested.
+
+**Gallery:** every chart, in two themes, light and dark:
+[abscissa.dustinedwards.info](https://abscissa.dustinedwards.info)
+(built by `npm run gallery`).
+
+## Statement of need
+
+Most web charting libraries draw in the browser. A chart drawn in the browser
+is absent until its script downloads and runs, is invisible to anything that
+reads HTML without running scripts, and is usually opaque to screen readers.
+Server-side alternatives exist for static images, but an image cannot follow
+the site's dark mode, cannot be read by assistive technology beyond its alt
+text, and cannot be made interactive.
+
+Scientific figures on the web have the same problem, and a second one: the
+figures researchers publish (titer plots, genome maps, dose-response curves,
+phylogenies, surveillance maps) are not in general-purpose charting libraries,
+so each lab site redraws them by hand, inconsistently, and usually without
+text alternatives.
+
+Abscissa is for developers of research, teaching and small-organization
+websites who want charts that:
+
+- **render on the server** as inline SVG inside semantic HTML, with no client
+  code required;
+- **are accessible by construction**: a required written description, an
+  equivalent data table, keyboard access and screen reader announcements for
+  every interaction, and no reliance on color alone;
+- **follow a site's theme** in light and dark mode from one render, with
+  palettes checked for contrast and for color vision deficiency;
+- **include scientific chart types** designed alongside the general ones,
+  sharing their theming, accessibility and interaction.
 
 ## Install
 
@@ -19,35 +60,178 @@ strings, so it works in any server framework and any JavaScript runtime
 npm install abscissa@next
 ```
 
-## Use
+Abscissa is ESM only and needs Node.js 20 or later (or any runtime with
+standard ES modules). TypeScript types are included.
+
+## Five-minute start
+
+**1. Render a chart on the server.** Every chart takes its data, the fields to
+plot, and `alt`: a sentence saying what the chart shows.
 
 ```ts
-import { barChart, defaultTheme, sparkline, stylesheet } from "abscissa";
+import { barChart, defaultTheme, stylesheet } from "abscissa";
 
 const entries = [
+  { year: 2022, type: "Publications" },
+  { year: 2022, type: "Talks" },
   { year: 2023, type: "Publications" },
   { year: 2024, type: "Publications" },
-  { year: 2024, type: "Talks" },
+  { year: 2024, type: "Grants" },
 ];
 
-const html = `
-  <style>${stylesheet(defaultTheme)}</style>
-  ${barChart({
-    data: entries,
-    x: "year",
-    series: "type",
-    alt: "Entries per year by type: one publication in 2023; a publication and a talk in 2024.",
-  })}
-  ${sparkline({ values: [1, 2], label: "Entries per year" })}
-`;
+const chart = barChart({
+  id: "entries",
+  data: entries,
+  x: "year",
+  series: "type", // stacks by type; omit y to count rows
+  title: "Entries per year",
+  alt: "Entries per year by type, 2022 to 2024: one or two a year, mostly publications.",
+});
 ```
 
-Every chart returns a `<figure>` whose SVG carries the text alternative you
-give in `alt`, followed by an equivalent data table. Colors come from the
-theme's stylesheet through CSS custom properties, so the same markup follows
-light and dark mode without a re-render. `checkTheme(theme)` measures a
-theme's contrast and color-vision-deficiency differences.
+**2. Put it in a page with the theme's stylesheet.** The stylesheet is
+included once per page, whatever the number of charts.
+
+```ts
+const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta name="color-scheme" content="light dark">
+<style>${stylesheet(defaultTheme)}</style>
+</head>
+<body>${chart}</body>
+</html>`;
+```
+
+That page is complete: the chart, its legend and a data table render with
+scripts off, and the `color-scheme` meta tag makes them follow the reader's
+light or dark preference.
+
+**3. Optionally, enhance it in the browser.**
+
+```ts
+import { enhance } from "abscissa/enhance";
+
+enhance(); // every Abscissa chart on the page
+document.addEventListener("abscissa:select", (event) => {
+  const { chartId, field, value } = event.detail; // e.g. "entries", "type", "Talks"
+  console.log(chartId, field, value); // value is null when the filter is cleared
+});
+```
+
+Now bars show details on hover and focus, arrow keys move between them,
+Enter or a click filters by the bar's series (and fires `abscissa:select`),
+legend entries become toggle buttons, and a drag or Shift with the arrow keys
+picks a range on time axes (`abscissa:brush`). Escape clears. Everything is
+announced to screen readers and motion stops under `prefers-reduced-motion`.
+
+Without a bundler, serve `node_modules/abscissa/dist/enhance/index.js` as a
+file (it has no imports of its own) and load it with
+`<script type="module">import { enhance } from "/enhance.js"; enhance();</script>`,
+or from a CDN such as
+`https://cdn.jsdelivr.net/npm/abscissa@0.1.0-alpha.6/dist/enhance/index.js`.
+
+To redraw a chart in place, pass new server markup to `update()` on the chart
+`enhance()` returns. That markup should come from Abscissa: it is sanitized
+before use, but it is not a way to insert arbitrary HTML.
+
+The [examples](examples/) directory holds a runnable file for every chart in
+the gallery. Each exports the chart's HTML, and `npm run gallery` renders them
+all into `site/dist`.
+
+## Charts
+
+| Function | Draws |
+|---|---|
+| `barChart` | Bars, stacked or grouped, vertical or horizontal; counts rows when no value is given |
+| `lineChart` | Lines over time or any number, with gaps, reference lines, event markers, direct labels, log y |
+| `areaChart` | Stacked areas over time |
+| `scatterPlot` | Points on linear or log axes, symbols per series, optional regression with 95% band |
+| `heatmap` | A grid on the theme's sequential ramp, with printed values and labelled bins |
+| `networkChart` | A force-directed network laid out on the server, deterministic |
+| `titerPlot` | Titers on a dilution axis with geometric mean, 95% CI and limit of detection |
+| `genomeTrack` | Features to scale on a nucleotide axis, arrows by strand, overlaps in lanes |
+| `sparkline` | A word-sized trend line |
+| `progressRing` | Progress toward a total |
+| `uptimeStrip` | Up, degraded, down or unmeasured, one tick per period |
+
+Every function is documented in the [API reference](docs/api.md) and in its
+TypeScript declarations. The chart types still to come, and the order they
+come in, are in the [scientific chart plan](docs/design/0005-scientific-charts.md).
+
+## Themes
+
+A theme is data: fonts, gridlines, and a light and a dark color scheme, each
+with eight series colors, a five-step sequential ramp and status colors.
+`stylesheet(theme)` turns it into CSS custom properties; charts refer only to
+those properties, so one server render serves every theme and both schemes.
+
+```ts
+import { checkTheme, defaultTheme, defineTheme, stylesheet } from "abscissa";
+
+const theme = defineTheme({
+  ...defaultTheme,
+  name: "lab",
+  fonts: { body: "Inter, system-ui, sans-serif" },
+  light: { ...defaultTheme.light, background: "#fbfaf7" },
+});
+const css = stylesheet(theme);
+const report = checkTheme(theme);
+// report.issues: text below 4.5:1, marks below 3:1 (WCAG 2.2),
+// and series colors closer than 10 CIEDE2000 units under simulated
+// protanopia, deuteranopia or tritanopia.
+```
+
+Any chart can override a series color with `colors: { Talks: "#8a4a1b" }` or a
+light and dark pair. Two themes ship with the package: `defaultTheme`, and
+`dustinedwardsTheme`, the theme of the first site to use Abscissa.
+
+## Accessibility
+
+- `alt` is required. It names the chart's SVG (`role="img"`), and belongs to
+  the SVG rather than the figure so that the caption and table stay readable.
+- Every chart carries an equivalent data table, in a disclosure or visually
+  hidden.
+- Every mark has hover details that work without script, through SVG `<title>`.
+- Series are distinguished by more than hue: legends and direct labels,
+  symbols in scatter plots, hollow points below a limit of detection, heights
+  in uptime strips, dashed outlines for missing values.
+- Enhanced charts are keyboard operable, announce filters and ranges through a
+  live region, and respect `prefers-reduced-motion`.
+- The test suite runs axe-core over the gallery in both themes, light and
+  dark, with and without scripts.
+
+## Development
+
+```sh
+npm ci
+npm run typecheck && npm run lint && npm test     # unit and rendering tests
+npm run build && npm run gallery                  # site/dist
+npm run test:browser                              # accessibility, interaction, visual
+```
+
+Development needs Node.js 24, which runs the TypeScript scripts directly.
+
+The gallery is hosted at https://abscissa.dustinedwards.info as an assets-only
+Cloudflare Worker (`wrangler.jsonc`), with a strict Content-Security-Policy
+and security headers from `site/_headers`. `npm run deploy:gallery` builds and
+deploys it; the "Deploy gallery" workflow does the same on every push to
+`main` once the repository has the `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID` secrets. See
+[docs/design/0008-gallery-hosting.md](docs/design/0008-gallery-hosting.md). See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and
+[docs/design](docs/design/) for why Abscissa is built the way it is.
+
+## Citing
+
+If you use Abscissa in research, please cite it using the metadata in
+[CITATION.cff](CITATION.cff).
+
+## AI use
+
+Abscissa was designed by Dustin Edwards and written with an AI coding
+assistant. What was done by whom is recorded in [docs/AI_USAGE.md](docs/AI_USAGE.md).
 
 ## License
 
-MIT. Copyright (c) 2026 Dustin Edwards.
+[MIT](LICENSE). Copyright (c) 2026 Dustin Edwards.

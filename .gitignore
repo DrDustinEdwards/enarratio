@@ -1,7 +1,9 @@
 node_modules/
 dist/
 coverage/
-test/visual/__output__/
+test/browser/__output__/
+test/browser/__snapshots__/win32/
+test/browser/__snapshots__/darwin/
 site/dist/
 *.log
 *.tgz

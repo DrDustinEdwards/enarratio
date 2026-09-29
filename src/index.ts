@@ -9,8 +9,34 @@
  */
 
 export { type BarChartOptions, barChart } from "./charts/bar.js";
+export { type HeatmapOptions, heatmap } from "./charts/heatmap.js";
+export {
+  areaChart,
+  type EventMarker,
+  type LineChartOptions,
+  lineChart,
+  type ReferenceLine,
+  type SeriesChartOptions,
+} from "./charts/line.js";
+export {
+  type NetworkChartOptions,
+  type NetworkLink,
+  type NetworkNode,
+  networkChart,
+} from "./charts/network.js";
+export { type ScatterPlotOptions, scatterPlot } from "./charts/scatter.js";
+export { type ProgressRingOptions, progressRing } from "./primitives/progress-ring.js";
 export { type SparklineOptions, sparkline } from "./primitives/sparkline.js";
+export {
+  type UptimeSlot,
+  type UptimeStatus,
+  type UptimeStripOptions,
+  uptimeStrip,
+} from "./primitives/uptime-strip.js";
 export type { FigureOptions, SeriesColor } from "./render/figure.js";
+export { type GenomeFeature, type GenomeTrackOptions, genomeTrack } from "./science/genome.js";
+export { type GeometricSummary, geometricSummary } from "./science/stats.js";
+export { type DilutionSeries, type TiterPlotOptions, titerPlot } from "./science/titer.js";
 export {
   type CheckIssue,
   type CheckReport,
@@ -22,6 +48,7 @@ export {
   type ColorVision,
   colorDifference,
   contrastRatio,
+  type Rgb,
   simulateColorVision,
 } from "./theme/color.js";
 export { defineTheme } from "./theme/define.js";

@@ -17,7 +17,7 @@ export function isHexColor(value: string): value is HexColor {
 }
 
 /** Parses `#rgb` or `#rrggbb` into sRGB channels from 0 to 1. Throws on anything else. */
-export function parseHex(color: string): Rgb {
+function parseHex(color: string): Rgb {
   if (!isHexColor(color)) {
     throw new Error(`"${color}" is not a hex color (#rgb or #rrggbb)`);
   }
@@ -47,7 +47,7 @@ function fromLinear(c: number): number {
 }
 
 /** WCAG 2 relative luminance, from 0 (black) to 1 (white). */
-export function relativeLuminance(color: string): number {
+function relativeLuminance(color: string): number {
   const [r, g, b] = linearize(parseHex(color));
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
@@ -101,7 +101,7 @@ export function simulateColorVision(color: string, vision: ColorVision): Rgb {
 export type Lab = readonly [number, number, number];
 
 /** Converts sRGB channels (0 to 1) to CIE L*a*b*. */
-export function rgbToLab(rgb: Rgb): Lab {
+function rgbToLab(rgb: Rgb): Lab {
   const [r, g, b] = linearize(rgb);
   const x = (0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / 0.95047;
   const y = 0.2126729 * r + 0.7151522 * g + 0.072175 * b;
@@ -186,7 +186,14 @@ export function colorDifference(a: string, b: string, vision?: ColorVision): num
   return deltaE2000(rgbToLab(see(a)), rgbToLab(see(b)));
 }
 
-/** Of two candidate colors, the one with the higher contrast against `background`. */
-export function mostReadable(background: string, a: HexColor, b: HexColor): HexColor {
-  return contrastRatio(background, a) >= contrastRatio(background, b) ? a : b;
+/**
+ * The color for text printed on a mark: the scheme's text or background color when either reaches
+ * 4.5:1 on the mark (the better of the two), otherwise black or white, one of which always does
+ * (F8).
+ */
+export function labelColor(fill: string, text: HexColor, background: HexColor): HexColor {
+  const best = (a: HexColor, b: HexColor): HexColor =>
+    contrastRatio(fill, a) >= contrastRatio(fill, b) ? a : b;
+  const themed = best(text, background);
+  return contrastRatio(fill, themed) >= 4.5 ? themed : best("#000000", "#ffffff");
 }

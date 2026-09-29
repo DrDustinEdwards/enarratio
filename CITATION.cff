@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use Abscissa, please cite it using these metadata."
+title: "Abscissa: accessible, server-rendered charts and scientific figures for the web"
+abstract: >-
+  Abscissa is a TypeScript library that draws charts and scientific figures
+  (bar, line, area and scatter charts, heatmaps, networks, titer plots and
+  genome tracks) on the server as accessible, themeable HTML and SVG, with an
+  optional browser layer for keyboard navigation, filtering and range
+  selection.
+type: software
+authors:
+  - family-names: Edwards
+    given-names: Dustin
+    orcid: "https://orcid.org/0000-0001-6409-8041"
+    affiliation: "Tarleton State University"
+repository-code: "https://github.com/DrDustinEdwards/abscissa"
+url: "https://abscissa.dustinedwards.info"
+license: MIT
+version: 0.1.0-alpha.6
+date-released: "2026-09-28"
+keywords:
+  - data visualization
+  - accessibility
+  - server-side rendering
+  - scientific figures
+  - virology
+  - TypeScript

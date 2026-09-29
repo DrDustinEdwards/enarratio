@@ -1,0 +1,34 @@
+name: Visual snapshots
+
+# Renders the gallery on the CI platform and uploads the images, for a maintainer to review and
+# commit when a chart's appearance changes on purpose. It never commits anything itself.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run gallery
+      # Ubuntu 24.04 runners forbid unprivileged user namespaces through AppArmor, and Chrome's
+      # sandbox needs them. Lifting that restriction on the throwaway runner keeps the sandbox on,
+      # so the tests run Chrome as readers do; --no-sandbox would test a weaker browser instead.
+      - name: Allow Chrome's sandbox
+        run: echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
+      - run: npx vitest run --config vitest.browser.config.ts test/browser/visual.test.ts
+        env:
+          UPDATE_SNAPSHOTS: "1"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: visual-snapshots-linux
+          path: test/browser/__snapshots__/linux/

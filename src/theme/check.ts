@@ -1,4 +1,4 @@
-import { type ColorVision, colorDifference, contrastRatio } from "./color.js";
+import { type ColorVision, colorDifference, contrastRatio, labelColor } from "./color.js";
 import type { ColorScheme, HexColor, Theme } from "./types.js";
 
 /** Thresholds {@link checkTheme} measures against. Every field has a documented default. */
@@ -32,7 +32,12 @@ export const DEFAULT_THRESHOLDS: CheckThresholds = {
 export interface CheckIssue {
   readonly severity: "error" | "warning";
   readonly scheme: "light" | "dark";
-  readonly check: "text-contrast" | "graphics-contrast" | "series-difference" | "sequential-order";
+  readonly check:
+    | "text-contrast"
+    | "graphics-contrast"
+    | "label-contrast"
+    | "series-difference"
+    | "sequential-order";
   readonly message: string;
   readonly colors: readonly HexColor[];
   /** The measured value: a contrast ratio or a CIEDE2000 difference. */
@@ -92,6 +97,27 @@ function checkScheme(
   contrast("status.warning", scheme.status.warning, t.graphics, "graphics-contrast");
   contrast("status.bad", scheme.status.bad, t.graphics, "graphics-contrast");
   contrast("sequential step 5", scheme.sequential[4], t.graphics, "graphics-contrast");
+
+  // Text printed on marks (heatmap values, genome feature names, bar labels) takes the color
+  // labelColor picks for each fill; it must reach body-text contrast there (F8).
+  const fills: [string, HexColor][] = [
+    ...scheme.series.map((c, i): [string, HexColor] => [`series ${i + 1}`, c]),
+    ...scheme.sequential.map((c, i): [string, HexColor] => [`sequential step ${i + 1}`, c]),
+  ];
+  for (const [name, fill] of fills) {
+    const label = labelColor(fill, scheme.text, scheme.background);
+    const ratio = contrastRatio(label, fill);
+    if (ratio < t.text) {
+      issues.push({
+        severity: "error",
+        scheme: which,
+        check: "label-contrast",
+        message: `${which} labels on ${name} ${fill} (${label}) have contrast ${round(ratio)}:1; needs ${t.text}:1`,
+        colors: [label, fill],
+        measured: round(ratio),
+      });
+    }
+  }
 
   // Each step must stand further from the background than the one before, or "more" reads as less.
   for (let i = 1; i < scheme.sequential.length; i += 1) {

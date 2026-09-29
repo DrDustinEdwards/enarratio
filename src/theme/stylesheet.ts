@@ -1,4 +1,5 @@
-import { mostReadable } from "./color.js";
+import { labelColor } from "./color.js";
+import { assertCssText, defineTheme } from "./define.js";
 import type { ColorScheme, Gridlines, HexColor, Theme } from "./types.js";
 
 /** Options for {@link stylesheet}. */
@@ -26,7 +27,14 @@ function colorVariables(light: ColorScheme, dark: ColorScheme): Variables {
     ["status-unknown", light.status.unknown, dark.status.unknown],
   ];
   light.series.forEach((color, i) => {
-    pairs.push([`series-${i + 1}`, color, dark.series[i] ?? color]);
+    const darkColor = dark.series[i] ?? color;
+    pairs.push([`series-${i + 1}`, color, darkColor]);
+    // A label printed on a mark (a genome feature) takes whichever of text or background reads better.
+    pairs.push([
+      `series-text-${i + 1}`,
+      labelColor(color, light.text, light.background),
+      labelColor(darkColor, dark.text, dark.background),
+    ]);
   });
   light.sequential.forEach((color, i) => {
     const darkColor = dark.sequential[i] ?? color;
@@ -34,8 +42,8 @@ function colorVariables(light: ColorScheme, dark: ColorScheme): Variables {
     // A label printed on a heatmap cell takes whichever of text or background reads better there.
     pairs.push([
       `sequential-text-${i + 1}`,
-      mostReadable(color, light.text, light.background),
-      mostReadable(darkColor, dark.text, dark.background),
+      labelColor(color, light.text, light.background),
+      labelColor(darkColor, dark.text, dark.background),
     ]);
   });
   return pairs;
@@ -56,6 +64,8 @@ const BASE_RULES = `
   font-family: var(--abscissa-font);
   font-size: 1rem;
 }
+.abscissa-frame { overflow-x: auto; }
+.abscissa-frame-wide > svg { min-width: 30rem; }
 .abscissa svg {
   display: block;
   max-width: 100%;
@@ -95,7 +105,7 @@ svg.abscissa { display: inline-block; vertical-align: middle; }
   font: inherit;
   cursor: pointer;
 }
-.abscissa-legend button[aria-pressed="false"] { text-decoration: line-through; opacity: 0.6; }
+.abscissa-legend button[aria-pressed="true"] { border-color: currentColor; font-weight: 600; }
 .abscissa-swatch {
   display: inline-block;
   width: 0.8em;
@@ -107,6 +117,11 @@ ${Array.from(
   { length: 8 },
   (_, i) =>
     `.abscissa [data-slot="${i + 1}"] { --abscissa-slot: var(--abscissa-series-${i + 1}); }`,
+).join("\n")}
+${Array.from(
+  { length: 5 },
+  (_, i) =>
+    `.abscissa [data-step="${i + 1}"] { --abscissa-slot: var(--abscissa-sequential-${i + 1}); }`,
 ).join("\n")}
 .abscissa-swatch { background: var(--abscissa-slot); }
 .abscissa-data { margin: 0.5em 0 0; font-size: 0.875em; }
@@ -142,19 +157,19 @@ ${Array.from(
   font-size: 0.8125rem;
   line-height: 1.35;
   box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
-  pointer-events: none;
 }
 .abscissa-tooltip[hidden] { display: none; }
 .abscissa [data-abscissa-key] { transition: opacity 150ms ease-out; }
-.abscissa[data-abscissa-interactive] [data-abscissa-key] { cursor: pointer; }
+.abscissa[data-abscissa-interactive] [data-abscissa-field] { cursor: pointer; }
 .abscissa [data-abscissa-dimmed] { opacity: 0.25; }
 .abscissa [data-abscissa-key]:focus { outline: none; }
-.abscissa [data-abscissa-key]:focus-visible,
-.abscissa [data-abscissa-key][data-abscissa-active] {
-  stroke: var(--abscissa-focus);
-  stroke-width: 3px;
-  paint-order: stroke;
-}
+/* The focus ring: a background-colored ring inside a focus-colored one, so one of the two always
+   contrasts with whatever mark or background is next to it. */
+.abscissa-focus-ring { pointer-events: none; fill: none; }
+.abscissa-focus-ring-inner { stroke: var(--abscissa-background); stroke-width: 5px; }
+.abscissa-focus-ring-outer { stroke: var(--abscissa-focus); stroke-width: 2.5px; }
+/* Invisible targets that make small marks at least 24 CSS pixels to point at. */
+.abscissa-hit { fill: transparent; stroke: none; }
 .abscissa svg:focus-visible, .abscissa-legend button:focus-visible {
   outline: 3px solid var(--abscissa-focus);
   outline-offset: 2px;
@@ -200,6 +215,13 @@ function declarations(entries: ReadonlyArray<readonly [string, string]>, indent 
  * get the light scheme.
  */
 export function stylesheet(theme: Theme, options: StylesheetOptions = {}): string {
+  // Everything written into the CSS is checked first, so a theme from data cannot break out of
+  // the stylesheet (F10). The scheme selectors are the page's own, trusted, but still may not
+  // contain what would end a rule.
+  defineTheme(theme);
+  for (const [which, selector] of Object.entries(options.colorScheme ?? {})) {
+    if (selector !== undefined) assertCssText(`colorScheme.${which} selector`, selector);
+  }
   const variables = colorVariables(theme.light, theme.dark);
   const fonts: [string, string][] = [
     ["font", theme.fonts.body],
@@ -218,7 +240,7 @@ export function stylesheet(theme: Theme, options: StylesheetOptions = {}): strin
   ].filter(Boolean);
 
   return [
-    `/* Abscissa theme: ${theme.name} */`,
+    `/* Abscissa theme: ${theme.name} */`, // safe: defineTheme refused comment and tag syntax
     `.abscissa, .abscissa-tooltip {\n${declarations(fonts)}\n${declarations(
       variables.map(([name, light]) => [name, light]),
     )}\n}`,

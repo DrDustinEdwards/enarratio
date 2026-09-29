@@ -20,7 +20,12 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "noEmit": true
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "abscissa": ["./src/index.ts"],
+      "abscissa/enhance": ["./src/enhance/index.ts"]
+    }
   },
-  "include": ["src", "test", "scripts", "vitest.config.ts"]
+  "include": ["src", "test", "scripts", "examples", "worker", "vitest.config.ts"]
 }

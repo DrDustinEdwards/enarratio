@@ -73,8 +73,9 @@ export function readDate(kind: string, row: object, key: string, index: number):
 
 /**
  * The distinct values of a label field in first-seen order, or ascending when every value is a
- * number (years, doses), or `explicit` when the caller fixed the order. Throws if data holds a
- * value `explicit` leaves out.
+ * number (years, doses), or `explicit` when the caller fixed the order. Values are compared as
+ * text, so 2022 and "2022" are one category (A8). Throws if data holds a value `explicit` leaves
+ * out.
  */
 export function domainOf(
   kind: string,
@@ -89,11 +90,42 @@ export function domainOf(
         throw new Error(`${kind}: ${field} value "${v}" is missing from the ${field} domain given`);
       }
     }
-    return explicit.map(String);
+    return [...new Set(explicit.map(String))];
   }
-  const distinct = [...new Set(values)];
+  const seen = new Map<string, string | number>();
+  for (const v of values) if (!seen.has(String(v))) seen.set(String(v), v);
+  const distinct = [...seen.values()];
   if (distinct.every((v) => typeof v === "number")) {
     return (distinct as number[]).sort((a, b) => a - b).map(String);
   }
-  return distinct.map(String);
+  return [...seen.keys()];
+}
+
+/**
+ * A mark's key from its parts. JSON, so no part can contain the separator and collide with
+ * another mark's key (A9, F14). Keys are opaque: compare them, never parse them.
+ */
+export function markKey(...parts: readonly (string | number)[]): string {
+  return JSON.stringify(parts);
+}
+
+/** The smallest of many numbers, without spreading them onto the stack (F15). */
+export function minOf(values: Iterable<number>): number {
+  let min = Number.POSITIVE_INFINITY;
+  for (const v of values) if (v < min) min = v;
+  return min;
+}
+
+/** The largest of many numbers, without spreading them onto the stack (F15). */
+export function maxOf(values: Iterable<number>): number {
+  let max = Number.NEGATIVE_INFINITY;
+  for (const v of values) if (v > max) max = v;
+  return max;
+}
+
+/** Throws unless a size option is a positive finite number (A7, F15). */
+export function requireSize(kind: string, name: string, value: number | undefined): void {
+  if (value !== undefined && !(Number.isFinite(value) && value > 0)) {
+    throw new Error(`${kind}: ${name} must be a positive number, is ${value}`);
+  }
 }

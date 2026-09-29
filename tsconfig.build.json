@@ -5,7 +5,9 @@
     "rootDir": "src",
     "outDir": "dist",
     "declaration": true,
-    "types": []
+    "types": [],
+    "allowImportingTsExtensions": false,
+    "paths": {}
   },
   "include": ["src"],
   "exclude": ["**/*.test.ts"]

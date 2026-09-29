@@ -20,7 +20,7 @@ export function escapeHtml(value: string): string {
 export type AttributeValue = string | number | boolean | undefined;
 
 /** Serializes attributes in the order given, skipping omitted ones. */
-export function attributes(attrs: Readonly<Record<string, AttributeValue>>): string {
+function attributes(attrs: Readonly<Record<string, AttributeValue>>): string {
   let out = "";
   for (const [name, value] of Object.entries(attrs)) {
     if (value === undefined || value === false) continue;
