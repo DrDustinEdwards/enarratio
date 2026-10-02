@@ -29,10 +29,16 @@ then finish (bump 0.2.0, CHANGELOG, remove PROGRESS.md, CI green, merge, deploym
   step-5 companions), CSS container-query fallback, examples heat-strip/timeline, tests (test/timeline.test.ts,
   test/browser/timeline.test.ts), docs, design 0014. Needs Linux baselines for heat-strip and timeline.
 
+- Step 4 baselines (heat-strip, timeline) copied in.
+- Step 5: companion tables (src/primitives/companion.ts; prepare* shared by drawing and companion;
+  sparklineTable, uptimeStripTable, progressRingTable, timelineTable, heatStripTable; dataTableBlock exported),
+  example primitive-tables, tests/companions.test.ts, hostile coverage, docs, design 0015.
+  Needs Linux baselines for primitive-tables (dispatch visual-snapshots workflow, copy NEW pngs).
+
 ## Next
-- Dispatch visual-snapshots workflow, copy new heat-strip/timeline PNGs, get CI green. Then step 5 (companion tables
-  for sparkline, uptimeStrip, progressRing, timeline, heatStrip: `<name>Table`), step 6 (remove dustinedwardsTheme;
-  gallery second theme becomes a neutral documented example; replace dustinedwards-* baselines).
+- Step 6: remove dustinedwardsTheme everywhere (src/themes/dustinedwards.ts, exports, tests that name it, README,
+  docs, gallery second page becomes a neutral documented example theme; replace dustinedwards-* baselines and
+  visual/a11y page list). Then finish: bump 0.2.0, CHANGELOG, remove PROGRESS.md, CI green, merge, deployment check.
 
 ## Decisions
 - Fallbacks at the point of use, not a :root block (0011).

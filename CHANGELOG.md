@@ -61,6 +61,12 @@ Becomes 0.2.0. Design records 0011 onward explain each decision.
   plain list that replaces the drawing under 30rem of room. `heatStrip` (core):
   a one-row, no-axis strip on the sequential ramp, a sibling of `uptimeStrip`
   (design record 0014).
+- Companion functions for every primitive: `sparklineTable`, `uptimeStripTable`,
+  `progressRingTable`, `timelineTable` and `heatStripTable`, each taking the
+  primitive's options and returning `{ summary, table, markup }` computed from
+  the same values as the drawing, so the table cannot disagree with the picture.
+  The primitives return exactly what they did (design record 0015). Also
+  `dataTableBlock`, the table markup figures carry.
 - `enarratio/plot`, `enarratio/science` and `enarratio/themes` entry points.
 - `baseStylesheet()` and `enarratio/base.css`: the theme-free rules.
 - Every fixed size, weight, radius and animation timing in the CSS is a custom

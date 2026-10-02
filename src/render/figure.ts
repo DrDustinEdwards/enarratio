@@ -155,6 +155,25 @@ function tableMarkup(table: DataTable, caption: string): string {
   );
 }
 
+/**
+ * A data table as the markup a figure carries: in a closed disclosure (default), or visible only
+ * to assistive technology. `caption` names the table for screen readers.
+ */
+export function dataTableBlock(
+  table: DataTable,
+  caption: string,
+  display: "details" | "visually-hidden" = "details",
+): string {
+  const markup = tableMarkup(table, caption);
+  return display === "visually-hidden"
+    ? element("div", { class: "enarratio-data enarratio-visually-hidden" }, markup)
+    : element(
+        "details",
+        { class: "enarratio-data" },
+        `${element("summary", {}, "Data table")}${markup}`,
+      );
+}
+
 function legendMarkup(parts: FigureParts): string {
   const swatch = element("span", { class: "enarratio-swatch", "aria-hidden": "true" });
   if (parts.ramp && parts.ramp.length > 0) {
@@ -191,15 +210,7 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
   const caption = options.caption?.trim();
 
   const legend = legendMarkup(parts);
-  const table = tableMarkup(parts.table, `Data for: ${title ?? alt}`);
-  const tableBlock =
-    options.dataTable === "visually-hidden"
-      ? element("div", { class: "enarratio-data enarratio-visually-hidden" }, table)
-      : element(
-          "details",
-          { class: "enarratio-data" },
-          `${element("summary", {}, "Data table")}${table}`,
-        );
+  const tableBlock = dataTableBlock(parts.table, `Data for: ${title ?? alt}`, options.dataTable);
 
   return element(
     "figure",

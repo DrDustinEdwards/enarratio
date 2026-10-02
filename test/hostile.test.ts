@@ -6,7 +6,19 @@
  */
 import { parseHTML } from "linkedom";
 import { describe, expect, it } from "vitest";
-import { heatStrip, progressRing, sparkline, timeline, uptimeStrip } from "../src/index.js";
+import {
+  escapeHtml,
+  heatStrip,
+  heatStripTable,
+  progressRing,
+  progressRingTable,
+  sparkline,
+  sparklineTable,
+  timeline,
+  timelineTable,
+  uptimeStrip,
+  uptimeStripTable,
+} from "../src/index.js";
 import { areaChart, barChart, heatmap, lineChart, scatterPlot } from "../src/plot/index.js";
 import { genomeTrack, networkChart, titerPlot } from "../src/science/index.js";
 
@@ -149,6 +161,20 @@ const RENDERERS: Record<string, Render> = {
       cellLabels: [p, p, p],
       formatValue: (n) => `${p}${n}`,
     }),
+  "companion tables": (p) =>
+    [
+      sparklineTable({ values: [1, 2], label: p, formatValue: (n) => `${p}${n}` }),
+      uptimeStripTable({ slots: [{ status: "up", label: p }], label: p }),
+      progressRingTable({ value: 1, label: p }),
+      heatStripTable({ values: [1, null], label: p, cellLabels: [p, p] }),
+      timelineTable({
+        label: p,
+        events: [{ lane: p, label: p, status: "ok", from: 0, to: 5 }],
+        formatTime: () => p,
+      }),
+    ]
+      .map((c) => `${c.markup}<p>${escapeHtml(c.summary)}</p>`)
+      .join(""),
   areaChart: (p) =>
     areaChart({
       data: [

@@ -89,7 +89,7 @@ describe.skipIf(!hasImages && !update).each(pages)("%s theme", (theme, file) => 
     const problems: string[] = [];
     for (const section of sections) {
       const id = await section.evaluate((el) => el.getAttribute("data-example") ?? "");
-      const target = (await section.$("figure, .primitives, svg")) ?? section;
+      const target = (await section.$("figure, .primitives, .primitive-tables, svg")) ?? section;
       const shot = await target.screenshot({ type: "png" });
       const name = `${theme}-${scheme}-${id}`;
       const problem = compare(name, shot);

@@ -1,5 +1,6 @@
 import { element, escapeHtml } from "../html.js";
 import { DAY, defaultFormat, formatInstant, maxOf, minOf, requireSize } from "../render/data.js";
+import { type PrimitiveTable, type PrimitiveTableOptions, primitiveTable } from "./companion.js";
 
 /** What happened, as the theme's status colors and a shape say it. */
 export type TimelineStatus = "ok" | "warning" | "error" | "unknown";
@@ -200,6 +201,13 @@ export function prepareTimeline(options: TimelineOptions): TimelineValues {
     alt: given || summary,
     subject,
   };
+}
+
+/** Events in time order, ties by lane: the order of the plain list and the table. */
+function sortedEvents(events: readonly PreparedEvent[]): PreparedEvent[] {
+  return [...events].sort(
+    (a, b) => a.from - b.from || (a.lane < b.lane ? -1 : a.lane > b.lane ? 1 : 0),
+  );
 }
 
 const ROW = 18;
@@ -443,8 +451,7 @@ export function timeline(options: TimelineOptions): string {
   const list = element(
     "ol",
     { class: "enarratio-timeline-list" },
-    [...p.events]
-      .sort((a, b) => a.from - b.from || (a.lane < b.lane ? -1 : a.lane > b.lane ? 1 : 0))
+    sortedEvents(p.events)
       .map((e) =>
         element(
           "li",
@@ -458,5 +465,36 @@ export function timeline(options: TimelineOptions): string {
     "div",
     { class: "enarratio enarratio-timeline", "data-enarratio": "timeline" },
     `${svg}${list}`,
+  );
+}
+
+/**
+ * A timeline's events as a table (event, lane, status, start and end, the end blank for a point
+ * event) in time order, and a summary sentence with the counts, computed from the same events
+ * as the drawing and its plain list so they cannot disagree. Takes the same options as
+ * {@link timeline}. Without `label` the summary is the given `alt`.
+ *
+ * @example
+ * const { table } = timelineTable({ label: "Agent runs", events });
+ */
+export function timelineTable(
+  options: TimelineOptions,
+  display?: PrimitiveTableOptions,
+): PrimitiveTable {
+  const p = prepareTimeline(options);
+  return primitiveTable(
+    p.summary,
+    {
+      columns: ["Event", "Lane", "Status", "Start", "End"],
+      rows: sortedEvents(p.events).map((e) => [
+        e.label,
+        e.lane,
+        STATUSES[e.status].word,
+        e.fromText,
+        e.span ? e.toText : "",
+      ]),
+    },
+    p.subject || p.alt,
+    display,
   );
 }

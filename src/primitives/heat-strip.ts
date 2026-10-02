@@ -7,6 +7,7 @@ import {
   rampThresholds,
   requireSize,
 } from "../render/data.js";
+import { type PrimitiveTable, type PrimitiveTableOptions, primitiveTable } from "./companion.js";
 
 /** Options for {@link heatStrip}. */
 export interface HeatStripOptions {
@@ -175,5 +176,33 @@ export function heatStrip(options: HeatStripOptions): string {
       "aria-label": p.alt,
     },
     cells.join(""),
+  );
+}
+
+/**
+ * A heat strip's cells as a table (cell, value and ramp step, `no data` for a gap) and a summary
+ * sentence, computed from the same values as the strip so the two cannot disagree. Takes the same
+ * options as {@link heatStrip}. The summary is the generated description even when `alt` is given.
+ *
+ * @example
+ * const { markup } = heatStripTable({ values: [3, 5, 9], label: "Requests per hour" });
+ */
+export function heatStripTable(
+  options: HeatStripOptions,
+  display?: PrimitiveTableOptions,
+): PrimitiveTable {
+  const p = prepareHeatStrip(options);
+  return primitiveTable(
+    p.summary,
+    {
+      columns: ["Cell", "Value", "Ramp step"],
+      rows: p.values.map((v, i) => [
+        p.cellLabel(i),
+        v === null ? "no data" : p.format(v),
+        v === null ? "" : String(p.steps[i]),
+      ]),
+    },
+    p.subject || p.alt,
+    display,
   );
 }

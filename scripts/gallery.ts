@@ -45,6 +45,7 @@ const ORDER = [
   "primitives",
   "heat-strip",
   "timeline",
+  "primitive-tables",
 ];
 
 async function loadExamples(): Promise<Example[]> {
@@ -95,6 +96,7 @@ section.example h2 { margin: 0 0 16px; font-size: 1.125rem; }
 .report { font-size: 0.875rem; }
 .primitives { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; }
 .report li { margin: 2px 0; }
+.primitive-tables p { margin: 8px 0; }
 `;
 
 /** A page's stylesheet: the theme, the page's colors from the theme, and the page layout. */

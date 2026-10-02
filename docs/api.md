@@ -351,7 +351,8 @@ a single value.
 
 From the core, `enarratio`.
 
-Primitives return an `<svg class="enarratio">` sized for inline use, named by a
+Primitives return an `<svg class="enarratio">` sized for inline use (the timeline, a
+`<div>` holding one), named by a
 text alternative. They use the same theme. As on charts, `alt` is the text
 alternative; `label` names what is measured and is used to generate one when
 `alt` is not given. One of the two is required.
@@ -459,6 +460,84 @@ hover text.
 ### `UptimeStatus`
 
 `"up" | "degraded" | "down" | "unknown"`.
+
+### Companion functions
+
+Every primitive offers its numbers as a data table and a summary sentence,
+through a companion function with the same options as the primitive:
+`sparklineTable`, `uptimeStripTable`, `progressRingTable`, `timelineTable` and
+`heatStripTable`. They are computed from the same validated values as the
+drawing (the primitive and its companion share one `prepare` step), so the table
+can never disagree with the picture, and they throw the same errors for the
+same bad options. The primitives themselves return exactly what they always
+did; the companions are separate, so a primitive used inline in a table cell or a
+sentence stays small, and a page that wants the table asks for it.
+
+```ts
+const options = { values: [3, 5, 4, 8], label: "Entries per year" };
+const strip = sparkline(options);
+const { summary, table, markup } = sparklineTable(options);
+// summary: "Entries per year: 4 values, from 3 to 8; lowest 3, highest 8."
+// markup: a <details> holding the table, in the figure's own markup
+```
+
+The summary is the generated sentence, the same one that is the primitive's
+text alternative when `alt` is not given (when only `alt` names a primitive
+there is nothing to generate from, and the summary is that `alt`). A missing
+value reads `no data` in these tables, because a blank cell is ambiguous to a
+screen reader.
+
+| Companion | Columns | One row per |
+|---|---|---|
+| `sparklineTable` | Position, the label (or "Value") | Value |
+| `uptimeStripTable` | Period, Status | Period |
+| `progressRingTable` | Measure, Value, Total, Percent | Ring (one row) |
+| `timelineTable` | Event, Lane, Status, Start, End | Event, in time order |
+| `heatStripTable` | Cell, Value, Ramp step | Cell |
+
+### `PrimitiveTable`
+
+What a companion returns: `{ summary: string; table: DataTable; markup: string }`.
+`markup` is the table in a closed disclosure (or visually hidden, per
+`PrimitiveTableOptions`), ready to put beside the primitive.
+
+### `PrimitiveTableOptions`
+
+`{ dataTable?: "details" | "visually-hidden" }`, the second argument of every
+companion: how `markup` shows the table, as on a figure.
+
+### `sparklineTable`
+
+`sparklineTable(options: SparklineOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+Positions and values.
+
+### `uptimeStripTable`
+
+`uptimeStripTable(options: UptimeStripOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+Each period, named as in its hover text, and its status; the summary has the
+counts and availability.
+
+### `progressRingTable`
+
+`progressRingTable(options: ProgressRingOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+Value, total and the real percentage.
+
+### `timelineTable`
+
+`timelineTable(options: TimelineOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+Every event with lane, status, start and end (blank for a point event), in the
+order of the timeline's plain list.
+
+### `heatStripTable`
+
+`heatStripTable(options: HeatStripOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+Each cell's value and its ramp step.
+
+### `dataTableBlock`
+
+`dataTableBlock(table: DataTable, caption: string, display?): string`. A data
+table as the markup a figure carries: a closed `<details>` (default) or visually
+hidden. `caption` names the table for assistive technology.
 
 ## Themes
 
