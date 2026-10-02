@@ -36,6 +36,7 @@ record in `docs/design/`.
    npm run lint          # npm run format fixes formatting
    npm test              # unit, rendering and documentation tests
    npm run build && npm run gallery
+   npm run size          # per-entry gzipped sizes; fails if core gains a dependency
    npm run test:browser  # accessibility, interaction and visual tests
    ```
 
@@ -46,8 +47,9 @@ record in `docs/design/`.
    platform) are committed, so on Windows or macOS the visual comparison is
    skipped unless you create local images with `UPDATE_SNAPSHOTS=1`. CI's
    Linux images come from a failed CI run's `visual-output` artifact or the
-   "Visual snapshots" workflow, and a maintainer commits them after looking at
-   each one.
+   "Visual snapshots" workflow (which also pushes them to a
+   `visual-snapshots/<branch>` branch, so they can be fetched with git), and a
+   maintainer commits them after looking at each one.
 5. Open a pull request. The template lists what reviewers look for. CI must
    pass.
 
@@ -60,7 +62,11 @@ record in `docs/design/`.
 - Every chart has a required `alt`, a data table, and does not rely on color
   alone.
 - Dependencies are pinned to exact versions. A new dependency needs a reason
-  in the pull request.
+  in the pull request. Core (`enarratio`) has no runtime dependency, and CI
+  fails if it gains one; Observable Plot, d3-force and linkedom are optional
+  peers of the entries that use them.
+- Charts and primitives use custom properties for every size, weight, radius and
+  timing, with today's value as the fallback (docs/api.md, "Custom properties").
 - No em dashes in code, comments or documentation (a house style).
 
 ## Releases

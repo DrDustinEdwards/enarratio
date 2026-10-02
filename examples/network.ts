@@ -1,5 +1,5 @@
 // A force-directed network, laid out on the server.
-import { networkChart } from "enarratio";
+import { networkChart } from "enarratio/science";
 
 const people = [
   ["Edwards", "Virology"],

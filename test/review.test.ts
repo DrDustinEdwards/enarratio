@@ -4,26 +4,22 @@
  * test/browser/review.test.ts.
  */
 import { afterEach, describe, expect, it } from "vitest";
+import { exampleTheme } from "../examples/themes/example.js";
 import {
-  areaChart,
-  barChart,
   checkTheme,
   colorDifference,
   contrastRatio,
-  defaultTheme,
   defineTheme,
-  dustinedwardsTheme,
-  heatmap,
-  lineChart,
   progressRing,
-  scatterPlot,
   sparkline,
   stylesheet,
   type Theme,
-  titerPlot,
   uptimeStrip,
 } from "../src/index.js";
+import { areaChart, barChart, heatmap, lineChart, scatterPlot } from "../src/plot/index.js";
+import { titerPlot } from "../src/science/index.js";
 import { labelColor } from "../src/theme/color.js";
+import { defaultTheme } from "../src/themes/index.js";
 import { keyedMarks, parse } from "./helpers.js";
 
 const tickLabels = (fig: Element, axis: "x" | "y"): string[] =>
@@ -344,8 +340,8 @@ describe("F5: area gaps are gaps", () => {
 });
 
 describe("F8: labels on marks reach 4.5:1", () => {
-  it("chooses a label color with at least 4.5:1 on every fill in both shipped themes", () => {
-    for (const theme of [defaultTheme, dustinedwardsTheme]) {
+  it("chooses a label color with at least 4.5:1 on every fill in both the built-in and the example theme", () => {
+    for (const theme of [defaultTheme, exampleTheme]) {
       for (const scheme of [theme.light, theme.dark]) {
         for (const fill of [...scheme.series, ...scheme.sequential]) {
           const label = labelColor(fill, scheme.text, scheme.background);

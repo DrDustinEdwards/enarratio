@@ -1,3 +1,5 @@
+(Note: `dustinedwardsTheme` was removed in 0.2.0, see [0016](0016-remove-the-site-theme.md); and charts import from `enarratio/plot`, see [0012](0012-subpath-exports.md).)
+
 # 0007. What moving each existing site onto Enarratio involves
 
 Status: proposed, 2026-09-28. No site is migrated in the first version

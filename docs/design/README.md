@@ -27,6 +27,12 @@ Each record says where a decision came from:
 | [0008](0008-gallery-hosting.md) | Hosting the gallery, and its Content-Security-Policy |
 | [0009](0009-review-fixes.md) | What the two reviews changed, and why |
 | [0010](0010-rename-to-enarratio.md) | The rename from Abscissa to Enarratio |
+| [0011](0011-theming-from-outside.md) | Theming from outside: the custom property contract and the base rules |
+| [0012](0012-subpath-exports.md) | One package, subpath exports, optional peers |
+| [0013](0013-forecasts-and-time-bars.md) | Forecast bands, the forecast boundary and time-axis bars |
+| [0014](0014-timeline-and-heat-strip.md) | The event timeline and the heat strip |
+| [0015](0015-primitive-companions.md) | Companion tables for the primitives |
+| [0016](0016-remove-the-site-theme.md) | The dustinedwards.info theme is removed |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

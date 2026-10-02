@@ -1,8 +1,29 @@
 # API reference
 
-Enarratio has two entry points. `enarratio` runs anywhere (server, build step,
-browser) and returns HTML strings. `enarratio/enhance` runs in the browser and
-adds interaction to charts already on the page.
+Enarratio is one npm package with several entry points, so a site installs and
+ships only what it uses.
+
+| Import | Holds | Needs |
+|---|---|---|
+| `enarratio` | Core: HTML helpers, theme types, `defineTheme`, `stylesheet`, `baseStylesheet`, `checkTheme`, color maths, figure and data-table assembly, the primitives | Nothing. No runtime dependencies. |
+| `enarratio/base.css` | The theme-free base rules as a stylesheet file | Nothing |
+| `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` | Peers `@observablehq/plot`, and `linkedom` outside a browser |
+| `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | Peers `@observablehq/plot` and `d3-force`, and `linkedom` outside a browser |
+| `enarratio/enhance` | Interaction for charts already on the page; runs in the browser | Nothing |
+| `enarratio/themes` | The themes that ship with the package | Nothing |
+
+`@observablehq/plot`, `d3-force` and `linkedom` are optional peer dependencies:
+npm 7 and later does not install them for a site that imports only the core.
+Install what the entries you import need, for example
+`npm install @observablehq/plot linkedom` for `enarratio/plot`. Where a bundler
+builds for browsers (the `browser` export condition) `linkedom` is dropped and
+the browser's own document is used; Worker, Node.js, Deno and Bun builds keep it.
+`enarratio/science` needs `d3-force` for `networkChart` even when a
+page draws only a titer plot; split imports are not possible within one entry.
+
+Everything returns HTML strings. Charts and primitives run anywhere (server,
+build step); the primitives, the core and `enarratio/enhance` also run in the
+browser. Where a section below names a function, its import is the entry above.
 
 Every chart function takes one options object and returns a string. Options
 are checked when the chart is drawn, and anything that would draw a wrong
@@ -19,6 +40,65 @@ feeds hostile text through every function and parses the result).
 The TypeScript declarations carry the same documentation, field by field, and
 show in any editor. This page is the map; a test fails if an export is missing
 from it.
+
+## Core building blocks
+
+The pieces every chart is made from, exported so a site can build its own figure
+with the same markup, escaping and data table as the charts it imports.
+
+### `escapeHtml`
+
+`escapeHtml(value: string): string`. Escapes text for use as HTML element
+content or as a double-quoted attribute value.
+
+### `element`
+
+`element(tag, attrs, children?): string`. One element as a string. Attribute
+values are escaped; `false` and `undefined` omit the attribute and `true` writes
+it bare. `children` is trusted markup: escape text with `escapeHtml` first.
+
+### `AttributeValue`
+
+`string | number | boolean | undefined`, the type of an attribute in `element`.
+
+### `figure`
+
+`figure(options: FigureOptions, parts: FigureParts): string`. Assembles the
+figure every chart is delivered in (title, legend, the SVG named by `alt`,
+caption and data table) from an SVG and a `DataTable`. Throws if `alt` is blank.
+
+### `FigureParts`
+
+`kind`, `svg`, `table`, and optionally `legend`, `ramp`, `seriesField`, `x`
+(a `ScaleDescription`), `orientation` and `slotColors`.
+
+### `DataTable`
+
+`{ columns: string[]; rows: string[][] }`. The first column holds row headers.
+
+### `LegendItem`
+
+`{ label: string; slot: number }`, the slot being a palette slot from 1 to 8.
+
+### `RampItem`
+
+`{ label: string; step: number }`, the step being a ramp step from 1 to 5.
+
+### `ScaleDescription`
+
+`{ type; domain; range }`: a scale as the enhancement layer needs it to turn a
+pointer position back into data.
+
+### `validateFigure`
+
+`validateFigure(kind: string, options: FigureOptions): void`. Throws unless
+`alt` is meaningful and any `width` and `height` are positive and finite.
+
+### `slotStyle`
+
+`slotStyle(colors?: ReadonlyMap<number, SeriesColor>): string | undefined`. Per-figure
+palette overrides as an inline style value; throws on a color that is not hex, a
+color function or `var()`.
 
 ## Common options
 
@@ -63,7 +143,7 @@ Each drawn datum carries `data-enarratio-key`, which is opaque (compare keys,
 never parse them), and `data-enarratio-col` and `data-enarratio-row`, its place
 in keyboard reading order.
 
-## Charts
+## Charts: `enarratio/plot`
 
 ### `barChart`
 
@@ -89,6 +169,19 @@ one row per item (a CV entry, a case) is enough.
   nth label is printed from the first.
 - `directLabels`: print each series' name inside the stacked segments it fits
   in, so series are told apart by text as well as color. Stacked layout only.
+- `xType: "time"`, with `interval`, `formatX`: a time axis. `x` is a Date, an
+  ISO 8601 string or epoch milliseconds; each row falls in the `interval`
+  (`"hour"`, `"day"` the default, `"week"` starting Monday, `"month"` or
+  `"year"`, all UTC) that contains it, and there is one bar slot for every
+  interval from the first row's to the last's, empty ones included, so a quiet
+  day is a gap in the chart and a zero in the table. Bars are labelled by their
+  first moment (`2026-01-05`, `2026-01`, `2026`, `2026-01-05 14:00 UTC`) or by
+  `formatX(start)`, which must give every interval its own label. Rows in an
+  interval and series are summed, or counted when `y` is omitted. Works with
+  stacked and grouped series and horizontal bars. Long axes print every nth
+  label unless `maxXTicks` says otherwise; every bar keeps its hover details
+  and table row. `xDomain` is not used with it, and `interval` and `formatX`
+  need `xType: "time"`. More than 2000 intervals throw.
 
 Links given by `href` must be relative or `http(s)`; a `//host` link, or any
 other scheme, throws. Count axes end at their last whole-number tick.
@@ -124,8 +217,32 @@ Options shared by line and area charts: `data`, `x`, `y`, `series`, `xType`
 
 ### `LineChartOptions`
 
-`SeriesChartOptions` plus `points`, `directLabels`, `yType` and `zero`. With
-`yType: "log"`, a value of zero or less throws.
+`SeriesChartOptions` plus `points`, `directLabels`, `yType`, `zero`, and the
+forecast options `band`, `forecastFrom` and `forecastLabel`. With
+`yType: "log"`, a value of zero or less (or a band lower bound of zero or less)
+throws.
+
+**Forecasts are computed by the caller; Enarratio only draws them.**
+
+- `band: { lower, upper, label? }` draws a shaded area between two fields, in
+  each series' color behind its line. A row has both bounds or neither
+  (neither is a gap in the band); a lower bound above its upper bound throws.
+  The data table gains two columns per series (`Lower bound` and `Upper bound`,
+  or `95% interval, lower` when `label` is `"95% interval"`; with several series,
+  prefixed by the series name), and hover details say the interval.
+- `forecastFrom` is the x after which the data are a forecast: rows with x
+  greater than it. The line is dashed from there (each series joined to its
+  last observed point), points are hollow, a rule labelled `forecastLabel`
+  (default "Forecast") marks the boundary, and the data table gets a `Forecast`
+  column reading `Yes` on those rows. It must lie within the data's x range and
+  before the last x, so that some rows are observed and some forecast.
+- The two work apart or together. A chart without them is drawn exactly as
+  before.
+
+### `LineBand`
+
+`{ lower: field; upper: field; label?: string }`: the fields holding a band's
+bounds, and what the band is called.
 
 ### `ReferenceLine`
 
@@ -163,7 +280,7 @@ row (the `y` field), and arrow keys move across columns and down rows.
 
 ### `networkChart`
 
-`networkChart(options: NetworkChartOptions): string`. A force-directed
+`networkChart(options: NetworkChartOptions): string`. From `enarratio/science`. A force-directed
 network laid out on the server with d3-force. The layout is deterministic: the
 same data always draws the same picture.
 
@@ -179,7 +296,9 @@ same data always draws the same picture.
 
 `{ source: string; target: string }`, by node id.
 
-## Scientific charts
+## Scientific charts: `enarratio/science`
+
+These, and `networkChart` above, import from `enarratio/science`.
 
 ### `titerPlot`
 
@@ -230,7 +349,10 @@ a single value.
 
 ## Primitives
 
-Primitives return an `<svg class="enarratio">` sized for inline use, named by a
+From the core, `enarratio`.
+
+Primitives return an `<svg class="enarratio">` sized for inline use (the timeline, a
+`<div>` holding one), named by a
 text alternative. They use the same theme. As on charts, `alt` is the text
 alternative; `label` names what is measured and is used to generate one when
 `alt` is not given. One of the two is required.
@@ -255,6 +377,71 @@ alternative is generated from the data unless `alt` is given.
 `showValue`, `color`. A value past `max` fills the ring and prints its real
 percentage, and the text alternative says it is more than the total.
 
+### `timeline`
+
+`timeline(options: TimelineOptions): string`. An event timeline: a lane for each
+site, agent or service, with spans (things that lasted) and point events over a
+time window. Status is carried by the theme's status colors and by shape (a
+circle for `ok`, a triangle for `warning`, a square for `error`, a dashed
+hollow circle for `unknown`), so it reads without hue. Events that overlap in a
+lane stack in rows. Times are instants in UTC.
+
+It returns a `<div class="enarratio enarratio-timeline">` holding the drawing,
+named by a generated text alternative, and a plain `<ol>` of the same events in
+time order. With `stylesheet` or `enarratio/base.css` the list is read by
+screen readers beside the drawing and replaces it when the container has less
+than 30rem of room; without CSS both show. Everything is checked when drawn: an
+event with no time, a span that ends before it starts, an unknown status or
+lane, or an event outside the window throws.
+
+### `TimelineOptions`
+
+`events`, `lanes` (top to bottom; default first-seen; a lane with no events is
+drawn empty), `start` and `end` (the window; default the earliest and latest
+event), `label` or `alt` (one is required), `width` (default 640), `formatTime`.
+
+### `TimelineEvent`
+
+A `TimelinePoint` or a `TimelineSpan`.
+
+### `TimelinePoint`
+
+`{ lane; label; status: TimelineStatus; at: TimelineTime }`: something that
+happened at one moment.
+
+### `TimelineSpan`
+
+`{ lane; label; status: TimelineStatus; from: TimelineTime; to: TimelineTime }`:
+something that lasted. A span past the window is clipped to it in the drawing,
+and the list keeps its real times.
+
+### `TimelineStatus`
+
+`"ok" | "warning" | "error" | "unknown"`, drawn in the status colors good,
+warning, bad and unknown.
+
+### `TimelineTime`
+
+A `Date`, an ISO 8601 string or epoch milliseconds.
+
+### `heatStrip`
+
+`heatStrip(options: HeatStripOptions): string`. A one-row strip of cells with no
+axis, each colored on the theme's sequential ramp by its value; a sibling of
+`uptimeStrip`. A missing value is a dashed outline. The text alternative is
+generated from the values (count, first, last, lowest, highest, how many
+missing) unless `alt` is given, and each cell's hover details carry its value.
+Colors come in five steps, so the exact numbers are in the hover details and in
+[`heatStripTable`](#heatstriptable).
+
+### `HeatStripOptions`
+
+`values` (numbers, or `null` for no data), `label` or `alt` (one is required),
+`width` (default 240), `height` (default 24), `min` and `max` (the range the
+ramp spans; default the lowest and highest value, fix them to compare strips),
+`thresholds` (four ascending values, as in `heatmap`), `cellLabels` (hover names
+such as "Mon 14:00"; one per value), `formatValue`.
+
 ### `uptimeStrip`
 
 `uptimeStrip(options: UptimeStripOptions): string`. One tick per period;
@@ -273,6 +460,84 @@ hover text.
 ### `UptimeStatus`
 
 `"up" | "degraded" | "down" | "unknown"`.
+
+### Companion functions
+
+Every primitive offers its numbers as a data table and a summary sentence,
+through a companion function with the same options as the primitive:
+`sparklineTable`, `uptimeStripTable`, `progressRingTable`, `timelineTable` and
+`heatStripTable`. They are computed from the same validated values as the
+drawing (the primitive and its companion share one `prepare` step), so the table
+can never disagree with the picture, and they throw the same errors for the
+same bad options. The primitives themselves return exactly what they always
+did; the companions are separate, so a primitive used inline in a table cell or a
+sentence stays small, and a page that wants the table asks for it.
+
+```ts
+const options = { values: [3, 5, 4, 8], label: "Entries per year" };
+const strip = sparkline(options);
+const { summary, table, markup } = sparklineTable(options);
+// summary: "Entries per year: 4 values, from 3 to 8; lowest 3, highest 8."
+// markup: a <details> holding the table, in the figure's own markup
+```
+
+The summary is the generated sentence, the same one that is the primitive's
+text alternative when `alt` is not given (when only `alt` names a primitive
+there is nothing to generate from, and the summary is that `alt`). A missing
+value reads `no data` in these tables, because a blank cell is ambiguous to a
+screen reader.
+
+| Companion | Columns | One row per |
+|---|---|---|
+| `sparklineTable` | Position, the label (or "Value") | Value |
+| `uptimeStripTable` | Period, Status | Period |
+| `progressRingTable` | Measure, Value, Total, Percent | Ring (one row) |
+| `timelineTable` | Event, Lane, Status, Start, End | Event, in time order |
+| `heatStripTable` | Cell, Value, Ramp step | Cell |
+
+### `PrimitiveTable`
+
+What a companion returns: `{ summary: string; table: DataTable; markup: string }`.
+`markup` is the table in a closed disclosure (or visually hidden, per
+`PrimitiveTableOptions`), ready to put beside the primitive.
+
+### `PrimitiveTableOptions`
+
+`{ dataTable?: "details" | "visually-hidden" }`, the second argument of every
+companion: how `markup` shows the table, as on a figure.
+
+### `sparklineTable`
+
+`sparklineTable(options: SparklineOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+Positions and values.
+
+### `uptimeStripTable`
+
+`uptimeStripTable(options: UptimeStripOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+Each period, named as in its hover text, and its status; the summary has the
+counts and availability.
+
+### `progressRingTable`
+
+`progressRingTable(options: ProgressRingOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+Value, total and the real percentage.
+
+### `timelineTable`
+
+`timelineTable(options: TimelineOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+Every event with lane, status, start and end (blank for a point event), in the
+order of the timeline's plain list.
+
+### `heatStripTable`
+
+`heatStripTable(options: HeatStripOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+Each cell's value and its ramp step.
+
+### `dataTableBlock`
+
+`dataTableBlock(table: DataTable, caption: string, display?): string`. A data
+table as the markup a figure carries: a closed `<details>` (default) or visually
+hidden. `caption` names the table for assistive technology.
 
 ## Themes
 
@@ -321,6 +586,17 @@ validates the theme with `defineTheme` first. Labels printed on marks take the
 scheme's text or background color when it reaches 4.5:1, otherwise black or
 white.
 
+### `baseStylesheet`
+
+`baseStylesheet(): string`. The theme-free rules: layout, legend, data table,
+tooltip, focus ring and animation. They use the color and font properties
+below without defining them, so a site that defines those itself, or a theme
+generated elsewhere, needs no `Theme` object. `stylesheet(theme)` is the
+theme's properties, then these rules, then the gridline rules the theme asks
+for. The same text is the package's `enarratio/base.css` (written at build
+from this function), for sites that link a stylesheet instead of calling
+JavaScript. See [Custom properties](#custom-properties) for what a site sets.
+
 ### `StylesheetOptions`
 
 `{ colorScheme?: { dark?: string; light?: string } }`: selectors for sites
@@ -330,11 +606,88 @@ refuses.
 
 ### `defaultTheme`
 
-Enarratio's own theme: neutral surfaces, system fonts.
+From `enarratio/themes`. Enarratio's own theme: neutral surfaces, system fonts. The package's only theme;
+the gallery's example theme (`examples/themes/example.ts`) shows how to write another.
 
-### `dustinedwardsTheme`
+## Custom properties
 
-The theme of dustinedwards.info, and a worked example of a site theme.
+Charts contain no colors and no fixed sizes of their own: the markup refers to
+custom properties, and the base rules give each one a fallback. Set a property
+on `:root`, on any ancestor of a chart, or on one `figure` and it applies there.
+Set none and every chart looks exactly as it did before the property existed,
+so a theme can be as small as one property or as large as all of them.
+
+### Colors and fonts
+
+`stylesheet(theme)` defines these from a `Theme`, as `light-dark()` pairs
+following the page's `color-scheme`. A site using `enarratio/base.css` defines
+them itself. They have no fallback: undefined, a rule using one is ignored.
+
+| Property | Meaning |
+|---|---|
+| `--enarratio-background`, `--enarratio-text`, `--enarratio-text-muted` | Page, text and muted text colors |
+| `--enarratio-grid`, `--enarratio-focus` | Gridlines and rules; the focus ring |
+| `--enarratio-series-1` to `--enarratio-series-8` | The eight series colors, in order |
+| `--enarratio-series-text-1` to `-8` | The label color that reads best on each series color |
+| `--enarratio-sequential-1` to `--enarratio-sequential-5` | The five-step ramp, least to most |
+| `--enarratio-sequential-text-1` to `-5` | The label color that reads best on each ramp step |
+| `--enarratio-status-good`, `-warning`, `-bad`, `-unknown` | Status colors |
+| `--enarratio-font`, `--enarratio-font-numeric` | Body and numeric font stacks |
+
+Gridlines are the one theme choice that is not a property: hide a direction
+with `.enarratio [data-enarratio-mark="x-grid"] { display: none; }` (or
+`y-grid`).
+
+### Sizes, weights, radii and timings
+
+Each has the fallback shown, which is what Enarratio draws when it is unset.
+A test keeps this table and the stylesheet in step.
+
+| Property | Fallback | Controls |
+|---|---|---|
+| `--enarratio-font-size` | `1rem` | Text size of a figure; the other text sizes are relative to it |
+| `--enarratio-font-size-mark` | `12px` | Text inside the drawing: tick labels, direct labels |
+| `--enarratio-font-size-small` | `0.875em` | Caption, legend and data table |
+| `--enarratio-font-size-tooltip` | `0.8125rem` | Tooltip text |
+| `--enarratio-font-weight-title` | `600` | The visible title |
+| `--enarratio-font-weight-emphasis` | `600` | A pressed legend button |
+| `--enarratio-line-height-tooltip` | `1.35` | Tooltip lines |
+| `--enarratio-space` | `0.5em` | Gap between title, legend, chart, caption and data table |
+| `--enarratio-gap` | `1em` | Between legend entries |
+| `--enarratio-gap-row` | `0.25em` | Between wrapped legend rows |
+| `--enarratio-gap-inline` | `0.4em` | Between a swatch and its label |
+| `--enarratio-padding-button` | `0.125em 0.25em` | Legend toggle buttons |
+| `--enarratio-cell-padding` | `0.2em 0.75em 0.2em 0` | Data table cells |
+| `--enarratio-border-width` | `1px` | Table rules, legend buttons, tooltip |
+| `--enarratio-radius` | `0.25em` | Legend toggle buttons |
+| `--enarratio-radius-swatch` | `0.15em` | Legend swatches |
+| `--enarratio-radius-tooltip` | `0.3em` | The tooltip |
+| `--enarratio-swatch-size` | `0.8em` | Legend swatches |
+| `--enarratio-tooltip-max-width` | `18em` | The tooltip |
+| `--enarratio-tooltip-padding` | `0.35em 0.6em` | The tooltip |
+| `--enarratio-tooltip-shadow` | `0 2px 8px rgb(0 0 0 / 15%)` | The tooltip |
+| `--enarratio-z-tooltip` | `10` | Stacking of the tooltip |
+| `--enarratio-opacity-dimmed` | `0.25` | Marks outside the current filter |
+| `--enarratio-opacity-brush` | `0.15` | Fill of a brushed range |
+| `--enarratio-focus-width-inner` | `5px` | Inner (background) ring on a focused mark |
+| `--enarratio-focus-width-outer` | `2.5px` | Outer (focus color) ring on a focused mark |
+| `--enarratio-focus-outline-width` | `3px` | Outline on a focused chart or legend button |
+| `--enarratio-focus-outline-offset` | `2px` | Distance of that outline |
+| `--enarratio-timeline-list-indent` | `1.25em` | Indent of the timeline's plain list on narrow screens |
+| `--enarratio-duration-hover` | `150ms` | Dimming and un-dimming |
+| `--enarratio-duration-grow` | `600ms` | Bars growing in |
+| `--enarratio-duration-fade` | `500ms` | Dots, areas and cells fading in |
+| `--enarratio-duration-draw` | `800ms` | Lines drawing in |
+| `--enarratio-ease-grow` | `cubic-bezier(0.2, 0.7, 0.3, 1)` | Easing of bars growing in |
+| `--enarratio-ease-out` | `ease-out` | Easing of the other timings |
+
+Not properties, on purpose: the 30rem minimum width of a wide drawing (the
+same threshold decides whether a figure scrolls, in code, from the drawing's
+`width`), the 30rem below which a timeline gives way to its plain list (a
+container query cannot use a property), and the geometry written into the SVG itself (stroke widths, tick
+lengths, the size of direct labels), which is part of each chart's drawing and
+cannot be set from CSS. Animation stops under `prefers-reduced-motion` whatever
+the durations are.
 
 ## Color checks
 

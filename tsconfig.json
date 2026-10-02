@@ -23,7 +23,11 @@
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "paths": {
+      "#document": ["./src/render/document.ts"],
       "enarratio": ["./src/index.ts"],
+      "enarratio/plot": ["./src/plot/index.ts"],
+      "enarratio/science": ["./src/science/index.ts"],
+      "enarratio/themes": ["./src/themes/index.ts"],
       "enarratio/enhance": ["./src/enhance/index.ts"]
     }
   },

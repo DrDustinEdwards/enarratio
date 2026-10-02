@@ -56,6 +56,8 @@ the gallery.
 
 ## The dustinedwards.info theme
 
+(Removed in 0.2.0: see [0016](0016-remove-the-site-theme.md).)
+
 Its first six series colors are the site's ratified chart ladder (cadet,
 purple, claret, sage, gold, rust), in the same order, with the site's light
 and dark values. Slots seven and eight, and the sequential ramp, come from the

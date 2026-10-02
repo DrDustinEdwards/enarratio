@@ -9,7 +9,9 @@
 import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { checkTheme, defaultTheme, dustinedwardsTheme, stylesheet, type Theme } from "enarratio";
+import { checkTheme, stylesheet, type Theme } from "enarratio";
+import { defaultTheme } from "enarratio/themes";
+import { exampleTheme } from "../examples/themes/example.ts";
 
 const root = resolve(import.meta.dirname, "..");
 const outDir = resolve(process.argv[2] ?? join(root, "site", "dist"));
@@ -29,9 +31,11 @@ const escapeText = (s: string): string =>
 const ORDER = [
   "stacked-bar",
   "years",
+  "runs",
   "grouped-bar",
   "horizontal-bar",
   "line",
+  "forecast",
   "area",
   "scatter",
   "heatmap",
@@ -40,6 +44,9 @@ const ORDER = [
   "genome",
   "sparkline",
   "primitives",
+  "heat-strip",
+  "timeline",
+  "primitive-tables",
 ];
 
 async function loadExamples(): Promise<Example[]> {
@@ -90,6 +97,7 @@ section.example h2 { margin: 0 0 16px; font-size: 1.125rem; }
 .report { font-size: 0.875rem; }
 .primitives { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; }
 .report li { margin: 2px 0; }
+.primitive-tables p { margin: 8px 0; }
 `;
 
 /** A page's stylesheet: the theme, the page's colors from the theme, and the page layout. */
@@ -155,7 +163,7 @@ mkdirSync(outDir, { recursive: true });
 /** Each page's theme, file and stylesheet. */
 const pages: [Theme, string, string][] = [
   [defaultTheme, "index.html", "index.css"],
-  [dustinedwardsTheme, "dustinedwards.html", "dustinedwards.css"],
+  [exampleTheme, "example.html", "example.css"],
 ];
 /**
  * The address a page is linked at: the host (Cloudflare static assets) serves index.html at the

@@ -77,7 +77,7 @@ function compare(name: string, actual: Uint8Array): string | null {
 
 const pages = [
   ["default", "index.html"],
-  ["dustinedwards", "dustinedwards.html"],
+  ["example", "example.html"],
 ] as const;
 const schemes = ["light", "dark"] as const;
 
@@ -89,7 +89,7 @@ describe.skipIf(!hasImages && !update).each(pages)("%s theme", (theme, file) => 
     const problems: string[] = [];
     for (const section of sections) {
       const id = await section.evaluate((el) => el.getAttribute("data-example") ?? "");
-      const target = (await section.$("figure, .primitives, svg")) ?? section;
+      const target = (await section.$("figure, .primitives, .primitive-tables, svg")) ?? section;
       const shot = await target.screenshot({ type: "png" });
       const name = `${theme}-${scheme}-${id}`;
       const problem = compare(name, shot);

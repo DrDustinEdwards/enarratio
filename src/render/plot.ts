@@ -5,15 +5,9 @@
  */
 
 import * as Plot from "@observablehq/plot";
-import { parseHTML } from "linkedom";
+import { createDocument } from "#document";
 import { escapeHtml } from "../html.js";
-
-/** A document for Plot to draw into. linkedom, because it runs in Node, Workers, Deno and Bun. */
-function createDocument(): Document {
-  const { document } = parseHTML("<!doctype html><html><body></body></html>");
-  // linkedom implements the subset of the DOM that Plot and Enarratio use; its types differ.
-  return document as unknown as Document;
-}
+import type { ScaleDescription } from "./figure.js";
 
 /** What the enhancement layer needs to know about one drawn datum. */
 export interface MarkDatum {
@@ -85,13 +79,6 @@ export function tag(el: Element, datum: MarkDatum): void {
   if (datum.series !== undefined) el.setAttribute("data-enarratio-series", datum.series);
   if (datum.column !== undefined) el.setAttribute("data-enarratio-col", String(datum.column));
   if (datum.row !== undefined) el.setAttribute("data-enarratio-row", String(datum.row));
-}
-
-/** A scale as the enhancement layer needs it to turn a pointer position back into data. */
-export interface ScaleDescription {
-  readonly type: string;
-  readonly domain: readonly (number | string)[];
-  readonly range: readonly number[];
 }
 
 const NUMBER = /-?\d+\.\d{3,}(?:e-?\d+)?/g;

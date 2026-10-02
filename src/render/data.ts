@@ -129,3 +129,58 @@ export function requireSize(kind: string, name: string, value: number | undefine
     throw new Error(`${kind}: ${name} must be a positive number, is ${value}`);
   }
 }
+
+/** Milliseconds in a UTC day. */
+export const DAY = 86_400_000;
+
+/**
+ * Dates made at local midnight (`new Date(2025, 0, 6)`) mean a calendar date, but east of UTC
+ * that instant falls on the previous UTC day. When every Date is at local midnight and not at
+ * UTC midnight, each is moved to UTC midnight of its local date (A3).
+ */
+export function calendarDates(dates: Date[]): Date[] {
+  const localMidnight = dates.every(
+    (d) =>
+      d.getHours() === 0 &&
+      d.getMinutes() === 0 &&
+      d.getSeconds() === 0 &&
+      d.getMilliseconds() === 0,
+  );
+  const utcMidnight = dates.every((d) => d.getTime() % DAY === 0);
+  if (!localMidnight || utcMidnight) return dates;
+  return dates.map((d) => new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())));
+}
+
+/** The step (1 to 5) of the sequential ramp a value falls in, given four ascending thresholds. */
+export function rampStep(value: number, thresholds: readonly number[]): number {
+  let step = 1;
+  for (const t of thresholds) if (value >= t) step += 1;
+  return step;
+}
+
+/**
+ * Four ascending thresholds splitting `min` to `max` into the ramp's five steps: the caller's, or
+ * equal intervals. Flat data still gets ascending thresholds, so every value lands in step 1.
+ */
+export function rampThresholds(
+  kind: string,
+  min: number,
+  max: number,
+  given: readonly number[] | undefined,
+): readonly number[] {
+  const span = max - min || 1;
+  const thresholds = given ?? [1, 2, 3, 4].map((k) => min + (span * k) / 5);
+  for (let i = 1; i < thresholds.length; i += 1) {
+    if ((thresholds[i] as number) <= (thresholds[i - 1] as number)) {
+      throw new Error(`${kind}: thresholds must ascend`);
+    }
+  }
+  return thresholds;
+}
+
+/** An instant as `2026-01-05 14:30 UTC` (seconds only when not zero). */
+export function formatInstant(date: Date): string {
+  const pad = (n: number): string => String(n).padStart(2, "0");
+  const seconds = date.getUTCSeconds() ? `:${pad(date.getUTCSeconds())}` : "";
+  return `${date.toISOString().slice(0, 10)} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}${seconds} UTC`;
+}

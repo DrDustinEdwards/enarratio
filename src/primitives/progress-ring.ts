@@ -1,5 +1,6 @@
 import { element, escapeHtml } from "../html.js";
 import { type SeriesColor, slotStyle } from "../render/figure.js";
+import { type PrimitiveTable, type PrimitiveTableOptions, primitiveTable } from "./companion.js";
 
 /** Options for {@link progressRing}. */
 export interface ProgressRingOptions {
@@ -26,14 +27,24 @@ export interface ProgressRingOptions {
 
 const round = (n: number): number => Math.round(n * 100) / 100;
 
-/**
- * A ring that fills clockwise from the top to show progress toward a total, with the percentage
- * in the middle. Its text alternative states the label, the value and the total.
- *
- * @example
- * progressRing({ value: 7, max: 12, label: "Chapters drafted" });
- */
-export function progressRing(options: ProgressRingOptions): string {
+/** Everything the ring, its text alternative and its companion table are computed from. */
+export interface ProgressRingValues {
+  readonly value: number;
+  readonly max: number;
+  /** The share of the ring filled, from 0 to 1 (a value past `max` fills it). */
+  readonly fraction: number;
+  /** The real percentage, which may pass 100. */
+  readonly percent: number;
+  readonly size: number;
+  readonly thickness: number;
+  readonly subject: string;
+  /** The sentence generated from the label and values, or "" when only `alt` names the ring. */
+  readonly summary: string;
+  readonly alt: string;
+}
+
+/** Validates the options and computes the numbers every part of a progress ring is made from. */
+export function prepareProgressRing(options: ProgressRingOptions): ProgressRingValues {
   const max = options.max ?? 1;
   const { value } = options;
   if (!Number.isFinite(max) || max <= 0)
@@ -58,15 +69,38 @@ export function progressRing(options: ProgressRingOptions): string {
   // The ring can only be full, but the number says how far past the total the value is (A7).
   const fraction = Math.min(1, value / max);
   const percent = Math.round((value / max) * 100);
+  const over = value > max ? ", more than the total" : "";
+  const summary =
+    subject === ""
+      ? ""
+      : max === 1
+        ? `${subject}: ${percent}%${over}`
+        : `${subject}: ${value} of ${max} (${percent}%${over})`;
+  return {
+    value,
+    max,
+    fraction,
+    percent,
+    size,
+    thickness,
+    subject,
+    summary,
+    alt: given || summary,
+  };
+}
+
+/**
+ * A ring that fills clockwise from the top to show progress toward a total, with the percentage
+ * in the middle. Its text alternative states the label, the value and the total.
+ *
+ * @example
+ * progressRing({ value: 7, max: 12, label: "Chapters drafted" });
+ */
+export function progressRing(options: ProgressRingOptions): string {
+  const { fraction, percent, size, thickness, alt } = prepareProgressRing(options);
   const radius = (size - thickness) / 2;
   const circumference = 2 * Math.PI * radius;
   const c = size / 2;
-  const over = value > max ? ", more than the total" : "";
-  const alt =
-    given ||
-    (max === 1
-      ? `${subject}: ${percent}%${over}`
-      : `${subject}: ${value} of ${max} (${percent}%${over})`);
   const showValue = options.showValue ?? size >= 36;
 
   return element(
@@ -121,5 +155,29 @@ export function progressRing(options: ProgressRingOptions): string {
           )
         : "",
     ].join(""),
+  );
+}
+
+/**
+ * A progress ring's numbers as a table (value, total and percentage) and a summary sentence,
+ * computed from the same values as the ring so the two cannot disagree. Takes the same options as
+ * {@link progressRing}. Without `label` the summary is the given `alt`.
+ *
+ * @example
+ * const { summary } = progressRingTable({ value: 7, max: 12, label: "Chapters drafted" });
+ */
+export function progressRingTable(
+  options: ProgressRingOptions,
+  display?: PrimitiveTableOptions,
+): PrimitiveTable {
+  const p = prepareProgressRing(options);
+  return primitiveTable(
+    p.summary || p.alt,
+    {
+      columns: ["Measure", "Value", "Total", "Percent"],
+      rows: [[p.subject || "Progress", String(p.value), String(p.max), `${p.percent}%`]],
+    },
+    p.subject || p.alt,
+    display,
   );
 }

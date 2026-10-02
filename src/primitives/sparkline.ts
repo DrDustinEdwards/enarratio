@@ -1,6 +1,7 @@
 import { element, escapeHtml } from "../html.js";
 import { defaultFormat, maxOf, minOf } from "../render/data.js";
 import { type SeriesColor, slotStyle } from "../render/figure.js";
+import { type PrimitiveTable, type PrimitiveTableOptions, primitiveTable } from "./companion.js";
 
 /** Options for {@link sparkline}. */
 export interface SparklineOptions {
@@ -25,14 +26,23 @@ const INSET = 2.5;
 
 const round = (n: number): number => Math.round(n * 100) / 100;
 
-/**
- * A word-sized line chart for a trend beside a number, without axes. Its text alternative is
- * generated from the data (count, first, last, lowest, highest) unless `alt` is given.
- *
- * @example
- * sparkline({ values: [3, 5, 4, 8, 11], label: "Entries per year" });
- */
-export function sparkline(options: SparklineOptions): string {
+/** Everything the sparkline, its text alternative and its companion table are computed from. */
+export interface SparklineValues {
+  readonly values: readonly (number | null)[];
+  /** The values that are not gaps, in order. */
+  readonly present: readonly number[];
+  readonly min: number;
+  readonly max: number;
+  readonly width: number;
+  readonly height: number;
+  readonly format: (value: number) => string;
+  /** The sentence generated from the data: count, first, last, lowest, highest. */
+  readonly summary: string;
+  readonly alt: string;
+}
+
+/** Validates the options and computes the numbers every part of a sparkline is made from. */
+export function prepareSparkline(options: SparklineOptions): SparklineValues {
   const { values } = options;
   const width = options.width ?? 120;
   const height = options.height ?? 32;
@@ -52,9 +62,32 @@ export function sparkline(options: SparklineOptions): string {
   });
   const present = values.filter((v): v is number => v !== null);
   if (present.length === 0) throw new Error("sparkline: needs at least one value");
-
   const min = minOf(present);
   const max = maxOf(present);
+  const summary = `${options.label ? `${options.label}: ` : ""}${defaultFormat(values.length)} values, from ${format(present[0] as number)} to ${format(present[present.length - 1] as number)}; lowest ${format(min)}, highest ${format(max)}.`;
+  return {
+    values,
+    present,
+    min,
+    max,
+    width,
+    height,
+    format,
+    summary,
+    alt: options.alt?.trim() || summary,
+  };
+}
+
+/**
+ * A word-sized line chart for a trend beside a number, without axes. Its text alternative is
+ * generated from the data (count, first, last, lowest, highest) unless `alt` is given.
+ *
+ * @example
+ * sparkline({ values: [3, 5, 4, 8, 11], label: "Entries per year" });
+ */
+export function sparkline(options: SparklineOptions): string {
+  const { values, width, height, min, max, alt } = prepareSparkline(options);
+
   const xOf = (i: number): number =>
     round(
       values.length === 1 ? width / 2 : INSET + (i * (width - 2 * INSET)) / (values.length - 1),
@@ -86,11 +119,8 @@ export function sparkline(options: SparklineOptions): string {
         .join("")
     : "";
 
-  const firstValue = present[0] as number;
   const lastIndex = values.length - 1;
   const lastValue = values[lastIndex];
-  const generated = `${options.label ? `${options.label}: ` : ""}${defaultFormat(values.length)} values, from ${format(firstValue)} to ${format(present[present.length - 1] as number)}; lowest ${format(min)}, highest ${format(max)}.`;
-  const alt = options.alt?.trim() || generated;
 
   const parts = [
     element("title", {}, escapeHtml(alt)),
@@ -134,5 +164,31 @@ export function sparkline(options: SparklineOptions): string {
       style: slotStyle(options.color ? new Map([[1, options.color]]) : undefined),
     },
     parts.join(""),
+  );
+}
+
+/**
+ * A sparkline's numbers as a table (position and value, `no data` for a gap) and a summary
+ * sentence, computed from the same values as the drawing so the two cannot disagree. Takes the
+ * same options as {@link sparkline}. The summary is the generated description even when `alt`
+ * is given.
+ *
+ * @example
+ * const { summary, markup } = sparklineTable({ values: [3, 5, 4], label: "Entries per year" });
+ */
+export function sparklineTable(
+  options: SparklineOptions,
+  display?: PrimitiveTableOptions,
+): PrimitiveTable {
+  const p = prepareSparkline(options);
+  const name = options.label?.trim() || "Value";
+  return primitiveTable(
+    p.summary,
+    {
+      columns: ["Position", name],
+      rows: p.values.map((v, i) => [String(i + 1), v === null ? "no data" : p.format(v)]),
+    },
+    options.label?.trim() || p.alt,
+    display,
   );
 }

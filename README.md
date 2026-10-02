@@ -13,10 +13,13 @@ An optional enhancement layer adds hover details, keyboard navigation,
 click-to-filter events and range brushing on top.
 
 It covers the charts a website needs (bars, lines, areas, scatter plots,
-heatmaps, networks, sparklines, progress rings and uptime strips) and the
+heatmaps, networks, with forecast bands and time axes), the small primitives a
+dashboard needs (sparklines, progress rings, uptime and heat strips, event
+timelines) and the
 figures a laboratory needs, starting with antibody titer plots and genome
 tracks. Charts are built on [Observable Plot](https://observablehq.com/plot/)
-and [d3-force](https://d3js.org/d3-force), and return plain HTML strings, so
+and [d3-force](https://d3js.org/d3-force) (optional peer dependencies, installed
+only for the charts that use them), and return plain HTML strings, so
 Enarratio works with any server framework. It is tested on Node.js 20, 22 and 24
 and runs on Cloudflare Workers (the gallery's first site renders charts in a
 Worker); Deno and Bun should work, since it uses only standard modules, but are
@@ -60,7 +63,23 @@ websites who want charts that:
 npm install enarratio@next
 ```
 
-Enarratio is ESM only and needs Node.js 20 or later (or any runtime with
+That is the core: the theme, the stylesheet, the color checks, and the small
+primitives (sparkline, progress ring, uptime strip, and the rest), with no
+runtime dependencies. The charts are separate entry points, each with the
+packages it needs as optional peer dependencies, so a site installs only what
+it draws:
+
+| Import | Holds | Also install |
+|---|---|---|
+| `enarratio` | Core and primitives | Nothing |
+| `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` | `@observablehq/plot linkedom` |
+| `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | `@observablehq/plot d3-force linkedom` |
+| `enarratio/enhance` | Browser interaction | Nothing |
+| `enarratio/themes` | `defaultTheme` | Nothing |
+| `enarratio/base.css` | The theme-free stylesheet | Nothing |
+
+(`linkedom` is dropped from browser bundles, which use the browser's own
+document.) Enarratio is ESM only and needs Node.js 20 or later (or any runtime with
 standard ES modules). TypeScript types are included.
 
 ## Five-minute start
@@ -69,7 +88,9 @@ standard ES modules). TypeScript types are included.
 plot, and `alt`: a sentence saying what the chart shows.
 
 ```ts
-import { barChart, defaultTheme, stylesheet } from "enarratio";
+import { stylesheet } from "enarratio";
+import { barChart } from "enarratio/plot";
+import { defaultTheme } from "enarratio/themes";
 
 const entries = [
   { year: 2022, type: "Publications" },
@@ -129,7 +150,7 @@ Without a bundler, serve `node_modules/enarratio/dist/enhance/index.js` as a
 file (it has no imports of its own) and load it with
 `<script type="module">import { enhance } from "/enhance.js"; enhance();</script>`,
 or from a CDN such as
-`https://cdn.jsdelivr.net/npm/enarratio@0.1.0-alpha.6/dist/enhance/index.js`.
+`https://cdn.jsdelivr.net/npm/enarratio@0.2.0/dist/enhance/index.js`.
 
 To redraw a chart in place, pass new server markup to `update()` on the chart
 `enhance()` returns. That markup should come from Enarratio: it is sanitized
@@ -141,19 +162,52 @@ all into `site/dist`.
 
 ## Charts
 
-| Function | Draws |
-|---|---|
-| `barChart` | Bars, stacked or grouped, vertical or horizontal; counts rows when no value is given |
-| `lineChart` | Lines over time or any number, with gaps, reference lines, event markers, direct labels, log y |
-| `areaChart` | Stacked areas over time |
-| `scatterPlot` | Points on linear or log axes, symbols per series, optional regression with 95% band |
-| `heatmap` | A grid on the theme's sequential ramp, with printed values and labelled bins |
-| `networkChart` | A force-directed network laid out on the server, deterministic |
-| `titerPlot` | Titers on a dilution axis with geometric mean, 95% CI and limit of detection |
-| `genomeTrack` | Features to scale on a nucleotide axis, arrows by strand, overlaps in lanes |
-| `sparkline` | A word-sized trend line |
-| `progressRing` | Progress toward a total |
-| `uptimeStrip` | Up, degraded, down or unmeasured, one tick per period |
+| Function | Import | Draws |
+|---|---|---|
+| `barChart` | `enarratio/plot` | Bars, stacked or grouped, vertical or horizontal, on a category or a time axis; counts rows when no value is given |
+| `lineChart` | `enarratio/plot` | Lines over time or any number, with gaps, reference lines, event markers, direct labels, log y, and a forecast band with the line dashed after a chosen x |
+| `areaChart` | `enarratio/plot` | Stacked areas over time |
+| `scatterPlot` | `enarratio/plot` | Points on linear or log axes, symbols per series, optional regression with 95% band |
+| `heatmap` | `enarratio/plot` | A grid on the theme's sequential ramp, with printed values and labelled bins |
+| `networkChart` | `enarratio/science` | A force-directed network laid out on the server, deterministic |
+| `titerPlot` | `enarratio/science` | Titers on a dilution axis with geometric mean, 95% CI and limit of detection |
+| `genomeTrack` | `enarratio/science` | Features to scale on a nucleotide axis, arrows by strand, overlaps in lanes |
+| `sparkline` | `enarratio` | A word-sized trend line |
+| `progressRing` | `enarratio` | Progress toward a total |
+| `uptimeStrip` | `enarratio` | Up, degraded, down or unmeasured, one tick per period |
+| `heatStrip` | `enarratio` | A one-row strip on the sequential ramp, one cell per value |
+| `timeline` | `enarratio` | Lanes for sites or agents, spans and point events over a time window, status by color and shape |
+
+Forecasts are computed by you and only drawn by Enarratio: give `lineChart` the
+bounds as fields and a boundary, and it shades the band, dashes the line after
+the boundary, draws forecast points hollow, and marks forecast rows in the data
+table. A time axis on `barChart` needs no pre-formatted labels:
+
+```ts
+import { barChart, lineChart } from "enarratio/plot";
+
+lineChart({
+  data: days, // { day, visits, lower, upper }, the last rows computed by your model
+  x: "day",
+  y: "visits",
+  band: { lower: "lower", upper: "upper", label: "95% interval" },
+  forecastFrom: "2026-02-23",
+  alt: "Daily visits, with a one-week forecast and its 95% interval from 24 February.",
+});
+
+barChart({
+  data: runs, // { at: "2026-06-09T08:00Z", site }, one row per run
+  x: "at",
+  xType: "time", // one bar per day, quiet days included
+  series: "site",
+  alt: "Analysis runs per day at three sites.",
+});
+```
+
+Every primitive can also state its numbers: `sparklineTable`,
+`uptimeStripTable`, `progressRingTable`, `timelineTable` and `heatStripTable`
+return a table and a summary sentence computed from the same values as the
+drawing, for pages that want them beside it.
 
 Every function is documented in the [API reference](docs/api.md) and in its
 TypeScript declarations. The chart types still to come, and the order they
@@ -167,7 +221,8 @@ with eight series colors, a five-step sequential ramp and status colors.
 those properties, so one server render serves every theme and both schemes.
 
 ```ts
-import { checkTheme, defaultTheme, defineTheme, stylesheet } from "enarratio";
+import { checkTheme, defineTheme, stylesheet } from "enarratio";
+import { defaultTheme } from "enarratio/themes";
 
 const theme = defineTheme({
   ...defaultTheme,
@@ -182,9 +237,19 @@ const report = checkTheme(theme);
 // protanopia, deuteranopia or tritanopia.
 ```
 
+A site whose colors and type already live in its own design tokens can skip the
+`Theme` object: link `enarratio/base.css` (or call `baseStylesheet()`), define the
+color and font properties yourself, and tune any size, weight, radius or animation
+timing the same way, for example `--enarratio-font-size-mark` or
+`--enarratio-duration-grow`. Every property has today's value as its fallback, so
+setting none changes nothing. The full list is in the
+[API reference](docs/api.md#custom-properties).
+
 Any chart can override a series color with `colors: { Talks: "#8a4a1b" }` or a
-light and dark pair. Two themes ship with the package: `defaultTheme`, and
-`dustinedwardsTheme`, the theme of the first site to use Enarratio.
+light and dark pair. One theme ships with the package, `defaultTheme` in `enarratio/themes`. The
+gallery's second page uses a neutral, heavily commented example theme,
+[examples/themes/example.ts](examples/themes/example.ts), written to be copied
+and edited.
 
 ## Accessibility
 

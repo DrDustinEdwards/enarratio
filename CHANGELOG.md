@@ -5,7 +5,105 @@ All notable changes to Enarratio (named Abscissa until 0.1.0-alpha.7) are record
 [Semantic Versioning](https://semver.org/). Before 1.0.0, a minor version may
 change the public API; every such change is listed here.
 
-## [Unreleased]
+## [0.2.0] - 2026-10-02
+
+Design records 0011 to 0016 explain each decision.
+
+### Breaking
+
+- **The root import is core only.** Every chart moved to a subpath; markup,
+  class names, custom properties, options and return values are unchanged, so
+  stored rendered charts stay valid and only import lines change:
+
+  ```ts
+  // before
+  import { barChart, lineChart, areaChart, scatterPlot, heatmap } from "enarratio";
+  // after
+  import { barChart, lineChart, areaChart, scatterPlot, heatmap } from "enarratio/plot";
+
+  // before
+  import { genomeTrack, titerPlot, geometricSummary, networkChart } from "enarratio";
+  // after
+  import { genomeTrack, titerPlot, geometricSummary, networkChart } from "enarratio/science";
+
+  // before
+  import { defaultTheme } from "enarratio";
+  // after
+  import { defaultTheme } from "enarratio/themes";
+  ```
+
+  The types moved with their functions (`BarChartOptions` with `barChart`,
+  `LineChartOptions`, `SeriesChartOptions`, `ReferenceLine` and `EventMarker` with
+  `lineChart`, `GenomeFeature` with `genomeTrack`, and so on). `sparkline`,
+  `progressRing`, `uptimeStrip`, `stylesheet`, `defineTheme`, `checkTheme`, the
+  color functions, the theme types and `enhance` stay where they were.
+- **`@observablehq/plot`, `d3-force` and `linkedom` are optional peer
+  dependencies, not dependencies.** Install what the entries you import need:
+  `enarratio/plot` needs `@observablehq/plot` and `linkedom`; `enarratio/science`
+  needs `@observablehq/plot`, `d3-force` and `linkedom`. A site using only core
+  installs none of them. The versions tested are ranges `^0.6.17`, `^3.0.0` and
+  `^0.18.13`.
+
+### Changed
+
+- `stylesheet()` output: the base rules now use `var(--enarratio-*, <value>)`
+  for every size, weight, radius and timing, with a leading comment, the
+  timeline's rules and `max-width: 100%; height: auto` on `svg.enarratio`.
+  Computed values are unchanged for any page that sets no property, so no stored
+  markup or image changed; a primitive wider than its container now shrinks to
+  fit instead of overflowing. This is the only default that changed.
+- `barChart`'s `x` field may also be a `Date` when `xType` is `"time"`.
+- The gallery's second page is `/example` (was `/dustinedwards`), and its
+  rendering and image tests use it.
+- New options' defaults: `interval: "day"`, `forecastLabel: "Forecast"`,
+  `timeline` `width: 640`, `heatStrip` `width: 240` and `height: 24`. A band is
+  drawn at 18% opacity behind its line. A missing value reads `no data` in the
+  companion tables (chart tables keep blank cells).
+
+### Removed
+
+- **`dustinedwardsTheme`**, with its export and its API section, because
+  dustinedwards.info is being redesigned (design record 0016). A site that used
+  it should keep its own theme object; the removed theme was a `Theme` like any
+  other. The gallery's second page, `/dustinedwards`, is now `/example`, a
+  neutral worked example theme (`examples/themes/example.ts`).
+
+### Added
+
+- `lineChart` `band` (`lower` and `upper` fields drawn as a shaded area behind
+  each line), `forecastFrom` (the line dashed after an x, points hollow, a
+  labelled rule at the boundary) and `forecastLabel`. The data table marks
+  forecast rows in a `Forecast` column and carries the band's bounds as
+  columns. The caller computes the forecast; Enarratio only draws it (design
+  record 0013).
+- `barChart` time axis: `xType: "time"` with `interval` (`hour`, `day`, `week`,
+  `month`, `year`) and `formatX`. One bar slot per interval from the first row
+  to the last, labelled automatically; works for stacked, grouped and
+  horizontal bars.
+- `timeline` (core): an event timeline with a lane for each site or agent,
+  spans and point events over a time window, status by color and shape, and a
+  plain list that replaces the drawing under 30rem of room. `heatStrip` (core):
+  a one-row, no-axis strip on the sequential ramp, a sibling of `uptimeStrip`
+  (design record 0014).
+- Companion functions for every primitive: `sparklineTable`, `uptimeStripTable`,
+  `progressRingTable`, `timelineTable` and `heatStripTable`, each taking the
+  primitive's options and returning `{ summary, table, markup }` computed from
+  the same values as the drawing, so the table cannot disagree with the picture.
+  The primitives return exactly what they did (design record 0015). Also
+  `dataTableBlock`, the table markup figures carry.
+- `enarratio/plot`, `enarratio/science` and `enarratio/themes` entry points.
+- `baseStylesheet()` and `enarratio/base.css`: the theme-free rules.
+- Every fixed size, weight, radius and animation timing in the CSS is a custom
+  property with today's value as its fallback (`--enarratio-font-size-mark`,
+  `--enarratio-font-size`, `--enarratio-radius`, `--enarratio-duration-*` and
+  the rest); the contract is in docs/api.md and design record 0011. Rendered
+  output is unchanged for anyone who sets none.
+- Core exports the pieces charts are built from: `escapeHtml`, `element`,
+  `figure`, `validateFigure`, `slotStyle` and their types.
+- A `browser` export condition drops `linkedom` where a real document exists;
+  Worker, Node.js, Deno and Bun builds keep it (design record 0012).
+- CI: `npm run size` reports each entry's gzipped size and fails if core gains
+  a runtime dependency.
 
 ## [0.1.0-alpha.8] - 2026-09-29
 

@@ -14,7 +14,7 @@ mkdirSync(resolve(outDir), { recursive: true });
 
 const harness = await startHarness();
 try {
-  for (const file of ["index.html", "dustinedwards.html"]) {
+  for (const file of ["index.html", "example.html"]) {
     for (const scheme of ["light", "dark"] as const) {
       const page = await harness.open(file, scheme);
       const name = `gallery-${file.replace(".html", "")}-${scheme}.png`;

@@ -1,6 +1,6 @@
 {
   "name": "enarratio",
-  "version": "0.1.0-alpha.8",
+  "version": "0.2.0",
   "description": "Accessible, server-rendered charts and scientific figures for the web",
   "keywords": [
     "charts",
@@ -28,11 +28,35 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./base.css": "./dist/base.css",
+    "./plot": {
+      "types": "./dist/plot/index.d.ts",
+      "default": "./dist/plot/index.js"
+    },
+    "./science": {
+      "types": "./dist/science/index.d.ts",
+      "default": "./dist/science/index.js"
+    },
     "./enhance": {
       "types": "./dist/enhance/index.d.ts",
       "default": "./dist/enhance/index.js"
     },
+    "./themes": {
+      "types": "./dist/themes/index.d.ts",
+      "default": "./dist/themes/index.js"
+    },
     "./package.json": "./package.json"
+  },
+  "imports": {
+    "#document": {
+      "node": "./dist/render/document.js",
+      "workerd": "./dist/render/document.js",
+      "worker": "./dist/render/document.js",
+      "edge-light": "./dist/render/document.js",
+      "deno": "./dist/render/document.js",
+      "browser": "./dist/render/document.browser.js",
+      "default": "./dist/render/document.js"
+    }
   },
   "files": [
     "dist"
@@ -45,7 +69,7 @@
     "tag": "next"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && node scripts/build-css.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "check": "npm run typecheck && npm run lint && npm test",
     "lint": "biome check .",
@@ -54,19 +78,34 @@
     "gallery": "node scripts/gallery.ts",
     "deploy:gallery": "npm run build && npm run gallery && npx --yes wrangler@4.143.0 deploy",
     "test:browser": "vitest run --config vitest.browser.config.ts",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "size": "node scripts/size-check.mjs"
   },
-  "dependencies": {
-    "@observablehq/plot": "0.6.17",
-    "d3-force": "3.0.0",
-    "linkedom": "0.18.13"
+  "peerDependencies": {
+    "@observablehq/plot": "^0.6.17",
+    "d3-force": "^3.0.0",
+    "linkedom": "^0.18.13"
+  },
+  "peerDependenciesMeta": {
+    "@observablehq/plot": {
+      "optional": true
+    },
+    "d3-force": {
+      "optional": true
+    },
+    "linkedom": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
+    "@observablehq/plot": "0.6.17",
     "@types/d3-force": "3.0.10",
     "@types/node": "22.20.0",
     "@types/pngjs": "6.0.5",
     "axe-core": "4.13.0",
+    "d3-force": "3.0.0",
+    "linkedom": "0.18.13",
     "pixelmatch": "7.2.0",
     "pngjs": "7.0.0",
     "puppeteer": "25.4.0",

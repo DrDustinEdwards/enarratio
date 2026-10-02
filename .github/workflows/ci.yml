@@ -29,6 +29,8 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      # Fails if core gains a runtime dependency; reports each entry's gzipped size.
+      - run: npm run size
       - run: npm pack --dry-run
 
   browser:

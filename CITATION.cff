@@ -3,8 +3,9 @@ message: "If you use Enarratio, please cite it using these metadata."
 title: "Enarratio: accessible, server-rendered charts and scientific figures for the web"
 abstract: >-
   Enarratio is a TypeScript library that draws charts and scientific figures
-  (bar, line, area and scatter charts, heatmaps, networks, titer plots and
-  genome tracks) on the server as accessible, themeable HTML and SVG, with an
+  (bar, line, area and scatter charts with forecasts, heatmaps, networks,
+  titer plots and genome tracks, and dashboard primitives such as sparklines
+  and event timelines) on the server as accessible, themeable HTML and SVG, with an
   optional browser layer for keyboard navigation, filtering and range
   selection.
 type: software
@@ -16,8 +17,8 @@ authors:
 repository-code: "https://github.com/DrDustinEdwards/enarratio"
 url: "https://enarratio.dustinedwards.info"
 license: MIT
-version: 0.1.0-alpha.8
-date-released: "2026-09-29"
+version: 0.2.0
+date-released: "2026-10-02"
 keywords:
   - data visualization
   - accessibility

@@ -9,6 +9,7 @@ updated whenever AI tools are used on the project.
 | Tool | Model (id) | Maker | Used for |
 |---|---|---|---|
 | Claude Code (Anthropic's command-line coding agent) | Claude Opus 5.5 (`claude-opus-5-5`) | Anthropic | Writing the code, tests, documentation, design records, gallery and the paper draft; fixing review findings; one of the two reviews |
+| Claude Code | The model named in the `Co-Authored-By` trailer of each 0.2.0 commit | Anthropic | Writing the 0.2.0 changes: subpath exports, themeable CSS, forecasts, time axis, timeline, heat strip, companion tables, docs and tests |
 | A separate review session | Fable 5.1 (`claude-fable-5-1`) | Anthropic | One of the two reviews |
 
 ## What happened, in order
@@ -48,6 +49,16 @@ updated whenever AI tools are used on the project.
    fixed the findings in the order Dustin set, each with a regression test
    named for its finding. Three JOSS findings (F21, A17 and F23: development
    history, and the paper's state of the field and impact) are deferred.
+
+7. **0.2.0: restructuring and extension.** On 2026-10-02 Dustin Edwards set the
+   decisions for this release in a written brief (subpath exports with optional
+   peer dependencies, theming through custom properties, forecasts drawn from
+   caller-computed values, a timeline and a heat strip, companion tables for the
+   primitives, removing the site theme). Claude, through Claude Code, did the
+   work on a `release/0.2` branch and a pull request, in steps with tests and
+   design records 0011 to 0016, with GitHub's CI as the check on each push. The
+   model identifier for this work is in the `Co-Authored-By` trailer of each
+   commit. The new decisions are marked "author's decision" in the records.
 
 ## Who decided what
 

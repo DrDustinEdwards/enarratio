@@ -1,5 +1,5 @@
 // Hemagglutination inhibition titers by timepoint on a two-fold dilution axis.
-import { titerPlot } from "enarratio";
+import { titerPlot } from "enarratio/science";
 
 const titers: Record<string, number[]> = {
   "Day 0": [5, 5, 10, 10, 10, 20, 20, 40, 10, 10, 20, 10],

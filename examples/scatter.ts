@@ -1,5 +1,5 @@
 // Two measurements per sample, grouped, with a regression line on a log axis.
-import { scatterPlot } from "enarratio";
+import { scatterPlot } from "enarratio/plot";
 
 const isolates = [
   { id: "A1", clade: "2.3.4.4b", ct: 18.2, titer: 5.2e6 },
