@@ -31,7 +31,11 @@ events, range brushing and animated updates, all announced to screen readers
 and disabled under reduced-motion preferences. Alongside bar, line, area,
 scatter, heatmap and network charts, Enarratio includes figures common in
 virology and immunology, beginning with antibody titer plots and genome
-tracks, which share the same theming, accessibility and interaction.
+tracks, which share the same theming, accessibility and interaction. It also
+draws forecasts computed elsewhere (a shaded interval and a dashed line after a
+chosen time) and small primitives for dashboards (sparklines, uptime and heat
+strips, event timelines), each of which can state its numbers as a table and a
+sentence.
 
 # Statement of need
 
@@ -72,8 +76,16 @@ rendering into a lightweight server-side DOM, and on d3-force [@d3] for
 deterministic network layouts. Every chart is a function from typed options to
 a string; field names are checked by TypeScript against the data's type, and
 invalid input throws with the chart, row and field rather than drawing a
-misleading figure. Charts contain no colors, only references to theme
-properties, so a site's theme is a stylesheet included once per page. The
+misleading figure. Charts contain no colors and no fixed sizes, only references to custom
+properties with defaults, so a site's theme is a stylesheet included once per
+page, or its own properties alone. The package is one npm package with subpath
+entries: a dependency-free core (theme, color checks, figure assembly and the
+primitives, which also run in the browser) and separate entries for the Plot
+charts and the scientific figures, whose Observable Plot, d3-force and linkedom
+dependencies are optional peers, so a site installs only what it draws. A
+forecast is computed by the caller and only drawn, and each primitive has a
+companion function whose table and summary sentence are computed from the same
+validated values as its drawing, so they cannot disagree. The
 enhancement layer reads keys the server writes on each drawn datum and uses
 the roving-tabindex keyboard pattern of the WAI-ARIA Authoring Practices
 [@apg]. Scientific statistics (for example the geometric mean titer with its
