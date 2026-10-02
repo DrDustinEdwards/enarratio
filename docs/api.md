@@ -376,6 +376,71 @@ alternative is generated from the data unless `alt` is given.
 `showValue`, `color`. A value past `max` fills the ring and prints its real
 percentage, and the text alternative says it is more than the total.
 
+### `timeline`
+
+`timeline(options: TimelineOptions): string`. An event timeline: a lane for each
+site, agent or service, with spans (things that lasted) and point events over a
+time window. Status is carried by the theme's status colors and by shape (a
+circle for `ok`, a triangle for `warning`, a square for `error`, a dashed
+hollow circle for `unknown`), so it reads without hue. Events that overlap in a
+lane stack in rows. Times are instants in UTC.
+
+It returns a `<div class="enarratio enarratio-timeline">` holding the drawing,
+named by a generated text alternative, and a plain `<ol>` of the same events in
+time order. With `stylesheet` or `enarratio/base.css` the list is read by
+screen readers beside the drawing and replaces it when the container has less
+than 30rem of room; without CSS both show. Everything is checked when drawn: an
+event with no time, a span that ends before it starts, an unknown status or
+lane, or an event outside the window throws.
+
+### `TimelineOptions`
+
+`events`, `lanes` (top to bottom; default first-seen; a lane with no events is
+drawn empty), `start` and `end` (the window; default the earliest and latest
+event), `label` or `alt` (one is required), `width` (default 640), `formatTime`.
+
+### `TimelineEvent`
+
+A `TimelinePoint` or a `TimelineSpan`.
+
+### `TimelinePoint`
+
+`{ lane; label; status: TimelineStatus; at: TimelineTime }`: something that
+happened at one moment.
+
+### `TimelineSpan`
+
+`{ lane; label; status: TimelineStatus; from: TimelineTime; to: TimelineTime }`:
+something that lasted. A span past the window is clipped to it in the drawing,
+and the list keeps its real times.
+
+### `TimelineStatus`
+
+`"ok" | "warning" | "error" | "unknown"`, drawn in the status colors good,
+warning, bad and unknown.
+
+### `TimelineTime`
+
+A `Date`, an ISO 8601 string or epoch milliseconds.
+
+### `heatStrip`
+
+`heatStrip(options: HeatStripOptions): string`. A one-row strip of cells with no
+axis, each colored on the theme's sequential ramp by its value; a sibling of
+`uptimeStrip`. A missing value is a dashed outline. The text alternative is
+generated from the values (count, first, last, lowest, highest, how many
+missing) unless `alt` is given, and each cell's hover details carry its value.
+Colors come in five steps, so the exact numbers are in the hover details and in
+[`heatStripTable`](#heatstriptable).
+
+### `HeatStripOptions`
+
+`values` (numbers, or `null` for no data), `label` or `alt` (one is required),
+`width` (default 240), `height` (default 24), `min` and `max` (the range the
+ramp spans; default the lowest and highest value, fix them to compare strips),
+`thresholds` (four ascending values, as in `heatmap`), `cellLabels` (hover names
+such as "Mon 14:00"; one per value), `formatValue`.
+
 ### `uptimeStrip`
 
 `uptimeStrip(options: UptimeStripOptions): string`. One tick per period;
@@ -532,6 +597,7 @@ A test keeps this table and the stylesheet in step.
 | `--enarratio-focus-width-outer` | `2.5px` | Outer (focus color) ring on a focused mark |
 | `--enarratio-focus-outline-width` | `3px` | Outline on a focused chart or legend button |
 | `--enarratio-focus-outline-offset` | `2px` | Distance of that outline |
+| `--enarratio-timeline-list-indent` | `1.25em` | Indent of the timeline's plain list on narrow screens |
 | `--enarratio-duration-hover` | `150ms` | Dimming and un-dimming |
 | `--enarratio-duration-grow` | `600ms` | Bars growing in |
 | `--enarratio-duration-fade` | `500ms` | Dots, areas and cells fading in |
@@ -541,7 +607,8 @@ A test keeps this table and the stylesheet in step.
 
 Not properties, on purpose: the 30rem minimum width of a wide drawing (the
 same threshold decides whether a figure scrolls, in code, from the drawing's
-`width`), and the geometry written into the SVG itself (stroke widths, tick
+`width`), the 30rem below which a timeline gives way to its plain list (a
+container query cannot use a property), and the geometry written into the SVG itself (stroke widths, tick
 lengths, the size of direct labels), which is part of each chart's drawing and
 cannot be set from CSS. Animation stops under `prefers-reduced-motion` whatever
 the durations are.

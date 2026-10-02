@@ -11,8 +11,18 @@
  */
 
 export { type AttributeValue, element, escapeHtml } from "./html.js";
+export { type HeatStripOptions, heatStrip } from "./primitives/heat-strip.js";
 export { type ProgressRingOptions, progressRing } from "./primitives/progress-ring.js";
 export { type SparklineOptions, sparkline } from "./primitives/sparkline.js";
+export {
+  type TimelineEvent,
+  type TimelineOptions,
+  type TimelinePoint,
+  type TimelineSpan,
+  type TimelineStatus,
+  type TimelineTime,
+  timeline,
+} from "./primitives/timeline.js";
 export {
   type UptimeSlot,
   type UptimeStatus,

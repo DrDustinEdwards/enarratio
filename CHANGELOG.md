@@ -56,6 +56,11 @@ Becomes 0.2.0. Design records 0011 onward explain each decision.
   `month`, `year`) and `formatX`. One bar slot per interval from the first row
   to the last, labelled automatically; works for stacked, grouped and
   horizontal bars.
+- `timeline` (core): an event timeline with a lane for each site or agent,
+  spans and point events over a time window, status by color and shape, and a
+  plain list that replaces the drawing under 30rem of room. `heatStrip` (core):
+  a one-row, no-axis strip on the sequential ramp, a sibling of `uptimeStrip`
+  (design record 0014).
 - `enarratio/plot`, `enarratio/science` and `enarratio/themes` entry points.
 - `baseStylesheet()` and `enarratio/base.css`: the theme-free rules.
 - Every fixed size, weight, radius and animation timing in the CSS is a custom

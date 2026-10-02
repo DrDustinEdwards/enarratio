@@ -23,8 +23,16 @@ then finish (bump 0.2.0, CHANGELOG, remove PROGRESS.md, CI green, merge, deploym
   workflow (workflow_dispatch) now also force-pushes images to branch visual-snapshots/<branch>; fetch it,
   copy only the new PNGs into test/browser/__snapshots__/linux/, view them, commit.
 
+- Step 3 CI baselines for forecast/runs copied from the visual-snapshots branch (existing PNGs differ only in
+  encoding bytes: copy only NEW ones).
+- Step 4: heatStrip + timeline in core (src/primitives/{heat-strip,timeline}.ts, prepare* functions shared with the
+  step-5 companions), CSS container-query fallback, examples heat-strip/timeline, tests (test/timeline.test.ts,
+  test/browser/timeline.test.ts), docs, design 0014. Needs Linux baselines for heat-strip and timeline.
+
 ## Next
-- Get step 3 CI green (commit baselines). Then step 4 (timeline + heatStrip in core).
+- Dispatch visual-snapshots workflow, copy new heat-strip/timeline PNGs, get CI green. Then step 5 (companion tables
+  for sparkline, uptimeStrip, progressRing, timeline, heatStrip: `<name>Table`), step 6 (remove dustinedwardsTheme;
+  gallery second theme becomes a neutral documented example; replace dustinedwards-* baselines).
 
 ## Decisions
 - Fallbacks at the point of use, not a :root block (0011).

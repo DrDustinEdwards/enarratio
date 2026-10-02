@@ -6,7 +6,7 @@
  */
 import { parseHTML } from "linkedom";
 import { describe, expect, it } from "vitest";
-import { progressRing, sparkline, uptimeStrip } from "../src/index.js";
+import { heatStrip, progressRing, sparkline, timeline, uptimeStrip } from "../src/index.js";
 import { areaChart, barChart, heatmap, lineChart, scatterPlot } from "../src/plot/index.js";
 import { genomeTrack, networkChart, titerPlot } from "../src/science/index.js";
 
@@ -24,6 +24,8 @@ const EMITTED = new Set([
   "figure",
   "p",
   "ul",
+  "ol",
+  "strong",
   "li",
   "span",
   "figcaption",
@@ -129,6 +131,23 @@ const RENDERERS: Record<string, Render> = {
       xLabel: p,
       title: p,
       alt: p,
+    }),
+  timeline: (p) =>
+    timeline({
+      label: p,
+      lanes: [p, "b"],
+      formatTime: (d) => `${p}${d.getUTCHours()}`,
+      events: [
+        { lane: p, label: p, status: "ok", at: 1000 },
+        { lane: "b", label: p, status: "error", from: 500, to: 3000 },
+      ],
+    }),
+  heatStrip: (p) =>
+    heatStrip({
+      values: [1, 2, null],
+      label: p,
+      cellLabels: [p, p, p],
+      formatValue: (n) => `${p}${n}`,
     }),
   areaChart: (p) =>
     areaChart({

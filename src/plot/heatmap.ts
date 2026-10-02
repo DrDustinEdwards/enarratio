@@ -6,6 +6,8 @@ import {
   markKey,
   maxOf,
   minOf,
+  rampStep,
+  rampThresholds,
   readCategory,
   readNumberOrNull,
 } from "../render/data.js";
@@ -46,12 +48,6 @@ interface Cell {
 
 const KIND = "heatmap";
 
-function stepOf(value: number, thresholds: readonly number[]): number {
-  let step = 1;
-  for (const t of thresholds) if (value >= t) step += 1;
-  return step;
-}
-
 /**
  * A grid of cells colored by value on the theme's sequential ramp: cohort retention, weekly
  * activity, plate layouts. Colors come in five labelled steps, printed values keep the chart
@@ -83,22 +79,14 @@ export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
 
   const min = minOf(present);
   const max = maxOf(present);
-  // Flat data still gets ascending thresholds: every cell then lands in the first step.
-  const span = max - min || 1;
-  const thresholds: readonly number[] =
-    options.thresholds ?? [1, 2, 3, 4].map((k) => min + (span * k) / 5);
-  for (let i = 1; i < thresholds.length; i += 1) {
-    if ((thresholds[i] as number) <= (thresholds[i - 1] as number)) {
-      throw new Error(`${KIND}: thresholds must ascend`);
-    }
-  }
+  const thresholds = rampThresholds(KIND, min, max, options.thresholds);
   const cells = data.map((_, i): Cell => {
     const v = values[i] ?? null;
     return {
       x: String(xs[i]),
       y: String(ys[i]),
       value: v,
-      step: v === null ? 0 : stepOf(v, thresholds),
+      step: v === null ? 0 : rampStep(v, thresholds),
     };
   });
 

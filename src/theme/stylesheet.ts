@@ -204,6 +204,35 @@ ${Array.from(
   fill-opacity: var(--enarratio-opacity-brush, 0.15);
   stroke: var(--enarratio-focus);
 }
+/* The timeline's plain list: read by screen readers beside the drawing, and shown in its place
+   when the container has under 30rem. The threshold is a container query, which cannot use a
+   custom property. */
+.enarratio-timeline { container-type: inline-size; }
+.enarratio-timeline-list {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+@container (max-width: 30rem) {
+  .enarratio-timeline > svg { display: none; }
+  .enarratio-timeline-list {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0 0 0 var(--enarratio-timeline-list-indent, 1.25em);
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+  .enarratio-timeline-list li { margin: 0 0 var(--enarratio-space, 0.5em); }
+}
 @keyframes enarratio-grow { from { transform: scaleY(0); } }
 @keyframes enarratio-grow-x { from { transform: scaleX(0); } }
 @keyframes enarratio-draw { from { stroke-dashoffset: var(--enarratio-length); } }

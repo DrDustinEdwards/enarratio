@@ -13,7 +13,9 @@ An optional enhancement layer adds hover details, keyboard navigation,
 click-to-filter events and range brushing on top.
 
 It covers the charts a website needs (bars, lines, areas, scatter plots,
-heatmaps, networks, sparklines, progress rings and uptime strips) and the
+heatmaps, networks, with forecast bands and time axes), the small primitives a
+dashboard needs (sparklines, progress rings, uptime and heat strips, event
+timelines) and the
 figures a laboratory needs, starting with antibody titer plots and genome
 tracks. Charts are built on [Observable Plot](https://observablehq.com/plot/)
 and [d3-force](https://d3js.org/d3-force) (optional peer dependencies, installed
@@ -173,6 +175,8 @@ all into `site/dist`.
 | `sparkline` | `enarratio` | A word-sized trend line |
 | `progressRing` | `enarratio` | Progress toward a total |
 | `uptimeStrip` | `enarratio` | Up, degraded, down or unmeasured, one tick per period |
+| `heatStrip` | `enarratio` | A one-row strip on the sequential ramp, one cell per value |
+| `timeline` | `enarratio` | Lanes for sites or agents, spans and point events over a time window, status by color and shape |
 
 Every function is documented in the [API reference](docs/api.md) and in its
 TypeScript declarations. The chart types still to come, and the order they

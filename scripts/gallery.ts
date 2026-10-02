@@ -43,6 +43,8 @@ const ORDER = [
   "genome",
   "sparkline",
   "primitives",
+  "heat-strip",
+  "timeline",
 ];
 
 async function loadExamples(): Promise<Example[]> {
