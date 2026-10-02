@@ -62,7 +62,7 @@ const BASE_RULES = `
   margin: 0;
   color: var(--enarratio-text);
   font-family: var(--enarratio-font);
-  font-size: 1rem;
+  font-size: var(--enarratio-font-size, 1rem);
 }
 .enarratio-frame { overflow-x: auto; }
 .enarratio-frame-wide > svg { min-width: 30rem; }
@@ -72,7 +72,7 @@ const BASE_RULES = `
   height: auto;
   overflow: visible;
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--enarratio-font-size-mark, 12px);
 }
 svg.enarratio { display: inline-block; vertical-align: middle; }
 .enarratio [data-enarratio-mark$="tick label"],
@@ -83,34 +83,48 @@ svg.enarratio { display: inline-block; vertical-align: middle; }
 .enarratio [data-enarratio-mark*="axis"] { color: var(--enarratio-text-muted); }
 .enarratio [data-enarratio-mark$="grid"] { stroke: var(--enarratio-grid); stroke-opacity: 1; }
 .enarratio [data-enarratio-mark="rule"] { stroke: var(--enarratio-text-muted); }
-.enarratio-title { margin: 0 0 0.5em; font-weight: 600; }
-.enarratio-caption { margin: 0.5em 0 0; color: var(--enarratio-text-muted); font-size: 0.875em; }
+.enarratio-title {
+  margin: 0 0 var(--enarratio-space, 0.5em);
+  font-weight: var(--enarratio-font-weight-title, 600);
+}
+.enarratio-caption {
+  margin: var(--enarratio-space, 0.5em) 0 0;
+  color: var(--enarratio-text-muted);
+  font-size: var(--enarratio-font-size-small, 0.875em);
+}
 .enarratio-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25em 1em;
-  margin: 0 0 0.5em;
+  gap: var(--enarratio-gap-row, 0.25em) var(--enarratio-gap, 1em);
+  margin: 0 0 var(--enarratio-space, 0.5em);
   padding: 0;
   list-style: none;
-  font-size: 0.875em;
+  font-size: var(--enarratio-font-size-small, 0.875em);
 }
-.enarratio-legend li, .enarratio-legend button { display: inline-flex; align-items: center; gap: 0.4em; }
+.enarratio-legend li, .enarratio-legend button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--enarratio-gap-inline, 0.4em);
+}
 .enarratio-legend button {
   margin: 0;
-  padding: 0.125em 0.25em;
-  border: 1px solid transparent;
-  border-radius: 0.25em;
+  padding: var(--enarratio-padding-button, 0.125em 0.25em);
+  border: var(--enarratio-border-width, 1px) solid transparent;
+  border-radius: var(--enarratio-radius, 0.25em);
   background: none;
   color: inherit;
   font: inherit;
   cursor: pointer;
 }
-.enarratio-legend button[aria-pressed="true"] { border-color: currentColor; font-weight: 600; }
+.enarratio-legend button[aria-pressed="true"] {
+  border-color: currentColor;
+  font-weight: var(--enarratio-font-weight-emphasis, 600);
+}
 .enarratio-swatch {
   display: inline-block;
-  width: 0.8em;
-  height: 0.8em;
-  border-radius: 0.15em;
+  width: var(--enarratio-swatch-size, 0.8em);
+  height: var(--enarratio-swatch-size, 0.8em);
+  border-radius: var(--enarratio-radius-swatch, 0.15em);
   forced-color-adjust: none;
 }
 ${Array.from(
@@ -124,12 +138,15 @@ ${Array.from(
     `.enarratio [data-step="${i + 1}"] { --enarratio-slot: var(--enarratio-sequential-${i + 1}); }`,
 ).join("\n")}
 .enarratio-swatch { background: var(--enarratio-slot); }
-.enarratio-data { margin: 0.5em 0 0; font-size: 0.875em; }
+.enarratio-data {
+  margin: var(--enarratio-space, 0.5em) 0 0;
+  font-size: var(--enarratio-font-size-small, 0.875em);
+}
 .enarratio-data summary { cursor: pointer; color: var(--enarratio-text-muted); }
-.enarratio-data table { border-collapse: collapse; margin-top: 0.5em; }
+.enarratio-data table { border-collapse: collapse; margin-top: var(--enarratio-space, 0.5em); }
 .enarratio-data th, .enarratio-data td {
-  padding: 0.2em 0.75em 0.2em 0;
-  border-bottom: 1px solid var(--enarratio-grid);
+  padding: var(--enarratio-cell-padding, 0.2em 0.75em 0.2em 0);
+  border-bottom: var(--enarratio-border-width, 1px) solid var(--enarratio-grid);
   text-align: left;
 }
 .enarratio-data td { font-variant-numeric: tabular-nums; text-align: right; }
@@ -146,35 +163,47 @@ ${Array.from(
 }
 .enarratio-tooltip {
   position: absolute;
-  z-index: 10;
-  max-width: 18em;
-  padding: 0.35em 0.6em;
-  border: 1px solid var(--enarratio-grid);
-  border-radius: 0.3em;
+  z-index: var(--enarratio-z-tooltip, 10);
+  max-width: var(--enarratio-tooltip-max-width, 18em);
+  padding: var(--enarratio-tooltip-padding, 0.35em 0.6em);
+  border: var(--enarratio-border-width, 1px) solid var(--enarratio-grid);
+  border-radius: var(--enarratio-radius-tooltip, 0.3em);
   background: var(--enarratio-background);
   color: var(--enarratio-text);
   font-family: var(--enarratio-font);
-  font-size: 0.8125rem;
-  line-height: 1.35;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+  font-size: var(--enarratio-font-size-tooltip, 0.8125rem);
+  line-height: var(--enarratio-line-height-tooltip, 1.35);
+  box-shadow: var(--enarratio-tooltip-shadow, 0 2px 8px rgb(0 0 0 / 15%));
 }
 .enarratio-tooltip[hidden] { display: none; }
-.enarratio [data-enarratio-key] { transition: opacity 150ms ease-out; }
+.enarratio [data-enarratio-key] {
+  transition: opacity var(--enarratio-duration-hover, 150ms) var(--enarratio-ease-out, ease-out);
+}
 .enarratio[data-enarratio-interactive] [data-enarratio-field] { cursor: pointer; }
-.enarratio [data-enarratio-dimmed] { opacity: 0.25; }
+.enarratio [data-enarratio-dimmed] { opacity: var(--enarratio-opacity-dimmed, 0.25); }
 .enarratio [data-enarratio-key]:focus { outline: none; }
 /* The focus ring: a background-colored ring inside a focus-colored one, so one of the two always
    contrasts with whatever mark or background is next to it. */
 .enarratio-focus-ring { pointer-events: none; fill: none; }
-.enarratio-focus-ring-inner { stroke: var(--enarratio-background); stroke-width: 5px; }
-.enarratio-focus-ring-outer { stroke: var(--enarratio-focus); stroke-width: 2.5px; }
+.enarratio-focus-ring-inner {
+  stroke: var(--enarratio-background);
+  stroke-width: var(--enarratio-focus-width-inner, 5px);
+}
+.enarratio-focus-ring-outer {
+  stroke: var(--enarratio-focus);
+  stroke-width: var(--enarratio-focus-width-outer, 2.5px);
+}
 /* Invisible targets that make small marks at least 24 CSS pixels to point at. */
 .enarratio-hit { fill: transparent; stroke: none; }
 .enarratio svg:focus-visible, .enarratio-legend button:focus-visible {
-  outline: 3px solid var(--enarratio-focus);
-  outline-offset: 2px;
+  outline: var(--enarratio-focus-outline-width, 3px) solid var(--enarratio-focus);
+  outline-offset: var(--enarratio-focus-outline-offset, 2px);
 }
-.enarratio-brush { fill: var(--enarratio-focus); fill-opacity: 0.15; stroke: var(--enarratio-focus); }
+.enarratio-brush {
+  fill: var(--enarratio-focus);
+  fill-opacity: var(--enarratio-opacity-brush, 0.15);
+  stroke: var(--enarratio-focus);
+}
 @keyframes enarratio-grow { from { transform: scaleY(0); } }
 @keyframes enarratio-grow-x { from { transform: scaleX(0); } }
 @keyframes enarratio-draw { from { stroke-dashoffset: var(--enarratio-length); } }
@@ -182,7 +211,8 @@ ${Array.from(
 .enarratio[data-enarratio-entering] [data-enarratio-mark="bar"] > * {
   transform-box: fill-box;
   transform-origin: bottom;
-  animation: enarratio-grow 600ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation: enarratio-grow var(--enarratio-duration-grow, 600ms)
+    var(--enarratio-ease-grow, cubic-bezier(0.2, 0.7, 0.3, 1)) both;
 }
 .enarratio[data-enarratio-entering][data-enarratio-orientation="horizontal"] [data-enarratio-mark="bar"] > * {
   transform-origin: left;
@@ -191,16 +221,34 @@ ${Array.from(
 .enarratio[data-enarratio-entering] [data-enarratio-mark="dot"] > *,
 .enarratio[data-enarratio-entering] [data-enarratio-mark="area"] > *,
 .enarratio[data-enarratio-entering] [data-enarratio-mark="cell"] > * {
-  animation: enarratio-fade 500ms ease-out both;
+  animation: enarratio-fade var(--enarratio-duration-fade, 500ms)
+    var(--enarratio-ease-out, ease-out) both;
 }
 .enarratio[data-enarratio-entering] [data-enarratio-mark="line"] > path {
   stroke-dasharray: var(--enarratio-length);
-  animation: enarratio-draw 800ms ease-out both;
+  animation: enarratio-draw var(--enarratio-duration-draw, 800ms)
+    var(--enarratio-ease-out, ease-out) both;
 }
 @media (prefers-reduced-motion: reduce) {
   .enarratio *, .enarratio-tooltip { animation: none !important; transition: none !important; }
 }
 `;
+
+/**
+ * The rules that do not depend on a theme: layout, legend, data table, tooltip, focus ring and
+ * animation. They refer to the color and font custom properties (`--enarratio-text`,
+ * `--enarratio-series-1` and the rest) without defining them, so a site that defines those itself
+ * (or a generated theme) needs no theme object. Every size, weight, radius and timing is a
+ * custom property whose fallback is Enarratio's own value, so setting none of them changes
+ * nothing. The same rules ship as `enarratio/base.css`. The full contract is in docs/api.md.
+ *
+ * The one thing a theme adds beyond properties is hiding gridlines (see {@link stylesheet}); a
+ * site using only the base rules hides them itself, e.g.
+ * `.enarratio [data-enarratio-mark="x-grid"] { display: none; }`.
+ */
+export function baseStylesheet(): string {
+  return `/* Enarratio base rules */\n${BASE_RULES.trim()}`;
+}
 
 function declarations(entries: ReadonlyArray<readonly [string, string]>, indent = "  "): string {
   return entries.map(([name, value]) => `${indent}--enarratio-${name}: ${value};`).join("\n");
@@ -249,7 +297,7 @@ export function stylesheet(theme: Theme, options: StylesheetOptions = {}): strin
       "    ",
     )}\n  }\n}`,
     ...schemeRules,
-    BASE_RULES.trim(),
+    baseStylesheet(),
     hidden,
   ]
     .filter(Boolean)

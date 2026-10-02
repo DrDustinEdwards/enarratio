@@ -1,5 +1,8 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  baseStylesheet,
   checkTheme,
   colorDifference,
   contrastRatio,
@@ -150,5 +153,41 @@ describe("stylesheet", () => {
 
   it("turns animation off under reduced motion", () => {
     expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)[^}]*animation: none/);
+  });
+});
+
+describe("the CSS custom property contract", () => {
+  const base = baseStylesheet();
+  const api = readFileSync(resolve(import.meta.dirname, "..", "docs", "api.md"), "utf8");
+  // Every `var(--enarratio-name, fallback)` the base rules use for a size, weight, radius or timing.
+  const tunable = new Map<string, string>();
+  for (const m of base.matchAll(/var\((--enarratio-[a-z-]+),\s*((?:[^()]|\([^()]*\))+)\)/g)) {
+    tunable.set(m[1] as string, (m[2] as string).replace(/\s+/g, " ").trim());
+  }
+
+  it("finds the tunable properties", () => {
+    expect(tunable.size).toBeGreaterThan(30);
+    expect(tunable.get("--enarratio-font-size-mark")).toBe("12px");
+    expect(tunable.get("--enarratio-duration-grow")).toBe("600ms");
+  });
+
+  it.each([...tunable])("documents %s with its fallback %s", (name, fallback) => {
+    const row = api.split("\n").find((line) => line.startsWith(`| \`${name}\``));
+    expect(row, `${name} is missing from the property table in docs/api.md`).toBeDefined();
+    expect(row).toContain(`\`${fallback}\``);
+  });
+
+  it("is included, unchanged, in every stylesheet", () => {
+    expect(stylesheet(defaultTheme)).toContain(base);
+  });
+
+  it("defines no theme value itself", () => {
+    expect(base).not.toMatch(/--enarratio-(?:series|sequential|status)-\d*[a-z-]*:/);
+    expect(base).not.toMatch(/#[0-9a-f]{3,6}\b/i);
+  });
+
+  it("ships as dist/base.css when built", () => {
+    const built = resolve(import.meta.dirname, "..", "dist", "base.css");
+    if (existsSync(built)) expect(readFileSync(built, "utf8").trim()).toBe(base.trim());
   });
 });

@@ -321,6 +321,17 @@ validates the theme with `defineTheme` first. Labels printed on marks take the
 scheme's text or background color when it reaches 4.5:1, otherwise black or
 white.
 
+### `baseStylesheet`
+
+`baseStylesheet(): string`. The theme-free rules: layout, legend, data table,
+tooltip, focus ring and animation. They use the color and font properties
+below without defining them, so a site that defines those itself, or a theme
+generated elsewhere, needs no `Theme` object. `stylesheet(theme)` is the
+theme's properties, then these rules, then the gridline rules the theme asks
+for. The same text is the package's `enarratio/base.css` (written at build
+from this function), for sites that link a stylesheet instead of calling
+JavaScript. See [Custom properties](#custom-properties) for what a site sets.
+
 ### `StylesheetOptions`
 
 `{ colorScheme?: { dark?: string; light?: string } }`: selectors for sites
@@ -335,6 +346,84 @@ Enarratio's own theme: neutral surfaces, system fonts.
 ### `dustinedwardsTheme`
 
 The theme of dustinedwards.info, and a worked example of a site theme.
+
+## Custom properties
+
+Charts contain no colors and no fixed sizes of their own: the markup refers to
+custom properties, and the base rules give each one a fallback. Set a property
+on `:root`, on any ancestor of a chart, or on one `figure` and it applies there.
+Set none and every chart looks exactly as it did before the property existed,
+so a theme can be as small as one property or as large as all of them.
+
+### Colors and fonts
+
+`stylesheet(theme)` defines these from a `Theme`, as `light-dark()` pairs
+following the page's `color-scheme`. A site using `enarratio/base.css` defines
+them itself. They have no fallback: undefined, a rule using one is ignored.
+
+| Property | Meaning |
+|---|---|
+| `--enarratio-background`, `--enarratio-text`, `--enarratio-text-muted` | Page, text and muted text colors |
+| `--enarratio-grid`, `--enarratio-focus` | Gridlines and rules; the focus ring |
+| `--enarratio-series-1` to `--enarratio-series-8` | The eight series colors, in order |
+| `--enarratio-series-text-1` to `-8` | The label color that reads best on each series color |
+| `--enarratio-sequential-1` to `--enarratio-sequential-5` | The five-step ramp, least to most |
+| `--enarratio-sequential-text-1` to `-5` | The label color that reads best on each ramp step |
+| `--enarratio-status-good`, `-warning`, `-bad`, `-unknown` | Status colors |
+| `--enarratio-font`, `--enarratio-font-numeric` | Body and numeric font stacks |
+
+Gridlines are the one theme choice that is not a property: hide a direction
+with `.enarratio [data-enarratio-mark="x-grid"] { display: none; }` (or
+`y-grid`).
+
+### Sizes, weights, radii and timings
+
+Each has the fallback shown, which is what Enarratio draws when it is unset.
+A test keeps this table and the stylesheet in step.
+
+| Property | Fallback | Controls |
+|---|---|---|
+| `--enarratio-font-size` | `1rem` | Text size of a figure; the other text sizes are relative to it |
+| `--enarratio-font-size-mark` | `12px` | Text inside the drawing: tick labels, direct labels |
+| `--enarratio-font-size-small` | `0.875em` | Caption, legend and data table |
+| `--enarratio-font-size-tooltip` | `0.8125rem` | Tooltip text |
+| `--enarratio-font-weight-title` | `600` | The visible title |
+| `--enarratio-font-weight-emphasis` | `600` | A pressed legend button |
+| `--enarratio-line-height-tooltip` | `1.35` | Tooltip lines |
+| `--enarratio-space` | `0.5em` | Gap between title, legend, chart, caption and data table |
+| `--enarratio-gap` | `1em` | Between legend entries |
+| `--enarratio-gap-row` | `0.25em` | Between wrapped legend rows |
+| `--enarratio-gap-inline` | `0.4em` | Between a swatch and its label |
+| `--enarratio-padding-button` | `0.125em 0.25em` | Legend toggle buttons |
+| `--enarratio-cell-padding` | `0.2em 0.75em 0.2em 0` | Data table cells |
+| `--enarratio-border-width` | `1px` | Table rules, legend buttons, tooltip |
+| `--enarratio-radius` | `0.25em` | Legend toggle buttons |
+| `--enarratio-radius-swatch` | `0.15em` | Legend swatches |
+| `--enarratio-radius-tooltip` | `0.3em` | The tooltip |
+| `--enarratio-swatch-size` | `0.8em` | Legend swatches |
+| `--enarratio-tooltip-max-width` | `18em` | The tooltip |
+| `--enarratio-tooltip-padding` | `0.35em 0.6em` | The tooltip |
+| `--enarratio-tooltip-shadow` | `0 2px 8px rgb(0 0 0 / 15%)` | The tooltip |
+| `--enarratio-z-tooltip` | `10` | Stacking of the tooltip |
+| `--enarratio-opacity-dimmed` | `0.25` | Marks outside the current filter |
+| `--enarratio-opacity-brush` | `0.15` | Fill of a brushed range |
+| `--enarratio-focus-width-inner` | `5px` | Inner (background) ring on a focused mark |
+| `--enarratio-focus-width-outer` | `2.5px` | Outer (focus color) ring on a focused mark |
+| `--enarratio-focus-outline-width` | `3px` | Outline on a focused chart or legend button |
+| `--enarratio-focus-outline-offset` | `2px` | Distance of that outline |
+| `--enarratio-duration-hover` | `150ms` | Dimming and un-dimming |
+| `--enarratio-duration-grow` | `600ms` | Bars growing in |
+| `--enarratio-duration-fade` | `500ms` | Dots, areas and cells fading in |
+| `--enarratio-duration-draw` | `800ms` | Lines drawing in |
+| `--enarratio-ease-grow` | `cubic-bezier(0.2, 0.7, 0.3, 1)` | Easing of bars growing in |
+| `--enarratio-ease-out` | `ease-out` | Easing of the other timings |
+
+Not properties, on purpose: the 30rem minimum width of a wide drawing (the
+same threshold decides whether a figure scrolls, in code, from the drawing's
+`width`), and the geometry written into the SVG itself (stroke widths, tick
+lengths, the size of direct labels), which is part of each chart's drawing and
+cannot be set from CSS. Animation stops under `prefers-reduced-motion` whatever
+the durations are.
 
 ## Color checks
 

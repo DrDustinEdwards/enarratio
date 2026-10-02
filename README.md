@@ -182,6 +182,14 @@ const report = checkTheme(theme);
 // protanopia, deuteranopia or tritanopia.
 ```
 
+A site whose colors and type already live in its own design tokens can skip the
+`Theme` object: link `enarratio/base.css` (or call `baseStylesheet()`), define the
+color and font properties yourself, and tune any size, weight, radius or animation
+timing the same way, for example `--enarratio-font-size-mark` or
+`--enarratio-duration-grow`. Every property has today's value as its fallback, so
+setting none changes nothing. The full list is in the
+[API reference](docs/api.md#custom-properties).
+
 Any chart can override a series color with `colors: { Talks: "#8a4a1b" }` or a
 light and dark pair. Two themes ship with the package: `defaultTheme`, and
 `dustinedwardsTheme`, the theme of the first site to use Enarratio.

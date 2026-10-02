@@ -52,7 +52,7 @@ export {
   simulateColorVision,
 } from "./theme/color.js";
 export { defineTheme } from "./theme/define.js";
-export { type StylesheetOptions, stylesheet } from "./theme/stylesheet.js";
+export { baseStylesheet, type StylesheetOptions, stylesheet } from "./theme/stylesheet.js";
 export type {
   ColorScheme,
   Gridlines,
