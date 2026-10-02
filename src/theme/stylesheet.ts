@@ -74,7 +74,7 @@ const BASE_RULES = `
   font-family: inherit;
   font-size: var(--enarratio-font-size-mark, 12px);
 }
-svg.enarratio { display: inline-block; vertical-align: middle; }
+svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; height: auto; }
 .enarratio [data-enarratio-mark$="tick label"],
 .enarratio .enarratio-numeric {
   font-family: var(--enarratio-font-numeric);
