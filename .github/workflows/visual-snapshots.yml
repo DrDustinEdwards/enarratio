@@ -1,12 +1,14 @@
 name: Visual snapshots
 
-# Renders the gallery on the CI platform and uploads the images, for a maintainer to review and
-# commit when a chart's appearance changes on purpose. It never commits anything itself.
+# Renders the gallery on the CI platform and publishes the images, for a maintainer to review and
+# commit when a chart's appearance changes on purpose. It never commits to the branch it ran on:
+# the images go to a separate branch, visual-snapshots/<branch>, which holds only them, and are
+# also uploaded as an artifact. Copy the ones you accept into test/browser/__snapshots__/linux/.
 on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   render:
@@ -32,3 +34,14 @@ jobs:
         with:
           name: visual-snapshots-linux
           path: test/browser/__snapshots__/linux/
+      # A branch of its own, so the images can be fetched with git without a login. Force-pushed:
+      # it is only ever the latest render.
+      - name: Publish the images to visual-snapshots/<branch>
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan visual-snapshots
+          git rm -rf --cached . > /dev/null
+          git add -f test/browser/__snapshots__/linux
+          git commit -q -m "Linux visual snapshots rendered from ${GITHUB_SHA}"
+          git push --force origin "HEAD:refs/heads/visual-snapshots/${GITHUB_REF_NAME//\//-}"

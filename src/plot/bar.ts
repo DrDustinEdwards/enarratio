@@ -1,11 +1,15 @@
 import * as Plot from "@observablehq/plot";
 import {
+  calendarDates,
+  DAY,
   defaultFormat,
   domainOf,
   type KeysOfType,
   markKey,
   maxOf,
+  minOf,
   readCategory,
+  readDate,
   readLabel,
   readNumber,
 } from "../render/data.js";
@@ -16,8 +20,29 @@ import { planSeries } from "../render/series.js";
 /** Options for {@link barChart}. */
 export interface BarChartOptions<T extends object> extends FigureOptions {
   readonly data: readonly T[];
-  /** The field for categories along the bar axis: a label, or a number such as a year. */
-  readonly x: KeysOfType<T, string | number>;
+  /**
+   * The field for categories along the bar axis: a label, or a number such as a year. With
+   * `xType: "time"` it is a time instead: a Date, an ISO 8601 string or epoch milliseconds.
+   */
+  readonly x: KeysOfType<T, string | number | Date>;
+  /**
+   * `"time"` puts the bars on a time axis: each row falls in the `interval` that contains its
+   * time, one bar slot for every interval from the first to the last (empty ones too, so a gap
+   * in the data is a gap in the chart), labelled for you. A run per day needs no pre-formatted
+   * labels. Rows in the same interval and series are summed, or counted when `y` is omitted.
+   * Dates are instants in UTC, except that when every Date falls at local midnight they are
+   * read as calendar dates, as in `lineChart`. The default, `"category"`, treats `x` as labels.
+   */
+  readonly xType?: "category" | "time";
+  /**
+   * With `xType: "time"`, the length of each bar's interval (default `"day"`). Intervals start
+   * at UTC midnight; weeks start on Monday. Each bar is labelled by its first moment: an hour
+   * as `2026-01-05 14:00 UTC`, a day or week as `2026-01-05`, a month as `2026-01`, a year as
+   * `2026`.
+   */
+  readonly interval?: "hour" | "day" | "week" | "month" | "year";
+  /** With `xType: "time"`, formats each interval's start for labels, hover details and the data table. */
+  readonly formatX?: (start: Date) => string;
   /**
    * The field for bar length. Omit it to count rows instead: `barChart({ data: entries, x:
    * "year", series: "type" })` draws entries per year by type. Rows sharing a category and series
@@ -32,7 +57,8 @@ export interface BarChartOptions<T extends object> extends FigureOptions {
   readonly orientation?: "vertical" | "horizontal";
   /**
    * Every category in display order. Without it, categories appear in data order, or ascending
-   * when all are numbers. Give it to show empty years or a fixed order.
+   * when all are numbers. Give it to show empty years or a fixed order. Not used with
+   * `xType: "time"`, which builds its own domain.
    */
   readonly xDomain?: readonly (string | number)[];
   /** Every series in display and color order. Without it, first-seen order. */
@@ -79,6 +105,98 @@ interface BarPoint {
 }
 
 const KIND = "barChart";
+
+type Interval = NonNullable<BarChartOptions<object>["interval"]>;
+
+const pad = (n: number): string => String(n).padStart(2, "0");
+
+/** The start of the interval containing `t` (UTC; weeks start on Monday), in epoch milliseconds. */
+function floorTo(t: number, interval: Interval): number {
+  const d = new Date(t);
+  switch (interval) {
+    case "hour":
+      return Math.floor(t / 3_600_000) * 3_600_000;
+    case "day":
+      return Math.floor(t / DAY) * DAY;
+    case "week": {
+      const day = Math.floor(t / DAY) * DAY;
+      const sinceMonday = (new Date(day).getUTCDay() + 6) % 7;
+      return day - sinceMonday * DAY;
+    }
+    case "month":
+      return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+    case "year":
+      return Date.UTC(d.getUTCFullYear(), 0, 1);
+  }
+}
+
+/** The start of the interval after the one starting at `start`. */
+function nextAfter(start: number, interval: Interval): number {
+  const d = new Date(start);
+  switch (interval) {
+    case "hour":
+      return start + 3_600_000;
+    case "day":
+      return start + DAY;
+    case "week":
+      return start + 7 * DAY;
+    case "month":
+      return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1);
+    case "year":
+      return Date.UTC(d.getUTCFullYear() + 1, 0, 1);
+  }
+}
+
+/** The default label for an interval starting at `start`. */
+function labelFor(start: number, interval: Interval): string {
+  const iso = new Date(start).toISOString();
+  switch (interval) {
+    case "hour":
+      return `${iso.slice(0, 10)} ${pad(new Date(start).getUTCHours())}:00 UTC`;
+    case "day":
+    case "week":
+      return iso.slice(0, 10);
+    case "month":
+      return iso.slice(0, 7);
+    case "year":
+      return iso.slice(0, 4);
+  }
+}
+
+/** The most bars a time axis will draw, so a typo in a date cannot ask for millions. */
+const MAX_PERIODS = 2000;
+
+/**
+ * The time axis: each row's interval start, and the label of every interval from the first to
+ * the last, in order.
+ */
+function timeAxis<T extends object>(
+  data: readonly T[],
+  x: string,
+  options: BarChartOptions<T>,
+): { starts: number[]; names: string[]; byRow: string[] } {
+  const interval = options.interval ?? "day";
+  const rows = calendarDates(data.map((row, i) => readDate(KIND, row, x, i)));
+  const starts = rows.map((d) => floorTo(d.getTime(), interval));
+  const label = (start: number): string =>
+    options.formatX ? options.formatX(new Date(start)) : labelFor(start, interval);
+  const first = minOf(starts);
+  const last = maxOf(starts);
+  const periods: number[] = [];
+  for (let t = first; t <= last; t = nextAfter(t, interval)) {
+    periods.push(t);
+    if (periods.length > MAX_PERIODS) {
+      throw new Error(
+        `${KIND}: the time axis would need more than ${MAX_PERIODS} bars between the first and last row; use a longer interval`,
+      );
+    }
+  }
+  const names = periods.map(label);
+  if (new Set(names).size !== names.length) {
+    throw new Error(`${KIND}: formatX gives two intervals the same label`);
+  }
+  return { starts: periods, names, byRow: starts.map(label) };
+}
 
 /**
  * Allows relative and http(s) links only, so data can never produce a `javascript:` URL. Browsers
@@ -155,8 +273,16 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
   const categoryLabel = options.xLabel === undefined ? x : options.xLabel;
   const soleSeries = valueLabel ?? "Value";
 
-  const rawX = data.map((row, i) => readCategory(KIND, row, x, i));
-  const xNames = domainOf(KIND, x, rawX, options.xDomain);
+  const time = options.xType === "time";
+  if (time && options.xDomain) {
+    throw new Error(`${KIND}: xDomain is not used with xType "time", which builds its own axis`);
+  }
+  if (!time && (options.interval !== undefined || options.formatX !== undefined)) {
+    throw new Error(`${KIND}: interval and formatX belong to xType "time"`);
+  }
+  const axis = time ? timeAxis(data, x, options) : undefined;
+  const rawX = axis ? axis.byRow : data.map((row, i) => readCategory(KIND, row, x, i));
+  const xNames = axis ? axis.names : domainOf(KIND, x, rawX, options.xDomain);
   const seriesOf = (row: T, i: number): string =>
     series === undefined ? soleSeries : readLabel(KIND, row, series, i);
   const seriesNames =
@@ -232,7 +358,9 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
   const longest = Math.max(maxOf(xNames.map((n) => n.length)), 1);
   const width = options.width ?? 640;
   const height = options.height ?? (horizontal ? Math.max(120, xNames.length * 28 + 60) : 320);
-  const thinned = thinTicks(xNames, options.maxXTicks);
+  // A time axis has many bars and long labels, so it thins them to fit unless told otherwise.
+  const fit = time ? Math.max(2, Math.floor((width - 80) / (longest * 7 + 12))) : undefined;
+  const thinned = thinTicks(xNames, options.maxXTicks ?? fit);
   const categoryScale = {
     domain: grouped ? seriesNames : xNames,
     label: grouped ? null : categoryLabel,

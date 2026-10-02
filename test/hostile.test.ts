@@ -100,6 +100,36 @@ const RENDERERS: Record<string, Render> = {
       alt: p,
       formatX: (v) => `${p}${String(v)}`,
     }),
+  "lineChart forecast": (p) =>
+    lineChart({
+      data: [
+        { t: 1, s: p, v: 1, lo: 0.5, hi: 1.5 },
+        { t: 2, s: p, v: 2, lo: 1, hi: 3 },
+        { t: 3, s: p, v: 3, lo: 2, hi: 4 },
+      ],
+      x: "t",
+      y: "v",
+      series: "s",
+      band: { lower: "lo", upper: "hi", label: p },
+      forecastFrom: 1,
+      forecastLabel: p,
+      title: p,
+      alt: p,
+    }),
+  "barChart time axis": (p) =>
+    barChart({
+      data: [
+        { t: "2026-01-01", s: p },
+        { t: "2026-01-03", s: p },
+      ],
+      x: "t",
+      xType: "time",
+      series: "s",
+      formatX: (d) => `${p}${d.toISOString().slice(0, 10)}`,
+      xLabel: p,
+      title: p,
+      alt: p,
+    }),
   areaChart: (p) =>
     areaChart({
       data: [

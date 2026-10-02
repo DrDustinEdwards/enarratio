@@ -162,8 +162,8 @@ all into `site/dist`.
 
 | Function | Import | Draws |
 |---|---|---|
-| `barChart` | `enarratio/plot` | Bars, stacked or grouped, vertical or horizontal; counts rows when no value is given |
-| `lineChart` | `enarratio/plot` | Lines over time or any number, with gaps, reference lines, event markers, direct labels, log y |
+| `barChart` | `enarratio/plot` | Bars, stacked or grouped, vertical or horizontal, on a category or a time axis; counts rows when no value is given |
+| `lineChart` | `enarratio/plot` | Lines over time or any number, with gaps, reference lines, event markers, direct labels, log y, and a forecast band with the line dashed after a chosen x |
 | `areaChart` | `enarratio/plot` | Stacked areas over time |
 | `scatterPlot` | `enarratio/plot` | Points on linear or log axes, symbols per series, optional regression with 95% band |
 | `heatmap` | `enarratio/plot` | A grid on the theme's sequential ramp, with printed values and labelled bins |

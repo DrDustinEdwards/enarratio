@@ -30,9 +30,11 @@ const escapeText = (s: string): string =>
 const ORDER = [
   "stacked-bar",
   "years",
+  "runs",
   "grouped-bar",
   "horizontal-bar",
   "line",
+  "forecast",
   "area",
   "scatter",
   "heatmap",

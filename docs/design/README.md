@@ -29,6 +29,7 @@ Each record says where a decision came from:
 | [0010](0010-rename-to-enarratio.md) | The rename from Abscissa to Enarratio |
 | [0011](0011-theming-from-outside.md) | Theming from outside: the custom property contract and the base rules |
 | [0012](0012-subpath-exports.md) | One package, subpath exports, optional peers |
+| [0013](0013-forecasts-and-time-bars.md) | Forecast bands, the forecast boundary and time-axis bars |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

@@ -16,8 +16,15 @@ then finish (bump 0.2.0, CHANGELOG, remove PROGRESS.md, CI green, merge, deploym
   (node vs browser factory); package.json exports/imports/peers; scripts/size-check.mjs (`npm run size`, in CI);
   test/package.test.ts; examples/tests/scripts import lines moved; README/api.md/CHANGELOG/design 0012.
 
+- Steps 1 and 2 pushed; CI green on both (browser suite included).
+- Step 3 (in progress/pushed): lineChart band/forecastFrom/forecastLabel; barChart xType time/interval/formatX;
+  examples forecast.ts and runs.ts (gallery ORDER updated); tests forecast/bar-time/hostile; docs; design 0013.
+  New examples need Linux visual baselines (forecast, runs x default/dustinedwards x light/dark): the visual
+  workflow (workflow_dispatch) now also force-pushes images to branch visual-snapshots/<branch>; fetch it,
+  copy only the new PNGs into test/browser/__snapshots__/linux/, view them, commit.
+
 ## Next
-- Verify CI on step 2 push, fix. Then step 3 (forecast band, time-axis bars).
+- Get step 3 CI green (commit baselines). Then step 4 (timeline + heatStrip in core).
 
 ## Decisions
 - Fallbacks at the point of use, not a :root block (0011).

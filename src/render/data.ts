@@ -129,3 +129,24 @@ export function requireSize(kind: string, name: string, value: number | undefine
     throw new Error(`${kind}: ${name} must be a positive number, is ${value}`);
   }
 }
+
+/** Milliseconds in a UTC day. */
+export const DAY = 86_400_000;
+
+/**
+ * Dates made at local midnight (`new Date(2025, 0, 6)`) mean a calendar date, but east of UTC
+ * that instant falls on the previous UTC day. When every Date is at local midnight and not at
+ * UTC midnight, each is moved to UTC midnight of its local date (A3).
+ */
+export function calendarDates(dates: Date[]): Date[] {
+  const localMidnight = dates.every(
+    (d) =>
+      d.getHours() === 0 &&
+      d.getMinutes() === 0 &&
+      d.getSeconds() === 0 &&
+      d.getMilliseconds() === 0,
+  );
+  const utcMidnight = dates.every((d) => d.getTime() % DAY === 0);
+  if (!localMidnight || utcMidnight) return dates;
+  return dates.map((d) => new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())));
+}

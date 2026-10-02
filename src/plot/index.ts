@@ -11,6 +11,7 @@ export { type HeatmapOptions, heatmap } from "./heatmap.js";
 export {
   areaChart,
   type EventMarker,
+  type LineBand,
   type LineChartOptions,
   lineChart,
   type ReferenceLine,

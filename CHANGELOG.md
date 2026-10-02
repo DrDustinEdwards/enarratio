@@ -46,6 +46,16 @@ Becomes 0.2.0. Design records 0011 onward explain each decision.
 
 ### Added
 
+- `lineChart` `band` (`lower` and `upper` fields drawn as a shaded area behind
+  each line), `forecastFrom` (the line dashed after an x, points hollow, a
+  labelled rule at the boundary) and `forecastLabel`. The data table marks
+  forecast rows in a `Forecast` column and carries the band's bounds as
+  columns. The caller computes the forecast; Enarratio only draws it (design
+  record 0013).
+- `barChart` time axis: `xType: "time"` with `interval` (`hour`, `day`, `week`,
+  `month`, `year`) and `formatX`. One bar slot per interval from the first row
+  to the last, labelled automatically; works for stacked, grouped and
+  horizontal bars.
 - `enarratio/plot`, `enarratio/science` and `enarratio/themes` entry points.
 - `baseStylesheet()` and `enarratio/base.css`: the theme-free rules.
 - Every fixed size, weight, radius and animation timing in the CSS is a custom

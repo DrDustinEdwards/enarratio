@@ -1,5 +1,7 @@
 import * as Plot from "@observablehq/plot";
 import {
+  calendarDates,
+  DAY,
   defaultFormat,
   domainOf,
   type KeysOfType,
@@ -70,8 +72,39 @@ export interface SeriesChartOptions<T extends object> extends FigureOptions {
   readonly markers?: readonly EventMarker[];
 }
 
+/**
+ * A shaded band around each series' line, such as a forecast interval or a confidence interval,
+ * from two fields the caller computed. Enarratio draws bounds; it does not estimate them.
+ */
+export interface LineBand<T extends object> {
+  /** The field for the band's lower bound at each x. `null` leaves a gap, with `upper`. */
+  readonly lower: KeysOfType<T, number | null | undefined>;
+  /** The field for the band's upper bound; never below `lower`. */
+  readonly upper: KeysOfType<T, number | null | undefined>;
+  /**
+   * What the band is, e.g. "95% interval". It names the band's data table columns ("95%
+   * interval, lower") and its hover details; without it they say "lower bound" and "upper bound".
+   */
+  readonly label?: string;
+}
+
 /** Options for {@link lineChart}. */
 export interface LineChartOptions<T extends object> extends SeriesChartOptions<T> {
+  /**
+   * A shaded band around each line, from `lower` and `upper` fields (a forecast interval, a
+   * confidence interval). Drawn in the series' color, behind the line, and carried in the data
+   * table as two columns per series. Every row has both bounds or neither.
+   */
+  readonly band?: LineBand<T>;
+  /**
+   * The x after which the data are forecast: the line is dashed from here on, points are drawn
+   * hollow, a labelled rule marks the boundary, and the data table marks the rows after it
+   * (those with x greater than this). Must lie within the data's x range, before its last value.
+   * The forecast itself is computed by the caller.
+   */
+  readonly forecastFrom?: number | Date | string;
+  /** The label on the forecast boundary (default "Forecast"). */
+  readonly forecastLabel?: string;
   /** Show a dot at every value (default: only when there are 30 or fewer per series). */
   readonly points?: boolean;
   /** Label each series at the end of its line as well as in the legend. */
@@ -92,12 +125,15 @@ interface Point {
   readonly xText: string;
   readonly series: string;
   readonly value: number | null;
+  readonly lower: number | null;
+  readonly upper: number | null;
+  /** Whether the row comes after `forecastFrom`. */
+  readonly forecast: boolean;
   /** The x value's rank among all x values, for keyboard order. */
   column: number;
   readonly row: number;
 }
 
-const DAY = 86_400_000;
 const pad = (n: number): string => String(n).padStart(2, "0");
 const isoDate = (d: Date): string => d.toISOString().slice(0, 10);
 const isoDateTime = (d: Date): string =>
@@ -116,24 +152,6 @@ function yearTicks(from: number, to: number): number[] {
   return ticks;
 }
 
-/**
- * Dates made at local midnight (`new Date(2025, 0, 6)`) mean a calendar date, but east of UTC
- * that instant falls on the previous UTC day. When every Date is at local midnight and not at
- * UTC midnight, each is moved to UTC midnight of its local date (A3).
- */
-function calendarDates(dates: Date[]): Date[] {
-  const localMidnight = dates.every(
-    (d) =>
-      d.getHours() === 0 &&
-      d.getMinutes() === 0 &&
-      d.getSeconds() === 0 &&
-      d.getMilliseconds() === 0,
-  );
-  const utcMidnight = dates.every((d) => d.getTime() % DAY === 0);
-  if (!localMidnight || utcMidnight) return dates;
-  return dates.map((d) => new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())));
-}
-
 interface Prepared {
   readonly points: Point[];
   readonly seriesNames: string[];
@@ -142,9 +160,15 @@ interface Prepared {
   readonly format: (value: number) => string;
   readonly xLabel: string | null;
   readonly yLabel: string | null;
+  /** `forecastFrom` as a number (epoch milliseconds for time), when given. */
+  readonly forecastAt?: number;
+  readonly band?: { readonly lower: string; readonly upper: string; readonly label?: string };
 }
 
-function prepare<T extends object>(kind: string, options: SeriesChartOptions<T>): Prepared {
+type Forecastable<T extends object> = SeriesChartOptions<T> &
+  Partial<Pick<LineChartOptions<T>, "band" | "forecastFrom">>;
+
+function prepare<T extends object>(kind: string, options: Forecastable<T>): Prepared {
   const { data, x, y, series } = options;
   validateFigure(kind, options);
   if (data.length === 0) throw new Error(`${kind}: data is empty`);
@@ -155,10 +179,29 @@ function prepare<T extends object>(kind: string, options: SeriesChartOptions<T>)
   const xLabel = options.xLabel === undefined ? x : options.xLabel;
   const sole = yLabel ?? "Value";
 
-  const xs: (number | Date)[] = time
-    ? calendarDates(data.map((row, i) => readDate(kind, row, x, i)))
+  // forecastFrom is read with the data, so calendar dates treat both the same way.
+  const given = options.forecastFrom;
+  const read: (number | Date)[] = time
+    ? data.map((row, i) => readDate(kind, row, x, i))
     : data.map((row, i) => readNumber(kind, row, x, i));
+  if (given !== undefined) {
+    read.push(
+      time
+        ? readDate(kind, { forecastFrom: given }, "forecastFrom", 0)
+        : readNumber(kind, { forecastFrom: given }, "forecastFrom", 0),
+    );
+  }
+  const all = time ? calendarDates(read as Date[]) : read;
+  const forecastBoundary = given !== undefined ? Number(all[all.length - 1]) : undefined;
+  const xs = given !== undefined ? all.slice(0, -1) : all;
   const numbers = xs.map(Number);
+  if (forecastBoundary !== undefined) {
+    if (!(forecastBoundary >= minOf(numbers) && forecastBoundary < maxOf(numbers))) {
+      throw new Error(
+        `${kind}: forecastFrom must lie within the x range and before its last value, so that some rows are forecast`,
+      );
+    }
+  }
   const years = !time && isYears(numbers);
   const subDaily = time && numbers.some((n) => n % DAY !== 0);
   const formatX = (v: number | Date): string => {
@@ -179,6 +222,7 @@ function prepare<T extends object>(kind: string, options: SeriesChartOptions<T>)
           options.seriesDomain,
         );
   const rowOf = new Map(seriesNames.map((name, i) => [name, i]));
+  const band = options.band;
   // Rows are identified by the x value itself, not its text, so hourly data with a daily label
   // (or any coarse formatX) is still distinct (F3).
   const seen = new Set<string>();
@@ -186,12 +230,27 @@ function prepare<T extends object>(kind: string, options: SeriesChartOptions<T>)
     const xv = xs[i] as number | Date;
     const at = Number(xv);
     const name = seriesOf(row, i);
+    const lower = band ? readNumberOrNull(kind, row, band.lower, i) : null;
+    const upper = band ? readNumberOrNull(kind, row, band.upper, i) : null;
+    if (band && (lower === null) !== (upper === null)) {
+      throw new Error(
+        `${kind}: row ${i + 1} has only one of the band's "${band.lower}" and "${band.upper}"; give both or neither`,
+      );
+    }
+    if (lower !== null && upper !== null && lower > upper) {
+      throw new Error(
+        `${kind}: row ${i + 1} band lower bound ${lower} is above its upper bound ${upper}`,
+      );
+    }
     const point: Point = {
       x: xv,
       at,
       xText: formatX(xv),
       series: name,
       value: readNumberOrNull(kind, row, y, i),
+      lower,
+      upper,
+      forecast: forecastBoundary !== undefined && at > forecastBoundary,
       column: 0,
       row: rowOf.get(name) ?? 0,
     };
@@ -206,7 +265,17 @@ function prepare<T extends object>(kind: string, options: SeriesChartOptions<T>)
   points.sort((a, b) => a.at - b.at || a.row - b.row);
   const ranks = new Map([...new Set(points.map((p) => p.at))].map((at, i) => [at, i]));
   for (const p of points) p.column = ranks.get(p.at) ?? 0;
-  return { points, seriesNames, time, years, format, xLabel, yLabel };
+  return {
+    points,
+    seriesNames,
+    time,
+    years,
+    format,
+    xLabel,
+    yLabel,
+    ...(forecastBoundary !== undefined ? { forecastAt: forecastBoundary } : {}),
+    ...(band ? { band } : {}),
+  };
 }
 
 function annotations(
@@ -241,25 +310,62 @@ function annotations(
   return marks;
 }
 
-function table(prepared: Prepared, xColumn: string) {
+/** The data table column for one bound of a band, e.g. "Berlin 95% interval, lower". */
+function boundColumn(prepared: Prepared, series: string, multi: boolean, bound: string): string {
+  const what = prepared.band?.label ? `${prepared.band.label}, ${bound}` : `${bound} bound`;
+  if (multi) return `${series} ${what}`;
+  return `${what.charAt(0).toUpperCase()}${what.slice(1)}`;
+}
+
+function table(prepared: Prepared, xColumn: string, multi: boolean) {
   const rowsByX = new Map<number, string>();
   for (const p of prepared.points) if (!rowsByX.has(p.at)) rowsByX.set(p.at, p.xText);
-  const cell = new Map(prepared.points.map((p) => [markKey(p.at, p.series), p.value]));
+  const cell = new Map(prepared.points.map((p) => [markKey(p.at, p.series), p]));
+  const bounds = prepared.band
+    ? prepared.seriesNames.flatMap((s) => [
+        { series: s, which: "lower" as const, column: boundColumn(prepared, s, multi, "lower") },
+        { series: s, which: "upper" as const, column: boundColumn(prepared, s, multi, "upper") },
+      ])
+    : [];
+  const forecast = prepared.forecastAt !== undefined;
   return {
-    columns: [xColumn, ...prepared.seriesNames],
+    columns: [
+      xColumn,
+      ...prepared.seriesNames,
+      ...bounds.map((b) => b.column),
+      ...(forecast ? ["Forecast"] : []),
+    ],
     rows: [...rowsByX].map(([at, text]) => [
       text,
       ...prepared.seriesNames.map((s) => {
-        const v = cell.get(markKey(at, s));
+        const v = cell.get(markKey(at, s))?.value;
         return v === null || v === undefined ? "" : prepared.format(v);
       }),
+      ...bounds.map((b) => {
+        const v = cell.get(markKey(at, b.series))?.[b.which];
+        return v === null || v === undefined ? "" : prepared.format(v);
+      }),
+      ...(forecast ? [forecastAt(prepared, at) ? "Yes" : ""] : []),
     ]),
   };
 }
 
+/** Whether an x value comes after the forecast boundary. */
+function forecastAt(prepared: Prepared, at: number): boolean {
+  return prepared.forecastAt !== undefined && at > prepared.forecastAt;
+}
+
 function describePoint(prepared: Prepared, multi: boolean, xColumn: string) {
-  return (p: Point): string =>
-    `${multi ? `${p.series}, ` : ""}${xColumn} ${p.xText}: ${p.value === null ? "no data" : prepared.format(p.value)}`;
+  return (p: Point): string => {
+    const notes: string[] = [];
+    if (p.forecast) notes.push("forecast");
+    if (prepared.band && p.lower !== null && p.upper !== null) {
+      notes.push(
+        `${prepared.band.label ?? "range"} ${prepared.format(p.lower)} to ${prepared.format(p.upper)}`,
+      );
+    }
+    return `${multi ? `${p.series}, ` : ""}${xColumn} ${p.xText}: ${p.value === null ? "no data" : prepared.format(p.value)}${notes.length > 0 ? ` (${notes.join("; ")})` : ""}`;
+  };
 }
 
 /** The x scale shared by line and area charts. */
@@ -293,6 +399,15 @@ function datum(p: Point, x: string, series: string | undefined) {
 
 const LINE = "lineChart";
 
+/** The labelled rule where observed data end and the forecast begins. */
+function forecastRule(at: number | Date, label: string): Plot.Markish[] {
+  const rule = [{ x: at, label }];
+  return [
+    Plot.ruleX(rule, { x: "x", strokeDasharray: "2,3" }),
+    Plot.text(rule, { x: "x", text: "label", frameAnchor: "top", textAnchor: "start", dx: 4 }),
+  ];
+}
+
 /**
  * A line chart over time or any continuous x: one series or several, with gaps where values are
  * missing, reference lines and event markers. Every value is a keyed point that shows hover
@@ -320,6 +435,14 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
       );
     }
   }
+  if (log) {
+    const low = points.find((p) => p.lower !== null && p.lower <= 0);
+    if (low) {
+      throw new Error(
+        `${LINE}: the band's lower bound for ${low.series} at ${low.xText} is ${low.lower}, which a log axis cannot show`,
+      );
+    }
+  }
   const plan = planSeries(LINE, seriesNames, options.colors);
   const multi = options.series !== undefined;
   const xColumn = prepared.xLabel ?? options.x;
@@ -328,25 +451,68 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
   const perSeries = present.length / seriesNames.length;
   const showPoints = options.points ?? perSeries <= 30;
 
+  const boundary = prepared.forecastAt;
+  const line = {
+    x: "x",
+    y: "value",
+    z: "series",
+    stroke: "series",
+    strokeWidth: 2,
+    curve: "linear",
+  } as const;
+  // Each series' dashed stretch starts at its last point on or before the boundary, so the line
+  // stays joined where the data change from observed to forecast.
+  const dashed =
+    boundary === undefined
+      ? []
+      : points
+          .filter((p) => p.at > boundary)
+          .concat(
+            seriesNames.flatMap((name) => {
+              const own = points.filter((p) => p.series === name && p.at <= boundary);
+              const last = own[own.length - 1];
+              return last ? [last] : [];
+            }),
+          )
+          .sort((a, b) => a.at - b.at || a.row - b.row);
+  const hollow = boundary !== undefined;
   const marks: Plot.Markish[] = [
-    Plot.line(points, {
-      x: "x",
-      y: "value",
-      z: "series",
-      stroke: "series",
-      strokeWidth: 2,
-      curve: "linear",
-    }),
+    ...(prepared.band
+      ? [
+          Plot.areaY(points, {
+            x: "x",
+            y1: "lower",
+            y2: "upper",
+            z: "series",
+            fill: "series",
+            fillOpacity: 0.18,
+            curve: "linear",
+          }),
+        ]
+      : []),
+    Plot.line(boundary === undefined ? points : points.filter((p) => p.at <= boundary), line),
+    ...(boundary === undefined ? [] : [Plot.line(dashed, { ...line, strokeDasharray: "6,4" })]),
     Plot.dot(present, {
       x: "x",
       y: "value",
       fill: "series",
       r: showPoints ? 3 : 4,
-      fillOpacity: showPoints ? 1 : 0,
+      // After the forecast boundary points are hollow: an outline in place of the fill.
+      fillOpacity: hollow ? (p: Point) => (showPoints && !p.forecast ? 1 : 0) : showPoints ? 1 : 0,
+      ...(hollow
+        ? {
+            stroke: "series",
+            strokeWidth: 1.5,
+            strokeOpacity: (p: Point) => (showPoints && p.forecast ? 1 : 0),
+          }
+        : {}),
       title: describe,
       render: keyed(present, (p) => datum(p, options.x, options.series)),
     }),
     ...annotations(options, time, LINE),
+    ...(boundary === undefined
+      ? []
+      : forecastRule(time ? new Date(boundary) : boundary, options.forecastLabel ?? "Forecast")),
   ];
   if (options.directLabels && multi) {
     marks.push(
@@ -396,7 +562,7 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
     legend: multi ? plan.legend : [],
     ...(multi && options.series ? { seriesField: options.series } : {}),
     slotColors: plan.slotColors,
-    table: table(prepared, xColumn),
+    table: table(prepared, xColumn, multi),
   });
 }
 
@@ -485,6 +651,6 @@ export function areaChart<T extends object>(options: SeriesChartOptions<T>): str
     legend: multi ? plan.legend : [],
     ...(multi && options.series ? { seriesField: options.series } : {}),
     slotColors: plan.slotColors,
-    table: table(prepared, xColumn),
+    table: table(prepared, xColumn, multi),
   });
 }

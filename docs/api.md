@@ -169,6 +169,19 @@ one row per item (a CV entry, a case) is enough.
   nth label is printed from the first.
 - `directLabels`: print each series' name inside the stacked segments it fits
   in, so series are told apart by text as well as color. Stacked layout only.
+- `xType: "time"`, with `interval`, `formatX`: a time axis. `x` is a Date, an
+  ISO 8601 string or epoch milliseconds; each row falls in the `interval`
+  (`"hour"`, `"day"` the default, `"week"` starting Monday, `"month"` or
+  `"year"`, all UTC) that contains it, and there is one bar slot for every
+  interval from the first row's to the last's, empty ones included, so a quiet
+  day is a gap in the chart and a zero in the table. Bars are labelled by their
+  first moment (`2026-01-05`, `2026-01`, `2026`, `2026-01-05 14:00 UTC`) or by
+  `formatX(start)`, which must give every interval its own label. Rows in an
+  interval and series are summed, or counted when `y` is omitted. Works with
+  stacked and grouped series and horizontal bars. Long axes print every nth
+  label unless `maxXTicks` says otherwise; every bar keeps its hover details
+  and table row. `xDomain` is not used with it, and `interval` and `formatX`
+  need `xType: "time"`. More than 2000 intervals throw.
 
 Links given by `href` must be relative or `http(s)`; a `//host` link, or any
 other scheme, throws. Count axes end at their last whole-number tick.
@@ -204,8 +217,32 @@ Options shared by line and area charts: `data`, `x`, `y`, `series`, `xType`
 
 ### `LineChartOptions`
 
-`SeriesChartOptions` plus `points`, `directLabels`, `yType` and `zero`. With
-`yType: "log"`, a value of zero or less throws.
+`SeriesChartOptions` plus `points`, `directLabels`, `yType`, `zero`, and the
+forecast options `band`, `forecastFrom` and `forecastLabel`. With
+`yType: "log"`, a value of zero or less (or a band lower bound of zero or less)
+throws.
+
+**Forecasts are computed by the caller; Enarratio only draws them.**
+
+- `band: { lower, upper, label? }` draws a shaded area between two fields, in
+  each series' color behind its line. A row has both bounds or neither
+  (neither is a gap in the band); a lower bound above its upper bound throws.
+  The data table gains two columns per series (`Lower bound` and `Upper bound`,
+  or `95% interval, lower` when `label` is `"95% interval"`; with several series,
+  prefixed by the series name), and hover details say the interval.
+- `forecastFrom` is the x after which the data are a forecast: rows with x
+  greater than it. The line is dashed from there (each series joined to its
+  last observed point), points are hollow, a rule labelled `forecastLabel`
+  (default "Forecast") marks the boundary, and the data table gets a `Forecast`
+  column reading `Yes` on those rows. It must lie within the data's x range and
+  before the last x, so that some rows are observed and some forecast.
+- The two work apart or together. A chart without them is drawn exactly as
+  before.
+
+### `LineBand`
+
+`{ lower: field; upper: field; label?: string }`: the fields holding a band's
+bounds, and what the band is called.
 
 ### `ReferenceLine`
 
