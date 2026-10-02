@@ -215,8 +215,10 @@ setting none changes nothing. The full list is in the
 [API reference](docs/api.md#custom-properties).
 
 Any chart can override a series color with `colors: { Talks: "#8a4a1b" }` or a
-light and dark pair. Two themes ship with the package: `defaultTheme`, and
-`dustinedwardsTheme`, the theme of the first site to use Enarratio.
+light and dark pair. One theme ships with the package, `defaultTheme` in `enarratio/themes`. The
+gallery's second page uses a neutral, heavily commented example theme,
+[examples/themes/example.ts](examples/themes/example.ts), written to be copied
+and edited.
 
 ## Accessibility
 

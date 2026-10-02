@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { exampleTheme } from "../examples/themes/example.js";
 import {
   baseStylesheet,
   checkTheme,
@@ -12,7 +13,7 @@ import {
   type Theme,
 } from "../src/index.js";
 import { deltaE2000 } from "../src/theme/color.js";
-import { defaultTheme, dustinedwardsTheme } from "../src/themes/index.js";
+import { defaultTheme } from "../src/themes/index.js";
 
 describe("contrastRatio", () => {
   it("is 21 for black on white and 1 for a color on itself", () => {
@@ -63,9 +64,9 @@ describe("color vision simulation", () => {
 });
 
 describe("checkTheme", () => {
-  it("passes both built-in themes with no errors", () => {
+  it("passes the built-in theme and the gallery's example theme with no errors", () => {
     expect(checkTheme(defaultTheme).ok).toBe(true);
-    expect(checkTheme(dustinedwardsTheme).ok).toBe(true);
+    expect(checkTheme(exampleTheme).ok).toBe(true);
   });
 
   it("reports low text contrast as an error, per scheme", () => {

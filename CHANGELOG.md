@@ -44,6 +44,14 @@ Becomes 0.2.0. Design records 0011 onward explain each decision.
   installs none of them. The versions tested are ranges `^0.6.17`, `^3.0.0` and
   `^0.18.13`.
 
+### Removed
+
+- **`dustinedwardsTheme`**, with its export and its API section, because
+  dustinedwards.info is being redesigned (design record 0016). A site that used
+  it should keep its own theme object; the removed theme was a `Theme` like any
+  other. The gallery's second page, `/dustinedwards`, is now `/example`, a
+  neutral worked example theme (`examples/themes/example.ts`).
+
 ### Added
 
 - `lineChart` `band` (`lower` and `upper` fields drawn as a shaded area behind

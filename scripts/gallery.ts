@@ -10,7 +10,8 @@ import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } fro
 import { basename, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { checkTheme, stylesheet, type Theme } from "enarratio";
-import { defaultTheme, dustinedwardsTheme } from "enarratio/themes";
+import { defaultTheme } from "enarratio/themes";
+import { exampleTheme } from "../examples/themes/example.ts";
 
 const root = resolve(import.meta.dirname, "..");
 const outDir = resolve(process.argv[2] ?? join(root, "site", "dist"));
@@ -162,7 +163,7 @@ mkdirSync(outDir, { recursive: true });
 /** Each page's theme, file and stylesheet. */
 const pages: [Theme, string, string][] = [
   [defaultTheme, "index.html", "index.css"],
-  [dustinedwardsTheme, "dustinedwards.html", "dustinedwards.css"],
+  [exampleTheme, "example.html", "example.css"],
 ];
 /**
  * The address a page is linked at: the host (Cloudflare static assets) serves index.html at the

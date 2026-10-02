@@ -606,11 +606,8 @@ refuses.
 
 ### `defaultTheme`
 
-From `enarratio/themes`. Enarratio's own theme: neutral surfaces, system fonts.
-
-### `dustinedwardsTheme`
-
-The theme of dustinedwards.info, and a worked example of a site theme.
+From `enarratio/themes`. Enarratio's own theme: neutral surfaces, system fonts. The package's only theme;
+the gallery's example theme (`examples/themes/example.ts`) shows how to write another.
 
 ## Custom properties
 

@@ -77,7 +77,7 @@ function compare(name: string, actual: Uint8Array): string | null {
 
 const pages = [
   ["default", "index.html"],
-  ["dustinedwards", "dustinedwards.html"],
+  ["example", "example.html"],
 ] as const;
 const schemes = ["light", "dark"] as const;
 

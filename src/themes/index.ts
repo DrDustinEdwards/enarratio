@@ -5,4 +5,3 @@
  */
 
 export { defaultTheme } from "./default.js";
-export { dustinedwardsTheme } from "./dustinedwards.js";

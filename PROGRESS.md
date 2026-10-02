@@ -35,10 +35,17 @@ then finish (bump 0.2.0, CHANGELOG, remove PROGRESS.md, CI green, merge, deploym
   example primitive-tables, tests/companions.test.ts, hostile coverage, docs, design 0015.
   Needs Linux baselines for primitive-tables (dispatch visual-snapshots workflow, copy NEW pngs).
 
+- Step 5 baseline (primitive-tables) copied in.
+- Step 6: dustinedwardsTheme deleted (src, exports, api.md, README, tests adapted to exampleTheme,
+  gallery page /dustinedwards -> /example from examples/themes/example.ts, design 0016, dustinedwards-* images removed).
+  Needs Linux baselines for the example-* images: dispatch visual-snapshots workflow, copy NEW example-* pngs.
+
 ## Next
-- Step 6: remove dustinedwardsTheme everywhere (src/themes/dustinedwards.ts, exports, tests that name it, README,
-  docs, gallery second page becomes a neutral documented example theme; replace dustinedwards-* baselines and
-  visual/a11y page list). Then finish: bump 0.2.0, CHANGELOG, remove PROGRESS.md, CI green, merge, deployment check.
+- Get CI green on step 6 (commit example-* baselines). Then finish: bump package.json to 0.2.0, finish CHANGELOG
+  (every default changed + why), update paper if needed (check paper/paper.md mentions), remove PROGRESS.md,
+  confirm CI green on final commit, merge PR with merge commit (mcp merge_pull_request, method merge),
+  then check gallery deploy (workflow gallery.yml on push to main; needs CLOUDFLARE secrets) and fetch the site.
+  Do NOT publish to npm or tag.
 
 ## Decisions
 - Fallbacks at the point of use, not a :root block (0011).
