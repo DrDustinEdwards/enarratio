@@ -6,7 +6,6 @@
  */
 
 import { element, escapeHtml } from "../html.js";
-import type { ScaleDescription } from "./plot.js";
 
 /** A color for one series: any CSS color, or a pair for light and dark. */
 export type SeriesColor = string | { readonly light: string; readonly dark: string };
@@ -33,6 +32,13 @@ export interface FigureOptions {
    * assistive technology. It is always present.
    */
   readonly dataTable?: "details" | "visually-hidden";
+}
+
+/** A scale as the enhancement layer needs it to turn a pointer position back into data. */
+export interface ScaleDescription {
+  readonly type: string;
+  readonly domain: readonly (number | string)[];
+  readonly range: readonly number[];
 }
 
 /** A table of the values a chart draws. The first column holds row headers. */

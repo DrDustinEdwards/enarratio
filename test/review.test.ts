@@ -5,25 +5,20 @@
  */
 import { afterEach, describe, expect, it } from "vitest";
 import {
-  areaChart,
-  barChart,
   checkTheme,
   colorDifference,
   contrastRatio,
-  defaultTheme,
   defineTheme,
-  dustinedwardsTheme,
-  heatmap,
-  lineChart,
   progressRing,
-  scatterPlot,
   sparkline,
   stylesheet,
   type Theme,
-  titerPlot,
   uptimeStrip,
 } from "../src/index.js";
+import { areaChart, barChart, heatmap, lineChart, scatterPlot } from "../src/plot/index.js";
+import { titerPlot } from "../src/science/index.js";
 import { labelColor } from "../src/theme/color.js";
+import { defaultTheme, dustinedwardsTheme } from "../src/themes/index.js";
 import { keyedMarks, parse } from "./helpers.js";
 
 const tickLabels = (fig: Element, axis: "x" | "y"): string[] =>

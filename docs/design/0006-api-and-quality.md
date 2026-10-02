@@ -31,6 +31,8 @@ minimal."
 
 ## Dependencies
 
+(Since 0.2.0 these are optional peer dependencies of the entries that use them: see [0012](0012-subpath-exports.md).)
+
 | Package | Why |
 |---|---|
 | `@observablehq/plot` | Scales, axes and marks, drawn as SVG (author's decision). |

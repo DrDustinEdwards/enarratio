@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { areaChart, lineChart } from "../src/index.js";
+import { areaChart, lineChart } from "../src/plot/index.js";
 import { keyedMarks, parse } from "./helpers.js";
 
 const weekly = [

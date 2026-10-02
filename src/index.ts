@@ -1,30 +1,16 @@
 /**
- * Enarratio: accessible, server-rendered charts and scientific figures for the web.
+ * Enarratio core: accessible, server-rendered charts and scientific figures for the web.
  *
- * Every chart function returns HTML (a `<figure>`, or an `<svg>` for primitives) that reads
- * without scripts. Include {@link stylesheet} once per page for the theme, and optionally
- * `enhance()` from `enarratio/enhance` for hover, keyboard and filter interactions.
+ * The root import has no runtime dependencies. It holds the theme types and stylesheet, the
+ * color checks, the HTML helpers and figure assembly that every chart is built from, and the
+ * small primitives (sparkline, progress ring, uptime strip), which also run in the browser.
+ * Charts live in `enarratio/plot` and `enarratio/science`, and the interaction layer in
+ * `enarratio/enhance`. Include {@link stylesheet} (or `enarratio/base.css`) once per page.
  *
  * @packageDocumentation
  */
 
-export { type BarChartOptions, barChart } from "./charts/bar.js";
-export { type HeatmapOptions, heatmap } from "./charts/heatmap.js";
-export {
-  areaChart,
-  type EventMarker,
-  type LineChartOptions,
-  lineChart,
-  type ReferenceLine,
-  type SeriesChartOptions,
-} from "./charts/line.js";
-export {
-  type NetworkChartOptions,
-  type NetworkLink,
-  type NetworkNode,
-  networkChart,
-} from "./charts/network.js";
-export { type ScatterPlotOptions, scatterPlot } from "./charts/scatter.js";
+export { type AttributeValue, element, escapeHtml } from "./html.js";
 export { type ProgressRingOptions, progressRing } from "./primitives/progress-ring.js";
 export { type SparklineOptions, sparkline } from "./primitives/sparkline.js";
 export {
@@ -33,10 +19,18 @@ export {
   type UptimeStripOptions,
   uptimeStrip,
 } from "./primitives/uptime-strip.js";
-export type { FigureOptions, SeriesColor } from "./render/figure.js";
-export { type GenomeFeature, type GenomeTrackOptions, genomeTrack } from "./science/genome.js";
-export { type GeometricSummary, geometricSummary } from "./science/stats.js";
-export { type DilutionSeries, type TiterPlotOptions, titerPlot } from "./science/titer.js";
+export {
+  type DataTable,
+  type FigureOptions,
+  type FigureParts,
+  figure,
+  type LegendItem,
+  type RampItem,
+  type ScaleDescription,
+  type SeriesColor,
+  slotStyle,
+  validateFigure,
+} from "./render/figure.js";
 export {
   type CheckIssue,
   type CheckReport,
@@ -62,5 +56,3 @@ export type {
   StatusColors,
   Theme,
 } from "./theme/types.js";
-export { defaultTheme } from "./themes/default.js";
-export { dustinedwardsTheme } from "./themes/dustinedwards.js";

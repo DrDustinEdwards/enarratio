@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { genomeTrack, geometricSummary, titerPlot } from "../src/index.js";
+import { genomeTrack, geometricSummary, titerPlot } from "../src/science/index.js";
 import { tCritical95 } from "../src/science/stats.js";
 import { keyedMarks, parse } from "./helpers.js";
 

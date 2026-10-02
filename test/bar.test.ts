@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barChart } from "../src/index.js";
+import { barChart } from "../src/plot/index.js";
 import { keyedMarks, parse } from "./helpers.js";
 
 const entries = [

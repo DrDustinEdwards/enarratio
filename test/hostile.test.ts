@@ -6,19 +6,9 @@
  */
 import { parseHTML } from "linkedom";
 import { describe, expect, it } from "vitest";
-import {
-  areaChart,
-  barChart,
-  genomeTrack,
-  heatmap,
-  lineChart,
-  networkChart,
-  progressRing,
-  scatterPlot,
-  sparkline,
-  titerPlot,
-  uptimeStrip,
-} from "../src/index.js";
+import { progressRing, sparkline, uptimeStrip } from "../src/index.js";
+import { areaChart, barChart, heatmap, lineChart, scatterPlot } from "../src/plot/index.js";
+import { genomeTrack, networkChart, titerPlot } from "../src/science/index.js";
 
 const PAYLOADS = [
   "<script>window.pwned=1</script>",

@@ -23,12 +23,17 @@ function exportedNames(source: string): string[] {
   return [...names];
 }
 
+const ENTRIES = [
+  "src/index.ts",
+  "src/plot/index.ts",
+  "src/science/index.ts",
+  "src/themes/index.ts",
+  "src/enhance/index.ts",
+];
+
 describe("documentation", () => {
   const api = read("docs/api.md");
-  const publicNames = [
-    ...exportedNames(read("src/index.ts")),
-    ...exportedNames(read("src/enhance/index.ts")),
-  ];
+  const publicNames = [...ENTRIES.flatMap((entry) => exportedNames(read(entry)))];
 
   it("finds the public API", () => {
     expect(publicNames).toContain("barChart");

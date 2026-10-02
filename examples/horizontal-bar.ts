@@ -1,5 +1,5 @@
 // A ranking with long category names reads best as horizontal bars.
-import { barChart } from "enarratio";
+import { barChart } from "enarratio/plot";
 
 const pages = [
   { page: "Teaching and mentoring", views: 1840 },

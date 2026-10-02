@@ -7,6 +7,59 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+Becomes 0.2.0. Design records 0011 onward explain each decision.
+
+### Breaking
+
+- **The root import is core only.** Every chart moved to a subpath; markup,
+  class names, custom properties, options and return values are unchanged, so
+  stored rendered charts stay valid and only import lines change:
+
+  ```ts
+  // before
+  import { barChart, lineChart, areaChart, scatterPlot, heatmap } from "enarratio";
+  // after
+  import { barChart, lineChart, areaChart, scatterPlot, heatmap } from "enarratio/plot";
+
+  // before
+  import { genomeTrack, titerPlot, geometricSummary, networkChart } from "enarratio";
+  // after
+  import { genomeTrack, titerPlot, geometricSummary, networkChart } from "enarratio/science";
+
+  // before
+  import { defaultTheme } from "enarratio";
+  // after
+  import { defaultTheme } from "enarratio/themes";
+  ```
+
+  The types moved with their functions (`BarChartOptions` with `barChart`,
+  `LineChartOptions`, `SeriesChartOptions`, `ReferenceLine` and `EventMarker` with
+  `lineChart`, `GenomeFeature` with `genomeTrack`, and so on). `sparkline`,
+  `progressRing`, `uptimeStrip`, `stylesheet`, `defineTheme`, `checkTheme`, the
+  color functions, the theme types and `enhance` stay where they were.
+- **`@observablehq/plot`, `d3-force` and `linkedom` are optional peer
+  dependencies, not dependencies.** Install what the entries you import need:
+  `enarratio/plot` needs `@observablehq/plot` and `linkedom`; `enarratio/science`
+  needs `@observablehq/plot`, `d3-force` and `linkedom`. A site using only core
+  installs none of them. The versions tested are ranges `^0.6.17`, `^3.0.0` and
+  `^0.18.13`.
+
+### Added
+
+- `enarratio/plot`, `enarratio/science` and `enarratio/themes` entry points.
+- `baseStylesheet()` and `enarratio/base.css`: the theme-free rules.
+- Every fixed size, weight, radius and animation timing in the CSS is a custom
+  property with today's value as its fallback (`--enarratio-font-size-mark`,
+  `--enarratio-font-size`, `--enarratio-radius`, `--enarratio-duration-*` and
+  the rest); the contract is in docs/api.md and design record 0011. Rendered
+  output is unchanged for anyone who sets none.
+- Core exports the pieces charts are built from: `escapeHtml`, `element`,
+  `figure`, `validateFigure`, `slotStyle` and their types.
+- A `browser` export condition drops `linkedom` where a real document exists;
+  Worker, Node.js, Deno and Bun builds keep it (design record 0012).
+- CI: `npm run size` reports each entry's gzipped size and fails if core gains
+  a runtime dependency.
+
 ## [0.1.0-alpha.8] - 2026-09-29
 
 ### Changed

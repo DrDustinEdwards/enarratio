@@ -1,8 +1,29 @@
 # API reference
 
-Enarratio has two entry points. `enarratio` runs anywhere (server, build step,
-browser) and returns HTML strings. `enarratio/enhance` runs in the browser and
-adds interaction to charts already on the page.
+Enarratio is one npm package with several entry points, so a site installs and
+ships only what it uses.
+
+| Import | Holds | Needs |
+|---|---|---|
+| `enarratio` | Core: HTML helpers, theme types, `defineTheme`, `stylesheet`, `baseStylesheet`, `checkTheme`, color maths, figure and data-table assembly, the primitives | Nothing. No runtime dependencies. |
+| `enarratio/base.css` | The theme-free base rules as a stylesheet file | Nothing |
+| `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` | Peers `@observablehq/plot`, and `linkedom` outside a browser |
+| `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | Peers `@observablehq/plot` and `d3-force`, and `linkedom` outside a browser |
+| `enarratio/enhance` | Interaction for charts already on the page; runs in the browser | Nothing |
+| `enarratio/themes` | The themes that ship with the package | Nothing |
+
+`@observablehq/plot`, `d3-force` and `linkedom` are optional peer dependencies:
+npm 7 and later does not install them for a site that imports only the core.
+Install what the entries you import need, for example
+`npm install @observablehq/plot linkedom` for `enarratio/plot`. Where a bundler
+builds for browsers (the `browser` export condition) `linkedom` is dropped and
+the browser's own document is used; Worker, Node.js, Deno and Bun builds keep it.
+`enarratio/science` needs `d3-force` for `networkChart` even when a
+page draws only a titer plot; split imports are not possible within one entry.
+
+Everything returns HTML strings. Charts and primitives run anywhere (server,
+build step); the primitives, the core and `enarratio/enhance` also run in the
+browser. Where a section below names a function, its import is the entry above.
 
 Every chart function takes one options object and returns a string. Options
 are checked when the chart is drawn, and anything that would draw a wrong
@@ -19,6 +40,65 @@ feeds hostile text through every function and parses the result).
 The TypeScript declarations carry the same documentation, field by field, and
 show in any editor. This page is the map; a test fails if an export is missing
 from it.
+
+## Core building blocks
+
+The pieces every chart is made from, exported so a site can build its own figure
+with the same markup, escaping and data table as the charts it imports.
+
+### `escapeHtml`
+
+`escapeHtml(value: string): string`. Escapes text for use as HTML element
+content or as a double-quoted attribute value.
+
+### `element`
+
+`element(tag, attrs, children?): string`. One element as a string. Attribute
+values are escaped; `false` and `undefined` omit the attribute and `true` writes
+it bare. `children` is trusted markup: escape text with `escapeHtml` first.
+
+### `AttributeValue`
+
+`string | number | boolean | undefined`, the type of an attribute in `element`.
+
+### `figure`
+
+`figure(options: FigureOptions, parts: FigureParts): string`. Assembles the
+figure every chart is delivered in (title, legend, the SVG named by `alt`,
+caption and data table) from an SVG and a `DataTable`. Throws if `alt` is blank.
+
+### `FigureParts`
+
+`kind`, `svg`, `table`, and optionally `legend`, `ramp`, `seriesField`, `x`
+(a `ScaleDescription`), `orientation` and `slotColors`.
+
+### `DataTable`
+
+`{ columns: string[]; rows: string[][] }`. The first column holds row headers.
+
+### `LegendItem`
+
+`{ label: string; slot: number }`, the slot being a palette slot from 1 to 8.
+
+### `RampItem`
+
+`{ label: string; step: number }`, the step being a ramp step from 1 to 5.
+
+### `ScaleDescription`
+
+`{ type; domain; range }`: a scale as the enhancement layer needs it to turn a
+pointer position back into data.
+
+### `validateFigure`
+
+`validateFigure(kind: string, options: FigureOptions): void`. Throws unless
+`alt` is meaningful and any `width` and `height` are positive and finite.
+
+### `slotStyle`
+
+`slotStyle(colors?: ReadonlyMap<number, SeriesColor>): string | undefined`. Per-figure
+palette overrides as an inline style value; throws on a color that is not hex, a
+color function or `var()`.
 
 ## Common options
 
@@ -63,7 +143,7 @@ Each drawn datum carries `data-enarratio-key`, which is opaque (compare keys,
 never parse them), and `data-enarratio-col` and `data-enarratio-row`, its place
 in keyboard reading order.
 
-## Charts
+## Charts: `enarratio/plot`
 
 ### `barChart`
 
@@ -163,7 +243,7 @@ row (the `y` field), and arrow keys move across columns and down rows.
 
 ### `networkChart`
 
-`networkChart(options: NetworkChartOptions): string`. A force-directed
+`networkChart(options: NetworkChartOptions): string`. From `enarratio/science`. A force-directed
 network laid out on the server with d3-force. The layout is deterministic: the
 same data always draws the same picture.
 
@@ -179,7 +259,9 @@ same data always draws the same picture.
 
 `{ source: string; target: string }`, by node id.
 
-## Scientific charts
+## Scientific charts: `enarratio/science`
+
+These, and `networkChart` above, import from `enarratio/science`.
 
 ### `titerPlot`
 
@@ -229,6 +311,8 @@ the chart.
 a single value.
 
 ## Primitives
+
+From the core, `enarratio`.
 
 Primitives return an `<svg class="enarratio">` sized for inline use, named by a
 text alternative. They use the same theme. As on charts, `alt` is the text
@@ -341,7 +425,7 @@ refuses.
 
 ### `defaultTheme`
 
-Enarratio's own theme: neutral surfaces, system fonts.
+From `enarratio/themes`. Enarratio's own theme: neutral surfaces, system fonts.
 
 ### `dustinedwardsTheme`
 

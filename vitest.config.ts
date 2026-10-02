@@ -7,7 +7,11 @@ export default defineConfig({
   // Examples import "enarratio" as a reader would; in tests that means the source, not dist.
   resolve: {
     alias: [
+      { find: /^#document$/, replacement: resolve(src, "render", "document.ts") },
       { find: /^enarratio\/enhance$/, replacement: resolve(src, "enhance", "index.ts") },
+      { find: /^enarratio\/plot$/, replacement: resolve(src, "plot", "index.ts") },
+      { find: /^enarratio\/science$/, replacement: resolve(src, "science", "index.ts") },
+      { find: /^enarratio\/themes$/, replacement: resolve(src, "themes", "index.ts") },
       { find: /^enarratio$/, replacement: resolve(src, "index.ts") },
     ],
   },

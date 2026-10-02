@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { heatmap, networkChart, scatterPlot } from "../src/index.js";
+import { heatmap, scatterPlot } from "../src/plot/index.js";
+import { networkChart } from "../src/science/index.js";
 import { keyedMarks, parse } from "./helpers.js";
 
 describe("scatterPlot", () => {

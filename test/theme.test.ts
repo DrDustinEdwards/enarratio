@@ -6,14 +6,13 @@ import {
   checkTheme,
   colorDifference,
   contrastRatio,
-  defaultTheme,
   defineTheme,
-  dustinedwardsTheme,
   simulateColorVision,
   stylesheet,
   type Theme,
 } from "../src/index.js";
 import { deltaE2000 } from "../src/theme/color.js";
+import { defaultTheme, dustinedwardsTheme } from "../src/themes/index.js";
 
 describe("contrastRatio", () => {
   it("is 21 for black on white and 1 for a color on itself", () => {

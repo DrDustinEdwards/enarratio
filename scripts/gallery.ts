@@ -9,7 +9,8 @@
 import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { checkTheme, defaultTheme, dustinedwardsTheme, stylesheet, type Theme } from "enarratio";
+import { checkTheme, stylesheet, type Theme } from "enarratio";
+import { defaultTheme, dustinedwardsTheme } from "enarratio/themes";
 
 const root = resolve(import.meta.dirname, "..");
 const outDir = resolve(process.argv[2] ?? join(root, "site", "dist"));

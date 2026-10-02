@@ -16,7 +16,8 @@ It covers the charts a website needs (bars, lines, areas, scatter plots,
 heatmaps, networks, sparklines, progress rings and uptime strips) and the
 figures a laboratory needs, starting with antibody titer plots and genome
 tracks. Charts are built on [Observable Plot](https://observablehq.com/plot/)
-and [d3-force](https://d3js.org/d3-force), and return plain HTML strings, so
+and [d3-force](https://d3js.org/d3-force) (optional peer dependencies, installed
+only for the charts that use them), and return plain HTML strings, so
 Enarratio works with any server framework. It is tested on Node.js 20, 22 and 24
 and runs on Cloudflare Workers (the gallery's first site renders charts in a
 Worker); Deno and Bun should work, since it uses only standard modules, but are
@@ -60,7 +61,23 @@ websites who want charts that:
 npm install enarratio@next
 ```
 
-Enarratio is ESM only and needs Node.js 20 or later (or any runtime with
+That is the core: the theme, the stylesheet, the color checks, and the small
+primitives (sparkline, progress ring, uptime strip, and the rest), with no
+runtime dependencies. The charts are separate entry points, each with the
+packages it needs as optional peer dependencies, so a site installs only what
+it draws:
+
+| Import | Holds | Also install |
+|---|---|---|
+| `enarratio` | Core and primitives | Nothing |
+| `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` | `@observablehq/plot linkedom` |
+| `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | `@observablehq/plot d3-force linkedom` |
+| `enarratio/enhance` | Browser interaction | Nothing |
+| `enarratio/themes` | `defaultTheme` | Nothing |
+| `enarratio/base.css` | The theme-free stylesheet | Nothing |
+
+(`linkedom` is dropped from browser bundles, which use the browser's own
+document.) Enarratio is ESM only and needs Node.js 20 or later (or any runtime with
 standard ES modules). TypeScript types are included.
 
 ## Five-minute start
@@ -69,7 +86,9 @@ standard ES modules). TypeScript types are included.
 plot, and `alt`: a sentence saying what the chart shows.
 
 ```ts
-import { barChart, defaultTheme, stylesheet } from "enarratio";
+import { stylesheet } from "enarratio";
+import { barChart } from "enarratio/plot";
+import { defaultTheme } from "enarratio/themes";
 
 const entries = [
   { year: 2022, type: "Publications" },
@@ -141,19 +160,19 @@ all into `site/dist`.
 
 ## Charts
 
-| Function | Draws |
-|---|---|
-| `barChart` | Bars, stacked or grouped, vertical or horizontal; counts rows when no value is given |
-| `lineChart` | Lines over time or any number, with gaps, reference lines, event markers, direct labels, log y |
-| `areaChart` | Stacked areas over time |
-| `scatterPlot` | Points on linear or log axes, symbols per series, optional regression with 95% band |
-| `heatmap` | A grid on the theme's sequential ramp, with printed values and labelled bins |
-| `networkChart` | A force-directed network laid out on the server, deterministic |
-| `titerPlot` | Titers on a dilution axis with geometric mean, 95% CI and limit of detection |
-| `genomeTrack` | Features to scale on a nucleotide axis, arrows by strand, overlaps in lanes |
-| `sparkline` | A word-sized trend line |
-| `progressRing` | Progress toward a total |
-| `uptimeStrip` | Up, degraded, down or unmeasured, one tick per period |
+| Function | Import | Draws |
+|---|---|---|
+| `barChart` | `enarratio/plot` | Bars, stacked or grouped, vertical or horizontal; counts rows when no value is given |
+| `lineChart` | `enarratio/plot` | Lines over time or any number, with gaps, reference lines, event markers, direct labels, log y |
+| `areaChart` | `enarratio/plot` | Stacked areas over time |
+| `scatterPlot` | `enarratio/plot` | Points on linear or log axes, symbols per series, optional regression with 95% band |
+| `heatmap` | `enarratio/plot` | A grid on the theme's sequential ramp, with printed values and labelled bins |
+| `networkChart` | `enarratio/science` | A force-directed network laid out on the server, deterministic |
+| `titerPlot` | `enarratio/science` | Titers on a dilution axis with geometric mean, 95% CI and limit of detection |
+| `genomeTrack` | `enarratio/science` | Features to scale on a nucleotide axis, arrows by strand, overlaps in lanes |
+| `sparkline` | `enarratio` | A word-sized trend line |
+| `progressRing` | `enarratio` | Progress toward a total |
+| `uptimeStrip` | `enarratio` | Up, degraded, down or unmeasured, one tick per period |
 
 Every function is documented in the [API reference](docs/api.md) and in its
 TypeScript declarations. The chart types still to come, and the order they
@@ -167,7 +186,8 @@ with eight series colors, a five-step sequential ramp and status colors.
 those properties, so one server render serves every theme and both schemes.
 
 ```ts
-import { checkTheme, defaultTheme, defineTheme, stylesheet } from "enarratio";
+import { checkTheme, defineTheme, stylesheet } from "enarratio";
+import { defaultTheme } from "enarratio/themes";
 
 const theme = defineTheme({
   ...defaultTheme,
