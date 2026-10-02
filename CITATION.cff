@@ -17,8 +17,8 @@ authors:
 repository-code: "https://github.com/DrDustinEdwards/enarratio"
 url: "https://enarratio.dustinedwards.info"
 license: MIT
-version: 0.1.0-alpha.8
-date-released: "2026-09-29"
+version: 0.2.0
+date-released: "2026-10-02"
 keywords:
   - data visualization
   - accessibility

@@ -5,9 +5,9 @@ All notable changes to Enarratio (named Abscissa until 0.1.0-alpha.7) are record
 [Semantic Versioning](https://semver.org/). Before 1.0.0, a minor version may
 change the public API; every such change is listed here.
 
-## [Unreleased]
+## [0.2.0] - 2026-10-02
 
-Becomes 0.2.0. Design records 0011 onward explain each decision.
+Design records 0011 to 0016 explain each decision.
 
 ### Breaking
 
@@ -43,6 +43,22 @@ Becomes 0.2.0. Design records 0011 onward explain each decision.
   needs `@observablehq/plot`, `d3-force` and `linkedom`. A site using only core
   installs none of them. The versions tested are ranges `^0.6.17`, `^3.0.0` and
   `^0.18.13`.
+
+### Changed
+
+- `stylesheet()` output: the base rules now use `var(--enarratio-*, <value>)`
+  for every size, weight, radius and timing, with a leading comment, the
+  timeline's rules and `max-width: 100%; height: auto` on `svg.enarratio`.
+  Computed values are unchanged for any page that sets no property, so no stored
+  markup or image changed; a primitive wider than its container now shrinks to
+  fit instead of overflowing. This is the only default that changed.
+- `barChart`'s `x` field may also be a `Date` when `xType` is `"time"`.
+- The gallery's second page is `/example` (was `/dustinedwards`), and its
+  rendering and image tests use it.
+- New options' defaults: `interval: "day"`, `forecastLabel: "Forecast"`,
+  `timeline` `width: 640`, `heatStrip` `width: 240` and `height: 24`. A band is
+  drawn at 18% opacity behind its line. A missing value reads `no data` in the
+  companion tables (chart tables keep blank cells).
 
 ### Removed
 

@@ -150,7 +150,7 @@ Without a bundler, serve `node_modules/enarratio/dist/enhance/index.js` as a
 file (it has no imports of its own) and load it with
 `<script type="module">import { enhance } from "/enhance.js"; enhance();</script>`,
 or from a CDN such as
-`https://cdn.jsdelivr.net/npm/enarratio@0.1.0-alpha.6/dist/enhance/index.js`.
+`https://cdn.jsdelivr.net/npm/enarratio@0.2.0/dist/enhance/index.js`.
 
 To redraw a chart in place, pass new server markup to `update()` on the chart
 `enhance()` returns. That markup should come from Enarratio: it is sanitized
