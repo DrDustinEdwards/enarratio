@@ -178,6 +178,37 @@ all into `site/dist`.
 | `heatStrip` | `enarratio` | A one-row strip on the sequential ramp, one cell per value |
 | `timeline` | `enarratio` | Lanes for sites or agents, spans and point events over a time window, status by color and shape |
 
+Forecasts are computed by you and only drawn by Enarratio: give `lineChart` the
+bounds as fields and a boundary, and it shades the band, dashes the line after
+the boundary, draws forecast points hollow, and marks forecast rows in the data
+table. A time axis on `barChart` needs no pre-formatted labels:
+
+```ts
+import { barChart, lineChart } from "enarratio/plot";
+
+lineChart({
+  data: days, // { day, visits, lower, upper }, the last rows computed by your model
+  x: "day",
+  y: "visits",
+  band: { lower: "lower", upper: "upper", label: "95% interval" },
+  forecastFrom: "2026-02-23",
+  alt: "Daily visits, with a one-week forecast and its 95% interval from 24 February.",
+});
+
+barChart({
+  data: runs, // { at: "2026-06-09T08:00Z", site }, one row per run
+  x: "at",
+  xType: "time", // one bar per day, quiet days included
+  series: "site",
+  alt: "Analysis runs per day at three sites.",
+});
+```
+
+Every primitive can also state its numbers: `sparklineTable`,
+`uptimeStripTable`, `progressRingTable`, `timelineTable` and `heatStripTable`
+return a table and a summary sentence computed from the same values as the
+drawing, for pages that want them beside it.
+
 Every function is documented in the [API reference](docs/api.md) and in its
 TypeScript declarations. The chart types still to come, and the order they
 come in, are in the [scientific chart plan](docs/design/0005-scientific-charts.md).
