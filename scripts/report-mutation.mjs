@@ -37,7 +37,7 @@ const PROTECT = [
 ];
 
 /** Tests that pin exact rendered output (stored HTML files or images): design-pinning. */
-const PINNING = [/toMatchFileSnapshot|snapshot|matches the stored/i];
+const PINNING = [/stored markup|stored images?|snapshot/i];
 
 const chunks = readdirSync(dir).filter((f) => f.endsWith(".json") && !f.includes(".incremental"));
 const files = {};
