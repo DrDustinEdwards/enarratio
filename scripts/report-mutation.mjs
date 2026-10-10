@@ -8,6 +8,9 @@
  * A test is a removal candidate when it kills no mutant (zero-kill) or when every mutant it kills
  * is also killed by another test (covered by others). Candidates are per test, not joint: two tests
  * that only cover each other are both flagged. Protected tests are never candidates; see PROTECT.
+ * covers counts the mutants a test executes. A zero-kill test that covers nothing either never
+ * reaches src or does its work outside the test (describe-scope setup, a module an earlier test
+ * imported), where per-test coverage cannot see it; it is unmeasured, not shown useless.
  */
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -51,7 +54,7 @@ for (const chunk of chunks) {
     for (const t of list) {
       const key = `${file}#${t.name}`;
       ids.set(t.id, key);
-      if (!tests.has(key)) tests.set(key, { file, name: t.name, kills: new Set() });
+      if (!tests.has(key)) tests.set(key, { file, name: t.name, kills: new Set(), covers: 0 });
     }
   }
   for (const [file, { mutants }] of Object.entries(report.files)) {
@@ -65,6 +68,10 @@ for (const chunk of chunks) {
       else if (status === "NoCoverage") row.noCoverage++;
       else if (status === "Ignored") row.ignored++;
       else row.other++;
+      for (const id of m.coveredBy ?? []) {
+        const key = ids.get(id);
+        if (key) tests.get(key).covers++;
+      }
       if (status !== "Killed") continue;
       const mutantKey = `${file}:${m.id}`;
       for (const id of m.killedBy ?? []) {
@@ -98,6 +105,7 @@ const matrix = [...tests.values()]
     return {
       file: t.file,
       name: t.name,
+      covers: t.covers,
       kills: t.kills.size,
       uniqueKills: unique,
       candidate: kind,
@@ -148,6 +156,9 @@ console.log(
 );
 console.log(
   `Covered by others: ${count((t) => t.candidate === "covered-by-others")} (protected ${count((t) => t.candidate === "covered-by-others" && t.protected)})`,
+);
+console.log(
+  `Zero-kill covering no mutant: ${count((t) => t.candidate === "zero-kill" && t.covers === 0)}`,
 );
 console.log(`Design-pinning: ${count((t) => t.designPinning)}`);
 

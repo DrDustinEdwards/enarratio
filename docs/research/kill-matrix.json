@@ -1,0 +1,4700 @@
+{
+  "chunks": ["enhance", "plot", "primitives", "render", "science", "theme"],
+  "mutants": {
+    "killed": 3477,
+    "timeout": 34,
+    "survived": 1776,
+    "noCoverage": 150,
+    "ignored": 58,
+    "other": 0
+  },
+  "score": 64.58,
+  "scoreCovered": 66.41,
+  "files": {
+    "src/enhance/index.ts": {
+      "killed": 0,
+      "timeout": 0,
+      "survived": 1003,
+      "noCoverage": 0,
+      "ignored": 0,
+      "other": 0,
+      "score": 0
+    },
+    "src/html.ts": {
+      "killed": 22,
+      "timeout": 0,
+      "survived": 8,
+      "noCoverage": 1,
+      "ignored": 0,
+      "other": 0,
+      "score": 70.97
+    },
+    "src/plot/bar.ts": {
+      "killed": 381,
+      "timeout": 18,
+      "survived": 41,
+      "noCoverage": 18,
+      "ignored": 0,
+      "other": 0,
+      "score": 87.12
+    },
+    "src/plot/heatmap.ts": {
+      "killed": 131,
+      "timeout": 0,
+      "survived": 14,
+      "noCoverage": 3,
+      "ignored": 0,
+      "other": 0,
+      "score": 88.51
+    },
+    "src/plot/line.ts": {
+      "killed": 506,
+      "timeout": 4,
+      "survived": 84,
+      "noCoverage": 8,
+      "ignored": 0,
+      "other": 0,
+      "score": 84.72
+    },
+    "src/plot/scatter.ts": {
+      "killed": 119,
+      "timeout": 0,
+      "survived": 29,
+      "noCoverage": 4,
+      "ignored": 0,
+      "other": 0,
+      "score": 78.29
+    },
+    "src/primitives/companion.ts": {
+      "killed": 4,
+      "timeout": 0,
+      "survived": 0,
+      "noCoverage": 0,
+      "ignored": 0,
+      "other": 0,
+      "score": 100
+    },
+    "src/primitives/heat-strip.ts": {
+      "killed": 139,
+      "timeout": 0,
+      "survived": 18,
+      "noCoverage": 1,
+      "ignored": 0,
+      "other": 0,
+      "score": 87.97
+    },
+    "src/primitives/progress-ring.ts": {
+      "killed": 131,
+      "timeout": 0,
+      "survived": 25,
+      "noCoverage": 2,
+      "ignored": 0,
+      "other": 0,
+      "score": 82.91
+    },
+    "src/primitives/sparkline.ts": {
+      "killed": 151,
+      "timeout": 0,
+      "survived": 19,
+      "noCoverage": 1,
+      "ignored": 0,
+      "other": 0,
+      "score": 88.3
+    },
+    "src/primitives/timeline.ts": {
+      "killed": 401,
+      "timeout": 7,
+      "survived": 70,
+      "noCoverage": 10,
+      "ignored": 1,
+      "other": 0,
+      "score": 83.61
+    },
+    "src/primitives/uptime-strip.ts": {
+      "killed": 121,
+      "timeout": 0,
+      "survived": 33,
+      "noCoverage": 1,
+      "ignored": 0,
+      "other": 0,
+      "score": 78.06
+    },
+    "src/render/data.ts": {
+      "killed": 123,
+      "timeout": 2,
+      "survived": 48,
+      "noCoverage": 3,
+      "ignored": 0,
+      "other": 0,
+      "score": 71.02
+    },
+    "src/render/document.browser.ts": {
+      "killed": 0,
+      "timeout": 0,
+      "survived": 0,
+      "noCoverage": 9,
+      "ignored": 0,
+      "other": 0,
+      "score": 0
+    },
+    "src/render/document.ts": {
+      "killed": 2,
+      "timeout": 0,
+      "survived": 0,
+      "noCoverage": 0,
+      "ignored": 0,
+      "other": 0,
+      "score": 100
+    },
+    "src/render/figure.ts": {
+      "killed": 146,
+      "timeout": 0,
+      "survived": 14,
+      "noCoverage": 1,
+      "ignored": 0,
+      "other": 0,
+      "score": 90.68
+    },
+    "src/render/plot.ts": {
+      "killed": 119,
+      "timeout": 0,
+      "survived": 38,
+      "noCoverage": 27,
+      "ignored": 0,
+      "other": 0,
+      "score": 64.67
+    },
+    "src/render/series.ts": {
+      "killed": 27,
+      "timeout": 0,
+      "survived": 3,
+      "noCoverage": 1,
+      "ignored": 0,
+      "other": 0,
+      "score": 87.1
+    },
+    "src/science/genome.ts": {
+      "killed": 275,
+      "timeout": 1,
+      "survived": 42,
+      "noCoverage": 17,
+      "ignored": 0,
+      "other": 0,
+      "score": 82.39
+    },
+    "src/science/network.ts": {
+      "killed": 116,
+      "timeout": 1,
+      "survived": 24,
+      "noCoverage": 17,
+      "ignored": 0,
+      "other": 0,
+      "score": 74.05
+    },
+    "src/science/stats.ts": {
+      "killed": 45,
+      "timeout": 0,
+      "survived": 4,
+      "noCoverage": 1,
+      "ignored": 0,
+      "other": 0,
+      "score": 90
+    },
+    "src/science/titer.ts": {
+      "killed": 202,
+      "timeout": 1,
+      "survived": 32,
+      "noCoverage": 5,
+      "ignored": 0,
+      "other": 0,
+      "score": 84.58
+    },
+    "src/theme/check.ts": {
+      "killed": 62,
+      "timeout": 0,
+      "survived": 50,
+      "noCoverage": 6,
+      "ignored": 0,
+      "other": 0,
+      "score": 52.54
+    },
+    "src/theme/color.ts": {
+      "killed": 183,
+      "timeout": 0,
+      "survived": 75,
+      "noCoverage": 5,
+      "ignored": 0,
+      "other": 0,
+      "score": 69.58
+    },
+    "src/theme/define.ts": {
+      "killed": 42,
+      "timeout": 0,
+      "survived": 30,
+      "noCoverage": 8,
+      "ignored": 0,
+      "other": 0,
+      "score": 52.5
+    },
+    "src/theme/stylesheet.ts": {
+      "killed": 29,
+      "timeout": 0,
+      "survived": 72,
+      "noCoverage": 1,
+      "ignored": 0,
+      "other": 0,
+      "score": 28.43
+    },
+    "src/themes/default.ts": {
+      "killed": 0,
+      "timeout": 0,
+      "survived": 0,
+      "noCoverage": 0,
+      "ignored": 57,
+      "other": 0,
+      "score": null
+    }
+  },
+  "tests": [
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis buckets by hour, week, month and year",
+      "covers": 574,
+      "kills": 173,
+      "uniqueKills": 31,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis counts rows as bars: the drawn values are the tabulated ones",
+      "covers": 538,
+      "kills": 162,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis draws horizontal bars on a time axis",
+      "covers": 539,
+      "kills": 135,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis filters by the interval's label once enhanced",
+      "covers": 538,
+      "kills": 159,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis formats labels with formatX, and refuses labels that collide",
+      "covers": 535,
+      "kills": 129,
+      "uniqueKills": 3,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis gives every day from the first to the last a slot, empty ones too",
+      "covers": 538,
+      "kills": 141,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis groups series on a time axis",
+      "covers": 587,
+      "kills": 177,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis leaves category charts exactly as they were",
+      "covers": 482,
+      "kills": 73,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis refuses what would draw wrongly",
+      "covers": 141,
+      "kills": 59,
+      "uniqueKills": 9,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis stacks series, summing a value field",
+      "covers": 567,
+      "kills": 192,
+      "uniqueKills": 2,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis sums rows that share an interval",
+      "covers": 520,
+      "kills": 138,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis takes Dates, epoch milliseconds and calendar dates",
+      "covers": 547,
+      "kills": 136,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar-time.test.ts",
+      "name": "barChart time axis thins the printed labels to fit, and keeps every bar",
+      "covers": 549,
+      "kills": 166,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart applies color overrides to the figure's slot",
+      "covers": 526,
+      "kills": 121,
+      "uniqueKills": 2,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart carries filter attributes for the enhancement layer",
+      "covers": 506,
+      "kills": 144,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart colors series by palette slot and lists them in a legend",
+      "covers": 506,
+      "kills": 166,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart counts rows per category and series when y is omitted",
+      "covers": 506,
+      "kills": 157,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart draws one series with given values, horizontal, and filters by category",
+      "covers": 467,
+      "kills": 156,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart emits an equivalent data table, zero-filling counts",
+      "covers": 506,
+      "kills": 124,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart escapes caller text",
+      "covers": 462,
+      "kills": 84,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart filters by category when asked, even with series",
+      "covers": 506,
+      "kills": 141,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart groups series side by side",
+      "covers": 509,
+      "kills": 131,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart is deterministic",
+      "covers": 506,
+      "kills": 75,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart makes each bar a link for readers without script",
+      "covers": 540,
+      "kills": 149,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart names the SVG, not the figure, and keeps caption and table outside role=img",
+      "covers": 508,
+      "kills": 98,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart refuses a missing alt, bad values, unknown color keys and too many series",
+      "covers": 539,
+      "kills": 143,
+      "uniqueKills": 22,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart refuses links that are not relative or http(s)",
+      "covers": 521,
+      "kills": 106,
+      "uniqueKills": 10,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart shows empty categories and a fixed series order when given",
+      "covers": 495,
+      "kills": 134,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart thins category labels to at most maxXTicks, keeping the first",
+      "covers": 496,
+      "kills": 129,
+      "uniqueKills": 4,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/bar.test.ts",
+      "name": "barChart uses whole-number ticks for counts",
+      "covers": 506,
+      "kills": 133,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/charts.test.ts",
+      "name": "heatmap fills cells from the sequential ramp by threshold, and outlines empty cells",
+      "covers": 483,
+      "kills": 182,
+      "uniqueKills": 11,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/charts.test.ts",
+      "name": "heatmap labels the ramp legend with its bins",
+      "covers": 478,
+      "kills": 125,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/charts.test.ts",
+      "name": "heatmap prints values in text colors chosen for their step",
+      "covers": 483,
+      "kills": 165,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/charts.test.ts",
+      "name": "heatmap refuses thresholds out of order and duplicate cells",
+      "covers": 111,
+      "kills": 46,
+      "uniqueKills": 3,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/charts.test.ts",
+      "name": "networkChart keys nodes, filters by group, and tabulates connections",
+      "covers": 418,
+      "kills": 149,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/charts.test.ts",
+      "name": "networkChart lays out deterministically",
+      "covers": 418,
+      "kills": 62,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/charts.test.ts",
+      "name": "networkChart refuses duplicate ids and links to missing nodes",
+      "covers": 47,
+      "kills": 22,
+      "uniqueKills": 6,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/charts.test.ts",
+      "name": "scatterPlot does not offer a filter when there are no series",
+      "covers": 394,
+      "kills": 73,
+      "uniqueKills": 1,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/charts.test.ts",
+      "name": "scatterPlot draws a regression band and refuses non-positive values on a log axis",
+      "covers": 406,
+      "kills": 114,
+      "uniqueKills": 8,
+      "candidate": null,
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/charts.test.ts",
+      "name": "scatterPlot keys every point, names it, and gives series distinct symbols",
+      "covers": 444,
+      "kills": 134,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "heatStripTable states what the strip's text alternative states",
+      "covers": 193,
+      "kills": 82,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "heatStripTable tabulates each cell's value and ramp step, as drawn",
+      "covers": 193,
+      "kills": 93,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "progressRingTable says when the value passes the total, and handles a ring named only by alt",
+      "covers": 159,
+      "kills": 59,
+      "uniqueKills": 5,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "progressRingTable states the value, total and percentage the ring's text alternative states",
+      "covers": 146,
+      "kills": 56,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "progressRingTable tabulates the numbers the ring draws",
+      "covers": 145,
+      "kills": 60,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "sparklineTable formats with formatValue and gives markup that follows the figure's convention",
+      "covers": 138,
+      "kills": 57,
+      "uniqueKills": 6,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "sparklineTable keeps the generated summary when alt is given, and validates like the sparkline",
+      "covers": 138,
+      "kills": 46,
+      "uniqueKills": 3,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "sparklineTable matches the drawn line: its heights read back as the tabulated values",
+      "covers": 164,
+      "kills": 83,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "sparklineTable states the values the sparkline's text alternative states",
+      "covers": 164,
+      "kills": 53,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "sparklineTable tabulates every position, with no data for a gap",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "timelineTable agrees with the drawing's plain list and hover text",
+      "covers": 412,
+      "kills": 132,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "timelineTable states what the timeline's text alternative states",
+      "covers": 412,
+      "kills": 141,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "timelineTable tabulates every event in time order, the end blank for a point",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "timelineTable validates like the timeline",
+      "covers": 24,
+      "kills": 18,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "uptimeStripTable states the counts and availability the strip's text alternative states",
+      "covers": 137,
+      "kills": 66,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "uptimeStripTable tabulates each period with its status, named as in the hover details",
+      "covers": 137,
+      "kills": 42,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/companions.test.ts",
+      "name": "uptimeStripTable uses the given alt as the summary when there is no label",
+      "covers": 163,
+      "kills": 52,
+      "uniqueKills": 4,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents areaChart in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents AttributeValue in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents barChart in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents BarChartOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents baseStylesheet in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents BrushDetail in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents CheckIssue in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents CheckReport in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents checkTheme in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents CheckThresholds in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents colorDifference in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents ColorScheme in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents ColorVision in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents contrastRatio in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents DataTable in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents dataTableBlock in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents DEFAULT_THRESHOLDS in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents defaultTheme in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents defineTheme in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents DilutionSeries in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents element in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents enhance in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents EnhancedChart in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents EnhanceOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents escapeHtml in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents EventMarker in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents figure in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents FigureOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents FigureParts in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents GenomeFeature in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents genomeTrack in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents GenomeTrackOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents geometricSummary in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents GeometricSummary in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents Gridlines in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents heatmap in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents HeatmapOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents heatStrip in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents HeatStripOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents heatStripTable in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents HexColor in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents LegendItem in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents LineBand in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents lineChart in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents LineChartOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents networkChart in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents NetworkChartOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents NetworkLink in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents NetworkNode in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents PrimitiveTable in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents PrimitiveTableOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents progressRing in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents ProgressRingOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents progressRingTable in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents RampItem in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents ReferenceLine in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents Rgb in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents ScaleDescription in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents scatterPlot in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents ScatterPlotOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents SelectDetail in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents SequentialRamp in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents SeriesChartOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents SeriesColor in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents SeriesPalette in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents simulateColorVision in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents slotStyle in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents sparkline in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents SparklineOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents sparklineTable in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents StatusColors in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents stylesheet in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents StylesheetOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents Theme in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents timeline in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents TimelineEvent in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents TimelineOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents TimelinePoint in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents TimelineSpan in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents TimelineStatus in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents timelineTable in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents TimelineTime in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents titerPlot in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents TiterPlotOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents UptimeSlot in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents UptimeStatus in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents uptimeStrip in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents UptimeStripOptions in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents uptimeStripTable in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation documents validateFigure in docs/api.md",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation finds the public API",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/docs.test.ts",
+      "name": "documentation names every chart function in the README",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart band carries the bounds in the data table, as columns, with forecast rows marked",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart band draws one shaded area behind the line",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart band draws the band at the lower and upper values, on the same scale as the points",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart band leaves a chart without options exactly as it was",
+      "covers": 578,
+      "kills": 111,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart band names bound columns per series",
+      "covers": 673,
+      "kills": 210,
+      "uniqueKills": 3,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart band names bound columns without a label",
+      "covers": 633,
+      "kills": 169,
+      "uniqueKills": 2,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart band refuses a band that would draw wrongly",
+      "covers": 228,
+      "kills": 94,
+      "uniqueKills": 16,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart band says the same in the hover details as in the table",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart forecastFrom draws a solid line up to the boundary and a dashed one from it, joined",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart forecastFrom draws forecast points hollow and observed ones filled",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart forecastFrom keeps each series joined when a series has no point at the boundary",
+      "covers": 697,
+      "kills": 186,
+      "uniqueKills": 3,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart forecastFrom labels the boundary and marks forecast rows in the table",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart forecastFrom refuses a boundary with nothing on one side",
+      "covers": 117,
+      "kills": 50,
+      "uniqueKills": 12,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart forecastFrom takes a custom label, and a Date or number for the boundary",
+      "covers": 701,
+      "kills": 185,
+      "uniqueKills": 1,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/forecast.test.ts",
+      "name": "lineChart forecastFrom works with a band and a log axis",
+      "covers": 755,
+      "kills": 194,
+      "uniqueKills": 2,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup areaChart keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 566,
+      "kills": 119,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup areaChart keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 566,
+      "kills": 119,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup areaChart keeps &lt;b&gt; & \" ' as text",
+      "covers": 566,
+      "kills": 115,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup areaChart keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 566,
+      "kills": 115,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup areaChart keeps <script>window.pwned=1</script> as text",
+      "covers": 566,
+      "kills": 115,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup barChart keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 585,
+      "kills": 97,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup barChart keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 585,
+      "kills": 97,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup barChart keeps &lt;b&gt; & \" ' as text",
+      "covers": 585,
+      "kills": 90,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup barChart keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 585,
+      "kills": 90,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup barChart keeps <script>window.pwned=1</script> as text",
+      "covers": 585,
+      "kills": 90,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup barChart time axis keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 589,
+      "kills": 114,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup barChart time axis keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 589,
+      "kills": 114,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup barChart time axis keeps &lt;b&gt; & \" ' as text",
+      "covers": 589,
+      "kills": 109,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup barChart time axis keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 589,
+      "kills": 109,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup barChart time axis keeps <script>window.pwned=1</script> as text",
+      "covers": 589,
+      "kills": 109,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup companion tables keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 624,
+      "kills": 225,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup companion tables keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 624,
+      "kills": 225,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup companion tables keeps &lt;b&gt; & \" ' as text",
+      "covers": 624,
+      "kills": 225,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup companion tables keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 624,
+      "kills": 225,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup companion tables keeps <script>window.pwned=1</script> as text",
+      "covers": 624,
+      "kills": 225,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup genomeTrack keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 545,
+      "kills": 90,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup genomeTrack keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 545,
+      "kills": 90,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup genomeTrack keeps &lt;b&gt; & \" ' as text",
+      "covers": 545,
+      "kills": 86,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup genomeTrack keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 545,
+      "kills": 86,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup genomeTrack keeps <script>window.pwned=1</script> as text",
+      "covers": 545,
+      "kills": 86,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup heatmap keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 484,
+      "kills": 104,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup heatmap keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 484,
+      "kills": 104,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup heatmap keeps &lt;b&gt; & \" ' as text",
+      "covers": 484,
+      "kills": 100,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup heatmap keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 484,
+      "kills": 100,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup heatmap keeps <script>window.pwned=1</script> as text",
+      "covers": 484,
+      "kills": 100,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup heatStrip keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 194,
+      "kills": 60,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup heatStrip keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 194,
+      "kills": 62,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup heatStrip keeps &lt;b&gt; & \" ' as text",
+      "covers": 194,
+      "kills": 62,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup heatStrip keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 194,
+      "kills": 60,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup heatStrip keeps <script>window.pwned=1</script> as text",
+      "covers": 194,
+      "kills": 60,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup lineChart forecast keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 742,
+      "kills": 145,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup lineChart forecast keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 742,
+      "kills": 145,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup lineChart forecast keeps &lt;b&gt; & \" ' as text",
+      "covers": 742,
+      "kills": 141,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup lineChart forecast keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 742,
+      "kills": 141,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup lineChart forecast keeps <script>window.pwned=1</script> as text",
+      "covers": 742,
+      "kills": 141,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup lineChart keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 619,
+      "kills": 116,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup lineChart keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 619,
+      "kills": 116,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup lineChart keeps &lt;b&gt; & \" ' as text",
+      "covers": 619,
+      "kills": 111,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup lineChart keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 619,
+      "kills": 111,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup lineChart keeps <script>window.pwned=1</script> as text",
+      "covers": 619,
+      "kills": 111,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup networkChart keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 418,
+      "kills": 79,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup networkChart keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 418,
+      "kills": 79,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup networkChart keeps &lt;b&gt; & \" ' as text",
+      "covers": 418,
+      "kills": 74,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup networkChart keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 418,
+      "kills": 74,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup networkChart keeps <script>window.pwned=1</script> as text",
+      "covers": 418,
+      "kills": 74,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup progressRing keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 147,
+      "kills": 43,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup progressRing keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 147,
+      "kills": 45,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup progressRing keeps &lt;b&gt; & \" ' as text",
+      "covers": 147,
+      "kills": 45,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup progressRing keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 147,
+      "kills": 43,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup progressRing keeps <script>window.pwned=1</script> as text",
+      "covers": 147,
+      "kills": 43,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup scatterPlot keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 446,
+      "kills": 87,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup scatterPlot keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 446,
+      "kills": 87,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup scatterPlot keeps &lt;b&gt; & \" ' as text",
+      "covers": 446,
+      "kills": 84,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup scatterPlot keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 446,
+      "kills": 84,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup scatterPlot keeps <script>window.pwned=1</script> as text",
+      "covers": 446,
+      "kills": 84,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup sparkline keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 159,
+      "kills": 38,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup sparkline keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 159,
+      "kills": 40,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup sparkline keeps &lt;b&gt; & \" ' as text",
+      "covers": 159,
+      "kills": 40,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup sparkline keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 159,
+      "kills": 38,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup sparkline keeps <script>window.pwned=1</script> as text",
+      "covers": 159,
+      "kills": 38,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup timeline keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 394,
+      "kills": 107,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup timeline keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 394,
+      "kills": 107,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup timeline keeps &lt;b&gt; & \" ' as text",
+      "covers": 390,
+      "kills": 107,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup timeline keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 394,
+      "kills": 107,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup timeline keeps <script>window.pwned=1</script> as text",
+      "covers": 394,
+      "kills": 107,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup titerPlot keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 550,
+      "kills": 116,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup titerPlot keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 550,
+      "kills": 116,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup titerPlot keeps &lt;b&gt; & \" ' as text",
+      "covers": 550,
+      "kills": 112,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup titerPlot keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 550,
+      "kills": 112,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup titerPlot keeps <script>window.pwned=1</script> as text",
+      "covers": 550,
+      "kills": 112,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup uptimeStrip keeps '><svg onload='window.pwned=1'> as text",
+      "covers": 128,
+      "kills": 36,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup uptimeStrip keeps \"><img src=x onerror=\"window.pwned=1\"> as text",
+      "covers": 128,
+      "kills": 38,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup uptimeStrip keeps &lt;b&gt; & \" ' as text",
+      "covers": 128,
+      "kills": 38,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup uptimeStrip keeps </svg></figure><script>window.pwned=1</script> as text",
+      "covers": 128,
+      "kills": 36,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/hostile.test.ts",
+      "name": "F12: hostile data cannot create markup uptimeStrip keeps <script>window.pwned=1</script> as text",
+      "covers": 128,
+      "kills": 36,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/line.test.ts",
+      "name": "areaChart refuses negative values, which cannot stack",
+      "covers": 173,
+      "kills": 55,
+      "uniqueKills": 5,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/line.test.ts",
+      "name": "areaChart stacks series and keys each present value; a gap has no point (F5)",
+      "covers": 597,
+      "kills": 185,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/line.test.ts",
+      "name": "lineChart breaks the line at a gap instead of drawing zero",
+      "covers": 579,
+      "kills": 149,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/line.test.ts",
+      "name": "lineChart describes a time x scale for the brush",
+      "covers": 622,
+      "kills": 153,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/line.test.ts",
+      "name": "lineChart draws labelled reference lines and markers, and direct labels",
+      "covers": 649,
+      "kills": 168,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/line.test.ts",
+      "name": "lineChart keys one point per present value, and skips gaps",
+      "covers": 622,
+      "kills": 196,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/line.test.ts",
+      "name": "lineChart refuses duplicate points and bad dates",
+      "covers": 155,
+      "kills": 54,
+      "uniqueKills": 5,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/line.test.ts",
+      "name": "lineChart tabulates every x with a blank for a gap",
+      "covers": 622,
+      "kills": 170,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/line.test.ts",
+      "name": "lineChart uses a linear x for numbers and supports a log y",
+      "covers": 566,
+      "kills": 136,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/package.test.ts",
+      "name": "package entries drops linkedom under the browser condition, and keeps it where a Worker bundler sets that condition too",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/package.test.ts",
+      "name": "package entries gives core no runtime dependency",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/package.test.ts",
+      "name": "package entries has the six subpaths and no others",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/package.test.ts",
+      "name": "package entries keeps Plot, linkedom and d3-force out of core, themes and enhance",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/package.test.ts",
+      "name": "package entries makes Plot, d3-force and linkedom optional peers",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/package.test.ts",
+      "name": "the built package builds the browser variant without linkedom",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/package.test.ts",
+      "name": "the built package points every export at a file that exists",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/package.test.ts",
+      "name": "the built package splits the charts from core",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/package.test.ts",
+      "name": "the built package writes base.css identical to baseStylesheet()",
+      "covers": 111,
+      "kills": 16,
+      "uniqueKills": 13,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/primitives.test.ts",
+      "name": "progressRing hides the number on small rings unless asked",
+      "covers": 139,
+      "kills": 34,
+      "uniqueKills": 1,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/primitives.test.ts",
+      "name": "progressRing refuses bad values",
+      "covers": 57,
+      "kills": 48,
+      "uniqueKills": 18,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/primitives.test.ts",
+      "name": "progressRing states label, value and total, and fills the matching arc",
+      "covers": 145,
+      "kills": 76,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/primitives.test.ts",
+      "name": "progressRing uses a percentage for fractions, says when a value passes the total, and draws no arc at zero (A7)",
+      "covers": 150,
+      "kills": 73,
+      "uniqueKills": 3,
+      "candidate": null,
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/primitives.test.ts",
+      "name": "uptimeStrip encodes status by height as well as color",
+      "covers": 129,
+      "kills": 49,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/primitives.test.ts",
+      "name": "uptimeStrip refuses empty strips and unknown states",
+      "covers": 47,
+      "kills": 24,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/primitives.test.ts",
+      "name": "uptimeStrip summarizes counts and availability, ignoring unmeasured periods",
+      "covers": 137,
+      "kills": 65,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/primitives.test.ts",
+      "name": "uptimeStrip uses per-slot labels in hover details",
+      "covers": 127,
+      "kills": 37,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering area.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering area.ts renders the stored markup",
+      "covers": 640,
+      "kills": 404,
+      "uniqueKills": 32,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering forecast.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering forecast.ts renders the stored markup",
+      "covers": 737,
+      "kills": 508,
+      "uniqueKills": 64,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering genome.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering genome.ts renders the stored markup",
+      "covers": 611,
+      "kills": 490,
+      "uniqueKills": 153,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering grouped-bar.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering grouped-bar.ts renders the stored markup",
+      "covers": 488,
+      "kills": 336,
+      "uniqueKills": 6,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering heat-strip.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering heat-strip.ts renders the stored markup",
+      "covers": 290,
+      "kills": 138,
+      "uniqueKills": 1,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering heatmap.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering heatmap.ts renders the stored markup",
+      "covers": 487,
+      "kills": 337,
+      "uniqueKills": 32,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering horizontal-bar.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering horizontal-bar.ts renders the stored markup",
+      "covers": 470,
+      "kills": 315,
+      "uniqueKills": 14,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering line.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering line.ts renders the stored markup",
+      "covers": 653,
+      "kills": 442,
+      "uniqueKills": 23,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering network.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering network.ts renders the stored markup",
+      "covers": 421,
+      "kills": 323,
+      "uniqueKills": 49,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering primitive-tables.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering primitive-tables.ts renders the stored markup",
+      "covers": 397,
+      "kills": 306,
+      "uniqueKills": 23,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering primitives.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering primitives.ts renders the stored markup",
+      "covers": 262,
+      "kills": 193,
+      "uniqueKills": 45,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering runs.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering runs.ts renders the stored markup",
+      "covers": 593,
+      "kills": 413,
+      "uniqueKills": 3,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering scatter.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering scatter.ts renders the stored markup",
+      "covers": 459,
+      "kills": 345,
+      "uniqueKills": 53,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering sparkline.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering sparkline.ts renders the stored markup",
+      "covers": 169,
+      "kills": 126,
+      "uniqueKills": 7,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering stacked-bar.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering stacked-bar.ts renders the stored markup",
+      "covers": 582,
+      "kills": 416,
+      "uniqueKills": 20,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering timeline.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering timeline.ts renders the stored markup",
+      "covers": 434,
+      "kills": 326,
+      "uniqueKills": 136,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering titer.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering titer.ts renders the stored markup",
+      "covers": 591,
+      "kills": 443,
+      "uniqueKills": 77,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering years.ts is well-formed and every svg is named",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/render.test.ts",
+      "name": "server rendering years.ts renders the stored markup",
+      "covers": 550,
+      "kills": 382,
+      "uniqueKills": 6,
+      "candidate": null,
+      "protected": false,
+      "designPinning": true
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A1: the default palette and direct labels keeps series 1 to 6 at least 10 CIEDE2000 apart for every simulated vision, in both schemes",
+      "covers": 313,
+      "kills": 107,
+      "uniqueKills": 10,
+      "candidate": null,
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A1: the default palette and direct labels prints series names inside stacked bars that fit, and refuses them on grouped bars",
+      "covers": 574,
+      "kills": 186,
+      "uniqueKills": 4,
+      "candidate": null,
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A10 and F10: theme text cannot break out of CSS refuses x */ body{display:none} /* as a theme name, font, or scheme selector",
+      "covers": 71,
+      "kills": 36,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A10 and F10: theme text cannot break out of CSS refuses x </style><script>alert(1)</script> as a theme name, font, or scheme selector",
+      "covers": 71,
+      "kills": 36,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A10 and F10: theme text cannot break out of CSS refuses x; } body { color: red as a theme name, font, or scheme selector",
+      "covers": 71,
+      "kills": 36,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A10 and F10: theme text cannot break out of CSS still accepts ordinary names, font stacks and selectors",
+      "covers": 187,
+      "kills": 37,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A11: protocol-relative links are refused refuses  //evil.example",
+      "covers": 241,
+      "kills": 69,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A11: protocol-relative links are refused refuses //evil.example/x",
+      "covers": 241,
+      "kills": 66,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A11: protocol-relative links are refused refuses /\\evil.example",
+      "covers": 241,
+      "kills": 66,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A11: protocol-relative links are refused refuses \\\\evil.example/x",
+      "covers": 241,
+      "kills": 66,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A11: protocol-relative links are refused still accepts root-relative and relative links",
+      "covers": 510,
+      "kills": 80,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A12: axes are hidden from assistive technology marks every axis group aria-hidden",
+      "covers": 476,
+      "kills": 104,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A13: wide drawings scroll instead of shrinking their text wraps the SVG in a frame that keeps a minimum width for wide drawings only",
+      "covers": 666,
+      "kills": 144,
+      "uniqueKills": 3,
+      "candidate": null,
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A2: count axes end at their last tick draws every tick inside the plot for 11 rows",
+      "covers": 479,
+      "kills": 77,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A2: count axes end at their last tick draws every tick inside the plot for 13 rows",
+      "covers": 479,
+      "kills": 77,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A3: local-midnight Dates are calendar dates keeps new Date(2025, 0, 6) as 6 January east of UTC",
+      "covers": 572,
+      "kills": 135,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A7 and F15: empty and impossible input throws draws a sparkline of 200,000 values without overflowing the stack",
+      "covers": 158,
+      "kills": 44,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A7 and F15: empty and impossible input throws refuses a dilution factor too fine to be a dilution series",
+      "covers": 195,
+      "kills": 68,
+      "uniqueKills": 2,
+      "candidate": null,
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A7 and F15: empty and impossible input throws refuses empty bar data, all-empty series and non-positive sizes",
+      "covers": 191,
+      "kills": 99,
+      "uniqueKills": 24,
+      "candidate": null,
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A7 and F15: empty and impossible input throws refuses statuses that are only Object.prototype names",
+      "covers": 54,
+      "kills": 21,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A8: a number and its text are one category draws 2022 and '2022' as one bar and one table row",
+      "covers": 479,
+      "kills": 141,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "A9 and F14: keys cannot collide keeps x 'a|b' in series 'c' apart from x 'a' in series 'b|c'",
+      "covers": 496,
+      "kills": 128,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F13: labels may contain the warning glyph draws a category and a reference named with a warning sign",
+      "covers": 764,
+      "kills": 134,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F13: labels may contain the warning glyph still throws when Plot itself warns",
+      "covers": 59,
+      "kills": 3,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F18: one name for text alternatives accepts alt on every primitive, and label as the subject of a generated one",
+      "covers": 392,
+      "kills": 125,
+      "uniqueKills": 4,
+      "candidate": null,
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F2: a log axis refuses values it cannot show throws on -5",
+      "covers": 164,
+      "kills": 57,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F2: a log axis refuses values it cannot show throws on 0",
+      "covers": 164,
+      "kills": 58,
+      "uniqueKills": 1,
+      "candidate": null,
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F3: sub-daily time series draws six hourly points as six rows, labelled with the time",
+      "covers": 575,
+      "kills": 186,
+      "uniqueKills": 7,
+      "candidate": null,
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F3: sub-daily time series keeps rows distinct under a coarse formatX",
+      "covers": 569,
+      "kills": 156,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F4: years print without a thousands separator labels the axis and table 2020, not 2,020",
+      "covers": 582,
+      "kills": 179,
+      "uniqueKills": 22,
+      "candidate": null,
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F5: area gaps are gaps gives a missing value no point and no hover text claiming zero",
+      "covers": 566,
+      "kills": 179,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F8: labels on marks reach 4.5:1 chooses a label color with at least 4.5:1 on every fill in both the built-in and the example theme",
+      "covers": 313,
+      "kills": 51,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F8: labels on marks reach 4.5:1 falls back to black or white for mid-tone fills",
+      "covers": 48,
+      "kills": 32,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F9: marks carry their reading order from the data numbers grouped bars by category, then series",
+      "covers": 483,
+      "kills": 145,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/review.test.ts",
+      "name": "F9: marks carry their reading order from the data orders a heatmap by column and row",
+      "covers": 475,
+      "kills": 140,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/science.test.ts",
+      "name": "genomeTrack colors and legends by type, and tabulates coordinates",
+      "covers": 599,
+      "kills": 128,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/science.test.ts",
+      "name": "genomeTrack draws features as polygons pointing along their strand",
+      "covers": 599,
+      "kills": 163,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/science.test.ts",
+      "name": "genomeTrack refuses features outside the sequence",
+      "covers": 49,
+      "kills": 24,
+      "uniqueKills": 9,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/science.test.ts",
+      "name": "genomeTrack stacks overlapping features into lanes",
+      "covers": 599,
+      "kills": 157,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/science.test.ts",
+      "name": "geometricSummary computes a geometric mean and a t-based 95% interval on the log scale",
+      "covers": 43,
+      "kills": 31,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/science.test.ts",
+      "name": "geometricSummary gives no interval for one value and refuses non-positive values",
+      "covers": 23,
+      "kills": 21,
+      "uniqueKills": 9,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/science.test.ts",
+      "name": "geometricSummary uses published t critical values",
+      "covers": 14,
+      "kills": 11,
+      "uniqueKills": 3,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/science.test.ts",
+      "name": "titerPlot draws below-limit samples hollow at half the limit",
+      "covers": 589,
+      "kills": 176,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/science.test.ts",
+      "name": "titerPlot labels the axis in dilution steps",
+      "covers": 589,
+      "kills": 156,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/science.test.ts",
+      "name": "titerPlot refuses non-positive titers and a bad dilution series",
+      "covers": 100,
+      "kills": 40,
+      "uniqueKills": 9,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/science.test.ts",
+      "name": "titerPlot spreads identical titers side by side",
+      "covers": 589,
+      "kills": 152,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/science.test.ts",
+      "name": "titerPlot summarizes each group in the table",
+      "covers": 589,
+      "kills": 176,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/sparkline.test.ts",
+      "name": "sparkline breaks the line at nulls instead of drawing zero",
+      "covers": 158,
+      "kills": 72,
+      "uniqueKills": 7,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/sparkline.test.ts",
+      "name": "sparkline describes the data when no alt is given",
+      "covers": 158,
+      "kills": 51,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/sparkline.test.ts",
+      "name": "sparkline draws a flat line mid-height for constant data and a dot at the end",
+      "covers": 151,
+      "kills": 60,
+      "uniqueKills": 2,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/sparkline.test.ts",
+      "name": "sparkline prefers a given alt",
+      "covers": 158,
+      "kills": 41,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/sparkline.test.ts",
+      "name": "sparkline refuses empty or non-finite data",
+      "covers": 34,
+      "kills": 24,
+      "uniqueKills": 5,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/sparkline.test.ts",
+      "name": "sparkline shades the area when asked and applies a color override",
+      "covers": 188,
+      "kills": 65,
+      "uniqueKills": 2,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "checkTheme errors when the sequential ramp does not grow away from the background",
+      "covers": 325,
+      "kills": 43,
+      "uniqueKills": 7,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "checkTheme passes the built-in theme and the gallery's example theme with no errors",
+      "covers": 313,
+      "kills": 56,
+      "uniqueKills": 5,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "checkTheme reports low text contrast as an error, per scheme",
+      "covers": 318,
+      "kills": 59,
+      "uniqueKills": 11,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "checkTheme warns once per pair of series colors that could be confused",
+      "covers": 314,
+      "kills": 76,
+      "uniqueKills": 17,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "color vision simulation collapses red and green under deuteranopia but not typical vision",
+      "covers": 180,
+      "kills": 47,
+      "uniqueKills": 1,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "color vision simulation leaves grays unchanged",
+      "covers": 41,
+      "kills": 22,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "color vision simulation measures zero difference between identical colors",
+      "covers": 183,
+      "kills": 43,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "contrastRatio is 21 for black on white and 1 for a color on itself",
+      "covers": 41,
+      "kills": 36,
+      "uniqueKills": 1,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "contrastRatio matches a published WCAG value",
+      "covers": 40,
+      "kills": 36,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "contrastRatio rejects colors it cannot measure",
+      "covers": 9,
+      "kills": 6,
+      "uniqueKills": 3,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "defineTheme rejects a non-hex color with its path",
+      "covers": 63,
+      "kills": 36,
+      "uniqueKills": 7,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "defineTheme rejects a palette of the wrong length",
+      "covers": 55,
+      "kills": 12,
+      "uniqueKills": 3,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "defineTheme returns a valid theme unchanged",
+      "covers": 62,
+      "kills": 28,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "deltaE2000 matches the published difference for [50,0,0] and [50,-1,2]",
+      "covers": 89,
+      "kills": 22,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "deltaE2000 matches the published difference for [50,2.5,0] and [73,25,-18]",
+      "covers": 115,
+      "kills": 80,
+      "uniqueKills": 6,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "deltaE2000 matches the published difference for [50,2.6772,-79.7751] and [50,0,-82.7485]",
+      "covers": 109,
+      "kills": 77,
+      "uniqueKills": 9,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "deltaE2000 matches the published difference for [60.2574,-34.0099,36.2677] and [60.4626,-34.1751,39.4387]",
+      "covers": 106,
+      "kills": 72,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "stylesheet defines every palette slot with a light fallback and a light-dark() pair",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "stylesheet hides the gridlines the theme does not show",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "stylesheet switches scheme under caller selectors",
+      "covers": 187,
+      "kills": 41,
+      "uniqueKills": 2,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "stylesheet turns animation off under reduced motion",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract defines no theme value itself",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-border-width with its fallback 1px",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-cell-padding with its fallback 0.2em 0.75em 0.2em 0",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-duration-draw with its fallback 800ms",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-duration-fade with its fallback 500ms",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-duration-grow with its fallback 600ms",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-duration-hover with its fallback 150ms",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-ease-grow with its fallback cubic-bezier(0.2, 0.7, 0.3, 1)",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-ease-out with its fallback ease-out",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-focus-outline-offset with its fallback 2px",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-focus-outline-width with its fallback 3px",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-focus-width-inner with its fallback 5px",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-focus-width-outer with its fallback 2.5px",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-font-size with its fallback 1rem",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-font-size-mark with its fallback 12px",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-font-size-small with its fallback 0.875em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-font-size-tooltip with its fallback 0.8125rem",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-font-weight-emphasis with its fallback 600",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-font-weight-title with its fallback 600",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-gap with its fallback 1em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-gap-inline with its fallback 0.4em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-gap-row with its fallback 0.25em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-line-height-tooltip with its fallback 1.35",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-opacity-brush with its fallback 0.15",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-opacity-dimmed with its fallback 0.25",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-padding-button with its fallback 0.125em 0.25em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-radius with its fallback 0.25em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-radius-swatch with its fallback 0.15em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-radius-tooltip with its fallback 0.3em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-space with its fallback 0.5em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-swatch-size with its fallback 0.8em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-timeline-list-indent with its fallback 1.25em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-tooltip-max-width with its fallback 18em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-tooltip-padding with its fallback 0.35em 0.6em",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-tooltip-shadow with its fallback 0 2px 8px rgb(0 0 0 / 15%)",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract documents --enarratio-z-tooltip with its fallback 10",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract finds the tunable properties",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract is included, unchanged, in every stylesheet",
+      "covers": 182,
+      "kills": 45,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/theme.test.ts",
+      "name": "the CSS custom property contract ships as dist/base.css when built",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "heatStrip colors each cell on the sequential ramp by its value, lowest to highest",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "heatStrip copes with flat data",
+      "covers": 182,
+      "kills": 77,
+      "uniqueKills": 2,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "heatStrip draws a missing value as a dashed outline",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "heatStrip fills the width with equal cells and has no axis",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "heatStrip is an svg named by a sentence made from the values",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "heatStrip puts the value in each cell's hover details",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "heatStrip refuses what would draw wrongly",
+      "covers": 114,
+      "kills": 86,
+      "uniqueKills": 20,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "heatStrip takes a fixed range, thresholds, cell labels and a formatter",
+      "covers": 181,
+      "kills": 76,
+      "uniqueKills": 1,
+      "candidate": null,
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline clips a span that runs past the window, and keeps its real times in the list",
+      "covers": 391,
+      "kills": 130,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline defaults the window to the events, takes Dates and epoch milliseconds, and formats times",
+      "covers": 379,
+      "kills": 132,
+      "uniqueKills": 2,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline draws lanes in the order given, empty ones too",
+      "covers": 431,
+      "kills": 115,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline draws spans as bars from start to end",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline is a container holding a named drawing and a plain list",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline labels the axis with ticks inside the window",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline lists every event in time order with its lane, status and time",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline puts each event at its time on one linear scale",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline refuses what would draw wrongly",
+      "covers": 201,
+      "kills": 162,
+      "uniqueKills": 52,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline says status by shape as well as color",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline shortens a long lane name and keeps the whole name as hover text",
+      "covers": 360,
+      "kills": 120,
+      "uniqueKills": 5,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline stacks overlapping events in a lane instead of drawing them over each other",
+      "covers": 390,
+      "kills": 89,
+      "uniqueKills": 0,
+      "candidate": "covered-by-others",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline takes its own text alternative",
+      "covers": 435,
+      "kills": 109,
+      "uniqueKills": 1,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/timeline.test.ts",
+      "name": "timeline uses calendar ticks for a long window",
+      "covers": 370,
+      "kills": 116,
+      "uniqueKills": 17,
+      "candidate": null,
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/worker.test.ts",
+      "name": "gallery worker redirects http to https permanently, keeping the path and query (A14, F16)",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": true,
+      "designPinning": false
+    },
+    {
+      "file": "test/worker.test.ts",
+      "name": "gallery worker redirects the old hostname to the new one in one hop, keeping the path and query",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    },
+    {
+      "file": "test/worker.test.ts",
+      "name": "gallery worker serves https requests from the assets",
+      "covers": 0,
+      "kills": 0,
+      "uniqueKills": 0,
+      "candidate": "zero-kill",
+      "protected": false,
+      "designPinning": false
+    }
+  ]
+}

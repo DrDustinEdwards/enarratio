@@ -60,6 +60,13 @@ updated whenever AI tools are used on the project.
    model identifier for this work is in the `Co-Authored-By` trailer of each
    commit. The new decisions are marked "author's decision" in the records.
 
+8. **2026-10-10: test baseline.** Claude Opus 5.5 (`claude-opus-5-5`), through
+   Claude Code, measured the test suite and ran a StrykerJS mutation baseline
+   with a per-test kill matrix (`docs/research/baseline.md`), following the method
+   of a sibling project. It wrote the Stryker config, the merge script and the
+   report. It changed no test or source file and removed nothing; any pruning
+   is a later decision for Dustin Edwards.
+
 ## Who decided what
 
 Dustin Edwards made the design decisions: those in the brief, and the
