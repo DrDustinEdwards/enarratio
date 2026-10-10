@@ -5,6 +5,19 @@ All notable changes to Enarratio (named Abscissa until 0.1.0-alpha.7) are record
 [Semantic Versioning](https://semver.org/). Before 1.0.0, a minor version may
 change the public API; every such change is listed here.
 
+## [Unreleased]
+
+### Development
+
+- A test baseline (`docs/research/baseline.md`): suite counts and runtimes, a
+  StrykerJS mutation score per file, and a per-test kill matrix
+  (`docs/research/kill-matrix.json`) with removal candidates and the
+  design-pinning tests listed separately. Measurement only: no test or source
+  changed. The chunked Stryker config (`stryker.config.mjs`,
+  `vitest.stryker.config.ts`) and the merge script
+  (`scripts/report-mutation.mjs`) are committed; Stryker itself is not a
+  dependency and is installed per run.
+
 ## [0.2.0] - 2026-10-02
 
 Design records 0011 to 0016 explain each decision.
