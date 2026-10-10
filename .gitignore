@@ -7,3 +7,5 @@ test/browser/__snapshots__/darwin/
 site/dist/
 *.log
 *.tgz
+reports/
+.stryker-tmp/
