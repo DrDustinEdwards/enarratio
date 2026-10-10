@@ -19,5 +19,6 @@ Enarratio draws accessible, server-rendered charts and scientific figures into t
 ## Releases and deploys
 
 - Every change is in `CHANGELOG.md`. The package publishes with the `next` tag until 1.0; the API may change before then and every change is recorded.
+- A `v*` tag runs `.github/workflows/release.yml`, which stages the package on npm (trusted publishing, provenance, no npm token). It goes live only when Dustin approves it on npm with 2FA. No session approves. Steps: `docs/releasing.md`.
 - The gallery deploys on every push to `main` (`.github/workflows/gallery.yml`); `npm run deploy:gallery` deploys by hand. A merge to `main` is a gallery deploy.
 - `wrangler.jsonc` is committed on purpose: it holds no account id or secret (wrangler takes the account from the login).
