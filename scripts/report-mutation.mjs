@@ -118,7 +118,10 @@ const summary = {
   files: Object.fromEntries(
     Object.entries(files)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([f, r]) => [f, { ...r, score: Number(score(r).pct.toFixed(2)) }]),
+      .map(([f, r]) => [
+        f,
+        { ...r, score: score(r).valid ? Number(score(r).pct.toFixed(2)) : null },
+      ]),
   ),
   tests: matrix,
 };
@@ -135,7 +138,7 @@ console.log(
 );
 for (const [f, r] of Object.entries(summary.files)) {
   console.log(
-    `| ${f} | ${r.killed} | ${r.timeout} | ${r.survived} | ${r.noCoverage} | ${r.score}% |`,
+    `| ${f} | ${r.killed} | ${r.timeout} | ${r.survived} | ${r.noCoverage} | ${r.score === null ? "n/a" : `${r.score}%`} |`,
   );
 }
 const count = (fn) => matrix.filter(fn).length;
