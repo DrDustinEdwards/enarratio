@@ -19,7 +19,9 @@ if (!mutate) throw new Error(`Set CHUNK to one of: ${Object.keys(CHUNKS).join(",
 
 export default {
   testRunner: "vitest",
-  vitest: { configFile: "vitest.stryker.config.ts" },
+  // related: false runs every test file. The default runs only files that import the mutated file,
+  // which misses the tests that reach src through examples, the worker or a dynamic import.
+  vitest: { configFile: "vitest.stryker.config.ts", related: false },
   plugins: ["@stryker-mutator/vitest-runner"],
   mutate: [...mutate, "!**/*.d.ts"],
   coverageAnalysis: "perTest",
