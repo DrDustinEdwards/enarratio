@@ -1,0 +1,77 @@
+name: Release
+
+# Stages a release on npm when a v* tag is pushed. Nothing goes live here: the workflow runs
+# `npm stage publish`, and the version stays hidden until a maintainer approves it with 2FA on
+# npmjs.com (Staged Packages tab) or with `npm stage approve`. Steps for a release: docs/releasing.md.
+#
+# Authentication is npm trusted publishing (OIDC): no npm token is stored anywhere. npm accepts the
+# publish only from this file, by name, as configured on the package's npm settings page, so renaming
+# this file breaks releases until that setting is changed too. Provenance is generated
+# automatically for a trusted publish from a public repository; it is also set explicitly below.
+# npm's documentation: https://docs.npmjs.com/trusted-publishers and
+# https://docs.npmjs.com/staged-publishing (npm CLI 11.15.0 or later, Node.js 22.14.0 or later).
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions: {}
+
+concurrency:
+  group: npm-release
+  cancel-in-progress: false
+
+jobs:
+  stage:
+    name: Stage the release on npm
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      # Lets the job request the OIDC token that npm exchanges for a short-lived publish token.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # No dependency cache in a release build (npm's trusted publishing guide).
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          registry-url: https://registry.npmjs.org
+      - name: Install the npm CLI that supports staged publishing
+        run: npm install --global npm@11.21.0
+      - name: Check the tag matches package.json and is on main
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version (expected v$version)."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag $GITHUB_REF_NAME points at a commit that is not on main. Tag a commit on main."
+            exit 1
+          fi
+      - run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npm run size
+      - name: Stage on npm
+        env:
+          NPM_CONFIG_PROVENANCE: "true"
+        run: |
+          # The dist-tag is fixed once staged, so it is passed explicitly from publishConfig.
+          tag="$(node -p 'require("./package.json").publishConfig.tag')"
+          npm stage publish --tag "$tag"
+      - name: Say what to do next
+        run: |
+          {
+            echo "### Staged on npm, not yet live"
+            echo
+            echo "Sign in at https://www.npmjs.com, open the Staged Packages tab and approve it, or run"
+            echo "\`npm stage list enarratio\` and \`npm stage approve <stage-id>\`. Steps: docs/releasing.md."
+          } >> "$GITHUB_STEP_SUMMARY"

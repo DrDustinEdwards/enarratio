@@ -15,6 +15,9 @@ change the public API; every such change is listed here.
 
 ### Development
 
+- Releases are staged on npm from GitHub Actions (`.github/workflows/release.yml`) when a `v*`
+  tag is pushed, using npm trusted publishing (no stored npm token) with provenance, and go live
+  only after a maintainer approves them on npm. The steps are in `docs/releasing.md`.
 - A test baseline (`docs/research/baseline.md`): suite counts and runtimes, a
   StrykerJS mutation score per file, and a per-test kill matrix
   (`docs/research/kill-matrix.json`) with removal candidates and the
