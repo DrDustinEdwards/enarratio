@@ -20,7 +20,7 @@ figures a laboratory needs, starting with antibody titer plots and genome
 tracks. Charts are built on [Observable Plot](https://observablehq.com/plot/)
 and [d3-force](https://d3js.org/d3-force) (optional peer dependencies, installed
 only for the charts that use them), and return plain HTML strings, so
-Enarratio works with any server framework. It is tested on Node.js 20, 22 and 24
+Enarratio works with any server framework. It is tested on Node.js 22 and 24
 and runs on Cloudflare Workers (the gallery's first site renders charts in a
 Worker); Deno and Bun should work, since it uses only standard modules, but are
 not yet tested.
@@ -79,7 +79,7 @@ it draws:
 | `enarratio/base.css` | The theme-free stylesheet | Nothing |
 
 (`linkedom` is dropped from browser bundles, which use the browser's own
-document.) Enarratio is ESM only and needs Node.js 20 or later (or any runtime with
+document.) Enarratio is ESM only and needs Node.js 22 or later (or any runtime with
 standard ES modules). TypeScript types are included.
 
 ## Five-minute start
