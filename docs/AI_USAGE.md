@@ -67,12 +67,37 @@ updated whenever AI tools are used on the project.
    report. It changed no test or source file and removed nothing; any pruning
    is a later decision for Dustin Edwards.
 
-9. **2026-10-11: light charts for the browser.** Dustin Edwards set the goal
-   (the Capsid Portal must draw its charts with Enarratio within 40 kB per
-   lazily loaded chunk) and the scope in a queued job. Claude Opus 5.5
-   (`claude-opus-5-5`), through Claude Code, wrote `enarratio/lite`, the shared
-   chart models, the parity tests that hold the light charts to the Plot
-   charts' output, the size check and design record 0017.
+9. **2026-10-10: Node.js 20 dropped (#15).** Claude Opus 5.5
+   (`claude-opus-5-5`), through Claude Code, dropped Node.js 20 (end of
+   life), set `engines` to `>=22`, and set the Node version for the tooling
+   jobs once, in `.nvmrc`. GitHub's CI and the seat's review checked it
+   before merge.
+
+10. **2026-10-10: staged npm releases (#16).** Claude Opus 5.5
+    (`claude-opus-5-5`), through Claude Code, wrote the Release workflow, which
+    stages the package on npm from a `v*` tag with trusted publishing and
+    provenance and no stored token, and `docs/releasing.md`, the one-time npm
+    setup and the steps of each release. GitHub's CI and the seat's review
+    checked it before merge.
+
+11. **2026-10-10: Node.js 26 (#17).** Claude Opus 5.5 (`claude-opus-5-5`),
+    through Claude Code, moved `.nvmrc` to Node.js 26 and the CI matrix to
+    Node.js 24 and 26, and updated the README, CONTRIBUTING and CHANGELOG to
+    match. GitHub's CI and the seat's review checked it before merge.
+
+12. **2026-10-11: keyboard access to a wide chart's frame (#18).** Claude
+    Opus 5.5 (`claude-opus-5-5`), through Claude Code, gave every wide
+    chart's scroll frame a tab stop, a group role and a name, with the
+    chart's focus outline in `base.css`, and made `enhance()` remove the tab
+    stop once the marks take focus and `destroy()` restore it. GitHub's CI and
+    the seat's review checked it before merge.
+
+13. **2026-10-11: light charts for the browser.** Dustin Edwards set the goal
+    (the Capsid Portal must draw its charts with Enarratio within 40 kB per
+    lazily loaded chunk) and the scope in a queued job. Claude Opus 5.5
+    (`claude-opus-5-5`), through Claude Code, wrote `enarratio/lite`, the shared
+    chart models, the parity tests that hold the light charts to the Plot
+    charts' output, the size check and design record 0017.
 
 ## Who decided what
 

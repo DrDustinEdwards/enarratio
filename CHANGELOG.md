@@ -7,6 +7,8 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-11
+
 ### Added
 
 - **Light bar, line and area charts for the browser: `enarratio/lite`.** `barChart`,
