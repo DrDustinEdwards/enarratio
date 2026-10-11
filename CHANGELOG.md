@@ -7,6 +7,18 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Added
+
+- **Light bar, line and area charts for the browser: `enarratio/lite`.** `barChart`,
+  `lineChart` and `areaChart` drawn without Observable Plot, linkedom or a DOM, from the
+  same options and to the same SVG as the charts in `enarratio/plot` (a test compares
+  them element by element on every gallery example and a matrix of options; the two
+  exceptions, where the Plot chart is wrong, are in the design record). Each also
+  has its own entry: `enarratio/lite/bar`, `enarratio/lite/line`, `enarratio/lite/area`.
+  Bundled for the browser, minified and gzipped they are 7.3, 9.2 and 8.8 kB (12.7 kB
+  together), against about 90 kB for the Plot versions without linkedom. The Plot
+  charts are unchanged. Design record 0017.
+
 ### Fixed
 
 - A wide drawing's frame (480 pixels or wider, which keeps 30rem and scrolls sideways on a narrow
@@ -28,6 +40,12 @@ change the public API; every such change is listed here.
 
 ### Development
 
+- `npm run size` also bundles each `enarratio/lite` entry for the browser with rolldown
+  (now a pinned dev dependency), minifies and gzips it, and fails above 40 kB, or if a
+  light entry imports anything outside the package.
+- The reading and checking of bar, line and area chart options moved out of the Plot
+  renderer into `src/render/bar-model.ts` and `src/render/line-model.ts`, shared by both
+  renderers. The Plot charts' output is byte for byte what it was.
 - Releases are staged on npm from GitHub Actions (`.github/workflows/release.yml`) when a `v*`
   tag is pushed, using npm trusted publishing (no stored npm token) with provenance, and go live
   only after a maintainer approves them on npm. The steps are in `docs/releasing.md`.

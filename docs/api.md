@@ -9,6 +9,7 @@ ships only what it uses.
 | `enarratio/base.css` | The theme-free base rules as a stylesheet file | Nothing |
 | `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` | Peers `@observablehq/plot`, and `linkedom` outside a browser |
 | `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | Peers `@observablehq/plot` and `d3-force`, and `linkedom` outside a browser |
+| `enarratio/lite` | `barChart`, `lineChart`, `areaChart` drawn without Observable Plot; also one entry per chart: `enarratio/lite/bar`, `enarratio/lite/line`, `enarratio/lite/area` | Nothing |
 | `enarratio/enhance` | Interaction for charts already on the page; runs in the browser | Nothing |
 | `enarratio/themes` | The themes that ship with the package | Nothing |
 
@@ -22,8 +23,8 @@ the browser's own document is used; Worker, Node.js, Deno and Bun builds keep it
 page draws only a titer plot; split imports are not possible within one entry.
 
 Everything returns HTML strings. Charts and primitives run anywhere (server,
-build step); the primitives, the core and `enarratio/enhance` also run in the
-browser. Where a section below names a function, its import is the entry above.
+build step); the primitives, the core, `enarratio/lite` and `enarratio/enhance`
+also run in the browser. Where a section below names a function, its import is the entry above.
 
 Every chart function takes one options object and returns a string. Options
 are checked when the chart is drawn, and anything that would draw a wrong
@@ -252,6 +253,23 @@ bounds, and what the band is called.
 
 `{ x: number | Date | string; label: string }`: a labelled vertical line, such
 as a deploy or an intervention.
+
+### Light charts: `enarratio/lite`
+
+`barChart`, `lineChart` and `areaChart` are also exported from `enarratio/lite`,
+for drawing in the browser. They take the same options (the same types, under
+the same names) and return the same figure: the SVG is the one the Plot charts
+draw, element for element, with coordinates equal to the hundredth of a pixel,
+and a test holds every gallery example and a matrix of options to that. The
+two exceptions are where the Plot chart is wrong (a bar link's accessible name,
+and bars whose values are all zero), listed in design record 0017. They
+need no Observable Plot, no linkedom and no DOM (the SVG is built as a string),
+so they run in a browser, a Worker or a server alike. Bundled for the browser,
+minified and gzipped, each is under 10 kB (`npm run size` measures them and
+fails above 40 kB); the Plot versions are about 90 kB without linkedom. Import
+one chart's entry, such as `enarratio/lite/bar`, for the smallest bundle. The
+Plot charts in `enarratio/plot` are unchanged and remain the ones for server
+rendering alongside the other Plot charts. Design record 0017 has the reasons.
 
 ### `scatterPlot`
 

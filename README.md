@@ -74,12 +74,15 @@ it draws:
 | `enarratio` | Core and primitives | Nothing |
 | `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` | `@observablehq/plot linkedom` |
 | `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | `@observablehq/plot d3-force linkedom` |
+| `enarratio/lite` | `barChart`, `lineChart`, `areaChart` without Observable Plot, for the browser; also `enarratio/lite/bar`, `/line`, `/area` | Nothing |
 | `enarratio/enhance` | Browser interaction | Nothing |
 | `enarratio/themes` | `defaultTheme` | Nothing |
 | `enarratio/base.css` | The theme-free stylesheet | Nothing |
 
 (`linkedom` is dropped from browser bundles, which use the browser's own
-document.) Enarratio is ESM only and needs Node.js 22 or later (or any runtime with
+document.) To draw bar, line and area charts in the browser, import them from
+`enarratio/lite`: the same options give the same SVG, with no Observable Plot,
+linkedom or DOM, in under 10 kB per chart bundled, minified and gzipped. Enarratio is ESM only and needs Node.js 22 or later (or any runtime with
 standard ES modules). TypeScript types are included.
 
 ## Five-minute start
