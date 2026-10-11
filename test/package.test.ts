@@ -30,9 +30,21 @@ function reach(entry: string, seen = new Set<string>()): Set<string> {
 }
 
 describe("package entries", () => {
-  it("has the six subpaths and no others", () => {
+  it("has the ten subpaths and no others", () => {
     expect(Object.keys(pkg.exports).sort()).toEqual(
-      [".", "./base.css", "./enhance", "./package.json", "./plot", "./science", "./themes"].sort(),
+      [
+        ".",
+        "./base.css",
+        "./enhance",
+        "./lite",
+        "./lite/area",
+        "./lite/bar",
+        "./lite/line",
+        "./package.json",
+        "./plot",
+        "./science",
+        "./themes",
+      ].sort(),
     );
   });
 
@@ -61,6 +73,16 @@ describe("package entries", () => {
         expect(readFileSync(file, "utf8"), file).not.toMatch(
           /@observablehq\/plot|linkedom|d3-force|#document/,
         );
+      }
+    }
+  });
+
+  it("keeps Plot, linkedom, d3-force and any DOM document out of the light charts", () => {
+    // Every import is a file of this package: no peer, and not the #document switch.
+    for (const entry of ["index", "bar", "line", "area"]) {
+      for (const file of reach(resolve(root, "src", "lite", `${entry}.ts`))) {
+        const specifiers = [...readFileSync(file, "utf8").matchAll(/from\s*["']([^"']+)["']/g)];
+        for (const [, specifier] of specifiers) expect(specifier, file).toMatch(/^\.\.?\//);
       }
     }
   });
@@ -105,6 +127,12 @@ describe.skipIf(!built)("the built package", () => {
     expect(Object.keys(await load("science/index.js")).sort()).toEqual(
       ["genomeTrack", "geometricSummary", "networkChart", "titerPlot"].sort(),
     );
+    expect(Object.keys(await load("lite/index.js")).sort()).toEqual(
+      ["areaChart", "barChart", "lineChart"].sort(),
+    );
+    expect(Object.keys(await load("lite/bar.js"))).toEqual(["barChart"]);
+    expect(Object.keys(await load("lite/line.js"))).toEqual(["lineChart"]);
+    expect(Object.keys(await load("lite/area.js"))).toEqual(["areaChart"]);
   });
 
   it("writes base.css identical to baseStylesheet()", async () => {

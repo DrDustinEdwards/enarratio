@@ -45,6 +45,22 @@
       "types": "./dist/themes/index.d.ts",
       "default": "./dist/themes/index.js"
     },
+    "./lite": {
+      "types": "./dist/lite/index.d.ts",
+      "default": "./dist/lite/index.js"
+    },
+    "./lite/bar": {
+      "types": "./dist/lite/bar.d.ts",
+      "default": "./dist/lite/bar.js"
+    },
+    "./lite/line": {
+      "types": "./dist/lite/line.d.ts",
+      "default": "./dist/lite/line.js"
+    },
+    "./lite/area": {
+      "types": "./dist/lite/area.d.ts",
+      "default": "./dist/lite/area.js"
+    },
     "./package.json": "./package.json"
   },
   "imports": {
@@ -109,6 +125,7 @@
     "pixelmatch": "7.2.0",
     "pngjs": "7.0.0",
     "puppeteer": "25.4.0",
+    "rolldown": "1.2.11",
     "typescript": "5.9.3",
     "vitest": "4.1.11"
   }

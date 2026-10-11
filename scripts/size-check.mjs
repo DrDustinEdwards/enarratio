@@ -4,6 +4,10 @@
  * brings with it from this package (compiled, not minified: a bundler's output is smaller), and
  * the outside packages it imports.
  *
+ * The light chart entries (`enarratio/lite` and its subpaths) are also measured the way a browser
+ * app ships them: bundled for the browser with everything they import, minified, then gzipped.
+ * Each must stay under LITE_LIMIT and import nothing outside this package.
+ *
  * It fails when core gains a runtime dependency: if package.json lists any `dependencies`, or if
  * the core entry imports anything outside this package.
  *
@@ -12,6 +16,10 @@
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
+import { rolldown } from "rolldown";
+
+/** The most a light chart entry may weigh, bundled, minified and gzipped (40 kB). */
+const LITE_LIMIT = 40_000;
 
 const root = resolve(import.meta.dirname, "..");
 const pkg = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
@@ -68,6 +76,29 @@ for (const [name, target] of Object.entries(pkg.exports)) {
     if (name === "." && outside.size > 0) {
       failures.push(`core ("enarratio") imports outside its own files: ${[...outside].join(", ")}`);
     }
+    if (name.startsWith("./lite") && outside.size > 0) {
+      failures.push(`${name} imports outside its own files: ${[...outside].join(", ")}`);
+    }
+  }
+}
+
+/** An entry bundled for the browser with all it imports, minified, then gzipped: its bytes. */
+async function bundled(path) {
+  const bundle = await rolldown({ input: path, platform: "browser", logLevel: "silent" });
+  const { output } = await bundle.generate({ format: "esm", minify: true });
+  await bundle.close();
+  return gzipSync(output.map((chunk) => chunk.code ?? "").join(""), { level: 9 }).length;
+}
+
+const lite = [];
+for (const [name, target] of Object.entries(pkg.exports)) {
+  if (!name.startsWith("./lite")) continue;
+  const bytes = await bundled(resolve(root, target.default));
+  lite.push([name, bytes]);
+  if (bytes > LITE_LIMIT) {
+    failures.push(
+      `${name} is ${bytes} bytes bundled, minified and gzipped; the limit is ${LITE_LIMIT}`,
+    );
   }
 }
 
@@ -78,8 +109,14 @@ for (const [label, bytes, outside] of rows) {
     `${label.padEnd(width)}  ${`${(bytes / 1024).toFixed(1)} kB`.padStart(7)}  ${outside}`,
   );
 }
+console.log(
+  `\nlight charts, bundled for the browser, minified, gzipped (limit ${LITE_LIMIT / 1000} kB):`,
+);
+for (const [label, bytes] of lite) {
+  console.log(`${label.padEnd(width)}  ${`${(bytes / 1000).toFixed(1)} kB`.padStart(7)}`);
+}
 if (failures.length > 0) {
   for (const failure of failures) console.error(`FAIL: ${failure}`);
   process.exit(1);
 }
-console.log("ok: core has no runtime dependency");
+console.log("ok: core has no runtime dependency; every light chart is within its limit");

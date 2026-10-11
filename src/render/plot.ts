@@ -7,26 +7,10 @@
 import * as Plot from "@observablehq/plot";
 import { createDocument } from "#document";
 import { escapeHtml } from "../html.js";
+import { datumAttributes, type MarkDatum } from "./datum.js";
 import type { ScaleDescription } from "./figure.js";
 
-/** What the enhancement layer needs to know about one drawn datum. */
-export interface MarkDatum {
-  /** Unique within the chart and stable across re-renders of the same data (for transitions). */
-  readonly key: string;
-  /** The value a click filters on, and the name of the field it belongs to. */
-  readonly filter?: { readonly field: string; readonly value: string };
-  /** The x value as text, for brush and hover. */
-  readonly x?: string;
-  /** The series name, when the chart has series. */
-  readonly series?: string;
-  /**
-   * The mark's place for keyboard reading order: its category (column) and its position within
-   * the category (row). Taken from the data, not the drawing, so order is right in facets and in
-   * charts enhanced while hidden (F9).
-   */
-  readonly column?: number;
-  readonly row?: number;
-}
+export type { MarkDatum } from "./datum.js";
 
 /**
  * A Plot render transform that calls `apply` on each element a mark draws with the datum it
@@ -70,15 +54,7 @@ export function keyed<T>(
 
 /** Writes a datum's keys onto an element. */
 export function tag(el: Element, datum: MarkDatum): void {
-  el.setAttribute("data-enarratio-key", datum.key);
-  if (datum.filter) {
-    el.setAttribute("data-enarratio-field", datum.filter.field);
-    el.setAttribute("data-enarratio-value", datum.filter.value);
-  }
-  if (datum.x !== undefined) el.setAttribute("data-enarratio-x", datum.x);
-  if (datum.series !== undefined) el.setAttribute("data-enarratio-series", datum.series);
-  if (datum.column !== undefined) el.setAttribute("data-enarratio-col", String(datum.column));
-  if (datum.row !== undefined) el.setAttribute("data-enarratio-row", String(datum.row));
+  for (const [name, value] of datumAttributes(datum)) el.setAttribute(name, value);
 }
 
 const NUMBER = /-?\d+\.\d{3,}(?:e-?\d+)?/g;

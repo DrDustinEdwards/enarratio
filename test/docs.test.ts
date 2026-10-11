@@ -29,6 +29,7 @@ const ENTRIES = [
   "src/science/index.ts",
   "src/themes/index.ts",
   "src/enhance/index.ts",
+  "src/lite/index.ts",
 ];
 
 describe("documentation", () => {

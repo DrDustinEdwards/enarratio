@@ -33,6 +33,7 @@ Each record says where a decision came from:
 | [0014](0014-timeline-and-heat-strip.md) | The event timeline and the heat strip |
 | [0015](0015-primitive-companions.md) | Companion tables for the primitives |
 | [0016](0016-remove-the-site-theme.md) | The dustinedwards.info theme is removed |
+| [0017](0017-light-charts.md) | Light bar, line and area charts for the browser |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

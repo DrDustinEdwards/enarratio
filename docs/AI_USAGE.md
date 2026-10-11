@@ -67,6 +67,13 @@ updated whenever AI tools are used on the project.
    report. It changed no test or source file and removed nothing; any pruning
    is a later decision for Dustin Edwards.
 
+9. **2026-10-11: light charts for the browser.** Dustin Edwards set the goal
+   (the Capsid Portal must draw its charts with Enarratio within 40 kB per
+   lazily loaded chunk) and the scope in a queued job. Claude Opus 5.5
+   (`claude-opus-5-5`), through Claude Code, wrote `enarratio/lite`, the shared
+   chart models, the parity tests that hold the light charts to the Plot
+   charts' output, the size check and design record 0017.
+
 ## Who decided what
 
 Dustin Edwards made the design decisions: those in the brief, and the
