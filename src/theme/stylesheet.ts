@@ -195,7 +195,7 @@ ${Array.from(
 }
 /* Invisible targets that make small marks at least 24 CSS pixels to point at. */
 .enarratio-hit { fill: transparent; stroke: none; }
-.enarratio svg:focus-visible, .enarratio-legend button:focus-visible {
+.enarratio svg:focus-visible, .enarratio-legend button:focus-visible, .enarratio-frame:focus-visible {
   outline: var(--enarratio-focus-outline-width, 3px) solid var(--enarratio-focus);
   outline-offset: var(--enarratio-focus-outline-offset, 2px);
 }

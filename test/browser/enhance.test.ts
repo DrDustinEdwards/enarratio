@@ -44,6 +44,10 @@ describe("enhance: stacked bar", () => {
     expect(marks[0]?.[2]).toBe("Year 2019, Publications: 3");
     expect(await page.$eval(`${STACKED} svg`, (svg) => svg.getAttribute("role"))).toBe("group");
     expect(await page.$(`${STACKED} [data-enarratio-key] title`)).toBeNull();
+    // The marks scroll the frame into view, so the frame is no longer a tab stop of its own.
+    expect(
+      await page.$eval(`${STACKED} .enarratio-frame`, (el) => el.getAttribute("tabindex")),
+    ).toBeNull();
   });
 
   it("moves by column with left and right, and through a stack with up and down", async () => {
@@ -149,12 +153,14 @@ describe("enhance: update and destroy", () => {
         after,
         role: figure.querySelector("svg")?.getAttribute("role"),
         titles: figure.querySelectorAll("[data-enarratio-key] > title").length,
+        frameTab: figure.querySelector(".enarratio-frame")?.getAttribute("tabindex"),
       };
     });
     expect(Number(result.during)).toBeLessThan(100);
     expect(result.after).toBe("100");
     expect(result.role).toBe("img");
     expect(result.titles).toBe(5);
+    expect(result.frameTab).toBe("0");
     expect(result.before).not.toBe("100");
     await p.close();
   });

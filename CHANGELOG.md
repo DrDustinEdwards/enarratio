@@ -7,6 +7,17 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Fixed
+
+- A wide drawing's frame (480 pixels or wider, which keeps 30rem and scrolls sideways on a narrow
+  screen, A13) could not be reached by keyboard, so a keyboard user could not scroll it. The frame
+  now carries `tabindex="0"`, `role="group"` and `aria-label="{title}, scrolls sideways"` ("Chart"
+  when there is no title, since the SVG inside already reads the alt), and `base.css` gives it the
+  same `:focus-visible` outline as the chart. Markup cannot know whether a frame overflows, so
+  every wide frame gets them; narrower frames, which never scroll, get none. `enhance()` removes
+  the frame's tab stop once the marks take focus (a focused mark scrolls itself into view), and
+  `destroy()` gives it back.
+
 ### Changed
 
 - CI tests Node.js 24 and 26, and the tooling jobs run on Node.js 26 (`.nvmrc`). `engines` is

@@ -245,6 +245,8 @@ class Chart implements EnhancedChart {
   private brushRect: SVGRectElement | null = null;
   /** The SVG's role as the server rendered it, restored by destroy(). */
   private serverRole: string | null = null;
+  /** A wide frame whose tab stop attach() removed, given back by destroy(). */
+  private untabbedFrame: HTMLElement | null = null;
   private ring: SVGGElement | null = null;
   private hideTimer: ReturnType<typeof setTimeout> | undefined;
   /** The first end of a range picked by clicking twice (A4). */
@@ -302,6 +304,13 @@ class Chart implements EnhancedChart {
       if (filterable) mark.setAttribute("aria-pressed", "false");
       mark.setAttribute("tabindex", i === 0 ? "0" : "-1");
     });
+    // A focused mark scrolls the frame into view itself, so the frame's own tab stop (A13) would
+    // be a second, empty stop before the data.
+    const frame = this.figure.querySelector<HTMLElement>(":scope > .enarratio-frame");
+    if (this.marks.length > 0 && frame?.getAttribute("tabindex") === "0") {
+      frame.removeAttribute("tabindex");
+      this.untabbedFrame = frame;
+    }
 
     if (this.options.tooltips) {
       const tip = document.createElement("div");
@@ -855,6 +864,8 @@ class Chart implements EnhancedChart {
         }
       }
     }
+    this.untabbedFrame?.setAttribute("tabindex", "0");
+    this.untabbedFrame = null;
     for (const name of [
       "data-enarratio-enhanced",
       "data-enarratio-interactive",
