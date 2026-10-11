@@ -20,7 +20,7 @@ figures a laboratory needs, starting with antibody titer plots and genome
 tracks. Charts are built on [Observable Plot](https://observablehq.com/plot/)
 and [d3-force](https://d3js.org/d3-force) (optional peer dependencies, installed
 only for the charts that use them), and return plain HTML strings, so
-Enarratio works with any server framework. It is tested on Node.js 22 and 24
+Enarratio works with any server framework. It is tested on Node.js 24 and 26
 and runs on Cloudflare Workers (the gallery's first site renders charts in a
 Worker); Deno and Bun should work, since it uses only standard modules, but are
 not yet tested.
@@ -275,7 +275,8 @@ npm run build && npm run gallery                  # site/dist
 npm run test:browser                              # accessibility, interaction, visual
 ```
 
-Development needs Node.js 24, which runs the TypeScript scripts directly.
+Development needs Node.js 24 or later, which runs the TypeScript scripts directly; `.nvmrc`
+pins 26.
 
 The gallery is hosted at https://enarratio.dustinedwards.info as an assets-only
 Cloudflare Worker (`wrangler.jsonc`), with a strict Content-Security-Policy

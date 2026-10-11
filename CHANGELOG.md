@@ -9,6 +9,8 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- CI tests Node.js 24 and 26, and the tooling jobs run on Node.js 26 (`.nvmrc`). `engines` is
+  unchanged (`>=22`); Node.js 22 is no longer in the CI matrix.
 - Node.js 20 (end of life) is dropped: `engines` is now `>=22`, CI tests Node.js 22 and 24, and the
   README says so. The Node version for the tooling jobs (browser tests, gallery build, visual
   snapshots) is set once, in `.nvmrc`.

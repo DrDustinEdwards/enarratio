@@ -23,8 +23,8 @@ record in `docs/design/`.
 ## Making a change
 
 1. Fork the repository and create a branch.
-2. `npm ci`. Development needs Node.js 24, which runs the TypeScript scripts
-   directly.
+2. `npm ci`. Development needs Node.js 24 or later, which runs the TypeScript
+   scripts directly; `.nvmrc` pins 26.
 3. Make the change, with tests. Every chart and primitive has unit tests; a
    new public function also needs a section in `docs/api.md` (a test checks),
    an example in `examples/` (which the gallery and the rendering tests pick
