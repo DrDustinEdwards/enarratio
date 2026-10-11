@@ -112,7 +112,7 @@ Every chart (not the primitives) accepts these.
 | `title` | `string` | Visible title above the chart. |
 | `caption` | `string` | Visible caption below: method, source, caveats. |
 | `id` | `string` | The figure's `id`, reported as `chartId` in events. |
-| `width`, `height` | `number` | Drawing size in CSS pixels, positive and finite. Drawings 480 pixels or wider keep at least 30rem on narrow screens and scroll sideways inside the figure, so their text stays readable. |
+| `width`, `height` | `number` | Drawing size in CSS pixels, positive and finite. Drawings 480 pixels or wider keep at least 30rem on narrow screens and scroll sideways inside the figure, so their text stays readable. That frame is in the tab order (`tabindex="0"`) and named "{title}, scrolls sideways" ("Chart" without a title), so a keyboard can scroll it; `enhance()` drops that tab stop once the marks take focus. |
 | `dataTable` | `"details"` or `"visually-hidden"` | How the always-present data table is shown. Default `"details"`. |
 
 A chart returns:
@@ -121,7 +121,7 @@ A chart returns:
 <figure class="enarratio" data-enarratio="bar" id="...">
   <p class="enarratio-title">...</p>
   <ul class="enarratio-legend">...</ul>
-  <div class="enarratio-frame">
+  <div class="enarratio-frame enarratio-frame-wide" tabindex="0" role="group" aria-label="{title}, scrolls sideways">
     <svg role="img" aria-label="{alt}">... one keyed element per datum ...</svg>
   </div>
   <figcaption class="enarratio-caption">...</figcaption>

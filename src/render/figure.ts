@@ -210,6 +210,7 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
   const caption = options.caption?.trim();
 
   const legend = legendMarkup(parts);
+  const wide = (options.width ?? 640) >= 480;
   const tableBlock = dataTableBlock(parts.table, `Data for: ${title ?? alt}`, options.dataTable);
 
   return element(
@@ -227,15 +228,21 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
       title ? element("p", { class: "enarratio-title" }, escapeHtml(title)) : "",
       legend,
       // A frame that scrolls sideways on narrow screens instead of shrinking the text (A13).
-      // Drawings 30rem or wider keep that width and scroll; narrower ones scale as usual.
+      // Drawings 30rem or wider keep that width and scroll; narrower ones scale as usual. A wide
+      // frame is the one that can scroll, so a keyboard can reach it (tabindex), and the group
+      // role lets it carry a name. Markup cannot know whether it overflows, so every wide frame
+      // gets both; enhance() drops the tab stop once the marks take focus. The name is the title,
+      // not the alt, which the SVG inside already reads.
       element(
         "div",
-        {
-          class:
-            (options.width ?? 640) >= 480
-              ? "enarratio-frame enarratio-frame-wide"
-              : "enarratio-frame",
-        },
+        wide
+          ? {
+              class: "enarratio-frame enarratio-frame-wide",
+              tabindex: "0",
+              role: "group",
+              "aria-label": `${title || "Chart"}, scrolls sideways`,
+            }
+          : { class: "enarratio-frame" },
         parts.svg,
       ),
       caption ? element("figcaption", { class: "enarratio-caption" }, escapeHtml(caption)) : "",

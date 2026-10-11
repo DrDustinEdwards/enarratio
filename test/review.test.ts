@@ -255,6 +255,28 @@ describe("A13: wide drawings scroll instead of shrinking their text", () => {
     expect(narrow.querySelector(".enarratio-frame")?.getAttribute("class")).toBe("enarratio-frame");
     expect(stylesheet(defaultTheme)).toContain(".enarratio-frame-wide > svg { min-width: 30rem; }");
   });
+
+  it("lets a keyboard reach a wide frame, which can scroll, and names it; a narrow frame stays out of the tab order", () => {
+    const wide = parse(barChart({ data: [{ k: "a" }], x: "k", title: "Counts", alt: "a" }));
+    const frame = wide.querySelector(".enarratio-frame");
+    expect(frame?.getAttribute("tabindex")).toBe("0");
+    expect(frame?.getAttribute("role")).toBe("group");
+    expect(frame?.getAttribute("aria-label")).toBe("Counts, scrolls sideways");
+    const untitled = parse(barChart({ data: [{ k: "a" }], x: "k", alt: "Counts by key" }));
+    // Untitled, the frame is not named by the alt, which the SVG inside already reads.
+    expect(untitled.querySelector(".enarratio-frame")?.getAttribute("aria-label")).toBe(
+      "Chart, scrolls sideways",
+    );
+    const blank = parse(barChart({ data: [{ k: "a" }], x: "k", title: "  ", alt: "a" }));
+    expect(blank.querySelector(".enarratio-frame")?.getAttribute("aria-label")).toBe(
+      "Chart, scrolls sideways",
+    );
+    const narrow = parse(barChart({ data: [{ k: "a" }], x: "k", width: 300, alt: "a" }));
+    const small = narrow.querySelector(".enarratio-frame");
+    expect(small?.hasAttribute("tabindex")).toBe(false);
+    expect(small?.hasAttribute("aria-label")).toBe(false);
+    expect(stylesheet(defaultTheme)).toContain(".enarratio-frame:focus-visible");
+  });
 });
 
 describe("F2: a log axis refuses values it cannot show", () => {
