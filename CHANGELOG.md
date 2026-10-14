@@ -7,6 +7,11 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Changed
+
+- **Releases tag themselves.** Merging a version bump to `main` tags it, publishes the GitHub
+  release and stages the package; nobody pushes a tag (`docs/releasing.md`).
+
 ## [0.3.1] - 2026-10-14
 
 ### Changed
