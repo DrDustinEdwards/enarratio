@@ -7,6 +7,15 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Changed
+
+- **Narrow ticks keep a gap.** `uptimeStrip` and `heatStrip` left no space between ticks
+  narrower than 5px, so a long strip (84 two-hour periods in 336px, say) read as one solid
+  bar. A tick of 3px or more now keeps a 1px gap and one of 2px a half-pixel gap.
+- **Area charts are lighter, with an edge.** Bands are filled at 0.3 opacity instead of
+  0.85, with a 2px line along each band's top edge, in `enarratio/plot` and
+  `enarratio/lite` alike, so gridlines show through and a stack reads as layers.
+
 ## [0.3.0] - 2026-10-11
 
 ### Added
