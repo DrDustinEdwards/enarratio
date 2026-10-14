@@ -57,12 +57,10 @@ terminal with your passkey keeps working too.
    `package-lock.json` (`npm version X.Y.Z --no-git-tag-version`), move the `[Unreleased]`
    entries in `CHANGELOG.md` under the new version and date, and add the release's tools and
    model ids to `docs/AI_USAGE.md`. Merge it once CI is green.
-2. **Create the tag on GitHub.** Open the repository, click **Releases**, then
-   **Draft a new release**. In **Choose a tag**, type `vX.Y.Z` (the version from
-   `package.json`, with a `v`) and click **Create new tag: vX.Y.Z on publish**. Leave
-   **Target** on `main`. Give it the title `vX.Y.Z`, paste the changelog entry, and click
-   **Publish release**. (From a terminal instead: `git tag vX.Y.Z` on an up-to-date `main`,
-   then `git push origin vX.Y.Z`.)
+2. **The merge makes the tag.** The Release workflow sees the new version on `main`, tags that
+   commit `vX.Y.Z`, publishes a GitHub release with the version's CHANGELOG section, and stages
+   the package. Nobody pushes a tag. (A version that merged before this existed is released with
+   **Actions > Release > Run workflow** on `main`. A hand-pushed `vX.Y.Z` tag still works too.)
 3. **Watch the Release workflow.** Click **Actions**, then **Release**. It checks that the
    tag matches `package.json` and is on `main`, runs the typecheck, lint, tests, build and size
    check, and stages the package. A red run stages nothing.
@@ -73,8 +71,8 @@ terminal with your passkey keeps working too.
    `npm stage approve <stage-id>`.
 5. **Check it is live.** The package page shows the new version under the `next` tag and a
    provenance section naming this repository and `release.yml`.
-6. **Start the consumer bumps.** The tag push already ran **bump-consumers**, but before the
-   version was live. Click **Actions**, then **bump-consumers**, then **Run workflow**, untick
+6. **Start the consumer bumps.** A tag the workflow made starts no other workflow, and a hand-pushed
+   tag ran **bump-consumers** before the version was live, so either way start it now. Click **Actions**, then **bump-consumers**, then **Run workflow**, untick
    **dry_run**, and run it.
 
 ## When something goes wrong
