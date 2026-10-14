@@ -99,6 +99,14 @@ updated whenever AI tools are used on the project.
     chart models, the parity tests that hold the light charts to the Plot
     charts' output, the size check and design record 0017.
 
+14. **2026-10-14: readable strips and lighter areas (#21, 0.3.1).** Dustin
+    Edwards asked why the Portal's charts looked worse after the move to
+    Enarratio and asked for them fixed. Claude Opus 5.5 (`claude-opus-5-5`),
+    through Claude Code, found the causes, kept a gap between narrow ticks in
+    `uptimeStrip` and `heatStrip`, and lightened area fills with a line along
+    each band. CI rendered the new area images, Dustin approved the before and
+    after screenshots, and GitHub's CI checked it before merge.
+
 ## Who decided what
 
 Dustin Edwards made the design decisions: those in the brief, and the

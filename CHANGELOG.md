@@ -7,6 +7,8 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-14
+
 ### Changed
 
 - **Narrow ticks keep a gap.** `uptimeStrip` and `heatStrip` left no space between ticks
