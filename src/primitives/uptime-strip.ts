@@ -1,5 +1,6 @@
 import { element, escapeHtml } from "../html.js";
 import { type PrimitiveTable, type PrimitiveTableOptions, primitiveTable } from "./companion.js";
+import { tickGap } from "./tick-gap.js";
 
 /** The state of one period in an {@link uptimeStrip}. */
 export type UptimeStatus = "up" | "degraded" | "down" | "unknown";
@@ -116,7 +117,7 @@ export function prepareUptimeStrip(options: UptimeStripOptions): UptimeStripValu
 export function uptimeStrip(options: UptimeStripOptions): string {
   const { slots, width, height, alt } = prepareUptimeStrip(options);
   const step = width / slots.length;
-  const gap = step > 4 ? 1 : 0;
+  const gap = tickGap(step);
 
   const ticks = slots.map((slot, i) => {
     const spec = STATUS[slot.status];

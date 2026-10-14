@@ -71,6 +71,19 @@ describe("uptimeStrip", () => {
     ]);
   });
 
+  it("keeps a gap between narrow ticks, so many periods do not merge into one bar", () => {
+    const widths = (slots: number, width: number) =>
+      [
+        ...parse(
+          uptimeStrip({ slots: Array(slots).fill("up"), label: "x", width }),
+        ).querySelectorAll("rect"),
+      ].map((r) => r.getAttribute("width"));
+    // 84 two-hour periods in 336px: 4px a tick, 1px of it gap (enarratio 0.3.0 left none).
+    expect(new Set(widths(84, 336))).toEqual(new Set(["3"]));
+    expect(new Set(widths(100, 250))).toEqual(new Set(["2"]));
+    expect(new Set(widths(100, 150))).toEqual(new Set(["1.5"]));
+  });
+
   it("uses per-slot labels in hover details", () => {
     const svg = parse(uptimeStrip({ slots: [{ status: "down", label: "Mon 14:00" }], label: "x" }));
     expect(svg.querySelector("rect title")?.textContent).toBe("Mon 14:00: down");

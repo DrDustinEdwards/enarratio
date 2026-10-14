@@ -506,6 +506,12 @@ export function lineModel<T extends object>(options: LineChartOptions<T>): LineM
 
 const AREA = "areaChart";
 
+/**
+ * The fill opacity of an area chart's bands. Light, with a line along each band's top edge,
+ * so the gridlines show through and a stack reads as layers rather than one solid block.
+ */
+export const AREA_OPACITY = 0.3;
+
 /** Reads and checks an area chart's options. Throws on anything it cannot draw. */
 export function areaModel<T extends object>(options: SeriesChartOptions<T>): SeriesModel {
   const prepared = prepare(AREA, options);

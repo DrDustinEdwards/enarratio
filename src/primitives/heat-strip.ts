@@ -8,6 +8,7 @@ import {
   requireSize,
 } from "../render/data.js";
 import { type PrimitiveTable, type PrimitiveTableOptions, primitiveTable } from "./companion.js";
+import { tickGap } from "./tick-gap.js";
 
 /** Options for {@link heatStrip}. */
 export interface HeatStripOptions {
@@ -130,7 +131,7 @@ export function prepareHeatStrip(options: HeatStripOptions): HeatStripValues {
 export function heatStrip(options: HeatStripOptions): string {
   const p = prepareHeatStrip(options);
   const step = p.width / p.values.length;
-  const gap = step > 4 ? 1 : 0;
+  const gap = tickGap(step);
   const cells = p.values.map((value, i) => {
     const title = `${p.cellLabel(i)}: ${value === null ? "no data" : p.format(value)}`;
     const common = {

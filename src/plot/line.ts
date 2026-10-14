@@ -1,5 +1,6 @@
 import * as Plot from "@observablehq/plot";
 import {
+  AREA_OPACITY,
   areaModel,
   type LineChartOptions,
   lineModel,
@@ -217,7 +218,19 @@ export function areaChart<T extends object>(options: SeriesChartOptions<T>): str
             y: "value",
             z: "series",
             fill: "series",
-            fillOpacity: 0.85,
+            fillOpacity: AREA_OPACITY,
+          }),
+        ),
+        // The top edge of each band as a line, so a light fill still reads as a shape.
+        Plot.lineY(
+          points,
+          Plot.stackY2({
+            ...order,
+            x: "x",
+            y: "value",
+            z: "series",
+            stroke: "series",
+            strokeWidth: 2,
           }),
         ),
         Plot.dot(

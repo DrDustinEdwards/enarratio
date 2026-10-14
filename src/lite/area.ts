@@ -5,8 +5,21 @@
  * @packageDocumentation
  */
 
-import { areaModel, type Point, type SeriesChartOptions } from "../render/line-model.js";
-import { annotations, areaPath, bySeries, dots, pathGroup, seriesFrame } from "./series.js";
+import {
+  AREA_OPACITY,
+  areaModel,
+  type Point,
+  type SeriesChartOptions,
+} from "../render/line-model.js";
+import {
+  annotations,
+  areaPath,
+  bySeries,
+  dots,
+  linePath,
+  pathGroup,
+  seriesFrame,
+} from "./series.js";
 import { el, svgRoot } from "./svg.js";
 
 export type {
@@ -74,7 +87,7 @@ export function areaChart<T extends object>(options: SeriesChartOptions<T>): str
     layout.axes,
     pathGroup(
       "area",
-      { "fill-opacity": "0.85" },
+      { "fill-opacity": String(AREA_OPACITY) },
       bySeries(points).map((group) => ({
         d: areaPath(
           group,
@@ -83,6 +96,19 @@ export function areaChart<T extends object>(options: SeriesChartOptions<T>): str
           (p) => [x(p.at), y(span(p)[0])],
         ),
         attrs: { fill: color(group[0] as Point) },
+      })),
+    ),
+    // The top edge of each band as a line, so a light fill still reads as a shape.
+    pathGroup(
+      "line",
+      { fill: "none", "stroke-width": "2", "stroke-linejoin": "round", "stroke-linecap": "round" },
+      bySeries(points).map((group) => ({
+        d: linePath(
+          group,
+          () => true,
+          (p) => [x(p.at), y(span(p)[1])],
+        ),
+        attrs: { stroke: color(group[0] as Point) },
       })),
     ),
     // Gaps have no point: their hover text would otherwise claim a value.
