@@ -11,6 +11,9 @@ change the public API; every such change is listed here.
 
 - **Releases tag themselves.** Merging a version bump to `main` tags it, publishes the GitHub
   release and stages the package; nobody pushes a tag (`docs/releasing.md`).
+- **A code map for the Capsid system explorer.** After each push to `main`, devkit's code-map
+  workflow publishes each module's imports and each function's complexity, coverage and CRAP to
+  the `code-map` branch; a weekly run adds Stryker mutation scores. Not part of the package.
 
 ## [0.3.1] - 2026-10-14
 
