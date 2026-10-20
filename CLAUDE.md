@@ -4,8 +4,8 @@ Enarratio draws accessible, server-rendered charts and scientific figures into t
 
 ## Rules that come first
 
-- The portfolio rules are in Capsid: `capsid/conventions.md`. Read it with this file. Where they disagree, conventions wins.
-- The npm package stays independent of Capsomer (it ships its own themeable CSS); the gallery site adopts Capsomer (capsid/decisions.md, 2026-10-02).
+- The portfolio rules are in Capsid: `capsid/conventions.md`. Read it with this file.
+- The npm package stays independent of Capsomer (it ships its own themeable CSS); the gallery site adopts Capsomer.
 - Design records are `docs/design/0001` onward. A new decision gets the next number; a reversal says which record it replaces.
 
 ## Commands
@@ -17,7 +17,7 @@ Enarratio draws accessible, server-rendered charts and scientific figures into t
 
 ## Releases and deploys
 
-- Every change is in `CHANGELOG.md`. The package publishes with the `next` tag until 1.0; the API may change before then and every change is recorded.
+- Every change is in `CHANGELOG.md`.
 - Merging a version bump to `main` is the release: `.github/workflows/release.yml` tags `vX.Y.Z`, publishes the GitHub release and stages the package on npm (trusted publishing, provenance, no npm token). It goes live only when Dustin approves it on npm with 2FA. No session approves. Steps: `docs/releasing.md`.
 - The gallery deploys on every push to `main` (`.github/workflows/gallery.yml`); `npm run deploy:gallery` deploys by hand. A merge to `main` is a gallery deploy.
 - `wrangler.jsonc` is committed on purpose: it holds no account id or secret (wrangler takes the account from the login).
