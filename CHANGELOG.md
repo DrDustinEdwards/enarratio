@@ -14,6 +14,14 @@ change the public API; every such change is listed here.
 - **A code map for the Capsid system explorer.** After each push to `main`, devkit's code-map
   workflow publishes each module's imports and each function's complexity, coverage and CRAP to
   the `code-map` branch; a weekly run adds Stryker mutation scores. Not part of the package.
+- **The gallery's security headers come from site-runtime.** `scripts/security-headers.ts`
+  builds them with `@dustinedwards/site-runtime` (a devDependency, pinned to `v0.3.0`) and the
+  gallery build writes `_headers`; the hand-written `site/_headers` is gone. The gallery now
+  also refuses framing, sends the cross-origin opener and resource policies, `object-src 'none'`,
+  a two-year HSTS, `Referrer-Policy: no-referrer` and the full Permissions-Policy, and reports
+  policy violations to `/csp-report`, where its Worker logs them. The Worker's redirects carry
+  the same headers. A test runs site-runtime's check on them. Not part of the package, which
+  is unchanged (record 0018).
 
 ## [0.3.1] - 2026-10-14
 

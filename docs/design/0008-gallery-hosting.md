@@ -1,7 +1,8 @@
 # 0008. Hosting the gallery, and its Content-Security-Policy
 
 Status: accepted, 2026-09-28. Amended by [0009](0009-review-fixes.md) after the two reviews,
-and by [0010](0010-rename-to-enarratio.md) for the new name and address.
+and by [0010](0010-rename-to-enarratio.md) for the new name and address. Point 3's
+headers are replaced by [0018](0018-shared-security-headers.md).
 
 ## Decision
 

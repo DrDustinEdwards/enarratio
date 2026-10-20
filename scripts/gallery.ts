@@ -12,6 +12,7 @@ import { pathToFileURL } from "node:url";
 import { checkTheme, stylesheet, type Theme } from "enarratio";
 import { defaultTheme } from "enarratio/themes";
 import { exampleTheme } from "../examples/themes/example.ts";
+import { writeHeadersFile } from "./security-headers.ts";
 
 const root = resolve(import.meta.dirname, "..");
 const outDir = resolve(process.argv[2] ?? join(root, "site", "dist"));
@@ -204,9 +205,9 @@ writeFileSync(
 `,
 );
 copyFileSync(join(root, "dist", "enhance", "index.js"), join(outDir, "enhance.js"));
-// Served as files beside the pages: the gallery script, the security and caching headers, and
-// the icon.
+// Served as files beside the pages: the gallery script and the icon. The security and caching
+// headers are written by scripts/security-headers.ts from the shared set (record 0018).
 copyFileSync(join(root, "site", "gallery.js"), join(outDir, "gallery.js"));
-copyFileSync(join(root, "site", "_headers"), join(outDir, "_headers"));
+writeHeadersFile(outDir);
 copyFileSync(join(root, "site", "favicon.svg"), join(outDir, "favicon.svg"));
 console.log(`gallery: ${examples.length} examples, ${pages.length} themes -> ${outDir}`);
