@@ -1,5 +1,5 @@
 /**
- * Browser regression tests for review findings (Fable 5.1: A*, Claude Opus 5.5: F*). Each test
+ * Browser regression tests for review findings (A* and F*, from the two reviews of PR #1). Each test
  * names the finding it guards.
  */
 import type { Page } from "puppeteer";

@@ -10,6 +10,7 @@ change the public API; every such change is listed here.
 ### Removed
 
 - Removed docs/AI_USAGE.md.
+- Removed the remaining AI-use mentions, including the paper's disclosure section.
 
 ### Changed
 

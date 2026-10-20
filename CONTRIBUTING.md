@@ -76,8 +76,3 @@ Maintainers release by updating `CHANGELOG.md` and the version in
 `vX.Y.Z`. The tag stages the package on npm through trusted publishing, with
 provenance, and a maintainer approves it before it goes live. The steps are in
 [docs/releasing.md](docs/releasing.md).
-
-## Use of AI tools
-
-If you use AI tools to prepare a contribution, say so in the pull request and
-describe how you checked the result.

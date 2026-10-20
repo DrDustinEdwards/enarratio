@@ -296,11 +296,6 @@ deploys it; the "Deploy gallery" workflow does the same on every push to
 If you use Enarratio in research, please cite it using the metadata in
 [CITATION.cff](CITATION.cff).
 
-## AI use
-
-Enarratio was designed by Dustin Edwards and written with an AI coding
-assistant.
-
 ## License
 
 [MIT](LICENSE). Copyright (c) 2026 Dustin Edwards.
