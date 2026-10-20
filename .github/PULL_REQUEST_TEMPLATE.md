@@ -9,4 +9,3 @@
 - [ ] New charts have an example in `examples/` and a required `alt`, a data table, and no reliance on color alone
 - [ ] `CHANGELOG.md` has an entry under Unreleased
 - [ ] A design change has a record in `docs/design/`
-- [ ] AI tools used for this change, if any, are named here with how the result was checked
