@@ -115,7 +115,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
-    "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.5.0",
+    "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.7.0",
     "@observablehq/plot": "0.6.17",
     "@types/d3-force": "3.0.10",
     "@types/node": "22.20.0",
