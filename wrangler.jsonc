@@ -22,6 +22,10 @@
     { "pattern": "enarratio.dustinedwards.info", "custom_domain": true },
     { "pattern": "abscissa.dustinedwards.info", "custom_domain": true }
   ],
+  // Workers Logs keep the Worker's own lines, which are the Content-Security-Policy violation
+  // reports (worker/index.ts, record 0018). Invocation logs (one per request) stay off: the
+  // gallery records nothing about its readers.
+  "observability": { "logs": { "enabled": true, "invocation_logs": false } },
   "workers_dev": false,
   "preview_urls": false
 }
