@@ -3,8 +3,7 @@
 Status: accepted, 2026-09-28. Amends 0002, 0003, 0004 and 0008 where noted.
 
 Two independent AI reviews of pull request #1 at d4fe7b6 (Fable 5.1,
-findings A1 to A17; Claude Opus 5.5, findings F1 to F23; see
-[AI_USAGE.md](../AI_USAGE.md)) found problems the tests had missed. Dustin
+findings A1 to A17; Claude Opus 5.5, findings F1 to F23) found problems the tests had missed. Dustin
 Edwards set the order of the fixes (**author's decision**); they ship as
 0.1.0-alpha.6. The CHANGELOG maps every change to its finding. This record
 keeps the decisions that changed how Enarratio works.

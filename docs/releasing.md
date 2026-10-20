@@ -55,8 +55,7 @@ terminal with your passkey keeps working too.
 
 1. **Prepare the release in a pull request.** Set the version in `package.json` and
    `package-lock.json` (`npm version X.Y.Z --no-git-tag-version`), move the `[Unreleased]`
-   entries in `CHANGELOG.md` under the new version and date, and add the release's tools and
-   model ids to `docs/AI_USAGE.md`. Merge it once CI is green.
+   entries in `CHANGELOG.md` under the new version and date. Merge it once CI is green.
 2. **The merge makes the tag.** The Release workflow sees the new version on `main`, tags that
    commit `vX.Y.Z`, publishes a GitHub release with the version's CHANGELOG section, and stages
    the package. Nobody pushes a tag. (A version that merged before this existed is released with

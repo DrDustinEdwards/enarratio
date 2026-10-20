@@ -114,9 +114,7 @@ brief and later decisions. The author defined the problem, requirements and
 design decisions. After the first versions were published and the repository
 made public, two independent AI reviews (Fable 5.1, `claude-fable-5-1`, and
 Claude Opus 5.5, both by Anthropic; not human peer review) examined the code,
-and their findings were fixed in version 0.1.0-alpha.6. The repository's
-`docs/AI_USAGE.md` records the tools, models, sequence of events and where AI
-was used.
+and their findings were fixed in version 0.1.0-alpha.6.
 
 # Acknowledgements
 

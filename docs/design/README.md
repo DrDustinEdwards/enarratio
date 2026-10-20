@@ -11,8 +11,7 @@ Each record says where a decision came from:
 - **Author's decision**: set by Dustin Edwards in the project brief of
   2026-09-28, quoted where it matters.
 - **Implementation choice**: made while building the first version to carry
-  out an author's decision, by the AI model that wrote the code (see
-  [docs/AI_USAGE.md](../AI_USAGE.md)). These are the ones most open to change,
+  out an author's decision, by the AI model that wrote the code. These are the ones most open to change,
   and the ones the two AI reviews of 0.1.0-alpha.5 tested hardest.
 
 | Record | Subject |

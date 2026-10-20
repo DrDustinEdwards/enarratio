@@ -7,7 +7,6 @@ Enarratio draws accessible, server-rendered charts and scientific figures into t
 - The portfolio rules are in Capsid: `capsid/conventions.md`. Read it with this file. Where they disagree, conventions wins.
 - The npm package stays independent of Capsomer (it ships its own themeable CSS); the gallery site adopts Capsomer (capsid/decisions.md, 2026-10-02).
 - Design records are `docs/design/0001` onward. A new decision gets the next number; a reversal says which record it replaces.
-- **AI disclosure (JOSS).** Commits and pull requests carry no AI attribution (portfolio rule). The disclosure lives in `docs/AI_USAGE.md` instead: every release adds the tools and model ids used and what they did, before it is published. That file is the record a JOSS reviewer reads.
 
 ## Commands
 

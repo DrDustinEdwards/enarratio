@@ -80,5 +80,4 @@ provenance, and a maintainer approves it before it goes live. The steps are in
 ## Use of AI tools
 
 If you use AI tools to prepare a contribution, say so in the pull request and
-describe how you checked the result. The project's own record is in
-[docs/AI_USAGE.md](docs/AI_USAGE.md).
+describe how you checked the result.

@@ -299,7 +299,7 @@ If you use Enarratio in research, please cite it using the metadata in
 ## AI use
 
 Enarratio was designed by Dustin Edwards and written with an AI coding
-assistant. What was done by whom is recorded in [docs/AI_USAGE.md](docs/AI_USAGE.md).
+assistant.
 
 ## License
 
