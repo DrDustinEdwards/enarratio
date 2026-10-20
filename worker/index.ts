@@ -33,7 +33,10 @@ export default {
     if (url.protocol === "http:" || url.hostname === OLD_HOST) {
       url.protocol = "https:";
       if (url.hostname === OLD_HOST) url.hostname = HOST;
-      return respond(301, { Location: url.toString() });
+      // 308 for anything but GET and HEAD, so a POST stays a POST (a 301 lets the browser turn it into a GET and drop
+      // the body), and never cached, as on dustinedwards.info (app/lib/https-redirect.mjs).
+      const read = request.method === "GET" || request.method === "HEAD";
+      return respond(read ? 301 : 308, { Location: url.toString(), "Cache-Control": "no-store" });
     }
     if (url.pathname === REPORT_PATH)
       return receiveCspReport(request, { headers: securityHeaders });
