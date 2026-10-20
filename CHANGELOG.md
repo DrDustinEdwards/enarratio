@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Removed
+
+- Removed docs/AI_USAGE.md.
+
 ### Changed
 
 - **Releases tag themselves.** Merging a version bump to `main` tags it, publishes the GitHub
