@@ -22,6 +22,11 @@ change the public API; every such change is listed here.
   policy violations to `/csp-report`, where its Worker logs them. The Worker's redirects carry
   the same headers. A test runs site-runtime's check on them. Not part of the package, which
   is unchanged (record 0018).
+- **The gallery's report sink is site-runtime's shared receiver.** The Worker's own `/csp-report`
+  handler is replaced by `receiveCspReport` from `@dustinedwards/site-runtime/csp-report` (pin
+  bumped to `v0.4.0`): every POST now gets 204, an oversized or malformed body included (an error
+  status makes browsers resend), the body is read to 16 KB and no further, and OPTIONS is
+  answered. Not part of the package.
 
 ## [0.3.1] - 2026-10-14
 

@@ -98,8 +98,8 @@ describe("gallery security headers", () => {
     });
   });
 
-  it("the report endpoint accepts the report-uri format and refuses other methods and bad bodies", async () => {
-    vi.spyOn(console, "log").mockImplementation(() => {});
+  it("the report endpoint accepts the report-uri format, answers 204 to any POST and refuses other methods", async () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
     const post = (body: string) =>
       worker.fetch(
         new Request(`https://enarratio.dustinedwards.info${REPORT_PATH}`, { method: "POST", body }),
@@ -107,12 +107,17 @@ describe("gallery security headers", () => {
       );
     const legacy = JSON.stringify({ "csp-report": { "violated-directive": "img-src" } });
     expect((await post(legacy)).status).toBe(204);
-    expect((await post("not json")).status).toBe(400);
-    expect((await post("x".repeat(20_000))).status).toBe(413);
+    expect(log).toHaveBeenCalledTimes(1);
+    // An error status makes a browser send the report again, so a bad or oversized body is 204 too.
+    expect((await post("not json")).status).toBe(204);
+    expect((await post("x".repeat(20_000))).status).toBe(204);
+    expect(log).toHaveBeenCalledTimes(1);
     const get = await worker.fetch(
       new Request(`https://enarratio.dustinedwards.info${REPORT_PATH}`),
       { ASSETS: assets },
     );
     expect(get.status).toBe(405);
+    expect(get.headers.get("Allow")).toBe("POST, OPTIONS");
+    expect(check(get.headers)).toEqual([]);
   });
 });
