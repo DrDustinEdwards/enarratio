@@ -27,6 +27,10 @@ change the public API; every such change is listed here.
   bumped to `v0.4.0`): every POST now gets 204, an oversized or malformed body included (an error
   status makes browsers resend), the body is read to 16 KB and no further, and OPTIONS is
   answered. Not part of the package.
+- **The gallery's https redirect keeps a POST a POST.** A plain-http request other than GET or
+  HEAD now gets 308 instead of 301 (a 301 lets a browser resend a POST as a GET without its
+  body), and the redirect is never cached, the rule dustinedwards.info uses. Not part of the
+  package.
 
 ## [0.3.1] - 2026-10-14
 

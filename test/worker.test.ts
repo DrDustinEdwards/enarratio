@@ -20,7 +20,19 @@ describe("gallery worker", () => {
     expect(response.headers.get("location")).toBe(
       "https://enarratio.dustinedwards.info/dustinedwards?x=1",
     );
+    expect(response.headers.get("cache-control")).toBe("no-store");
     expect(assets.requests).toEqual([]);
+  });
+
+  it("keeps a POST a POST: 308, not 301", async () => {
+    const response = await worker.fetch(
+      new Request("http://enarratio.dustinedwards.info/csp-report", { method: "POST", body: "{}" }),
+      { ASSETS: assets },
+    );
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(
+      "https://enarratio.dustinedwards.info/csp-report",
+    );
   });
 
   it("redirects the old hostname to the new one in one hop, keeping the path and query", async () => {
