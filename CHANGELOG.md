@@ -7,6 +7,12 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Security
+
+- A bar `href` with a user or password before the host (`https://trusted.example@other.example/`)
+  now throws, like a `javascript:` link. `update()` drops such links too, along with `ping`, any
+  `form*` attribute and `button` elements, none of which the server emits.
+
 ### Removed
 
 - Removed docs/AI_USAGE.md.
@@ -22,6 +28,8 @@ change the public API; every such change is listed here.
   constants instead of numbers repeated across files. A shared `toDate` replaces two copies of the
   date parsing. Biome now fails on promises that are neither awaited nor handled. No change in
   behaviour.
+- CI fails on a high `npm audit` advisory, and bump-consumers runs only by hand, after the npm
+  approval, never on a tag push. `.gitignore` covers `.env`, `.mcp.json` and `.dev.vars`.
 - The shared devkit workflows are pinned to devkit v0.7.0, and devkit is a dev dependency. The
   gallery Worker is minified with its source maps uploaded, and a new `worker-size` check holds
   its bundle to a budget in `.worker-size.json`.
@@ -31,7 +39,7 @@ change the public API; every such change is listed here.
   workflow publishes each module's imports and each function's complexity, coverage and CRAP to
   the `code-map` branch; a weekly run adds Stryker mutation scores. Not part of the package.
 - **The gallery's security headers come from site-runtime.** `scripts/security-headers.ts`
-  builds them with `@dustinedwards/site-runtime` (a devDependency, pinned to `v0.3.0`) and the
+  builds them with `@dustinedwards/site-runtime` (a devDependency, now pinned to `v0.7.0`) and the
   gallery build writes `_headers`; the hand-written `site/_headers` is gone. The gallery now
   also refuses framing, sends the cross-origin opener and resource policies, `object-src 'none'`,
   a two-year HSTS, `Referrer-Policy: no-referrer` and the full Permissions-Policy, and reports
@@ -39,8 +47,7 @@ change the public API; every such change is listed here.
   the same headers. A test runs site-runtime's check on them. Not part of the package, which
   is unchanged (record 0018).
 - **The gallery's report sink is site-runtime's shared receiver.** The Worker's own `/csp-report`
-  handler is replaced by `receiveCspReport` from `@dustinedwards/site-runtime/csp-report` (pin
-  bumped to `v0.4.0`): every POST now gets 204, an oversized or malformed body included (an error
+  handler is replaced by `receiveCspReport` from `@dustinedwards/site-runtime/csp-report`: every POST now gets 204, an oversized or malformed body included (an error
   status makes browsers resend), the body is read to 16 KB and no further, and OPTIONS is
   answered. Not part of the package.
 - **The gallery's https redirect keeps a POST a POST.** A plain-http request other than GET or

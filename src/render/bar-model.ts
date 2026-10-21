@@ -208,16 +208,33 @@ function timeAxis<T extends object>(
 /**
  * Allows relative and http(s) links only, so data can never produce a `javascript:` URL. Browsers
  * ignore control characters and spaces inside a scheme, so the scheme is read without them. A
- * leading `//` (or its backslash forms) names another host, so it is refused too (A11).
+ * leading `//` (or its backslash forms) names another host, so it is refused too (A11), and so is
+ * a user or password before the host, which lets `https://trusted.example@other.example/` read as
+ * the trusted name.
  */
 function safeHref(href: string): string {
   const compact = [...href].filter((ch) => ch.charCodeAt(0) > 0x20).join("");
   const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(compact)?.[1]?.toLowerCase();
   const otherHost = /^[/\\][/\\]/.test(compact);
-  if (otherHost || (scheme !== undefined && scheme !== "http" && scheme !== "https")) {
+  if (
+    otherHost ||
+    (scheme !== undefined && scheme !== "http" && scheme !== "https") ||
+    hasUserinfo(compact, scheme)
+  ) {
     throw new Error(`${KIND}: href "${href}" is not a relative or http(s) link`);
   }
   return href;
+}
+
+/** Whether an absolute http(s) link names a user or password before its host. */
+function hasUserinfo(compact: string, scheme: string | undefined): boolean {
+  if (scheme === undefined) return false;
+  try {
+    const url = new URL(compact);
+    return url.username !== "" || url.password !== "";
+  } catch {
+    return true;
+  }
 }
 
 /** Every nth category, when there are more than `max`, or undefined to print them all. */

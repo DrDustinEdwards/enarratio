@@ -220,7 +220,12 @@ describe("barChart", () => {
   });
 
   it("refuses links that are not relative or http(s)", () => {
-    for (const bad of ["javascript:alert(1)", " java\tscript:x", "data:text/html,x"]) {
+    for (const bad of [
+      "javascript:alert(1)",
+      " java\tscript:x",
+      "data:text/html,x",
+      "https://dustinedwards.info@evil.example/login",
+    ]) {
       expect(() => barChart({ data: entries, x: "year", href: () => bad, alt: "a" })).toThrow(
         /not a relative or http\(s\) link/,
       );

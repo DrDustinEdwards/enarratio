@@ -1,7 +1,7 @@
 name: bump-consumers
 
 # A release of this package reaches every repository that depends on it at once (Dustin, 2026-10-09;
-# job_3b09752450c1). Pushing a v* tag starts a Renovate run in each consumer, and the shared preset
+# job_3b09752450c1). A run started by hand after the npm approval starts a Renovate run in each consumer, and the shared preset
 # (DrDustinEdwards/devkit default.json) opens the bump with no cooldown and no schedule,
 # automerging minor and patch on green CI. The logic, and how consumers are found from their
 # manifests, is in devkit's bump-consumers.yml; this file only calls it.
@@ -11,9 +11,9 @@ name: bump-consumers
 #
 # Needs the RENOVATE_TRIGGER_TOKEN repository secret: see the header of the called workflow.
 
+# Not on a tag push: a tag can exist before the staged npm version is approved, and consumers would
+# be bumped to a version npm does not serve yet. Run it by hand after the approval (docs/releasing.md).
 on:
-  push:
-    tags: ["v*"]
   workflow_dispatch:
     inputs:
       dry_run:
@@ -27,6 +27,6 @@ jobs:
   bump:
     uses: DrDustinEdwards/devkit/.github/workflows/bump-consumers.yml@27e0a1ca0747b5839bf7e0433c307ae671de8501 # v0.7.0
     with:
-      dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+      dry_run: ${{ inputs.dry_run }}
     secrets:
       token: ${{ secrets.RENOVATE_TRIGGER_TOKEN }}

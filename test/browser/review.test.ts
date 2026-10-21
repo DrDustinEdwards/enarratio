@@ -212,7 +212,9 @@ describe("F11: update() keeps only what Enarratio emits", () => {
       const win = window as unknown as { pwned?: number };
       chart.update(
         '<figure class="enarratio" onmouseover="window.pwned=2"><img src="data:," onerror="window.pwned=1">' +
-          '<script>window.pwned=3</script><svg role="img" aria-label="x"><a href="javascript:alert(1)"><rect data-enarratio-key="k" onclick="window.pwned=4" width="10" height="10"></rect></a></svg></figure>',
+          '<script>window.pwned=3</script><button type="submit" form="publish">x</button>' +
+          '<svg role="img" aria-label="x"><a href="https://a.example/" ping="https://evil.example/p"></a>' +
+          '<a href="https://trusted.example@evil.example/"></a><a href="javascript:alert(1)"><rect data-enarratio-key="k" onclick="window.pwned=4" width="10" height="10"></rect></a></svg></figure>',
       );
       await new Promise((r) => setTimeout(r, 300));
       chart.figure.dispatchEvent(new MouseEvent("mouseover"));
@@ -223,11 +225,18 @@ describe("F11: update() keeps only what Enarratio emits", () => {
       return {
         pwned: win.pwned ?? null,
         handlers,
-        img: chart.figure.querySelectorAll("img, script").length,
-        href: chart.figure.querySelector("a")?.getAttribute("href") ?? null,
+        img: chart.figure.querySelectorAll("img, script, button").length,
+        ping: chart.figure.querySelectorAll("[ping]").length,
+        hrefs: [...chart.figure.querySelectorAll("a")].map((a) => a.getAttribute("href")),
       };
     });
-    expect(result).toEqual({ pwned: null, handlers: [], img: 0, href: null });
+    expect(result).toEqual({
+      pwned: null,
+      handlers: [],
+      img: 0,
+      ping: 0,
+      hrefs: ["https://a.example/", null, null],
+    });
     await p.close();
   });
 });
