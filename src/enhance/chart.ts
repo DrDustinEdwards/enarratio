@@ -17,6 +17,17 @@ import { sanitize } from "./sanitize.js";
 import { focusRing, hitArea } from "./targets.js";
 import type { BrushDetail, EnhancedChart, EnhanceOptions, SelectDetail } from "./types.js";
 
+/** How far a pointer moves, in SVG units, before a press becomes a drag (the brush). */
+const DRAG_THRESHOLD = 3;
+/** How long the entrance attribute stays on: longer than the slowest default animation (800ms). */
+const ENTRANCE_MS = 1000;
+/** How much of a chart must be on screen before it animates in. */
+const ENTRANCE_VISIBLE = 0.25;
+/** How long the tooltip waits for the pointer to reach it before hiding (WCAG 1.4.13, F6). */
+const HIDE_DELAY_MS = 300;
+/** The tooltip's gap from its mark and from the viewport edge, in CSS pixels. */
+const TIP_GAP = 8;
+
 export class Chart implements EnhancedChart {
   readonly figure: HTMLElement;
   readonly options: Required<EnhanceOptions>;
@@ -190,7 +201,7 @@ export class Chart implements EnhancedChart {
       if (start === null) return;
       const x = clampX(svgPoint(svg, event).x);
       if (!dragging) {
-        if (Math.abs(x - start) < 3) return;
+        if (Math.abs(x - start) < DRAG_THRESHOLD) return;
         // Capture only once this is a drag: capturing on pointerdown sent every click to the
         // SVG instead of the mark under the pointer, so marks on these charts could not be
         // clicked (F1).
@@ -273,10 +284,13 @@ export class Chart implements EnhancedChart {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
         this.figure.setAttribute("data-enarratio-entering", "");
-        const done = setTimeout(() => this.figure.removeAttribute("data-enarratio-entering"), 1000);
+        const done = setTimeout(
+          () => this.figure.removeAttribute("data-enarratio-entering"),
+          ENTRANCE_MS,
+        );
         this.cleanup.push(() => clearTimeout(done));
       },
-      { threshold: 0.25 },
+      { threshold: ENTRANCE_VISIBLE },
     );
     observer.observe(this.figure);
     this.cleanup.push(() => observer.disconnect());
@@ -291,12 +305,12 @@ export class Chart implements EnhancedChart {
     const box = mark.getBoundingClientRect();
     const tipBox = tip.getBoundingClientRect();
     const left = Math.min(
-      Math.max(8, box.left + box.width / 2 - tipBox.width / 2),
-      document.documentElement.clientWidth - tipBox.width - 8,
+      Math.max(TIP_GAP, box.left + box.width / 2 - tipBox.width / 2),
+      document.documentElement.clientWidth - tipBox.width - TIP_GAP,
     );
-    const above = box.top - tipBox.height - 8;
+    const above = box.top - tipBox.height - TIP_GAP;
     tip.style.left = `${left + scrollX}px`;
-    tip.style.top = `${(above > 0 ? above : box.bottom + 8) + scrollY}px`;
+    tip.style.top = `${(above > 0 ? above : box.bottom + TIP_GAP) + scrollY}px`;
   }
 
   private hideTip(): void {
@@ -307,7 +321,7 @@ export class Chart implements EnhancedChart {
   /** Hides the tooltip shortly, unless the pointer reaches it first. */
   private scheduleHide(): void {
     clearTimeout(this.hideTimer);
-    this.hideTimer = setTimeout(() => this.hideTip(), 300);
+    this.hideTimer = setTimeout(() => this.hideTip(), HIDE_DELAY_MS);
   }
 
   private onKey(event: KeyboardEvent): void {

@@ -1,5 +1,14 @@
 import { element, escapeHtml } from "../html.js";
-import { DAY, defaultFormat, formatInstant, maxOf, minOf, requireSize } from "../render/data.js";
+import {
+  DAY,
+  defaultFormat,
+  formatInstant,
+  maxOf,
+  minOf,
+  requireSize,
+  toDate,
+} from "../render/data.js";
+import { DEFAULT_WIDTH } from "../render/size.js";
 import { type PrimitiveTable, type PrimitiveTableOptions, primitiveTable } from "./companion.js";
 
 /** What happened, as the theme's status colors and a shape say it. */
@@ -95,13 +104,8 @@ export interface TimelineValues {
 }
 
 function readTime(what: string, value: unknown): number {
-  const date =
-    value instanceof Date
-      ? value
-      : typeof value === "string" || typeof value === "number"
-        ? new Date(value)
-        : undefined;
-  if (!date || Number.isNaN(date.getTime())) {
+  const date = toDate(value);
+  if (!date) {
     throw new Error(`${KIND}: ${what} is ${JSON.stringify(value)}, not a time`);
   }
   return date.getTime();
@@ -114,7 +118,7 @@ export function prepareTimeline(options: TimelineOptions): TimelineValues {
   const subject = options.label?.trim() ?? "";
   const given = options.alt?.trim() ?? "";
   if (subject === "" && given === "") throw new Error(`${KIND}: label or alt is required`);
-  const width = options.width ?? 640;
+  const width = options.width ?? DEFAULT_WIDTH;
   requireSize(KIND, "width", width);
   const text = options.formatTime ?? formatInstant;
   const at = (ms: number): string => text(new Date(ms));

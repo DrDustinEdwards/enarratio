@@ -65,59 +65,17 @@ describe("gallery security headers", () => {
     expect(check(response.headers)).toEqual([]);
   });
 
-  it("the report endpoint logs each violation without query strings and answers 204", async () => {
-    const log = vi.spyOn(console, "log").mockImplementation(() => {});
-    const body = JSON.stringify([
-      {
-        type: "csp-violation",
-        body: {
-          documentURL: "https://enarratio.dustinedwards.info/example?q=private",
-          blockedURL: "https://evil.example.com/x.js?token=1",
-          effectiveDirective: "script-src-elem",
-          disposition: "enforce",
-        },
-      },
-    ]);
+  it("routes reports to the shared receiver, whose answers carry the set", async () => {
+    // The receiver itself is tested in site-runtime; this checks the Worker sends reports to it.
+    vi.spyOn(console, "log").mockImplementation(() => {});
     const response = await worker.fetch(
       new Request(`https://enarratio.dustinedwards.info${REPORT_PATH}`, {
         method: "POST",
-        headers: { "content-type": "application/reports+json" },
-        body,
+        body: JSON.stringify({ "csp-report": { "violated-directive": "img-src" } }),
       }),
       { ASSETS: assets },
     );
     expect(response.status).toBe(204);
     expect(check(response.headers)).toEqual([]);
-    expect(log).toHaveBeenCalledTimes(1);
-    const line = JSON.parse(String(log.mock.calls[0]?.[0])) as Record<string, unknown>;
-    expect(line).toMatchObject({
-      event: "csp-violation",
-      directive: "script-src-elem",
-      blocked: "https://evil.example.com/x.js",
-      page: "https://enarratio.dustinedwards.info/example",
-    });
-  });
-
-  it("the report endpoint accepts the report-uri format, answers 204 to any POST and refuses other methods", async () => {
-    const log = vi.spyOn(console, "log").mockImplementation(() => {});
-    const post = (body: string) =>
-      worker.fetch(
-        new Request(`https://enarratio.dustinedwards.info${REPORT_PATH}`, { method: "POST", body }),
-        { ASSETS: assets },
-      );
-    const legacy = JSON.stringify({ "csp-report": { "violated-directive": "img-src" } });
-    expect((await post(legacy)).status).toBe(204);
-    expect(log).toHaveBeenCalledTimes(1);
-    // An error status makes a browser send the report again, so a bad or oversized body is 204 too.
-    expect((await post("not json")).status).toBe(204);
-    expect((await post("x".repeat(20_000))).status).toBe(204);
-    expect(log).toHaveBeenCalledTimes(1);
-    const get = await worker.fetch(
-      new Request(`https://enarratio.dustinedwards.info${REPORT_PATH}`),
-      { ASSETS: assets },
-    );
-    expect(get.status).toBe(405);
-    expect(get.headers.get("Allow")).toBe("POST, OPTIONS");
-    expect(check(get.headers)).toEqual([]);
   });
 });

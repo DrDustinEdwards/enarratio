@@ -54,16 +54,22 @@ export function readLabel(kind: string, row: object, key: string, index: number)
   return String(readCategory(kind, row, key, index));
 }
 
-/** Reads a Date, an ISO 8601 string or a timestamp as a Date, or throws. */
-export function readDate(kind: string, row: object, key: string, index: number): Date {
-  const value: unknown = (row as Record<string, unknown>)[key];
+/** A Date, an ISO 8601 string or a timestamp as a Date; undefined for anything else or an invalid date. */
+export function toDate(value: unknown): Date | undefined {
   const date =
     value instanceof Date
       ? value
       : typeof value === "string" || typeof value === "number"
         ? new Date(value)
         : undefined;
-  if (!date || Number.isNaN(date.getTime())) {
+  return date && !Number.isNaN(date.getTime()) ? date : undefined;
+}
+
+/** Reads a Date, an ISO 8601 string or a timestamp as a Date, or throws. */
+export function readDate(kind: string, row: object, key: string, index: number): Date {
+  const value: unknown = (row as Record<string, unknown>)[key];
+  const date = toDate(value);
+  if (!date) {
     throw new Error(
       `${kind}: row ${index + 1} field "${key}" is ${JSON.stringify(value)}, not a date`,
     );

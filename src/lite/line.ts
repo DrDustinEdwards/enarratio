@@ -6,6 +6,7 @@
  */
 
 import { type LineChartOptions, lineModel, type Point } from "../render/line-model.js";
+import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
 import {
   annotations,
   areaPath,
@@ -57,8 +58,8 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
   const layout = seriesFrame(
     model,
     {
-      width: options.width ?? 640,
-      height: options.height ?? 320,
+      width: options.width ?? DEFAULT_WIDTH,
+      height: options.height ?? DEFAULT_HEIGHT,
       marginTop: 20,
       marginRight: model.directLabels ? 96 : 24,
       marginBottom: 44,

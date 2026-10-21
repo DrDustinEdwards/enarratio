@@ -3,6 +3,7 @@ import { defaultFormat, domainOf, type KeysOfType, readLabel, readNumber } from 
 import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
+import { DEFAULT_WIDTH } from "../render/size.js";
 
 /** Options for {@link scatterPlot}. */
 export interface ScatterPlotOptions<T extends object> extends FigureOptions {
@@ -123,7 +124,7 @@ export function scatterPlot<T extends object>(options: ScatterPlotOptions<T>): s
 
   const rendered = renderPlot(
     {
-      width: options.width ?? 640,
+      width: options.width ?? DEFAULT_WIDTH,
       height: options.height ?? 360,
       marginTop: 20,
       marginLeft: yLabel === null ? 48 : 64,
