@@ -85,7 +85,7 @@
     "tag": "next"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && node scripts/build-css.mjs",
+    "build": "tsc -p tsconfig.build.json && node scripts/build-css.mjs && node scripts/bundle-enhance.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "check": "npm run typecheck && npm run lint && npm test",
     "lint": "biome check .",
