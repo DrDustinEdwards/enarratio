@@ -2,8 +2,9 @@
  * The gallery's Worker: sends plain HTTP to HTTPS and the old hostname to the new one, receives
  * Content-Security-Policy violation reports with site-runtime's shared receiver, and serves
  * everything else from the static assets. It runs in front of the assets (`run_worker_first`) so
- * it sees http: requests, which the assets layer would otherwise answer directly (A14, F16). The assets carry the security headers from
- * `_headers`; the responses made here carry the same set, from scripts/security-headers.ts (record 0018).
+ * it sees http: requests, which the assets layer would otherwise answer directly. The assets carry
+ * the security headers from `_headers`; the responses made here carry the same set, from
+ * scripts/security-headers.ts (record 0018).
  */
 
 import { receiveCspReport } from "@dustinedwards/site-runtime/csp-report";
