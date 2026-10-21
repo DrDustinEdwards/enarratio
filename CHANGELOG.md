@@ -11,9 +11,14 @@ change the public API; every such change is listed here.
 
 - Removed docs/AI_USAGE.md.
 - Removed the remaining AI-use mentions, including the paper's disclosure section.
+- Removed the dated test baseline (`docs/research/`) and its report script
+  (`scripts/report-mutation.mjs`); the code-map workflow keeps the mutation results now.
 
 ### Changed
 
+- The shared devkit workflows are pinned to devkit v0.7.0, and devkit is a dev dependency. The
+  gallery Worker is minified with its source maps uploaded, and a new `worker-size` check holds
+  its bundle to a budget in `.worker-size.json`.
 - **Releases tag themselves.** Merging a version bump to `main` tags it, publishes the GitHub
   release and stages the package; nobody pushes a tag (`docs/releasing.md`).
 - **A code map for the Capsid system explorer.** After each push to `main`, devkit's code-map

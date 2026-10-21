@@ -2,9 +2,8 @@ name: ai-author
 
 # Devkit's gate that refuses an AI attribution trailer on a commit a push or pull request adds
 # (and a commit authored or committed as Claude on a pull request): portfolio rule, no AI
-# attribution on any commit. This repository has no other use for devkit, so the bin comes from
-# the tag passed as `devkit` below, not from package.json. The workflow is pinned by full sha,
-# which devkit's scripts/check-callers.mjs requires.
+# attribution on any commit. The bin comes from the devkit tag in package.json. The workflow is
+# pinned by full sha, which devkit's scripts/check-callers.mjs requires.
 
 on:
   pull_request:
@@ -16,6 +15,4 @@ permissions:
 
 jobs:
   ai-author:
-    uses: DrDustinEdwards/devkit/.github/workflows/ai-author.yml@ffcf8535938f7588708f0577e4d428a98d844b45 # devkit #32
-    with:
-      devkit: DrDustinEdwards/devkit#v0.6.0
+    uses: DrDustinEdwards/devkit/.github/workflows/ai-author.yml@27e0a1ca0747b5839bf7e0433c307ae671de8501 # v0.7.0

@@ -1,0 +1,20 @@
+name: worker-size
+
+# The gallery Worker's bundle budget (.worker-size.json, about 10% over its size on 2026-10-21): devkit's shared
+# check, a `wrangler deploy --dry-run` that needs no Cloudflare secret. The gallery is built first because wrangler
+# reads the assets directory.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  worker-size:
+    uses: DrDustinEdwards/devkit/.github/workflows/worker-size.yml@27e0a1ca0747b5839bf7e0433c307ae671de8501 # v0.7.0
+    with:
+      install: PUPPETEER_SKIP_DOWNLOAD=true npm ci
+      prepare: npm run build && npm run gallery

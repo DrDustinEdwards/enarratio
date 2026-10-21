@@ -1,4 +1,4 @@
-// StrykerJS mutation baseline (docs/research/baseline.md). Not a dependency: install per run with
+// StrykerJS config, run by the code-map workflow (.github/workflows/code-map.yml). Not a dependency: install per run with
 //   npm install --no-save @stryker-mutator/core@9.6.1 @stryker-mutator/vitest-runner@9.6.1
 // (10.0.0 has a Babel 8 parser bug), then run one chunk at a time:
 //   CHUNK=plot npx stryker run stryker.config.mjs

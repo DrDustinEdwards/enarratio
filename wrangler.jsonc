@@ -7,6 +7,9 @@
   // abscissa-gallery (design record 0010). A name that did not match would deploy a second Worker.
   "name": "enarratio-gallery",
   "compatibility_date": "2026-09-28",
+  // A minified bundle with its source maps uploaded, so stack traces in the logs still read.
+  "minify": true,
+  "upload_source_maps": true,
   // A tiny Worker in front of the assets redirects http: to https: and the old hostname to the
   // new one (worker/index.ts).
   "main": "./worker/index.ts",
