@@ -13,6 +13,7 @@ import { maxOf, minOf } from "../render/data.js";
 import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
+import { DEFAULT_WIDTH } from "../render/size.js";
 
 /** A node in a {@link networkChart}. */
 export interface NetworkNode {
@@ -69,7 +70,7 @@ export function networkChart(options: NetworkChartOptions): string {
   const { nodes, links } = options;
   validateFigure(KIND, options);
   if (nodes.length === 0) throw new Error(`${KIND}: nodes is empty`);
-  const width = options.width ?? 640;
+  const width = options.width ?? DEFAULT_WIDTH;
   const height = options.height ?? 420;
   const ungrouped = "Nodes";
   const grouped = nodes.some((n) => n.group !== undefined);

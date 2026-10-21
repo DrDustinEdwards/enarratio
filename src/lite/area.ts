@@ -11,6 +11,7 @@ import {
   type Point,
   type SeriesChartOptions,
 } from "../render/line-model.js";
+import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
 import {
   annotations,
   areaPath,
@@ -70,8 +71,8 @@ export function areaChart<T extends object>(options: SeriesChartOptions<T>): str
   const layout = seriesFrame(
     model,
     {
-      width: options.width ?? 640,
-      height: options.height ?? 320,
+      width: options.width ?? DEFAULT_WIDTH,
+      height: options.height ?? DEFAULT_HEIGHT,
       marginTop: 20,
       marginRight: 20,
       marginBottom: 44,

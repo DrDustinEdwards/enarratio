@@ -6,6 +6,7 @@
  */
 
 import { element, escapeHtml } from "../html.js";
+import { DEFAULT_WIDTH } from "./size.js";
 
 /** A color for one series: any CSS color, or a pair for light and dark. */
 export type SeriesColor = string | { readonly light: string; readonly dark: string };
@@ -210,7 +211,7 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
   const caption = options.caption?.trim();
 
   const legend = legendMarkup(parts);
-  const wide = (options.width ?? 640) >= 480;
+  const wide = (options.width ?? DEFAULT_WIDTH) >= 480;
   const tableBlock = dataTableBlock(parts.table, `Data for: ${title ?? alt}`, options.dataTable);
 
   return element(

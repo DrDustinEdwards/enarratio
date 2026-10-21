@@ -10,6 +10,7 @@ import {
   type SeriesChartOptions,
 } from "../render/line-model.js";
 import { keyed, renderPlot } from "../render/plot.js";
+import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
 
 export type {
   EventMarker,
@@ -153,8 +154,8 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
 
   const rendered = renderPlot(
     {
-      width: options.width ?? 640,
-      height: options.height ?? 320,
+      width: options.width ?? DEFAULT_WIDTH,
+      height: options.height ?? DEFAULT_HEIGHT,
       marginTop: 20,
       marginLeft: prepared.yLabel === null ? 48 : 64,
       marginRight: model.directLabels ? 96 : 24,
@@ -194,8 +195,8 @@ export function areaChart<T extends object>(options: SeriesChartOptions<T>): str
 
   const rendered = renderPlot(
     {
-      width: options.width ?? 640,
-      height: options.height ?? 320,
+      width: options.width ?? DEFAULT_WIDTH,
+      height: options.height ?? DEFAULT_HEIGHT,
       marginTop: 20,
       marginLeft: prepared.yLabel === null ? 48 : 64,
       marginBottom: 44,

@@ -13,6 +13,7 @@ import {
 } from "../render/data.js";
 import { type FigureOptions, figure, type RampItem, validateFigure } from "../render/figure.js";
 import { decorate, keyed, renderPlot } from "../render/plot.js";
+import { DEFAULT_WIDTH } from "../render/size.js";
 
 /** Options for {@link heatmap}. */
 export interface HeatmapOptions<T extends object> extends FigureOptions {
@@ -142,7 +143,7 @@ export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
 
   const { svg } = renderPlot(
     {
-      width: options.width ?? 640,
+      width: options.width ?? DEFAULT_WIDTH,
       height: options.height ?? Math.max(160, yNames.length * 32 + 64),
       marginTop: 20,
       marginLeft: Math.min(200, longest * 7 + 24) + (options.yLabel === null ? 0 : 20),

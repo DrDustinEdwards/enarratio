@@ -21,6 +21,7 @@ import {
 import type { MarkDatum } from "./datum.js";
 import { type FigureOptions, figure, type SeriesColor, validateFigure } from "./figure.js";
 import { planSeries, type SeriesPlan } from "./series.js";
+import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "./size.js";
 
 /** Options for `barChart`, from `enarratio/plot` or `enarratio/lite`. */
 export interface BarChartOptions<T extends object> extends FigureOptions {
@@ -360,8 +361,9 @@ export function barModel<T extends object>(options: BarChartOptions<T>): BarMode
   const linkOf = options.href;
 
   const longest = Math.max(maxOf(xNames.map((n) => n.length)), 1);
-  const width = options.width ?? 640;
-  const height = options.height ?? (horizontal ? Math.max(120, xNames.length * 28 + 60) : 320);
+  const width = options.width ?? DEFAULT_WIDTH;
+  const height =
+    options.height ?? (horizontal ? Math.max(120, xNames.length * 28 + 60) : DEFAULT_HEIGHT);
   // A time axis has many bars and long labels, so it thins them to fit unless told otherwise.
   const fit = time ? Math.max(2, Math.floor((width - 80) / (longest * 7 + 12))) : undefined;
   const thinned = thinTicks(xNames, options.maxXTicks ?? fit);

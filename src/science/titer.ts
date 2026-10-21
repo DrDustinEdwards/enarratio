@@ -3,6 +3,7 @@ import { domainOf, type KeysOfType, maxOf, minOf, readLabel, readNumber } from "
 import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
+import { DEFAULT_WIDTH } from "../render/size.js";
 import { type GeometricSummary, geometricSummary } from "./stats.js";
 
 /** A serial dilution series: the first dilution and the factor between steps. */
@@ -211,7 +212,7 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
 
   const { svg } = renderPlot(
     {
-      width: options.width ?? 640,
+      width: options.width ?? DEFAULT_WIDTH,
       height: options.height ?? 360,
       marginTop: 20,
       marginLeft: titerLabel === null ? 56 : 72,
