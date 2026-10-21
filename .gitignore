@@ -1,4 +1,8 @@
 node_modules/
+.env
+.env.*
+.mcp.json
+.dev.vars
 dist/
 coverage/
 test/browser/__output__/

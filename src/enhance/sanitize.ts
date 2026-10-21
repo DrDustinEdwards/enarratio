@@ -18,7 +18,6 @@ const ALLOWED_ELEMENTS = new Set([
   "tr",
   "th",
   "td",
-  "button",
   "svg",
   "g",
   "rect",
@@ -38,15 +37,22 @@ const ALLOWED_ELEMENTS = new Set([
 const LINK_ATTRIBUTES = new Set(["href", "xlink:href"]);
 const SAFE_STYLE = /^(\s*--enarratio-[a-z0-9-]+\s*:\s*[^;{}<>]*;?)*\s*$/i;
 
-/** Relative and http(s) links only, as the server allows (A11). */
+/** Relative and http(s) links only, with no user or password before the host, as the server allows (A11). */
 function safeLink(value: string): boolean {
   const compact = [...value].filter((ch) => ch.charCodeAt(0) > 0x20).join("");
   if (/^[/\\][/\\]/.test(compact)) return false;
   const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(compact)?.[1]?.toLowerCase();
-  return scheme === undefined || scheme === "http" || scheme === "https";
+  if (scheme === undefined) return true;
+  if (scheme !== "http" && scheme !== "https") return false;
+  try {
+    const url = new URL(compact);
+    return url.username === "" && url.password === "";
+  } catch {
+    return false;
+  }
 }
 
-/** Removes everything the server never emits: other elements, handlers, unsafe links and styles. */
+/** Removes everything the server never emits: other elements, handlers, link pings, form attributes, unsafe links and styles. */
 export function sanitize(root: Element): void {
   for (const el of [root, ...root.querySelectorAll("*")]) {
     if (!ALLOWED_ELEMENTS.has(el.localName.toLowerCase())) {
@@ -61,7 +67,8 @@ export function sanitize(root: Element): void {
         (LINK_ATTRIBUTES.has(lower) && !safeLink(value)) ||
         (lower === "style" && !SAFE_STYLE.test(value)) ||
         lower === "srcdoc" ||
-        lower === "formaction"
+        lower === "ping" ||
+        lower.startsWith("form")
       ) {
         el.removeAttribute(name);
       }

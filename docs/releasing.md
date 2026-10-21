@@ -70,8 +70,8 @@ terminal with your passkey keeps working too.
    `npm stage approve <stage-id>`.
 5. **Check it is live.** The package page shows the new version under the `next` tag and a
    provenance section naming this repository and `release.yml`.
-6. **Start the consumer bumps.** A tag the workflow made starts no other workflow, and a hand-pushed
-   tag ran **bump-consumers** before the version was live, so either way start it now. Click **Actions**, then **bump-consumers**, then **Run workflow**, untick
+6. **Start the consumer bumps.** No tag starts it, because a tag exists before the version is live,
+   so start it now. Click **Actions**, then **bump-consumers**, then **Run workflow**, untick
    **dry_run**, and run it.
 
 ## When something goes wrong
