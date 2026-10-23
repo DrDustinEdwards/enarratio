@@ -45,7 +45,7 @@ export interface HeatStripOptions {
 const KIND = "heatStrip";
 
 /** Everything the strip, its text alternative and its companion table are computed from. */
-export interface HeatStripValues {
+interface HeatStripValues {
   readonly values: readonly (number | null)[];
   /** The ramp step, 1 to 5, of each cell; 0 for a cell with no data. */
   readonly steps: readonly number[];
@@ -65,7 +65,7 @@ export interface HeatStripValues {
 const round = (n: number): number => Math.round(n * 100) / 100;
 
 /** Validates the options and computes the numbers every part of a heat strip is made from. */
-export function prepareHeatStrip(options: HeatStripOptions): HeatStripValues {
+function prepareHeatStrip(options: HeatStripOptions): HeatStripValues {
   const { values } = options;
   if (values.length === 0) throw new Error(`${KIND}: needs at least one value`);
   const subject = options.label?.trim() ?? "";

@@ -22,6 +22,10 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- Internal helpers that no subpath exports are no longer exported from their modules: the
+  primitives' `prepare*` steps and their value types, `extent`, `markerPoints`, `tag`, and the
+  gallery Worker's `HOST` and `OLD_HOST`. The public API does not change. One unit test that
+  repeated the package test for `dist/base.css` is gone.
 - The enhancement layer's source is split into modules (`src/enhance/`); the build bundles them, so
   the published `enhance/index.js` is still one file with no imports. No change in behaviour.
 - The default chart size (640 by 320) and the enhancement layer's timings and gaps are named

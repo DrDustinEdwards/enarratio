@@ -53,7 +53,7 @@ export function keyed<T>(
 }
 
 /** Writes a datum's keys onto an element. */
-export function tag(el: Element, datum: MarkDatum): void {
+function tag(el: Element, datum: MarkDatum): void {
   for (const [name, value] of datumAttributes(datum)) el.setAttribute(name, value);
 }
 

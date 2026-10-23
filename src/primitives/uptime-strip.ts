@@ -36,7 +36,7 @@ const STATUS: Readonly<Record<UptimeStatus, { color: string; height: number; wor
 const round = (n: number): number => Math.round(n * 100) / 100;
 
 /** One period, checked, with the name it carries in hover details and the companion table. */
-export interface PreparedSlot {
+interface PreparedSlot {
   readonly status: UptimeStatus;
   /** The slot's own label, or "Period 3". */
   readonly name: string;
@@ -44,7 +44,7 @@ export interface PreparedSlot {
 }
 
 /** Everything the strip, its text alternative and its companion table are computed from. */
-export interface UptimeStripValues {
+interface UptimeStripValues {
   readonly slots: readonly PreparedSlot[];
   readonly counts: Readonly<Record<UptimeStatus, number>>;
   readonly width: number;
@@ -56,7 +56,7 @@ export interface UptimeStripValues {
 }
 
 /** Validates the options and computes the numbers every part of an uptime strip is made from. */
-export function prepareUptimeStrip(options: UptimeStripOptions): UptimeStripValues {
+function prepareUptimeStrip(options: UptimeStripOptions): UptimeStripValues {
   const { slots } = options;
   if (slots.length === 0) throw new Error("uptimeStrip: needs at least one slot");
   const subject = options.label?.trim() ?? "";
