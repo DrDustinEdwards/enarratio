@@ -27,7 +27,7 @@ const INSET = 2.5;
 const round = (n: number): number => Math.round(n * 100) / 100;
 
 /** Everything the sparkline, its text alternative and its companion table are computed from. */
-export interface SparklineValues {
+interface SparklineValues {
   readonly values: readonly (number | null)[];
   /** The values that are not gaps, in order. */
   readonly present: readonly number[];
@@ -42,7 +42,7 @@ export interface SparklineValues {
 }
 
 /** Validates the options and computes the numbers every part of a sparkline is made from. */
-export function prepareSparkline(options: SparklineOptions): SparklineValues {
+function prepareSparkline(options: SparklineOptions): SparklineValues {
   const { values } = options;
   const width = options.width ?? 120;
   const height = options.height ?? 32;

@@ -11,15 +11,13 @@ import { receiveCspReport } from "@dustinedwards/site-runtime/csp-report";
 import { applyHeaderSet } from "@dustinedwards/site-runtime/headers";
 import { HOST, REPORT_PATH, securityHeaders } from "../scripts/security-headers.ts";
 
-export { HOST };
-
 /** The assets binding wrangler provides as `env.ASSETS`. */
 export interface Env {
   readonly ASSETS: { fetch(request: Request): Promise<Response> };
 }
 
 /** The gallery's address before the rename to Enarratio (design record 0010). */
-export const OLD_HOST = "abscissa.dustinedwards.info";
+const OLD_HOST = "abscissa.dustinedwards.info";
 
 /** A response made by the Worker, with the gallery's security headers. */
 function respond(status: number, headers: Record<string, string> = {}): Response {

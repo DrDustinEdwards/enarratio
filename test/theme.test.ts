@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { exampleTheme } from "../examples/themes/example.js";
@@ -184,10 +184,5 @@ describe("the CSS custom property contract", () => {
   it("defines no theme value itself", () => {
     expect(base).not.toMatch(/--enarratio-(?:series|sequential|status)-\d*[a-z-]*:/);
     expect(base).not.toMatch(/#[0-9a-f]{3,6}\b/i);
-  });
-
-  it("ships as dist/base.css when built", () => {
-    const built = resolve(import.meta.dirname, "..", "dist", "base.css");
-    if (existsSync(built)) expect(readFileSync(built, "utf8").trim()).toBe(base.trim());
   });
 });

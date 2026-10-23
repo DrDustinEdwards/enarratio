@@ -299,7 +299,7 @@ export interface MarkerPoint {
 }
 
 /** Reads the event markers' positions the way the chart reads x. */
-export function markerPoints(
+function markerPoints(
   options: Pick<SeriesChartOptions<object>, "markers">,
   time: boolean,
   kind: string,
