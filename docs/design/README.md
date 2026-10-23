@@ -34,6 +34,7 @@ Each record says where a decision came from:
 | [0016](0016-remove-the-site-theme.md) | The dustinedwards.info theme is removed |
 | [0017](0017-light-charts.md) | Light bar, line and area charts for the browser |
 | [0018](0018-shared-security-headers.md) | The gallery's security headers come from site-runtime |
+| [0019](0019-gallery-on-capsomer.md) | The gallery's page is Capsomer's |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.
