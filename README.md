@@ -29,6 +29,13 @@ not yet tested.
 [enarratio.dustinedwards.info](https://enarratio.dustinedwards.info)
 (built by `npm run gallery`).
 
+**Astro and EmDash:** [enarratio-astro](https://www.npmjs.com/package/enarratio-astro)
+draws Enarratio charts in Astro pages and Markdown, and
+[enarratio-emdash](https://www.npmjs.com/package/enarratio-emdash) adds them to
+the EmDash editor as a Chart block. They are separate packages, in
+[DrDustinEdwards/astro](https://github.com/DrDustinEdwards/astro); see
+[enarratio.dustinedwards.info/astro](https://enarratio.dustinedwards.info/astro).
+
 ## Statement of need
 
 Most web charting libraries draw in the browser. A chart drawn in the browser

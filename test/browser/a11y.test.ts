@@ -51,7 +51,7 @@ async function audit(page: Page): Promise<Violation[]> {
   });
 }
 
-const pages = ["index.html", "example.html"];
+const pages = ["index.html", "example.html", "astro.html"];
 const schemes = ["light", "dark"] as const;
 
 describe.each(pages)("%s", (file) => {
