@@ -14,10 +14,11 @@ import { createRequire } from "node:module";
 import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { checkTheme, stylesheet, type Theme } from "enarratio";
+import { barChart } from "enarratio/lite";
 import { defaultTheme } from "enarratio/themes";
 import { rolldown } from "rolldown";
 import { exampleTheme } from "../examples/themes/example.ts";
-import { writeHeadersFile } from "./security-headers.ts";
+import { HOST, writeHeadersFile } from "./security-headers.ts";
 
 const root = resolve(import.meta.dirname, "..");
 const outDir = resolve(process.argv[2] ?? join(root, "site", "dist"));
@@ -135,6 +136,9 @@ const GALLERY_CSS = `
 .primitive-tables p { margin: var(--space-3) 0; }
 .gallery-logo { display: inline-flex; align-items: center; gap: var(--space-3); font-weight: 600; }
 .gallery-logo img { display: block; inline-size: 24px; block-size: 24px; }
+.guide h2 { margin: var(--space-7) 0 var(--space-3); }
+.guide p, .guide ul { max-width: var(--measure); }
+.guide pre { overflow-x: auto; margin: var(--space-3) 0; padding: var(--space-4); border-radius: var(--radius-m); background: var(--sunken); font: 400 var(--fs-detail) / 1.6 var(--mono); }
 `;
 
 /** Capsomer for the whole gallery: the faces, the tokens and base, then each component's CSS. */
@@ -190,13 +194,19 @@ ${links.map((l) => `<li><a href="${l.href}"${current(l)}><span class="cap-site-h
 </header>`;
 }
 
-/** The head every page shares: Capsomer, then the page's own chart theme, then the remembered theme before first paint. */
-function head(title: string, description: string, themeCss?: string): string {
+/** The site's address, for canonical links, the sitemap and llms.txt. */
+const SITE = `https://${HOST}`;
+
+/**
+ * The head every page shares: Capsomer, then the page's own chart theme, then the remembered theme
+ * before first paint. `address` is the page's clean path ("/", "/astro"); the 404 page has none.
+ */
+function head(title: string, description: string, themeCss?: string, address?: string): string {
   return `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeText(title)}</title>
 <meta name="description" content="${escapeText(description)}">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+${address ? `<link rel="canonical" href="${SITE}${address}">\n` : ""}<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/capsomer.css">
 ${themeCss ? `<link rel="stylesheet" href="${themeCss}">\n` : ""}<script src="/theme.js"></script>`;
 }
@@ -207,6 +217,7 @@ ${themeCss ? `<link rel="stylesheet" href="${themeCss}">\n` : ""}<script src="/t
  */
 function page(
   theme: Theme,
+  file: string,
   css: string,
   examples: readonly Example[],
   links: readonly Link[],
@@ -219,7 +230,7 @@ function page(
   return `<!doctype html>
 <html lang="en">
 <head>
-${head(`Enarratio gallery: ${theme.name} theme`, `Every Enarratio chart, server-rendered, in the ${theme.name} theme.`, css)}
+${head(`Enarratio gallery: ${theme.name} theme`, `Every Enarratio chart, server-rendered, in the ${theme.name} theme.`, css, pathOf(file))}
 </head>
 <body>
 ${siteHeader(links)}
@@ -269,6 +280,158 @@ async function bundle(file: string, format: "esm" | "iife"): Promise<string> {
   return chunk.code;
 }
 
+/** The page for Enarratio in Astro and EmDash sites, served at /astro. */
+const ASTRO_PAGE = "astro.html";
+const ASTRO_TITLE = "Accessible charts for Astro and EmDash";
+const ASTRO_DESCRIPTION =
+  "Server-rendered, accessible bar, line, area, scatter and heatmap charts in Astro pages, Markdown and the EmDash editor, from the enarratio-astro and enarratio-emdash packages.";
+const ASTRO_REPO = "https://github.com/DrDustinEdwards/astro";
+
+/** A code sample, escaped. */
+const code = (source: string): string =>
+  `<pre tabindex="0"><code>${escapeText(source)}</code></pre>`;
+
+const MARKDOWN_SAMPLE = `\`\`\`chart
+type: bar
+x: team
+y: tickets
+series: status
+layout: grouped
+title: Tickets by team
+alt: Support has the most open tickets; Platform has closed the most.
+---
+team,status,tickets
+Support,Open,14
+Support,Closed,22
+Platform,Open,5
+Platform,Closed,31
+Web,Open,8
+Web,Closed,17
+\`\`\``;
+
+/** The chart MARKDOWN_SAMPLE draws: the same options, drawn here by Enarratio itself. */
+const sampleChart = barChart({
+  id: "tickets-by-team",
+  data: [
+    { team: "Support", status: "Open", tickets: 14 },
+    { team: "Support", status: "Closed", tickets: 22 },
+    { team: "Platform", status: "Open", tickets: 5 },
+    { team: "Platform", status: "Closed", tickets: 31 },
+    { team: "Web", status: "Open", tickets: 8 },
+    { team: "Web", status: "Closed", tickets: 17 },
+  ],
+  x: "team",
+  y: "tickets",
+  series: "status",
+  layout: "grouped",
+  title: "Tickets by team",
+  alt: "Support has the most open tickets; Platform has closed the most.",
+});
+
+/** Structured data naming the two packages, so search engines can describe them. */
+const astroData = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    [
+      "enarratio-astro",
+      "Accessible charts for Astro: a Chart component and charts in Markdown, drawn on the server by Enarratio.",
+    ],
+    [
+      "enarratio-emdash",
+      "An EmDash plugin that adds a Chart block to the editor, drawn on the server by Enarratio.",
+    ],
+  ].map(([name, description]) => ({
+    "@type": "SoftwareSourceCode",
+    name,
+    description,
+    codeRepository: `${ASTRO_REPO}/tree/main/packages/${name}`,
+    url: `https://www.npmjs.com/package/${name}`,
+    programmingLanguage: "TypeScript",
+    runtimePlatform: "Astro",
+    license: "https://opensource.org/licenses/MIT",
+    author: { "@type": "Person", name: "Dustin Edwards", url: "https://dustinedwards.info" },
+  })),
+}).replace(/</g, "\\u003c");
+
+function astroPage(): string {
+  return `<!doctype html>
+<html lang="en">
+<head>
+${head(`${ASTRO_TITLE}: Enarratio`, ASTRO_DESCRIPTION, "index.css", pathOf(ASTRO_PAGE))}
+<script type="application/ld+json">${astroData}</script>
+</head>
+<body>
+${siteHeader(links(ASTRO_PAGE))}
+<main class="gallery guide" id="main" tabindex="-1">
+<header class="cap-page-head">
+<div class="cap-page-head-text">
+<h1 class="cap-page-head-title">${ASTRO_TITLE}</h1>
+<p class="cap-page-head-lead">Enarratio's charts in Astro pages, in Markdown, and as a block in the EmDash editor.</p>
+</div>
+</header>
+<p>Two packages bring Enarratio to <a href="https://astro.build">Astro</a> sites and to <a href="https://github.com/emdash-cms/emdash">EmDash</a>, the CMS built on Astro. A chart arrives in the page as HTML and SVG, drawn on the server: complete before any script runs, with a written description and a data table for screen readers, numbers that search engines and language models can read, and light and dark themes. It draws bar, line, stacked area, scatter (with an optional regression line) and heatmap charts, and can add hover details, keyboard navigation and filtering where a page asks for them.</p>
+<ul>
+<li><a href="https://www.npmjs.com/package/enarratio-astro">enarratio-astro</a>: a <code>&lt;Chart&gt;</code> component and <code>chart</code> blocks in Markdown, for Astro 6 or later.</li>
+<li><a href="https://www.npmjs.com/package/enarratio-emdash">enarratio-emdash</a>: a Chart block for EmDash 1.0 or later. An editor types <code>/chart</code>, pastes data from a spreadsheet, and describes what the chart shows.</li>
+</ul>
+<p>Both are MIT licensed. The code is at <a href="${ASTRO_REPO}">github.com/DrDustinEdwards/astro</a>.</p>
+
+<h2>In an Astro page</h2>
+${code("npm install enarratio-astro")}
+${code(`---
+import Chart from "enarratio-astro/Chart.astro";
+import downloads from "../data/downloads.json";
+---
+<Chart
+  type="line"
+  data={downloads}
+  x="year"
+  y="downloads"
+  series="package"
+  alt="Downloads per year, 2024 to 2026: both packages grow every year."
+  interactive
+/>`)}
+<p>The data can be rows (from code, JSON or a content collection) or CSV text. The chart's CSS is written once per page.</p>
+
+<h2>In Markdown</h2>
+<p>A code block whose language is <code>chart</code> becomes a chart: options, a line of three dashes, then the data. This block:</p>
+${code(MARKDOWN_SAMPLE)}
+<p>draws this chart:</p>
+<section class="cap-panel example" id="tickets" aria-labelledby="tickets-title">
+<header class="cap-panel-head"><h3 id="tickets-title">The chart the block draws</h3></header>
+<div class="cap-panel-body example-chart">
+${sampleChart}
+</div>
+</section>
+<p>Register the plugin with Astro's Markdown processor, Sätteri (Astro 7) or remark (Astro 6):</p>
+${code(`// astro.config.mjs
+import { satteri } from "@astrojs/markdown-satteri";
+import { satteriCharts } from "enarratio-astro/markdown";
+
+export default defineConfig({
+  markdown: { processor: satteri({ mdastPlugins: [satteriCharts()] }) },
+});`)}
+
+<h2>In EmDash</h2>
+${code("npm install enarratio-emdash")}
+${code(`// astro.config.mjs
+import emdash from "emdash/astro";
+import { enarratioPlugin } from "enarratio-emdash";
+
+export default defineConfig({
+  integrations: [emdash({ plugins: [enarratioPlugin()] })],
+});`)}
+<p>The editor gains a Chart block. It is a native EmDash plugin, installed from npm: EmDash's plugin registry holds only sandboxed plugins, which cannot draw on public pages. The plugin declares no capabilities, makes no network requests and stores nothing.</p>
+
+<h2>Styles</h2>
+<p>Charts use Enarratio's default theme, in light and dark, unless a site picks <code>styles: "base"</code> (layout only, colors from the site's own design tokens) or <code>"none"</code>. The <a href="./">gallery</a> shows every chart Enarratio draws.</p>
+</main>
+<script type="module" src="gallery.js"></script>
+</body>
+</html>
+`;
+}
+
 const examples = await loadExamples();
 mkdirSync(join(outDir, "fonts"), { recursive: true });
 writeFileSync(join(outDir, "capsomer.css"), capsomerCss(join(outDir, "fonts")));
@@ -283,18 +446,66 @@ const pages: [Theme, string, string][] = [
  */
 const cleanAddress = (file: string): string =>
   file === "index.html" ? "./" : file.replace(/\.html$/, "");
+/** The same address from the site's root, for canonical links and the sitemap. */
+const pathOf = (file: string): string =>
+  file === "index.html" ? "/" : `/${file.replace(/\.html$/, "")}`;
 const links = (current: string): Link[] => [
   ...pages.map(([t, f]) => ({
     label: `${t.name[0]?.toUpperCase()}${t.name.slice(1)} theme`,
     href: cleanAddress(f),
     current: f === current,
   })),
+  { label: "Astro and EmDash", href: "astro", current: current === ASTRO_PAGE },
   { label: "Code", href: "https://github.com/DrDustinEdwards/enarratio", current: false },
 ];
 for (const [theme, file, css] of pages) {
   writeFileSync(join(outDir, css), stylesheet(theme));
-  writeFileSync(join(outDir, file), page(theme, css, examples, links(file)));
+  writeFileSync(join(outDir, file), page(theme, file, css, examples, links(file)));
 }
+writeFileSync(join(outDir, ASTRO_PAGE), astroPage());
+const addresses = [...pages.map(([, file]) => pathOf(file)), pathOf(ASTRO_PAGE)];
+// For search engines and language models: the pages, the sitemap that lists them, and llms.txt
+// (https://llmstxt.org), a short guide in Markdown. Cloudflare puts its own robots.txt lines first.
+writeFileSync(
+  join(outDir, "sitemap.xml"),
+  `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${addresses.map((a) => `<url><loc>${SITE}${a}</loc></url>`).join("\n")}
+</urlset>
+`,
+);
+writeFileSync(
+  join(outDir, "robots.txt"),
+  `User-agent: *
+Allow: /
+
+Sitemap: ${SITE}/sitemap.xml
+# LLM guide: ${SITE}/llms.txt
+`,
+);
+writeFileSync(
+  join(outDir, "llms.txt"),
+  `# Enarratio
+
+> Accessible, server-rendered charts and scientific figures for the web. An open-source (MIT) JavaScript library by Dustin Edwards: charts are drawn on the server into the HTML as SVG, with a written description and a data table, and work without JavaScript.
+
+- Install: \`npm install enarratio@next\`. Code and documentation: https://github.com/DrDustinEdwards/enarratio
+- Charts: bar, line, area, scatter, heatmap, network, titer plots, genome tracks, sparklines, progress rings, uptime and heat strips, timelines.
+- Runs on Node.js and Cloudflare Workers; \`enarratio/lite\` draws bar, line and area charts in the browser with no dependencies.
+
+## Pages
+
+- [Gallery](${SITE}/): every Enarratio chart in the default theme, with its source
+- [Gallery, example theme](${SITE}/example): the same charts in a custom theme
+- [Charts for Astro and EmDash](${SITE}/astro): enarratio-astro (a Chart component and charts in Markdown for Astro) and enarratio-emdash (a Chart block for the EmDash CMS)
+
+## Packages
+
+- [enarratio](https://www.npmjs.com/package/enarratio): the library
+- [enarratio-astro](https://www.npmjs.com/package/enarratio-astro): charts in Astro pages and Markdown
+- [enarratio-emdash](https://www.npmjs.com/package/enarratio-emdash): the EmDash Chart block
+`,
+);
 writeFileSync(
   join(outDir, "404.html"),
   `<!doctype html>
@@ -321,4 +532,6 @@ writeFileSync(join(outDir, "gallery.js"), await bundle("gallery.js", "esm"));
 writeFileSync(join(outDir, "theme.js"), await bundle("theme.js", "iife"));
 writeHeadersFile(outDir);
 copyFileSync(join(root, "site", "favicon.svg"), join(outDir, "favicon.svg"));
-console.log(`gallery: ${examples.length} examples, ${pages.length} themes -> ${outDir}`);
+console.log(
+  `gallery: ${examples.length} examples, ${pages.length} themes, the Astro page -> ${outDir}`,
+);

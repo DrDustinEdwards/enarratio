@@ -20,6 +20,13 @@ change the public API; every such change is listed here.
 - Removed the dated test baseline (`docs/research/`) and its report script
   (`scripts/report-mutation.mjs`); the code-map workflow keeps the mutation results now.
 
+### Added
+
+- **The gallery has a page for Astro and EmDash** (`/astro`), on the separate enarratio-astro and
+  enarratio-emdash packages, with structured data naming them. The gallery now also serves
+  `sitemap.xml`, `robots.txt` (pointing to the sitemap) and `llms.txt`, and every page names its
+  canonical address. Gallery only: the package is unchanged.
+
 ### Changed
 
 - site-runtime (a gallery dev dependency) is at v0.12.1; the package is unchanged.
