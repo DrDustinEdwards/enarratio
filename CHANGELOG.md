@@ -22,6 +22,10 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- **The gallery's `Reporting-Endpoints` header comes from site-runtime v0.12.0's
+  `reportingEndpoints`** in place of a hand-written string; the header and the policy are
+  unchanged. Gallery only: site-runtime stays a dev dependency, and the package is unchanged.
+  The gallery Worker grows to 11.6 KiB (5.0 KiB gzip), so its budget is reset to 10% over that.
 - **The gallery's page is Capsomer's.** Capsomer's fonts, tokens, site header, page head, panels
   and disclosures around the charts, and its theme button in place of the gallery's "Dark"
   button. Each chart sits on its own theme's background. Gallery only: `capsomer` and two

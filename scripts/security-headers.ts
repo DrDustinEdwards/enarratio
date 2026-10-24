@@ -7,7 +7,7 @@
  * imports this or site-runtime.
  */
 
-import { buildContentSecurityPolicy } from "@dustinedwards/site-runtime/csp";
+import { buildContentSecurityPolicy, reportingEndpoints } from "@dustinedwards/site-runtime/csp";
 import { buildSecurityHeaders } from "@dustinedwards/site-runtime/headers";
 
 /** The gallery's address. */
@@ -40,9 +40,8 @@ export const standardHeaders = buildSecurityHeaders();
 export const securityHeaders: Readonly<Record<string, string>> = Object.freeze({
   ...standardHeaders,
   [csp.name]: csp.value,
-  // The Reporting API needs an absolute address for the group `report-to` names; `report-uri`
-  // covers browsers without it.
-  "Reporting-Endpoints": `${REPORT_GROUP}="https://${HOST}${REPORT_PATH}"`,
+  // The group `report-to` names; `report-uri` covers browsers without the Reporting API.
+  "Reporting-Endpoints": reportingEndpoints(REPORT_GROUP, new URL(REPORT_PATH, `https://${HOST}`)),
 });
 
 /**
