@@ -25,7 +25,7 @@ function labels(attrs: Attrs, items: string[]): string {
 }
 
 /** The smallest and largest finite numbers in `values`, or undefined when there are none. */
-export function extent(values: Iterable<number | null>): Pair | undefined {
+function extent(values: Iterable<number | null>): Pair | undefined {
   let lo = Number.POSITIVE_INFINITY;
   let hi = Number.NEGATIVE_INFINITY;
   for (const v of values) {

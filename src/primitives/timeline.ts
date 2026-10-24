@@ -77,7 +77,7 @@ const STATUSES: Readonly<Record<TimelineStatus, { color: string; word: string }>
 };
 
 /** An event with its times read and checked, and its window position clipped to the window. */
-export interface PreparedEvent {
+interface PreparedEvent {
   readonly lane: string;
   readonly label: string;
   readonly status: TimelineStatus;
@@ -92,7 +92,7 @@ export interface PreparedEvent {
 }
 
 /** Everything the timeline, its text alternative and its companion table are computed from. */
-export interface TimelineValues {
+interface TimelineValues {
   readonly events: readonly PreparedEvent[];
   readonly lanes: readonly string[];
   readonly start: number;
@@ -112,7 +112,7 @@ function readTime(what: string, value: unknown): number {
 }
 
 /** Validates the options and computes the numbers every part of a timeline is made from. */
-export function prepareTimeline(options: TimelineOptions): TimelineValues {
+function prepareTimeline(options: TimelineOptions): TimelineValues {
   const { events } = options;
   if (events.length === 0) throw new Error(`${KIND}: needs at least one event`);
   const subject = options.label?.trim() ?? "";

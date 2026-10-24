@@ -28,7 +28,7 @@ export interface ProgressRingOptions {
 const round = (n: number): number => Math.round(n * 100) / 100;
 
 /** Everything the ring, its text alternative and its companion table are computed from. */
-export interface ProgressRingValues {
+interface ProgressRingValues {
   readonly value: number;
   readonly max: number;
   /** The share of the ring filled, from 0 to 1 (a value past `max` fills it). */
@@ -44,7 +44,7 @@ export interface ProgressRingValues {
 }
 
 /** Validates the options and computes the numbers every part of a progress ring is made from. */
-export function prepareProgressRing(options: ProgressRingOptions): ProgressRingValues {
+function prepareProgressRing(options: ProgressRingOptions): ProgressRingValues {
   const max = options.max ?? 1;
   const { value } = options;
   if (!Number.isFinite(max) || max <= 0)
