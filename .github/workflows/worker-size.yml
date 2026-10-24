@@ -1,6 +1,6 @@
 name: worker-size
 
-# The gallery Worker's bundle budget (.worker-size.json, about 10% over its size on 2026-10-21): devkit's shared
+# The gallery Worker's bundle budget (.worker-size.json, about 10% over its size on 2026-10-24): devkit's shared
 # check, a `wrangler deploy --dry-run` that needs no Cloudflare secret. The gallery is built first because wrangler
 # reads the assets directory.
 
