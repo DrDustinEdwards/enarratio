@@ -22,6 +22,7 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- site-runtime (a gallery dev dependency) is at v0.12.1; the package is unchanged.
 - **The gallery's `Reporting-Endpoints` header comes from site-runtime v0.12.0's
   `reportingEndpoints`** in place of a hand-written string; the header and the policy are
   unchanged. Gallery only: site-runtime stays a dev dependency, and the package is unchanged.
