@@ -22,6 +22,10 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- **The gallery's page is Capsomer's.** Capsomer's fonts, tokens, site header, page head, panels
+  and disclosures around the charts, and its theme button in place of the gallery's "Dark"
+  button. Each chart sits on its own theme's background. Gallery only: `capsomer` and two
+  `@fontsource` faces are dev dependencies, and the package is unchanged (record 0019).
 - Internal helpers that no subpath exports are no longer exported from their modules: the
   primitives' `prepare*` steps and their value types, `extent`, `markerPoints`, `tag`, and the
   gallery Worker's `HOST` and `OLD_HOST`. The public API does not change. One unit test that

@@ -71,7 +71,7 @@ export async function startHarness(): Promise<Harness> {
       }
       await page.goto(`${origin}/${path}`, { waitUntil: "load" });
       await page.evaluate((s) => {
-        document.documentElement.dataset["scheme"] = s;
+        document.documentElement.dataset["theme"] = s;
       }, scheme);
       return page;
     },

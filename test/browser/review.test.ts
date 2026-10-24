@@ -143,7 +143,7 @@ describe("F7: the focus ring has two tones", () => {
     expect(strokes).toHaveLength(2);
     expect(strokes[0]).not.toBe(strokes[1]);
     expect(colors.every((c) => c.trim() !== "")).toBe(true);
-    await p.$eval("button.scheme", (el) => (el as HTMLElement).focus());
+    await p.$eval(".cap-theme-button", (el) => (el as HTMLElement).focus());
     expect(await p.$('[data-example="stacked-bar"] .enarratio-focus-ring')).toBeNull();
     await p.close();
   });
@@ -237,23 +237,6 @@ describe("F11: update() keeps only what Enarratio emits", () => {
       ping: 0,
       hrefs: ["https://a.example/", null, null],
     });
-    await p.close();
-  });
-});
-
-describe("F17: the scheme button reports the scheme shown", () => {
-  it("starts pressed when the system is dark, and one click shows light", async () => {
-    const p = await harness.open("index.html", "dark");
-    // The harness pins data-scheme; clear it so the page follows the system, as it does for readers.
-    await p.evaluate(() => {
-      delete document.documentElement.dataset["scheme"];
-    });
-    // The page loaded before the harness set a scheme, so the button shows the system's.
-    const load = await p.$eval("button.scheme", (b) => b.getAttribute("aria-pressed"));
-    expect(load).toBe("true");
-    await p.click("button.scheme");
-    expect(await p.evaluate(() => document.documentElement.dataset["scheme"])).toBe("light");
-    expect(await p.$eval("button.scheme", (b) => b.getAttribute("aria-pressed"))).toBe("false");
     await p.close();
   });
 });
