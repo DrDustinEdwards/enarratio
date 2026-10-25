@@ -49,5 +49,5 @@ there is room for it.
 6. **Each table's columns follow what the primitive draws:** position and value;
    period and status; measure, value, total and percent; event, lane, status, start
    and end; cell, value and ramp step. The heat strip's ramp step is in the table
-   because colour is the only thing a strip draws, and the step is that colour as a
+   because color is the only thing a strip draws, and the step is that color as a
    number.

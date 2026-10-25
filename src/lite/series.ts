@@ -227,7 +227,7 @@ export function dots(
   );
 }
 
-/** Reference lines across the frame, and markers down it, each labelled, as Plot draws them. */
+/** Reference lines across the frame, and markers down it, each labeled, as Plot draws them. */
 export function annotations(
   options: Pick<SeriesChartOptions<object>, "references">,
   model: SeriesModel,
@@ -261,7 +261,7 @@ export function annotations(
   return out;
 }
 
-/** Labelled vertical rules (event markers, the forecast boundary), from the top of the frame. */
+/** Labeled vertical rules (event markers, the forecast boundary), from the top of the frame. */
 export function verticalRules(rules: readonly Tick[], frame: Frame): string {
   if (rules.length === 0) return "";
   const { marginTop, height, marginBottom } = frame;

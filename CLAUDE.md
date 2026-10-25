@@ -1,10 +1,10 @@
 # CLAUDE.md - enarratio
 
-Enarratio draws accessible, server-rendered charts and scientific figures into the HTML: the npm package `enarratio` and its gallery at https://enarratio.dustinedwards.info. Public research software, headed for a JOSS submission after the Capsid paper.
+Enarratio draws accessible, server-rendered charts and scientific figures into the HTML: the npm package `enarratio` and its gallery at https://enarratio.dustinedwards.info. Public research software, headed for a JOSS submission after the Capsid paper. Before writing anything another site might have, read what the family shares: https://github.com/DrDustinEdwards/devkit/blob/shared-list/SHARED.md (CI's family check fails on a copy).
 
 ## Rules that come first
 
-- Tests: keep the minimal set (a few browser tests for flows that must never break, one integration test per real behaviour, unit tests only for tricky logic, shared code tested once where it lives), and remove any test that pins design, repeats coverage or has never caught a real mistake, unless it guards a harm that cannot be undone.
+- Tests: keep the minimal set (a few browser tests for flows that must never break, one integration test per real behavior, unit tests only for tricky logic, shared code tested once where it lives), and remove any test that pins design, repeats coverage or has never caught a real mistake, unless it guards a harm that cannot be undone.
 - The npm package stays independent of Capsomer (it ships its own themeable CSS); the gallery site adopts Capsomer.
 - Design records are `docs/design/0001` onward. A new decision gets the next number; a reversal says which record it replaces.
 

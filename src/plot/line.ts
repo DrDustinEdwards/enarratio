@@ -59,7 +59,7 @@ function xScale(prepared: Prepared, yearTicks: number[] | undefined) {
   return { ...base, ticks: yearTicks, tickFormat: (d: number) => String(d) };
 }
 
-/** The labelled rule where observed data end and the forecast begins. */
+/** The labeled rule where observed data end and the forecast begins. */
 function forecastRule(at: number | Date, label: string): Plot.Markish[] {
   const rule = [{ x: at, label }];
   return [

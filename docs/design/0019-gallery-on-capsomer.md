@@ -7,7 +7,7 @@ Status: accepted, 2026-10-23.
 **Author's decision (Dustin Edwards).** The gallery site adopts Capsomer, the family design
 system, and the npm package stays independent of it (CLAUDE.md, "Rules that come first"). Until
 now the gallery drew its own page: a heading, a text link per theme, a "Dark" button that set
-`data-scheme`, and colours taken from the chart theme on show.
+`data-scheme`, and colors taken from the chart theme on show.
 
 ## Implementation choices
 
@@ -23,7 +23,7 @@ now the gallery drew its own page: a heading, a text link per theme, a "Dark" bu
    of the old button (F17) is gone: the button is Capsomer's and is tested there.
 3. **Files, not inline.** `scripts/gallery.ts` writes `capsomer.css` (Capsomer's CSS with its
    imports written in place, and two faces from `@fontsource`), and bundles `site/gallery.js`
-   and `site/theme.js` with rolldown, Capsomer's behaviour included and `enhance.js` left as
+   and `site/theme.js` with rolldown, Capsomer's behavior included and `enhance.js` left as
    its own file. The Content-Security-Policy of [0018](0018-shared-security-headers.md) is
    unchanged.
 4. **Dev dependencies only.** `capsomer` (pinned to a tag), `@fontsource/schibsted-grotesk` and

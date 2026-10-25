@@ -20,7 +20,7 @@ afterAll(async () => {
 const eventLog = (p: Page, example: string): Promise<string> =>
   p.$eval(`[data-example="${example}"] .events`, (el) => el.textContent ?? "");
 
-/** Clicks the centre of an element with the real mouse, as a reader would. */
+/** Clicks the center of an element with the real mouse, as a reader would. */
 async function mouseClick(p: Page, selector: string): Promise<void> {
   await p.$eval(selector, (el) => el.scrollIntoView({ block: "center" }));
   const box = await p.$eval(selector, (el) => {

@@ -5,7 +5,7 @@ ships only what it uses.
 
 | Import | Holds | Needs |
 |---|---|---|
-| `enarratio` | Core: HTML helpers, theme types, `defineTheme`, `stylesheet`, `baseStylesheet`, `checkTheme`, color maths, figure and data-table assembly, the primitives | Nothing. No runtime dependencies. |
+| `enarratio` | Core: HTML helpers, theme types, `defineTheme`, `stylesheet`, `baseStylesheet`, `checkTheme`, color math, figure and data-table assembly, the primitives | Nothing. No runtime dependencies. |
 | `enarratio/base.css` | The theme-free base rules as a stylesheet file | Nothing |
 | `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` | Peers `@observablehq/plot`, and `linkedom` outside a browser |
 | `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | Peers `@observablehq/plot` and `d3-force`, and `linkedom` outside a browser |
@@ -175,7 +175,7 @@ one row per item (a CV entry, a case) is enough.
   (`"hour"`, `"day"` the default, `"week"` starting Monday, `"month"` or
   `"year"`, all UTC) that contains it, and there is one bar slot for every
   interval from the first row's to the last's, empty ones included, so a quiet
-  day is a gap in the chart and a zero in the table. Bars are labelled by their
+  day is a gap in the chart and a zero in the table. Bars are labeled by their
   first moment (`2026-01-05`, `2026-01`, `2026`, `2026-01-05 14:00 UTC`) or by
   `formatX(start)`, which must give every interval its own label. Rows in an
   interval and series are summed, or counted when `y` is omitted. Works with
@@ -233,7 +233,7 @@ throws.
   prefixed by the series name), and hover details say the interval.
 - `forecastFrom` is the x after which the data are a forecast: rows with x
   greater than it. The line is dashed from there (each series joined to its
-  last observed point), points are hollow, a rule labelled `forecastLabel`
+  last observed point), points are hollow, a rule labeled `forecastLabel`
   (default "Forecast") marks the boundary, and the data table gets a `Forecast`
   column reading `Yes` on those rows. It must lie within the data's x range and
   before the last x, so that some rows are observed and some forecast.
@@ -247,11 +247,11 @@ bounds, and what the band is called.
 
 ### `ReferenceLine`
 
-`{ y: number; label: string }`: a labelled horizontal line, such as a threshold.
+`{ y: number; label: string }`: a labeled horizontal line, such as a threshold.
 
 ### `EventMarker`
 
-`{ x: number | Date | string; label: string }`: a labelled vertical line, such
+`{ x: number | Date | string; label: string }`: a labeled vertical line, such
 as a deploy or an intervention.
 
 ### Light charts: `enarratio/lite`
@@ -286,7 +286,7 @@ least-squares line with its 95% confidence band.
 ### `heatmap`
 
 `heatmap(options: HeatmapOptions<T>): string`. A grid colored on the theme's
-five-step sequential ramp, with a labelled legend of the bins, values printed
+five-step sequential ramp, with a labeled legend of the bins, values printed
 in cells in a readable color, and dashed outlines for empty cells.
 
 ### `HeatmapOptions`

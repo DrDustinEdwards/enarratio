@@ -35,7 +35,7 @@ keeps the decisions that changed how Enarratio works.
   slot keeping its hue from light to dark (A1). The palette was found by a
   search over OKLCH hues constrained by 3:1 contrast in both schemes, then
   checked with `checkTheme`; slots 7 and 8 keep one warning between them.
-- **Bars can be labelled directly** (`directLabels`), so series are told apart
+- **Bars can be labeled directly** (`directLabels`), so series are told apart
   by text as well as color (A1).
 - **Labels printed on marks reach 4.5:1** (F8). The label color is the scheme's
   text or background color when either reaches it, otherwise black or white,

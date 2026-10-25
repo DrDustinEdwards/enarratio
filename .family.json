@@ -1,0 +1,11 @@
+{
+  "apps": {
+    ".": "static"
+  },
+  "copies": {
+    "src/render/data.ts": "toDate reads a chart value (a Date, an ISO string or a timestamp) inside the published library, which takes no runtime dependency on Prelum"
+  },
+  "spelling": {
+    "skip": ["CHANGELOG.md"]
+  }
+}

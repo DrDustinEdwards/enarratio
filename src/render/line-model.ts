@@ -77,9 +77,9 @@ export interface SeriesChartOptions<T extends object> extends FigureOptions {
    * UTC time added when any value falls within a day; years print without a thousands separator.
    */
   readonly formatX?: (value: number | Date) => string;
-  /** Horizontal reference lines, each labelled on the chart. */
+  /** Horizontal reference lines, each labeled on the chart. */
   readonly references?: readonly ReferenceLine[];
-  /** Vertical event markers, each labelled on the chart. */
+  /** Vertical event markers, each labeled on the chart. */
   readonly markers?: readonly EventMarker[];
 }
 
@@ -109,7 +109,7 @@ export interface LineChartOptions<T extends object> extends SeriesChartOptions<T
   readonly band?: LineBand<T>;
   /**
    * The x after which the data are forecast: the line is dashed from here on, points are drawn
-   * hollow, a labelled rule marks the boundary, and the data table marks the rows after it
+   * hollow, a labeled rule marks the boundary, and the data table marks the rows after it
    * (those with x greater than this). Must lie within the data's x range, before its last value.
    * The forecast itself is computed by the caller.
    */

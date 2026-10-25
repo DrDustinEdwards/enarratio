@@ -16,5 +16,5 @@ Security fixes are made on the latest release, published under the npm `next` ta
 Please report privately through GitHub's
 [private vulnerability reporting](https://github.com/DrDustinEdwards/enarratio/security/advisories/new)
 rather than a public issue. Include the chart function, the options that
-cause the problem and what they produce. You can expect an acknowledgement
+cause the problem and what they produce. You can expect an acknowledgment
 within a week, and a fix or a plan within thirty days.

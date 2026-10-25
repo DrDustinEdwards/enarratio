@@ -105,7 +105,7 @@ dashboards. Planned scientific figures include dose-response and growth
 curves, endpoint dilution titrations, gel-style band plots, phylogenetic
 trees and county-level surveillance maps.
 
-# Acknowledgements
+# Acknowledgments
 
 <!-- To be completed by the author. -->
 

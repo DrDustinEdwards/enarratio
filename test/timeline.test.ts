@@ -59,8 +59,8 @@ describe("timeline", () => {
   });
 
   it("puts each event at its time on one linear scale", () => {
-    // Point events: x is the marker's centre; hour h should sit h/8 of the way along the plot.
-    const centre = (mark: Element): number => {
+    // Point events: x is the marker's center; hour h should sit h/8 of the way along the plot.
+    const center = (mark: Element): number => {
       const shape = mark.querySelector("circle, polygon, rect:last-child");
       if (shape?.localName === "circle") return Number(shape.getAttribute("cx"));
       if (shape?.localName === "rect") return Number(shape.getAttribute("x")) + 4.5;
@@ -71,9 +71,9 @@ describe("timeline", () => {
     };
     const byLabel = (label: string): Element =>
       marks.find((m) => m.querySelector("title")?.textContent?.includes(label)) as Element;
-    const x0 = centre(byLabel("Deploy")); // hour 0
-    const x3 = centre(byLabel("Timeout")); // hour 3
-    const x7 = centre(byLabel("Heartbeat lost")); // hour 7
+    const x0 = center(byLabel("Deploy")); // hour 0
+    const x3 = center(byLabel("Timeout")); // hour 3
+    const x7 = center(byLabel("Heartbeat lost")); // hour 7
     expect((x7 - x0) / 7).toBeCloseTo((x3 - x0) / 3, 1);
   });
 

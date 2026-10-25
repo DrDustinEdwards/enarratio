@@ -24,7 +24,7 @@ bands), so the time axis has to build its own.
 ## Implementation choices
 
 1. **A forecast is never told from observed data by color alone.** After
-   `forecastFrom` the line is dashed, points are hollow, a labelled rule marks
+   `forecastFrom` the line is dashed, points are hollow, a labeled rule marks
    the boundary, the hover text of a point says "forecast", and the table has a
    `Forecast` column. Any one of those survives a reader who loses the others.
 2. **"After" means strictly after.** The row at `forecastFrom` is the last
@@ -35,7 +35,7 @@ bands), so the time axis has to build its own.
    not a legend entry or a series of its own: it belongs to the line it surrounds.
    Its bounds are two table columns per series, named `Lower bound` and
    `Upper bound`, or `<label>, lower` and `<label>, upper` when the band is
-   labelled; with several series the series name leads. A row has both bounds or
+   labeled; with several series the series name leads. A row has both bounds or
    neither, because a half-band has no honest drawing.
 4. **`forecastFrom` must have data on both sides.** A boundary at or after the
    last x forecasts nothing, and one before the first x forecasts everything; both
