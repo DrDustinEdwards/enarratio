@@ -105,6 +105,23 @@ describe("checkTheme", () => {
     };
     expect(checkTheme(reversed).issues.some((i) => i.check === "sequential-order")).toBe(true);
   });
+
+  it("errors when muted text passes on the background but not on the diagram header tint", () => {
+    // #757575 is 4.6:1 on white, but about 3.8:1 on black mixed 10% into white (#e6e6e6).
+    const faint: Theme = {
+      ...defaultTheme,
+      light: {
+        ...defaultTheme.light,
+        background: "#ffffff",
+        text: "#000000",
+        mutedText: "#757575",
+      },
+    };
+    const issues = checkTheme(faint).issues;
+    expect(issues.some((i) => i.check === "text-contrast" && i.scheme === "light")).toBe(false);
+    const diagram = issues.find((i) => i.check === "diagram-contrast");
+    expect(diagram?.colors).toEqual(["#757575", "#e6e6e6"]);
+  });
 });
 
 describe("defineTheme", () => {

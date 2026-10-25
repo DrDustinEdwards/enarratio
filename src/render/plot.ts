@@ -6,9 +6,9 @@
 
 import * as Plot from "@observablehq/plot";
 import { createDocument } from "#document";
-import { escapeHtml } from "../html.js";
 import { datumAttributes, type MarkDatum } from "./datum.js";
 import type { ScaleDescription } from "./figure.js";
+import { roundCoordinates, serialize } from "./svg.js";
 
 export type { MarkDatum } from "./datum.js";
 
@@ -55,60 +55,6 @@ export function keyed<T>(
 /** Writes a datum's keys onto an element. */
 function tag(el: Element, datum: MarkDatum): void {
   for (const [name, value] of datumAttributes(datum)) el.setAttribute(name, value);
-}
-
-const NUMBER = /-?\d+\.\d{3,}(?:e-?\d+)?/g;
-const ROUNDED_ATTRIBUTES = new Set([
-  "x",
-  "y",
-  "x1",
-  "x2",
-  "y1",
-  "y2",
-  "cx",
-  "cy",
-  "r",
-  "width",
-  "height",
-  "d",
-  "points",
-  "transform",
-  "viewBox",
-]);
-
-function roundCoordinates(root: Element): void {
-  for (const el of [root, ...root.querySelectorAll("*")]) {
-    for (const name of el.getAttributeNames()) {
-      if (!ROUNDED_ATTRIBUTES.has(name)) continue;
-      const value = el.getAttribute(name);
-      if (value === null) continue;
-      el.setAttribute(
-        name,
-        value.replace(NUMBER, (n) => String(Math.round(Number(n) * 100) / 100)),
-      );
-    }
-  }
-}
-
-const ELEMENT_NODE = 1;
-const TEXT_NODE = 3;
-
-/**
- * Serializes an SVG tree with every attribute and text node escaped, so the markup is valid in
- * HTML and XML alike whatever the data contains. Childless elements self-close, as SVG allows.
- */
-function serialize(node: Node): string {
-  if (node.nodeType === TEXT_NODE) return escapeHtml(node.textContent ?? "");
-  if (node.nodeType !== ELEMENT_NODE) return "";
-  const el = node as Element;
-  const attrs = el
-    .getAttributeNames()
-    .map((name) => ` ${name}="${escapeHtml(el.getAttribute(name) ?? "")}"`)
-    .join("");
-  const children = [...el.childNodes].map(serialize).join("");
-  return children === ""
-    ? `<${el.localName}${attrs}/>`
-    : `<${el.localName}${attrs}>${children}</${el.localName}>`;
 }
 
 /** The result of {@link renderPlot}. */

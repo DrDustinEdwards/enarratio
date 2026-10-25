@@ -15,3 +15,11 @@ export function createDocument(): Document {
   }
   return real.implementation.createHTMLDocument("");
 }
+
+/** Parses SVG markup another library drew, with the browser's own XML parser. */
+export function parseSvg(markup: string): Element {
+  const parsed = new DOMParser().parseFromString(markup, "image/svg+xml");
+  const error = parsed.querySelector("parsererror");
+  if (error) throw new Error(`Enarratio could not parse a drawing: ${error.textContent ?? ""}`);
+  return parsed.documentElement;
+}

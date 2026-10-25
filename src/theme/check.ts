@@ -1,4 +1,11 @@
-import { type ColorVision, colorDifference, contrastRatio, labelColor } from "./color.js";
+import {
+  type ColorVision,
+  colorDifference,
+  contrastRatio,
+  labelColor,
+  mixColors,
+} from "./color.js";
+import { DIAGRAM_TINT } from "./stylesheet.js";
 import type { ColorScheme, HexColor, Theme } from "./types.js";
 
 /** Thresholds {@link checkTheme} measures against. Every field has a documented default. */
@@ -37,7 +44,8 @@ export interface CheckIssue {
     | "graphics-contrast"
     | "label-contrast"
     | "series-difference"
-    | "sequential-order";
+    | "sequential-order"
+    | "diagram-contrast";
   readonly message: string;
   readonly colors: readonly HexColor[];
   /** The measured value: a contrast ratio or a CIEDE2000 difference. */
@@ -117,6 +125,22 @@ function checkScheme(
         measured: round(ratio),
       });
     }
+  }
+
+  // Diagram labels in muted text (group names, edge labels, class member types) sit on the
+  // diagram fills, which mix the text color into the background; they need body-text contrast
+  // on the stronger tint too.
+  const header = mixColors(scheme.text, bg, DIAGRAM_TINT.header);
+  const onHeader = contrastRatio(scheme.mutedText, header);
+  if (onHeader < t.text) {
+    issues.push({
+      severity: "error",
+      scheme: which,
+      check: "diagram-contrast",
+      message: `${which} mutedText ${scheme.mutedText} has contrast ${round(onHeader)}:1 on the diagram header ${header}; needs ${t.text}:1`,
+      colors: [scheme.mutedText, header],
+      measured: round(onHeader),
+    });
   }
 
   // Each step must stand further from the background than the one before, or "more" reads as less.

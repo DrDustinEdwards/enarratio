@@ -22,6 +22,19 @@ change the public API; every such change is listed here.
 
 ### Added
 
+- **Mermaid diagrams: `mermaidDiagram` from the new `enarratio/diagram` entry.** A flowchart,
+  state, sequence, class or entity-relationship diagram written in Mermaid syntax, laid out and
+  drawn on the server by beautiful-mermaid (no browser, so it also runs in Workers), in the
+  theme's colors in light and dark, with the required `alt` and an equivalent data table: each
+  node and where it leads, each message in order with its block, each class or entity with its
+  members and relationships. `beautiful-mermaid` is a new optional peer dependency, needed only
+  for this entry. Other Mermaid types, front matter, `style`, `classDef`, `linkStyle`, `cssClass`,
+  `click` and `callback` throw. The gallery shows a flowchart and a sequence diagram (record 0020).
+- **Diagram properties in the base rules:** `--enarratio-diagram-fill`, `-header` and `-stroke`,
+  derived from the theme's text, muted text and background, and `--enarratio-diagram-halo`.
+  Nothing else in the stylesheet changes.
+- **`checkTheme` checks muted text on the diagram header tint** (`diagram-contrast`), so a theme
+  whose muted text only just passes on its background is told when diagram labels would not.
 - **The gallery has a page for Astro and EmDash** (`/astro`), on the separate enarratio-astro and
   enarratio-emdash packages, with structured data naming them. The gallery now also serves
   `sitemap.xml`, `robots.txt` (pointing to the sitemap) and `llms.txt`, and every page names its
@@ -29,6 +42,8 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- The SVG rounding and serialization Plot's charts go through moved to `src/render/svg.ts`, shared
+  with the diagrams; Plot's output is unchanged.
 - site-runtime (a gallery dev dependency) is at v0.12.1; the package is unchanged.
 - **The gallery's `Reporting-Endpoints` header comes from site-runtime v0.12.0's
   `reportingEndpoints`** in place of a hand-written string; the header and the policy are

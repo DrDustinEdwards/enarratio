@@ -68,7 +68,9 @@ for (const [name, target] of Object.entries(pkg.exports)) {
     rows.push([name, gzipped(new Set([path])), "-"]);
     continue;
   }
-  const variants = name === "./plot" || name === "./science" ? ["default", "browser"] : ["default"];
+  const variants = ["./plot", "./science", "./diagram"].includes(name)
+    ? ["default", "browser"]
+    : ["default"];
   for (const condition of variants) {
     const { files, outside } = closure(path, condition);
     const label = condition === "browser" ? `${name} (browser build)` : name;

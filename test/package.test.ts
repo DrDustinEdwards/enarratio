@@ -30,11 +30,12 @@ function reach(entry: string, seen = new Set<string>()): Set<string> {
 }
 
 describe("package entries", () => {
-  it("has the ten subpaths and no others", () => {
+  it("has the eleven subpaths and no others", () => {
     expect(Object.keys(pkg.exports).sort()).toEqual(
       [
         ".",
         "./base.css",
+        "./diagram",
         "./enhance",
         "./lite",
         "./lite/area",
@@ -56,9 +57,10 @@ describe("package entries", () => {
     }
   });
 
-  it("makes Plot, d3-force and linkedom optional peers", () => {
+  it("makes Plot, d3-force, beautiful-mermaid and linkedom optional peers", () => {
     expect(Object.keys(pkg.peerDependencies).sort()).toEqual([
       "@observablehq/plot",
+      "beautiful-mermaid",
       "d3-force",
       "linkedom",
     ]);
@@ -67,11 +69,11 @@ describe("package entries", () => {
     }
   });
 
-  it("keeps Plot, linkedom and d3-force out of core, themes and enhance", () => {
+  it("keeps Plot, linkedom, d3-force and beautiful-mermaid out of core, themes and enhance", () => {
     for (const entry of ["src/index.ts", "src/themes/index.ts", "src/enhance/index.ts"]) {
       for (const file of reach(resolve(root, entry))) {
         expect(readFileSync(file, "utf8"), file).not.toMatch(
-          /@observablehq\/plot|linkedom|d3-force|#document/,
+          /@observablehq\/plot|linkedom|d3-force|beautiful-mermaid|#document/,
         );
       }
     }
@@ -127,6 +129,7 @@ describe.skipIf(!built)("the built package", () => {
     expect(Object.keys(await load("science/index.js")).sort()).toEqual(
       ["genomeTrack", "geometricSummary", "networkChart", "titerPlot"].sort(),
     );
+    expect(Object.keys(await load("diagram/index.js"))).toEqual(["mermaidDiagram"]);
     expect(Object.keys(await load("lite/index.js")).sort()).toEqual(
       ["areaChart", "barChart", "lineChart"].sort(),
     );

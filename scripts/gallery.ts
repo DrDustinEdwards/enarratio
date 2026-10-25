@@ -49,6 +49,8 @@ const ORDER = [
   "network",
   "titer",
   "genome",
+  "flowchart",
+  "sequence",
   "sparkline",
   "primitives",
   "heat-strip",
@@ -490,7 +492,7 @@ writeFileSync(
 > Accessible, server-rendered charts and scientific figures for the web. An open-source (MIT) JavaScript library by Dustin Edwards: charts are drawn on the server into the HTML as SVG, with a written description and a data table, and work without JavaScript.
 
 - Install: \`npm install enarratio@next\`. Code and documentation: https://github.com/DrDustinEdwards/enarratio
-- Charts: bar, line, area, scatter, heatmap, network, titer plots, genome tracks, sparklines, progress rings, uptime and heat strips, timelines.
+- Charts: bar, line, area, scatter, heatmap, network, titer plots, genome tracks, Mermaid diagrams (flowchart, state, sequence, class and entity-relationship), sparklines, progress rings, uptime and heat strips, timelines.
 - Runs on Node.js and Cloudflare Workers; \`enarratio/lite\` draws bar, line and area charts in the browser with no dependencies.
 
 ## Pages

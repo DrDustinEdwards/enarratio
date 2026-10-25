@@ -12,6 +12,12 @@ export interface StylesheetOptions {
   readonly colorScheme?: { readonly dark?: string; readonly light?: string };
 }
 
+/**
+ * How much of the text color the diagram fills mix into the background, in percent. The theme
+ * check measures muted text on the header tint, the stronger of the two.
+ */
+export const DIAGRAM_TINT = { fill: 4, header: 10 } as const;
+
 type Variables = ReadonlyArray<readonly [name: string, light: string, dark: string]>;
 
 function colorVariables(light: ColorScheme, dark: ColorScheme): Variables {
@@ -83,6 +89,27 @@ svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; 
 .enarratio [data-enarratio-mark*="axis"] { color: var(--enarratio-text-muted); }
 .enarratio [data-enarratio-mark$="grid"] { stroke: var(--enarratio-grid); stroke-opacity: 1; }
 .enarratio [data-enarratio-mark="rule"] { stroke: var(--enarratio-text-muted); }
+/* Diagram fills and outlines, derived from the theme's checked colors. :where() keeps them at zero
+   specificity, so a site sets any of the three on .enarratio to override it. */
+:where(.enarratio[data-enarratio="diagram"]) {
+  --enarratio-diagram-fill: var(--enarratio-background);
+  --enarratio-diagram-header: var(--enarratio-grid);
+  --enarratio-diagram-stroke: var(--enarratio-text-muted);
+}
+/* Sequence labels sit on lifelines: a halo in the background color keeps them readable. */
+.enarratio [data-enarratio-mark="message"] text,
+.enarratio [data-enarratio-mark="block"] > line + text {
+  stroke: var(--enarratio-background);
+  stroke-width: var(--enarratio-diagram-halo, 4px);
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+@supports (color: color-mix(in srgb, red, blue)) {
+  :where(.enarratio[data-enarratio="diagram"]) {
+    --enarratio-diagram-fill: color-mix(in srgb, var(--enarratio-text) ${DIAGRAM_TINT.fill}%, var(--enarratio-background));
+    --enarratio-diagram-header: color-mix(in srgb, var(--enarratio-text) ${DIAGRAM_TINT.header}%, var(--enarratio-background));
+  }
+}
 .enarratio-title {
   margin: 0 0 var(--enarratio-space, 0.5em);
   font-weight: var(--enarratio-font-weight-title, 600);

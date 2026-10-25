@@ -13,13 +13,17 @@ An optional enhancement layer adds hover details, keyboard navigation,
 click-to-filter events and range brushing on top.
 
 It covers the charts a website needs (bars, lines, areas, scatter plots,
-heatmaps, networks, with forecast bands and time axes), the small primitives a
+heatmaps, networks, with forecast bands and time axes), diagrams written in
+Mermaid (flowcharts, state, sequence, class and entity-relationship diagrams),
+the small primitives a
 dashboard needs (sparklines, progress rings, uptime and heat strips, event
 timelines) and the
 figures a laboratory needs, starting with antibody titer plots and genome
 tracks. Charts are built on [Observable Plot](https://observablehq.com/plot/)
-and [d3-force](https://d3js.org/d3-force) (optional peer dependencies, installed
-only for the charts that use them), and return plain HTML strings, so
+and [d3-force](https://d3js.org/d3-force), and diagrams on
+[beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid) (optional
+peer dependencies, installed only for the charts that use them), and return
+plain HTML strings, so
 Enarratio works with any server framework. It is tested on Node.js 24 and 26
 and runs on Cloudflare Workers (the gallery's first site renders charts in a
 Worker); Deno and Bun should work, since it uses only standard modules, but are
@@ -81,6 +85,7 @@ it draws:
 | `enarratio` | Core and primitives | Nothing |
 | `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` | `@observablehq/plot linkedom` |
 | `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | `@observablehq/plot d3-force linkedom` |
+| `enarratio/diagram` | `mermaidDiagram`: Mermaid flowcharts, state, sequence, class and ER diagrams | `beautiful-mermaid linkedom` |
 | `enarratio/lite` | `barChart`, `lineChart`, `areaChart` without Observable Plot, for the browser; also `enarratio/lite/bar`, `/line`, `/area` | Nothing |
 | `enarratio/enhance` | Browser interaction | Nothing |
 | `enarratio/themes` | `defaultTheme` | Nothing |
@@ -182,6 +187,7 @@ all into `site/dist`.
 | `networkChart` | `enarratio/science` | A force-directed network laid out on the server, deterministic |
 | `titerPlot` | `enarratio/science` | Titers on a dilution axis with geometric mean, 95% CI and limit of detection |
 | `genomeTrack` | `enarratio/science` | Features to scale on a nucleotide axis, arrows by strand, overlaps in lanes |
+| `mermaidDiagram` | `enarratio/diagram` | A Mermaid flowchart, state, sequence, class or entity-relationship diagram, with a table of its nodes, steps or relationships |
 | `sparkline` | `enarratio` | A word-sized trend line |
 | `progressRing` | `enarratio` | Progress toward a total |
 | `uptimeStrip` | `enarratio` | Up, degraded, down or unmeasured, one tick per period |
@@ -211,6 +217,21 @@ barChart({
   xType: "time", // one bar per day, quiet days included
   series: "site",
   alt: "Analysis runs per day at three sites.",
+});
+```
+
+Diagrams are written in [Mermaid](https://mermaid.js.org/) and drawn on the
+server, with no browser, in the theme's colors. The data table lists what the
+picture shows (here, each step and where it leads):
+
+```ts
+import { mermaidDiagram } from "enarratio/diagram";
+
+mermaidDiagram({
+  source: `flowchart LR
+  Draft --> Review -->|approved| Publish
+  Review -->|changes| Draft`,
+  alt: "A post goes from draft to review; it is published once approved, or goes back to draft for changes.",
 });
 ```
 

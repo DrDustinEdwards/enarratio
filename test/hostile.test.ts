@@ -6,6 +6,7 @@
  */
 import { parseHTML } from "linkedom";
 import { describe, expect, it } from "vitest";
+import { mermaidDiagram } from "../src/diagram/index.js";
 import {
   escapeHtml,
   heatStrip,
@@ -61,6 +62,11 @@ const EMITTED = new Set([
   "polygon",
   "a",
   "tspan",
+  // Diagrams also draw these.
+  "defs",
+  "marker",
+  "polyline",
+  "ellipse",
 ]);
 
 function assertInert(markup: string, payload: string): void {
@@ -78,6 +84,14 @@ function assertInert(markup: string, payload: string): void {
 type Render = (p: string) => string;
 
 const RENDERERS: Record<string, Render> = {
+  mermaidDiagram: (p) =>
+    mermaidDiagram({
+      source: `sequenceDiagram\n  participant A as ${p}\n  A->>B: ${p}\n  Note over A: ${p}`,
+      title: p,
+      caption: p,
+      alt: p,
+      id: p,
+    }),
   barChart: (p) =>
     barChart({
       data: [

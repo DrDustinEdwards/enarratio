@@ -9,11 +9,12 @@ ships only what it uses.
 | `enarratio/base.css` | The theme-free base rules as a stylesheet file | Nothing |
 | `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` | Peers `@observablehq/plot`, and `linkedom` outside a browser |
 | `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | Peers `@observablehq/plot` and `d3-force`, and `linkedom` outside a browser |
+| `enarratio/diagram` | `mermaidDiagram`: flowcharts, state, sequence, class and entity-relationship diagrams from Mermaid syntax | Peer `beautiful-mermaid`, and `linkedom` outside a browser |
 | `enarratio/lite` | `barChart`, `lineChart`, `areaChart` drawn without Observable Plot; also one entry per chart: `enarratio/lite/bar`, `enarratio/lite/line`, `enarratio/lite/area` | Nothing |
 | `enarratio/enhance` | Interaction for charts already on the page; runs in the browser | Nothing |
 | `enarratio/themes` | The themes that ship with the package | Nothing |
 
-`@observablehq/plot`, `d3-force` and `linkedom` are optional peer dependencies:
+`@observablehq/plot`, `d3-force`, `beautiful-mermaid` and `linkedom` are optional peer dependencies:
 npm 7 and later does not install them for a site that imports only the core.
 Install what the entries you import need, for example
 `npm install @observablehq/plot linkedom` for `enarratio/plot`. Where a bundler
@@ -365,6 +366,44 @@ the chart.
 `{ n: number; mean: number; lower?: number; upper?: number }`. No interval for
 a single value.
 
+## Diagrams: `enarratio/diagram`
+
+### `mermaidDiagram`
+
+`mermaidDiagram(options: MermaidDiagramOptions): string`. From
+`enarratio/diagram`. A diagram written in [Mermaid](https://mermaid.js.org/)
+syntax, laid out and drawn on the server by
+[beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid), with no
+browser: flowcharts (`flowchart` or `graph`, with subgraphs), `stateDiagram-v2`
+(with composite states), `sequenceDiagram` (with `loop`, `alt`, `opt`, `par`,
+`critical`, `break` and notes), `classDiagram` and `erDiagram`. Like every
+chart it needs `alt`, draws in the theme's colors in light and dark, and carries
+an equivalent data table:
+
+| Diagram | Table |
+|---|---|
+| Flowchart, state | Each node (or state), its subgraph, and where it leads, with edge labels |
+| Sequence | Each message and note in order, with the `loop`, `alt` or other section it is in |
+| Class | Each class with its annotation, its members, and the classes it relates to |
+| Entity-relationship | Each entity with its attributes and keys, and its relationships with their cardinality |
+
+Throws for other Mermaid types (pie, gantt, mindmap and the rest; `xychart`
+points to `barChart` and `lineChart`), for front matter, and for `style`,
+`classDef`, `linkStyle`, `cssClass`, `click` and `callback`: colors come from
+the theme, where `checkTheme` has measured them, and a server-drawn diagram has
+no click handlers. Text is measured by beautiful-mermaid for its own font
+metrics; a much wider body font can crowd a box's label.
+
+### `MermaidDiagramOptions`
+
+`source`, plus the common options. Without `width` or `height` the drawing
+keeps the size its layout needs; with one, the other follows the diagram's
+proportions.
+
+### `MermaidDiagramType`
+
+`"flowchart" | "state" | "sequence" | "class" | "er"`.
+
 ## Primitives
 
 From the core, `enarratio`.
@@ -652,6 +691,12 @@ them itself. They have no fallback: undefined, a rule using one is ignored.
 | `--enarratio-status-good`, `-warning`, `-bad`, `-unknown` | Status colors |
 | `--enarratio-font`, `--enarratio-font-numeric` | Body and numeric font stacks |
 
+Diagrams also use three colors the base rules derive from those, at zero
+specificity, so a site can set any of them on `.enarratio` instead:
+`--enarratio-diagram-fill` (boxes: the text color mixed 4% into the
+background), `--enarratio-diagram-header` (box headers and key badges: 10%) and
+`--enarratio-diagram-stroke` (box outlines: the muted text color).
+
 Gridlines are the one theme choice that is not a property: hide a direction
 with `.enarratio [data-enarratio-mark="x-grid"] { display: none; }` (or
 `y-grid`).
@@ -692,6 +737,7 @@ A test keeps this table and the stylesheet in step.
 | `--enarratio-focus-outline-width` | `3px` | Outline on a focused chart or legend button |
 | `--enarratio-focus-outline-offset` | `2px` | Distance of that outline |
 | `--enarratio-timeline-list-indent` | `1.25em` | Indent of the timeline's plain list on narrow screens |
+| `--enarratio-diagram-halo` | `4px` | Background-colored outline that keeps sequence labels clear of lifelines |
 | `--enarratio-duration-hover` | `150ms` | Dimming and un-dimming |
 | `--enarratio-duration-grow` | `600ms` | Bars growing in |
 | `--enarratio-duration-fade` | `500ms` | Dots, areas and cells fading in |
@@ -713,7 +759,8 @@ the durations are.
 
 `checkTheme(theme: Theme, thresholds?: Partial<CheckThresholds>): CheckReport`.
 Measures text and mark contrast (WCAG 2.2), the contrast of labels printed on
-every series and ramp color, the order of the sequential ramp, and the
+every series and ramp color, muted text on the diagram header tint, the order
+of the sequential ramp, and the
 difference between every pair of series colors with typical vision and
 simulated protanopia, deuteranopia and tritanopia. Reports rather than throws.
 The focus ring needs no check against series colors: it is drawn in two tones,

@@ -46,6 +46,21 @@ function fromLinear(c: number): number {
   return clamped <= 0.0031308 ? clamped * 12.92 : 1.055 * clamped ** (1 / 2.4) - 0.055;
 }
 
+/**
+ * `color` mixed `percent` into `base` in gamma-encoded sRGB, as CSS
+ * `color-mix(in srgb, color percent%, base)` computes it.
+ */
+export function mixColors(color: string, base: string, percent: number): HexColor {
+  const a = parseHex(color);
+  const b = parseHex(base);
+  const share = percent / 100;
+  const hex = (i: 0 | 1 | 2): string =>
+    Math.round((a[i] * share + b[i] * (1 - share)) * 255)
+      .toString(16)
+      .padStart(2, "0");
+  return `#${hex(0)}${hex(1)}${hex(2)}` as HexColor;
+}
+
 /** WCAG 2 relative luminance, from 0 (black) to 1 (white). */
 function relativeLuminance(color: string): number {
   const [r, g, b] = linearize(parseHex(color));

@@ -11,6 +11,7 @@ export default defineConfig({
       { find: /^enarratio\/enhance$/, replacement: resolve(src, "enhance", "index.ts") },
       { find: /^enarratio\/plot$/, replacement: resolve(src, "plot", "index.ts") },
       { find: /^enarratio\/science$/, replacement: resolve(src, "science", "index.ts") },
+      { find: /^enarratio\/diagram$/, replacement: resolve(src, "diagram", "index.ts") },
       { find: /^enarratio\/themes$/, replacement: resolve(src, "themes", "index.ts") },
       { find: /^enarratio$/, replacement: resolve(src, "index.ts") },
     ],
