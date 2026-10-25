@@ -7,6 +7,7 @@
  * imports this or site-runtime.
  */
 
+import { TDM_RESERVATION_HEADERS } from "@drdustinedwards/site-helpers/robots";
 import { buildContentSecurityPolicy, reportingEndpoints } from "@dustinedwards/site-runtime/csp";
 import { buildSecurityHeaders } from "@dustinedwards/site-runtime/headers";
 
@@ -42,6 +43,8 @@ export const securityHeaders: Readonly<Record<string, string>> = Object.freeze({
   [csp.name]: csp.value,
   // The group `report-to` names; `report-uri` covers browsers without the Reporting API.
   "Reporting-Endpoints": reportingEndpoints(REPORT_GROUP, new URL(REPORT_PATH, `https://${HOST}`)),
+  // Prelum's TDMRep header: training rights reserved, as /ai.txt says.
+  ...TDM_RESERVATION_HEADERS,
 });
 
 /**

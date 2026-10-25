@@ -22,6 +22,11 @@ change the public API; every such change is listed here.
 
 ### Added
 
+- **The gallery's head and machine files come from Prelum** (`@drdustinedwards/site-helpers`, a
+  gallery devDependency; the npm package does not use it). Every page now sends Open Graph and
+  Twitter tags with a share card (`site/og-card.png`), and the gallery pages describe the library as
+  structured data. robots.txt follows the family bot policy, and a new `/ai.txt` and the
+  `tdm-reservation: 1` header reserve training rights while welcoming citation.
 - **The gallery has a page for Astro and EmDash** (`/astro`), on the separate enarratio-astro and
   enarratio-emdash packages, with structured data naming them. The gallery now also serves
   `sitemap.xml`, `robots.txt` (pointing to the sitemap) and `llms.txt`, and every page names its
