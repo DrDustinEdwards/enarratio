@@ -220,18 +220,20 @@ function paint(value: string): string {
   return themed;
 }
 
-/** The drawing's size: the layout's own, or scaled to the width or height asked for. */
+/**
+ * The drawing's size in whole pixels, so a figure below it does not land on a fractional offset:
+ * the layout's own, or scaled to the width or height asked for.
+ */
 function sizeOf(svg: Element, options: MermaidDiagramOptions): { width: number; height: number } {
   const [, , w = 0, h = 0] = (svg.getAttribute("viewBox") ?? "").split(/\s+/).map(Number);
   if (!(w > 0 && h > 0)) throw new Error(`${KIND}: the diagram has no size`);
-  const round = (n: number): number => Math.round(n * 100) / 100;
   if (options.width !== undefined) {
-    return { width: options.width, height: options.height ?? round((h * options.width) / w) };
+    return { width: options.width, height: options.height ?? Math.round((h * options.width) / w) };
   }
   if (options.height !== undefined) {
-    return { width: round((w * options.height) / h), height: options.height };
+    return { width: Math.round((w * options.height) / h), height: options.height };
   }
-  return { width: round(w), height: round(h) };
+  return { width: Math.ceil(w), height: Math.ceil(h) };
 }
 
 const list = (items: readonly string[]): string => items.join("; ") || "none";
