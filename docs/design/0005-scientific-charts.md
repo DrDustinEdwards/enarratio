@@ -31,10 +31,10 @@ A scientific chart is an ordinary Enarratio chart. It:
 ## What shipped
 
 **`titerPlot`.** Reciprocal titers by group on a log axis in the dilution
-series' base, ticks at each dilution labelled 1:10, 1:20 and so on. Each
+series' base, ticks at each dilution labeled 1:10, 1:20 and so on. Each
 sample is a point, identical titers side by side so their number shows;
 geometric mean titer with a Student's t 95% interval on the log scale; the
-limit of detection as a labelled rule; values below it hollow at half the
+limit of detection as a labeled rule; values below it hollow at half the
 limit, the usual convention, stated in the caption and table.
 
 **`genomeTrack`.** A linear map: features to scale on a 1-based nucleotide

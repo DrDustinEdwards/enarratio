@@ -34,7 +34,7 @@ export interface BarChartOptions<T extends object> extends FigureOptions {
   /**
    * `"time"` puts the bars on a time axis: each row falls in the `interval` that contains its
    * time, one bar slot for every interval from the first to the last (empty ones too, so a gap
-   * in the data is a gap in the chart), labelled for you. A run per day needs no pre-formatted
+   * in the data is a gap in the chart), labeled for you. A run per day needs no pre-formatted
    * labels. Rows in the same interval and series are summed, or counted when `y` is omitted.
    * Dates are instants in UTC, except that when every Date falls at local midnight they are
    * read as calendar dates, as in `lineChart`. The default, `"category"`, treats `x` as labels.
@@ -42,7 +42,7 @@ export interface BarChartOptions<T extends object> extends FigureOptions {
   readonly xType?: "category" | "time";
   /**
    * With `xType: "time"`, the length of each bar's interval (default `"day"`). Intervals start
-   * at UTC midnight; weeks start on Monday. Each bar is labelled by its first moment: an hour
+   * at UTC midnight; weeks start on Monday. Each bar is labeled by its first moment: an hour
    * as `2026-01-05 14:00 UTC`, a day or week as `2026-01-05`, a month as `2026-01`, a year as
    * `2026`.
    */

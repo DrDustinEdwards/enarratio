@@ -177,8 +177,8 @@ describe("lineChart forecastFrom", () => {
   });
 
   it("takes a custom label, and a Date or number for the boundary", () => {
-    const labelled = lineChart({ ...base, forecastFrom: "2026-03-03", forecastLabel: "Projected" });
-    expect(labelled).toContain("Projected");
+    const labeled = lineChart({ ...base, forecastFrom: "2026-03-03", forecastLabel: "Projected" });
+    expect(labeled).toContain("Projected");
     const asDate = lineChart({ ...base, forecastFrom: new Date(Date.UTC(2026, 2, 3)) });
     expect(asDate).toBe(lineChart({ ...base, forecastFrom: "2026-03-03" }));
     const linear = parse(

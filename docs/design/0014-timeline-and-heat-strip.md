@@ -6,7 +6,7 @@ Status: accepted, 2026-10-02.
 
 **Author's decision (Dustin Edwards, 2026-10-02).** Two new core primitives, no
 Plot: an event timeline (lanes for sites or agents, spans and point events over a
-time window, status shown by colour and shape, with a plain fallback on narrow
+time window, status shown by color and shape, with a plain fallback on narrow
 screens) and a heat strip (a one-row, no-axis strip using the sequential ramp, a
 sibling of `uptimeStrip`). No straight meter: meters belong to Capsomer.
 

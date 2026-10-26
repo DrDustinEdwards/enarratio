@@ -1,6 +1,6 @@
 /**
  * barChart on a time axis (`xType: "time"`): one bar slot for every interval from the first row
- * to the last, labelled for the caller, so a run per day needs no pre-formatted labels.
+ * to the last, labeled for the caller, so a run per day needs no pre-formatted labels.
  */
 import { describe, expect, it } from "vitest";
 import { barChart } from "../src/plot/index.js";

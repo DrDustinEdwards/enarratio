@@ -142,7 +142,7 @@ const barCases: [string, Parameters<typeof plot.barChart<(typeof sales)[number]>
   ],
   ["counted", { data: sales, x: "region", series: "quarter", alt: "Rows" }],
   [
-    "counted, grouped, sized and labelled",
+    "counted, grouped, sized and labeled",
     {
       data: sales,
       x: "quarter",

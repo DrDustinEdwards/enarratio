@@ -18,6 +18,7 @@ import { llmsDocument } from "@drdustinedwards/site-helpers/llms";
 import { aiTxt, robotsDocument } from "@drdustinedwards/site-helpers/robots";
 import { graph, thing, website } from "@drdustinedwards/site-helpers/schema";
 import { sitemapDocument } from "@drdustinedwards/site-helpers/sitemap";
+import { securityTxt } from "@dustinedwards/site-runtime/security-txt";
 import { checkTheme, stylesheet, type Theme } from "enarratio";
 import { barChart } from "enarratio/lite";
 import { defaultTheme } from "enarratio/themes";
@@ -201,6 +202,12 @@ ${links.map((l) => `<li><a href="${l.href}"${current(l)}><span class="cap-site-h
 
 /** The site's address, for canonical links, the sitemap and llms.txt. */
 const SITE = `https://${HOST}`;
+
+/** The IndexNow key, served as /<key>.txt; .github/workflows/gallery.yml reads it here to ping IndexNow. Public by design. */
+const INDEXNOW_KEY = "af8c0a9cc5d66f499272f9cd7b95b024";
+
+/** When security.txt lapses (RFC 9116 asks for under a year); renew it before then. */
+const SECURITY_TXT_EXPIRES = "2027-10-25T00:00:00Z";
 
 /** The share card every page sends (site/og-card.png): the line example beside the name. */
 const CARD = {
@@ -521,7 +528,18 @@ writeFileSync(join(outDir, ASTRO_PAGE), astroPage());
 const addresses = [...pages.map(([, file]) => pathOf(file)), pathOf(ASTRO_PAGE)];
 // For search engines and language models, from Prelum: the sitemap, robots.txt (the family bot
 // policy; Cloudflare puts its own lines first), ai.txt (citation welcome, training reserved, as the
-// tdm-reservation header in _headers says) and llms.txt (https://llmstxt.org), a short guide.
+// tdm-reservation header in _headers says) and llms.txt (https://llmstxt.org), a short guide; then
+// security.txt (site-runtime) and the IndexNow key file.
+mkdirSync(join(outDir, ".well-known"), { recursive: true });
+writeFileSync(
+  join(outDir, ".well-known", "security.txt"),
+  securityTxt({
+    origin: SITE,
+    contact: "security@dustinedwards.info",
+    expires: SECURITY_TXT_EXPIRES,
+  }),
+);
+writeFileSync(join(outDir, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY);
 writeFileSync(
   join(outDir, "sitemap.xml"),
   sitemapDocument(addresses.map((a) => ({ loc: `${SITE}${a}` }))),
@@ -614,7 +632,7 @@ ${siteHeader(links(""))}
 `,
 );
 copyFileSync(join(root, "dist", "enhance", "index.js"), join(outDir, "enhance.js"));
-// Served as files beside the pages: the gallery's scripts (Capsomer's behaviour bundled in) and the
+// Served as files beside the pages: the gallery's scripts (Capsomer's behavior bundled in) and the
 // icon. The security and caching headers are written by scripts/security-headers.ts from the
 // shared set (record 0018).
 writeFileSync(join(outDir, "gallery.js"), await bundle("gallery.js", "esm"));

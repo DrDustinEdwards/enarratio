@@ -44,3 +44,10 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: "true"
       - if: steps.secrets.outputs.ready == 'true'
         run: npm run deploy:gallery
+      # Prelum's prelum-indexnow with the built sitemap and the key in scripts/gallery.ts. A refused ping is a
+      # warning, never a failed deploy.
+      - if: steps.secrets.outputs.ready == 'true'
+        name: Tell IndexNow
+        run: |
+          key=$(sed -n 's/^const INDEXNOW_KEY = "\(.*\)";$/\1/p' scripts/gallery.ts)
+          npx prelum-indexnow --origin https://enarratio.dustinedwards.info --key "$key" --sitemap site/dist/sitemap.xml

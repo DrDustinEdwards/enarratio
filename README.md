@@ -178,7 +178,7 @@ all into `site/dist`.
 | `lineChart` | `enarratio/plot` | Lines over time or any number, with gaps, reference lines, event markers, direct labels, log y, and a forecast band with the line dashed after a chosen x |
 | `areaChart` | `enarratio/plot` | Stacked areas over time |
 | `scatterPlot` | `enarratio/plot` | Points on linear or log axes, symbols per series, optional regression with 95% band |
-| `heatmap` | `enarratio/plot` | A grid on the theme's sequential ramp, with printed values and labelled bins |
+| `heatmap` | `enarratio/plot` | A grid on the theme's sequential ramp, with printed values and labeled bins |
 | `networkChart` | `enarratio/science` | A force-directed network laid out on the server, deterministic |
 | `titerPlot` | `enarratio/science` | Titers on a dilution axis with geometric mean, 95% CI and limit of detection |
 | `genomeTrack` | `enarratio/science` | Features to scale on a nucleotide axis, arrows by strand, overlaps in lanes |

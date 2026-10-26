@@ -7,6 +7,14 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Changed
+
+- The gallery serves `/.well-known/security.txt` (security@dustinedwards.info) and its IndexNow key
+  file (site-runtime builds security.txt), and the gallery deploy pings IndexNow with Prelum. A failed ping is only a
+  warning.
+- The family check (devkit) runs in CI; `.family.json` records its exceptions.
+- American spelling in docs and comments. No exported name changes.
+
 ### Security
 
 - A bar `href` with a user or password before the host (`https://trusted.example@other.example/`)

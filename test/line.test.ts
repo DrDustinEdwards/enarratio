@@ -60,7 +60,7 @@ describe("lineChart", () => {
     ]);
   });
 
-  it("draws labelled reference lines and markers, and direct labels", () => {
+  it("draws labeled reference lines and markers, and direct labels", () => {
     const markup = lineChart({
       data: weekly,
       x: "week",

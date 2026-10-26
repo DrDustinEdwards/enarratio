@@ -297,7 +297,7 @@ describe("F2: a log axis refuses values it cannot show", () => {
 });
 
 describe("F3: sub-daily time series", () => {
-  it("draws six hourly points as six rows, labelled with the time", () => {
+  it("draws six hourly points as six rows, labeled with the time", () => {
     const data = Array.from({ length: 6 }, (_, h) => ({
       t: new Date(Date.UTC(2026, 0, 1, h)),
       v: h,

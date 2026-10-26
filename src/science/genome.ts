@@ -240,13 +240,13 @@ export function genomeTrack(options: GenomeTrackOptions): string {
     }),
   ];
   if (showLabels) {
-    const labelled = placed.filter(fits);
+    const labeled = placed.filter(fits);
     marks.push(
-      Plot.text(labelled, {
+      Plot.text(labeled, {
         x: (p: Placed) => (p.feature.start + p.feature.end) / 2,
         y: "row",
         text: (p: Placed) => p.feature.name,
-        render: decorate(labelled, (el, p) => {
+        render: decorate(labeled, (el, p) => {
           el.setAttribute("fill", `var(--enarratio-series-text-${plan.slot(p.type)})`);
         }),
       }),

@@ -51,7 +51,7 @@ const KIND = "heatmap";
 
 /**
  * A grid of cells colored by value on the theme's sequential ramp: cohort retention, weekly
- * activity, plate layouts. Colors come in five labelled steps, printed values keep the chart
+ * activity, plate layouts. Colors come in five labeled steps, printed values keep the chart
  * readable without color, and empty cells are outlined with a dashed line rather than colored as zero.
  *
  * @example
