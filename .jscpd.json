@@ -1,0 +1,8 @@
+{
+  "path": ["src", "scripts", "worker", "site/gallery.js", "site/theme.js"],
+  "format": ["typescript", "javascript", "css"],
+  "ignore": ["**/node_modules/**", "**/dist/**"],
+  "gitignore": true,
+  "reporters": ["json"],
+  "silent": true
+}

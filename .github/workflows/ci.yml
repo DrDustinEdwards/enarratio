@@ -33,6 +33,8 @@ jobs:
       - run: npm run build
       # Fails if core gains a runtime dependency; reports each entry's gzipped size.
       - run: npm run size
+      # devkit's no-bloat report (knip and jscpd against .no-bloat.json's baseline): a warning, never a failure.
+      - run: npm run bloat
       - run: npm pack --dry-run
 
   browser:
