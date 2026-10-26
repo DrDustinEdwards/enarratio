@@ -91,7 +91,14 @@ async function loadExamples(): Promise<Example[]> {
     const heading = /^\/\/ (.+)$/m.exec(source)?.[1] ?? file;
     const id = basename(file, ".ts");
     const from = /from "(enarratio[^"]*)"/.exec(source)?.[1] ?? "enarratio";
-    examples.push({ id, name: NAMES[id] ?? id, module: from, title: heading, source, markup: module.default });
+    examples.push({
+      id,
+      name: NAMES[id] ?? id,
+      module: from,
+      title: heading,
+      source,
+      markup: module.default,
+    });
   }
   return examples;
 }
@@ -314,8 +321,9 @@ const libraryData = graph([
 ]);
 
 /** The library's version, shown on every page. */
-const VERSION = (JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { version: string })
-  .version;
+const VERSION = (
+  JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { version: string }
+).version;
 
 /** The section's sign at the top of a page (Capsomer's manual theme). */
 const runningHead = (name: string, folio: string): string =>
