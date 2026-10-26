@@ -347,7 +347,7 @@ async function bundle(file: string, format: "esm" | "iife"): Promise<string> {
 const ASTRO_PAGE = "astro.html";
 const ASTRO_TITLE = "Accessible charts for Astro and EmDash";
 const ASTRO_DESCRIPTION =
-  "Server-rendered, accessible bar, line, area, scatter and heatmap charts in Astro pages, Markdown and the EmDash editor, from the enarratio-astro and enarratio-emdash packages.";
+  "Accessible bar, line, area, scatter and heatmap charts drawn on the server for Astro pages, Markdown and the EmDash editor.";
 const ASTRO_REPO = "https://github.com/DrDustinEdwards/astro";
 
 /** A code sample, escaped. */
