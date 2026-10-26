@@ -9,6 +9,7 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- The gallery takes the NASA manual theme the family's public sites share, in its own color, rose (Capsomer v0.27.0, record [0020](docs/design/0020-gallery-in-the-manual-theme.md)): a running head sign, the facts in form boxes, each chart numbered with a leader index beside them, and the family footer with Enarratio in its strip of sites.
 - The gallery moves to Capsomer v0.22.0 and Prelum v0.14.0, the newest releases.
 - devkit v0.13.3, site-runtime v0.24.0 and Capsomer v0.23.0, the newest releases.
 - The repository runs devkit's no-bloat report in CI (`npm run bloat`: unused files, exports and dependencies, and duplicated blocks), as a warning.
