@@ -1,0 +1,26 @@
+{
+  "$schema": "https://unpkg.com/knip@6.39.0/schema.json",
+  "entry": [
+    "src/**/index.ts",
+    "src/lite/*.ts",
+    "scripts/*.{mjs,ts}",
+    "worker/index.ts",
+    "site/*.js",
+    "test/**/*.test.ts",
+    "examples/**/*.{ts,mjs}",
+    "src/render/document.browser.ts",
+    "stryker.config.mjs",
+    "vitest.stryker.config.ts"
+  ],
+  "project": [
+    "src/**/*.ts",
+    "scripts/**/*.{mjs,ts}",
+    "worker/**/*.ts",
+    "site/*.js",
+    "test/**/*.ts",
+    "examples/**/*.{ts,mjs}",
+    "*.{ts,mjs}"
+  ],
+  "ignoreDependencies": ["@fontsource/martian-mono", "@fontsource/schibsted-grotesk", "axe-core"],
+  "ignoreUnresolved": ["^\\./enhance\\.js$"]
+}

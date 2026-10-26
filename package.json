@@ -95,7 +95,8 @@
     "deploy:gallery": "npm run build && npm run gallery && npx --yes wrangler@4.143.0 deploy",
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "prepare": "npm run build",
-    "size": "node scripts/size-check.mjs"
+    "size": "node scripts/size-check.mjs",
+    "bloat": "devkit-no-bloat --warn-only"
   },
   "peerDependencies": {
     "@observablehq/plot": "^0.6.17",

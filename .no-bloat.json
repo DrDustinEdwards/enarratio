@@ -1,0 +1,14 @@
+{
+  "tools": {
+    "knip": "knip@6.39.0",
+    "jscpd": "jscpd@5.4.0"
+  },
+  "baseline": {
+    "measured_at": "949d3ec",
+    "knip": {},
+    "jscpd": {
+      "clones": 4,
+      "percentage": 0.37
+    }
+  }
+}
