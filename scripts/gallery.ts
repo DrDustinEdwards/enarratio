@@ -19,6 +19,7 @@ import { aiTxt, robotsDocument } from "@drdustinedwards/site-helpers/robots";
 import { graph, thing, website } from "@drdustinedwards/site-helpers/schema";
 import { sitemapDocument } from "@drdustinedwards/site-helpers/sitemap";
 import { securityTxt } from "@dustinedwards/site-runtime/security-txt";
+import { familyFooterHtml } from "capsomer/behavior/family-footer";
 import { checkTheme, stylesheet, type Theme } from "enarratio";
 import { barChart } from "enarratio/lite";
 import { defaultTheme } from "enarratio/themes";
@@ -32,6 +33,9 @@ const examplesDir = join(root, "examples");
 
 interface Example {
   readonly id: string;
+  readonly name: string;
+  /** The module it imports: enarratio, enarratio/plot or enarratio/science. */
+  readonly module: string;
   readonly title: string;
   readonly source: string;
   readonly markup: string;
@@ -40,27 +44,31 @@ interface Example {
 const escapeText = (s: string): string =>
   s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] ?? c);
 
-/** Gallery order. Every example must be listed, so a new one cannot be left out by accident. */
-const ORDER = [
-  "stacked-bar",
-  "years",
-  "runs",
-  "grouped-bar",
-  "horizontal-bar",
-  "line",
-  "forecast",
-  "area",
-  "scatter",
-  "heatmap",
-  "network",
-  "titer",
-  "genome",
-  "sparkline",
-  "primitives",
-  "heat-strip",
-  "timeline",
-  "primitive-tables",
-];
+/**
+ * Gallery order, with each example's short name for its number and the contents. Every example
+ * must be listed, so a new one cannot be left out by accident.
+ */
+const NAMES: Record<string, string> = {
+  "stacked-bar": "Stacked bars",
+  years: "Bars by year",
+  runs: "Runs per day",
+  "grouped-bar": "Grouped bars",
+  "horizontal-bar": "Horizontal bars",
+  line: "Line",
+  forecast: "Forecast",
+  area: "Stacked areas",
+  scatter: "Scatter",
+  heatmap: "Heatmap",
+  network: "Network",
+  titer: "Titers",
+  genome: "Genome map",
+  sparkline: "Sparklines",
+  primitives: "Rings and uptime",
+  "heat-strip": "Heat strip",
+  timeline: "Timeline",
+  "primitive-tables": "Primitives as tables",
+};
+const ORDER = Object.keys(NAMES);
 
 async function loadExamples(): Promise<Example[]> {
   const found = readdirSync(examplesDir)
@@ -81,7 +89,9 @@ async function loadExamples(): Promise<Example[]> {
     if (typeof module.default !== "string") throw new Error(`${file} must export a string`);
     const source = readFileSync(path, "utf8");
     const heading = /^\/\/ (.+)$/m.exec(source)?.[1] ?? file;
-    examples.push({ id: basename(file, ".ts"), title: heading, source, markup: module.default });
+    const id = basename(file, ".ts");
+    const from = /from "(enarratio[^"]*)"/.exec(source)?.[1] ?? "enarratio";
+    examples.push({ id, name: NAMES[id] ?? id, module: from, title: heading, source, markup: module.default });
   }
   return examples;
 }
@@ -115,7 +125,10 @@ const FONTS = [
   ["Martian Mono", "400", "@fontsource/martian-mono/files/martian-mono-latin-400-normal.woff2"],
 ] as const;
 
-/** The Capsomer components the page uses, in the order their CSS loads. */
+/**
+ * The Capsomer components the page uses, in the order their CSS loads: then the NASA manual theme
+ * the family's public sites share, and the family footer.
+ */
 const COMPONENTS = [
   "button",
   "popover",
@@ -125,15 +138,38 @@ const COMPONENTS = [
   "page-head",
   "panel",
   "disclosure",
+  "manual",
+  "family-footer",
 ];
 
-/** The gallery's own layout, from Capsomer's tokens. */
+/** The gallery's color family: every page's root is `data-family="rose"`. */
+const FAMILY = "rose";
+
+/**
+ * The gallery's own layout, from Capsomer's tokens, in the NASA manual theme: a sign for the running
+ * head, the facts in form boxes, the charts as numbered parts in ruled boxes and the contents as a
+ * leader index beside them on a wide screen. The charts' column stays 52rem, so each chart is drawn
+ * at the width its stored images were taken at.
+ */
 const GALLERY_CSS = `
-.gallery { max-width: 52rem; margin: 0 auto; padding: var(--space-6) var(--space-5) var(--space-9); }
-.gallery .cap-page-head { margin-block-end: var(--space-5); }
-.gallery-intro { max-width: var(--measure); margin: 0 0 var(--space-5); }
-.gallery .cap-panel { margin-block-start: var(--space-6); }
-.gallery .cap-panel-head h2 { text-wrap: balance; }
+.gallery { max-width: 1180px; margin: 0 auto; padding: var(--space-6) var(--space-5) var(--space-9); }
+.gallery > .cap-running-head { margin-block-end: var(--space-6); }
+.gallery-head h1 { margin: 0 0 var(--space-3); font-size: clamp(2rem, 1.5rem + 2vw, 3rem); line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance; }
+.gallery-head .cap-form-boxes { margin-block: var(--space-5) 0; }
+.gallery-intro { max-width: var(--measure); margin: 0 0 var(--space-4); color: var(--muted); }
+.gallery-body { display: grid; gap: var(--space-7); margin-block-start: var(--space-7); }
+.gallery-main { min-width: 0; max-width: 52rem; }
+.gallery-contents h2 { margin: 0 0 var(--space-3); font: 600 0.75rem / 1.5 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+@media (min-width: 75rem) {
+  .gallery-body { grid-template-columns: 52rem minmax(0, 1fr); align-items: start; }
+  .gallery-contents { position: sticky; top: var(--space-5); order: 2; }
+}
+.gallery .report { border-radius: 0; border-color: var(--text); }
+.gallery .cap-panel { margin-block-start: var(--space-6); border-color: var(--text); border-radius: 0; box-shadow: none; }
+.gallery .cap-panel-head { display: grid; gap: var(--space-1); background: transparent; border-block-end: 1px solid var(--line); }
+.gallery .cap-panel-head h2 { margin: 0; font-size: 1.25rem; text-wrap: balance; }
+.gallery .cap-panel-head h2 .cap-part-no { margin-inline-end: var(--space-3); font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
+.gallery .cap-panel-head p { margin: 0; color: var(--muted); font-size: var(--fs-detail); }
 .example-chart { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); background: var(--enarratio-background); color: var(--enarratio-text); }
 .example-source { border-block-start: 1px solid var(--line); padding: var(--space-2) calc(var(--pad-card) - var(--pad-x)); }
 .example-source pre { overflow-x: auto; margin: 0; padding: var(--space-4); border-radius: var(--radius-m); background: var(--sunken); font: 400 var(--fs-detail) / 1.6 var(--mono); }
@@ -142,9 +178,11 @@ const GALLERY_CSS = `
 .primitive-tables p { margin: var(--space-3) 0; }
 .gallery-logo { display: inline-flex; align-items: center; gap: var(--space-3); font-weight: 600; }
 .gallery-logo img { display: block; inline-size: 24px; block-size: 24px; }
+.guide > :not(.cap-running-head, .gallery-head) { max-width: 52rem; }
 .guide h2 { margin: var(--space-7) 0 var(--space-3); }
 .guide p, .guide ul { max-width: var(--measure); }
 .guide pre { overflow-x: auto; margin: var(--space-3) 0; padding: var(--space-4); border-radius: var(--radius-m); background: var(--sunken); font: 400 var(--fs-detail) / 1.6 var(--mono); }
+.site-foot { max-width: 1180px; margin: 0 auto; padding: 0 var(--space-5) var(--space-6); }
 `;
 
 /** Capsomer for the whole gallery: the faces, the tokens and base, then each component's CSS. */
@@ -159,6 +197,7 @@ function capsomerCss(fontDir: string): string {
     ...faces,
     inlineCss(join(capsomerDir, "css", "tokens.css")),
     inlineCss(join(capsomerDir, "css", "base.css")),
+    `@layer cap.tokens {\n${inlineCss(join(capsomerDir, "tokens", `family-${FAMILY}.css`))}\n}`,
     ...COMPONENTS.map((name) => inlineCss(join(capsomerDir, "components", name, `${name}.css`))),
     GALLERY_CSS,
   ].join("\n\n");
@@ -274,6 +313,27 @@ const libraryData = graph([
   }),
 ]);
 
+/** The library's version, shown on every page. */
+const VERSION = (JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { version: string })
+  .version;
+
+/** The section's sign at the top of a page (Capsomer's manual theme). */
+const runningHead = (name: string, folio: string): string =>
+  `<div class="cap-running-head" data-variant="sign"><span class="cap-running-head-name"><span class="cap-running-head-no">1</span>${escapeText(name)}</span><span class="cap-running-head-folio">${escapeText(folio)}</span></div>`;
+
+/** The family footer every dustinedwards.info site ends with, Enarratio's own part first. */
+function siteFooter(): string {
+  const center = `<div class="cap-family-footer-center">
+<div><p class="cap-family-footer-center-name">Enarratio</p><p class="cap-family-footer-about">Accessible charts and scientific figures, drawn on the server into the HTML. Open source, MIT licensed.</p></div>
+<div class="cap-family-footer-columns">
+<ul class="cap-family-footer-links"><li><a href="/">Default theme</a></li><li><a href="/example">Example theme</a></li><li><a href="/astro">Astro and EmDash</a></li></ul>
+<ul class="cap-family-footer-links"><li><a href="https://github.com/DrDustinEdwards/enarratio">Source</a></li><li><a href="https://www.npmjs.com/package/enarratio">npm</a></li><li><a href="https://github.com/DrDustinEdwards/enarratio/blob/main/CHANGELOG.md">Changes</a></li></ul>
+</div>
+<p class="cap-family-footer-stamp"><span>Release ${escapeText(VERSION)}</span></p>
+</div>`;
+  return `<footer class="site-foot">${familyFooterHtml({ site: "enarratio", center })}</footer>`;
+}
+
 /**
  * One gallery page. It links its stylesheets and scripts as files, never inline, so the site's
  * Content-Security-Policy can allow scripts and style sheets from its own origin only.
@@ -290,28 +350,47 @@ function page(
     report.issues.length === 0
       ? "<p>No findings.</p>"
       : `<ul>${report.issues.map((i) => `<li>${escapeText(i.severity)}: ${escapeText(i.message)}</li>`).join("")}</ul>`;
+  const index = examples
+    .map(
+      (e, i) =>
+        `<li><a class="cap-leader-index-link" href="#${e.id}"><span class="cap-leader-index-no">${i + 1}</span><span class="cap-leader-index-name">${escapeText(e.name)}</span><span class="cap-leader-index-dots" aria-hidden="true"></span><span class="cap-leader-index-fact">${e.module}</span></a></li>`,
+    )
+    .join("\n");
   return `<!doctype html>
-<html lang="en">
+<html lang="en" data-family="${FAMILY}">
 <head>
 ${head(`Enarratio gallery: ${theme.name} theme`, `Every Enarratio chart, server-rendered, in the ${theme.name} theme.`, css, pathOf(file), [libraryData])}
 </head>
 <body>
 ${siteHeader(links)}
 <main class="gallery" id="main" tabindex="-1">
-<header class="cap-page-head">
-<div class="cap-page-head-text">
-<h1 class="cap-page-head-title">Enarratio gallery</h1>
-<p class="cap-page-head-lead">Every Enarratio chart in the ${escapeText(theme.name)} theme.</p>
-</div>
+${runningHead("Gallery", `${theme.name[0]?.toUpperCase()}${theme.name.slice(1)} theme`)}
+<header class="gallery-head">
+<h1>Enarratio gallery</h1>
+<p class="gallery-intro">Every Enarratio chart in the ${escapeText(theme.name)} theme. Each was drawn on the server and reads without scripts; the enhancement layer adds hover details, keyboard navigation, filters and brushing.</p>
+<dl class="cap-form-boxes" data-variant="readings">
+<div class="cap-form-boxes-box"><dt>Release</dt><dd>${escapeText(VERSION)}</dd></div>
+<div class="cap-form-boxes-box"><dt>Charts</dt><dd>${examples.length}</dd></div>
+<div class="cap-form-boxes-box"><dt>Theme check</dt><dd>${report.ok ? "Passes" : "Fails"}</dd></div>
+<div class="cap-form-boxes-box"><dt>License</dt><dd>MIT</dd></div>
+</dl>
 </header>
-<p class="gallery-intro">Every chart below was drawn on the server and reads without scripts; the enhancement layer adds hover details, keyboard navigation, filters and brushing.</p>
+<div class="gallery-body">
+<nav class="gallery-contents" aria-labelledby="contents-name">
+<h2 id="contents-name">Charts</h2>
+<ol class="cap-leader-index">
+${index}
+</ol>
+</nav>
+<div class="gallery-main">
 <details class="cap-disclosure report"><summary>Theme check: ${report.ok ? "passes" : "fails"} with ${report.issues.length} finding${report.issues.length === 1 ? "" : "s"}</summary><div class="cap-disclosure-body">${findings}</div></details>
 ${examples
   .map(
     (
       e,
+      i,
     ) => `<section class="cap-panel example" id="${e.id}" data-example="${e.id}" aria-labelledby="${e.id}-title">
-<header class="cap-panel-head"><h2 id="${e.id}-title">${escapeText(e.title)}</h2></header>
+<header class="cap-panel-head"><h2 id="${e.id}-title"><span class="cap-part-no">${i + 1}</span>${escapeText(e.name)}</h2><p>${escapeText(e.title)}</p></header>
 <div class="cap-panel-body example-chart">
 ${e.markup}
 <p class="events" aria-live="polite"></p>
@@ -320,7 +399,10 @@ ${e.markup}
 </section>`,
   )
   .join("\n")}
+</div>
+</div>
 </main>
+${siteFooter()}
 <script type="module" src="gallery.js"></script>
 </body>
 </html>
@@ -418,18 +500,17 @@ const astroData = graph(
 
 function astroPage(): string {
   return `<!doctype html>
-<html lang="en">
+<html lang="en" data-family="${FAMILY}">
 <head>
 ${head(`${ASTRO_TITLE}: Enarratio`, ASTRO_DESCRIPTION, "index.css", pathOf(ASTRO_PAGE), [astroData])}
 </head>
 <body>
 ${siteHeader(links(ASTRO_PAGE))}
 <main class="gallery guide" id="main" tabindex="-1">
-<header class="cap-page-head">
-<div class="cap-page-head-text">
-<h1 class="cap-page-head-title">${ASTRO_TITLE}</h1>
-<p class="cap-page-head-lead">Enarratio's charts in Astro pages, in Markdown, and as a block in the EmDash editor.</p>
-</div>
+${runningHead("Astro and EmDash", "enarratio-astro, enarratio-emdash")}
+<header class="gallery-head">
+<h1>${ASTRO_TITLE}</h1>
+<p class="gallery-intro">Enarratio's charts in Astro pages, in Markdown, and as a block in the EmDash editor.</p>
 </header>
 <p>Two packages bring Enarratio to <a href="https://astro.build">Astro</a> sites and to <a href="https://github.com/emdash-cms/emdash">EmDash</a>, the CMS built on Astro. A chart arrives in the page as HTML and SVG, drawn on the server: complete before any script runs, with a written description and a data table for screen readers, numbers that search engines and language models can read, and light and dark themes. It draws bar, line, stacked area, scatter (with an optional regression line) and heatmap charts, and can add hover details, keyboard navigation and filtering where a page asks for them.</p>
 <ul>
@@ -488,6 +569,7 @@ export default defineConfig({
 <h2>Styles</h2>
 <p>Charts use Enarratio's default theme, in light and dark, unless a site picks <code>styles: "base"</code> (layout only, colors from the site's own design tokens) or <code>"none"</code>. The <a href="./">gallery</a> shows every chart Enarratio draws.</p>
 </main>
+${siteFooter()}
 <script type="module" src="gallery.js"></script>
 </body>
 </html>
@@ -616,16 +698,18 @@ writeFileSync(
 writeFileSync(
   join(outDir, "404.html"),
   `<!doctype html>
-<html lang="en">
+<html lang="en" data-family="${FAMILY}">
 <head>
 ${head("Not found: Enarratio gallery", "There is no page at this address.")}
 </head>
 <body>
 ${siteHeader(links(""))}
 <main class="gallery" id="main" tabindex="-1">
-<header class="cap-page-head"><div class="cap-page-head-text"><h1 class="cap-page-head-title">Not found</h1></div></header>
-<p class="gallery-intro">There is no page at this address. The gallery is at <a href="/">enarratio.dustinedwards.info</a>, and the code at <a href="https://github.com/DrDustinEdwards/enarratio">github.com/DrDustinEdwards/enarratio</a>.</p>
+${runningHead("Not found", "404")}
+<header class="gallery-head"><h1>Not found</h1>
+<p class="gallery-intro">There is no page at this address. The gallery is at <a href="/">enarratio.dustinedwards.info</a>, and the code at <a href="https://github.com/DrDustinEdwards/enarratio">github.com/DrDustinEdwards/enarratio</a>.</p></header>
 </main>
+${siteFooter()}
 <script type="module" src="/gallery.js"></script>
 </body>
 </html>
