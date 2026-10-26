@@ -176,7 +176,8 @@ const GALLERY_CSS = `
 .gallery .cap-panel-head { display: grid; gap: var(--space-1); background: transparent; border-block-end: 1px solid var(--line); }
 .gallery .cap-panel-head h2 { margin: 0; font-size: 1.25rem; text-wrap: balance; }
 .gallery .cap-panel-head h2 .cap-part-no { margin-inline-end: var(--space-3); font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
-.gallery .cap-panel-head p { margin: 0; color: var(--muted); font-size: var(--fs-detail); }
+/* A whole-pixel line (13px at 1.5 is 19.5px), so each chart starts on the pixel grid its stored image was taken on. */
+.gallery .cap-panel-head p { margin: 0; color: var(--muted); font-size: var(--fs-detail); line-height: 20px; }
 .example-chart { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); background: var(--enarratio-background); color: var(--enarratio-text); }
 .example-source { border-block-start: 1px solid var(--line); padding: var(--space-2) calc(var(--pad-card) - var(--pad-x)); }
 .example-source pre { overflow-x: auto; margin: 0; padding: var(--space-4); border-radius: var(--radius-m); background: var(--sunken); font: 400 var(--fs-detail) / 1.6 var(--mono); }
@@ -226,7 +227,7 @@ function siteHeader(links: readonly Link[]): string {
   return `<header class="cap-site-header" data-cap="site-header" data-links="left">
 <a class="cap-site-header-skip" href="#main">Skip to the charts</a>
 <a class="cap-site-header-logo gallery-logo" href="./"><img src="/favicon.svg" alt="" width="24" height="24"><span>Enarratio</span></a>
-<nav class="cap-site-header-sections" aria-label="Site"><ul>
+<nav class="cap-site-header-sections" aria-label="Gallery"><ul>
 ${links.map((l) => `<li><a class="cap-site-header-link" href="${l.href}"${current(l)}>${escapeText(l.label)}</a></li>`).join("\n")}
 </ul></nav>
 <div class="cap-site-header-tools">
