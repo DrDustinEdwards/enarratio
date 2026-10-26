@@ -10,7 +10,7 @@ change the public API; every such change is listed here.
 ### Changed
 
 - The gallery moves to Capsomer v0.22.0 and Prelum v0.14.0, the newest releases.
-- CI moves to devkit v0.13.3, the newest release.
+- CI moves to devkit v0.13.3 and site-runtime to v0.24.0, the newest releases.
 - The repository runs devkit's no-bloat report in CI (`npm run bloat`: unused files, exports and dependencies, and duplicated blocks), as a warning.
 - The gallery serves `/.well-known/security.txt` (security@dustinedwards.info) and its IndexNow key
   file (site-runtime builds security.txt), and the gallery deploy pings IndexNow with Prelum. A failed ping is only a
