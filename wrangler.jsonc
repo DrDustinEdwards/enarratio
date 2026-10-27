@@ -4,8 +4,10 @@
   // CLOUDFLARE_ACCOUNT_ID. Deploy with `npm run deploy:gallery`.
   "$schema": "https://unpkg.com/wrangler@4.143.0/config-schema.json",
   // The name matches the Worker's name in the dashboard, where it was renamed from
-  // abscissa-gallery (design record 0010). A name that did not match would deploy a second Worker.
-  "name": "enarratio-gallery",
+  // abscissa-gallery (design record 0010) and then from enarratio-gallery, so every family
+  // Worker serving a product's site takes the product's name. A name that did not match would
+  // deploy a second Worker.
+  "name": "enarratio",
   "compatibility_date": "2026-09-28",
   // A minified bundle with its source maps uploaded, so stack traces in the logs still read.
   "minify": true,
