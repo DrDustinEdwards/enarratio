@@ -9,6 +9,7 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- The old gallery address, abscissa.dustinedwards.info, no longer redirects; the gallery answers only at enarratio.dustinedwards.info.
 - The gallery's Worker is named `enarratio`, after its site, as every family Worker serving a product's site is.
 - The gallery takes the NASA manual theme the family's public sites share, in its own color, rose (Capsomer v0.27.0, record [0020](docs/design/0020-gallery-in-the-manual-theme.md)): a running head sign, the facts in form boxes, each chart numbered with a leader index beside them, and the family footer with Enarratio in its strip of sites.
 - The gallery moves to Capsomer v0.22.0 and Prelum v0.14.0, the newest releases.

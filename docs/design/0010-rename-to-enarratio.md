@@ -26,7 +26,9 @@ yet, so the rename is clean, with redirects rather than duplicates.
   address.
 - **The gallery** is at `enarratio.dustinedwards.info`. The old hostname,
   `abscissa.dustinedwards.info`, stays attached to the same Worker, which
-  answers it with a 301 to the same path on the new one (amends 0008).
+  answers it with a 301 to the same path on the new one (amends 0008). On
+  2026-10-27 Dustin dropped that redirect: the old hostname is detached and
+  the Worker answers only the new one.
 - **The gallery Worker** is `enarratio-gallery`. It was renamed from
   `abscissa-gallery` in the Cloudflare dashboard first, and `wrangler.jsonc`
   followed, because deploying a new name before the dashboard rename would
@@ -42,6 +44,4 @@ yet, so the rename is clean, with redirects rather than duplicates.
 
 - **The CHANGELOG's entries for 0.1.0-alpha.0 to alpha.7**: they record the
   names those releases shipped with.
-- **The old hostname in `wrangler.jsonc` and `worker/index.ts`**, and in the
-  test of its redirect, because the Worker has to recognize it to redirect it.
 - **This record**, which has to name what was renamed.
