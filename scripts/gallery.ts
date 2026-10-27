@@ -20,6 +20,7 @@ import { graph, thing, website } from "@drdustinedwards/site-helpers/schema";
 import { sitemapDocument } from "@drdustinedwards/site-helpers/sitemap";
 import { securityTxt } from "@dustinedwards/site-runtime/security-txt";
 import { familyFooterHtml } from "capsomer/behavior/family-footer";
+import { letterheadHtml } from "capsomer/behavior/site-header";
 import { checkTheme, stylesheet, type Theme } from "enarratio";
 import { barChart } from "enarratio/lite";
 import { defaultTheme } from "enarratio/themes";
@@ -159,8 +160,8 @@ const FAMILY = "rose";
  * at the width its stored images were taken at.
  */
 const GALLERY_CSS = `
+:root { --header-max: calc(1180px - 2 * var(--space-5)); }
 .gallery { max-width: 1180px; margin: 0 auto; padding: var(--space-6) var(--space-5) var(--space-9); }
-.gallery > .cap-running-head { margin-block-end: var(--space-6); }
 .gallery-head h1 { margin: 0 0 var(--space-3); font-size: clamp(2rem, 1.5rem + 2vw, 3rem); line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance; }
 .gallery-head .cap-form-boxes { margin-block: var(--space-5) 0; }
 .gallery-intro { max-width: var(--measure); margin: 0 0 var(--space-4); color: var(--muted); }
@@ -184,9 +185,7 @@ const GALLERY_CSS = `
 .events { min-height: 1.5em; margin: 0; font: 400 var(--fs-detail) / var(--leading) var(--mono); overflow-wrap: anywhere; }
 .primitives { display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: center; }
 .primitive-tables p { margin: var(--space-3) 0; }
-.gallery-logo { display: inline-flex; align-items: center; gap: var(--space-3); font-weight: 600; }
-.gallery-logo img { display: block; inline-size: 24px; block-size: 24px; }
-.guide > :not(.cap-running-head, .gallery-head) { max-width: 52rem; }
+.guide > :not(.gallery-head) { max-width: 52rem; }
 .guide h2 { margin: var(--space-7) 0 var(--space-3); }
 .guide p, .guide ul { max-width: var(--measure); }
 .guide pre { overflow-x: auto; margin: var(--space-3) 0; padding: var(--space-4); border-radius: var(--radius-m); background: var(--sunken); font: 400 var(--fs-detail) / 1.6 var(--mono); }
@@ -211,40 +210,23 @@ function capsomerCss(fontDir: string): string {
   ].join("\n\n");
 }
 
-const THEME_ICONS = `<svg class="cap-theme-icon" data-show="light" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>
-<svg class="cap-theme-icon" data-show="dark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>`;
-
-/** A link in the header and in the phone sheet: the theme pages, then the code. */
+/** A link in the header: the theme pages, then the code. */
 interface Link {
   readonly label: string;
   readonly href: string;
   readonly current: boolean;
 }
 
-/** Capsomer's site header, written by hand (site-header.md, "Markup"), wired by gallery.js. */
+/** The family letterhead (capsomer/site-header), wired by gallery.js. */
 function siteHeader(links: readonly Link[]): string {
-  const current = (l: Link): string => (l.current ? ' aria-current="page"' : "");
-  return `<header class="cap-site-header" data-cap="site-header" data-links="left">
-<a class="cap-site-header-skip" href="#main">Skip to the charts</a>
-<a class="cap-site-header-logo gallery-logo" href="./"><img src="/favicon.svg" alt="" width="24" height="24"><span>Enarratio</span></a>
-<nav class="cap-site-header-sections" aria-label="Gallery"><ul>
-${links.map((l) => `<li><a class="cap-site-header-link" href="${l.href}"${current(l)}>${escapeText(l.label)}</a></li>`).join("\n")}
-</ul></nav>
-<div class="cap-site-header-tools">
-<button type="button" class="cap-theme-button cap-site-header-icon cap-site-header-theme" data-cap="theme-switch" data-variant="button" aria-label="Switch to dark theme">
-${THEME_ICONS}
-<span class="cap-theme-tip cap-popover" data-variant="tooltip" data-side="bottom" data-offset="6" popover="manual" role="tooltip" aria-hidden="true"><span class="cap-theme-tip-text">Switch to dark theme</span></span>
-</button>
-<button type="button" class="cap-site-header-icon cap-site-header-menu" aria-label="Menu" aria-haspopup="dialog" aria-expanded="false" aria-controls="sheet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg></button>
-</div>
-<dialog class="cap-dialog cap-site-header-sheet" data-cap="dialog" data-placement="bottom" data-size="md" id="sheet" aria-labelledby="sheet-title">
-<div class="cap-dialog-header"><h2 id="sheet-title" class="cap-dialog-title cap-site-header-sheet-title" tabindex="-1">Enarratio menu</h2></div>
-<div class="cap-dialog-body"><nav aria-labelledby="sheet-title"><ul class="cap-site-header-sheet-list">
-${links.map((l) => `<li><a href="${l.href}"${current(l)}><span class="cap-site-header-sheet-icon" aria-hidden="true"></span><span class="cap-site-header-sheet-name">${escapeText(l.label)}</span></a></li>`).join("\n")}
-</ul></nav></div>
-<button type="button" class="cap-btn cap-dialog-close" data-variant="quiet" data-icon-only="" data-cap-part="close" aria-label="Close"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg></button>
-</dialog>
-</header>`;
+  const current = links.find((l) => l.current)?.label;
+  return letterheadHtml({
+    name: "Enarratio",
+    home: "./",
+    mark: '<img src="/favicon.svg" alt="" width="32" height="32">',
+    links: links.map((l) => [l.href, l.label] as [string, string]),
+    ...(current ? { current } : {}),
+  });
 }
 
 /** The site's address, for canonical links, the sitemap and llms.txt. */
@@ -326,10 +308,6 @@ const VERSION = (
   JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { version: string }
 ).version;
 
-/** The section's sign at the top of a page (Capsomer's manual theme). */
-const runningHead = (name: string, folio: string): string =>
-  `<div class="cap-running-head" data-variant="sign"><span class="cap-running-head-name"><span class="cap-running-head-no">1</span>${escapeText(name)}</span><span class="cap-running-head-folio">${escapeText(folio)}</span></div>`;
-
 /** The family footer every dustinedwards.info site ends with, Enarratio's own part first. */
 function siteFooter(): string {
   const center = `<div class="cap-family-footer-center">
@@ -373,7 +351,6 @@ ${head(`Enarratio gallery: ${theme.name} theme`, `Every Enarratio chart, server-
 <body>
 ${siteHeader(links)}
 <main class="gallery" id="main" tabindex="-1">
-${runningHead("Gallery", `${theme.name[0]?.toUpperCase()}${theme.name.slice(1)} theme`)}
 <header class="gallery-head">
 <h1>Enarratio gallery</h1>
 <p class="gallery-intro">Every Enarratio chart in the ${escapeText(theme.name)} theme. Each was drawn on the server and reads without scripts; the enhancement layer adds hover details, keyboard navigation, filters and brushing.</p>
@@ -516,7 +493,6 @@ ${head(`${ASTRO_TITLE}: Enarratio`, ASTRO_DESCRIPTION, "index.css", pathOf(ASTRO
 <body>
 ${siteHeader(links(ASTRO_PAGE))}
 <main class="gallery guide" id="main" tabindex="-1">
-${runningHead("Astro and EmDash", "enarratio-astro, enarratio-emdash")}
 <header class="gallery-head">
 <h1>${ASTRO_TITLE}</h1>
 <p class="gallery-intro">Enarratio's charts in Astro pages, in Markdown, and as a block in the EmDash editor.</p>
@@ -604,7 +580,7 @@ const pathOf = (file: string): string =>
   file === "index.html" ? "/" : `/${file.replace(/\.html$/, "")}`;
 const links = (current: string): Link[] => [
   ...pages.map(([t, f]) => ({
-    label: `${t.name[0]?.toUpperCase()}${t.name.slice(1)} theme`,
+    label: f === pages[0]?.[1] ? "Home" : `${t.name[0]?.toUpperCase()}${t.name.slice(1)} theme`,
     href: cleanAddress(f),
     current: f === current,
   })),
@@ -714,7 +690,6 @@ ${head("Not found: Enarratio gallery", "There is no page at this address.")}
 <body>
 ${siteHeader(links(""))}
 <main class="gallery" id="main" tabindex="-1">
-${runningHead("Not found", "404")}
 <header class="gallery-head"><h1>Not found</h1>
 <p class="gallery-intro">There is no page at this address. The gallery is at <a href="/">enarratio.dustinedwards.info</a>, and the code at <a href="https://github.com/DrDustinEdwards/enarratio">github.com/DrDustinEdwards/enarratio</a>.</p></header>
 </main>
