@@ -12,8 +12,7 @@
   // A minified bundle with its source maps uploaded, so stack traces in the logs still read.
   "minify": true,
   "upload_source_maps": true,
-  // A tiny Worker in front of the assets redirects http: to https: and the old hostname to the
-  // new one (worker/index.ts).
+  // A tiny Worker in front of the assets redirects http: to https: (worker/index.ts).
   "main": "./worker/index.ts",
   "assets": {
     "directory": "./site/dist",
