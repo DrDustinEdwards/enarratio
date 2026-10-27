@@ -35,7 +35,6 @@ describe("gallery worker", () => {
     );
   });
 
-
   it("serves https requests from the assets", async () => {
     const response = await worker.fetch(new Request("https://enarratio.dustinedwards.info/"), {
       ASSETS: assets,
