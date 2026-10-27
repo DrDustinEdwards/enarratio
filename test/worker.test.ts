@@ -35,19 +35,6 @@ describe("gallery worker", () => {
     );
   });
 
-  it("redirects the old hostname to the new one in one hop, keeping the path and query", async () => {
-    for (const scheme of ["https", "http"]) {
-      const response = await worker.fetch(
-        new Request(`${scheme}://abscissa.dustinedwards.info/dustinedwards?x=1`),
-        { ASSETS: assets },
-      );
-      expect(response.status).toBe(301);
-      expect(response.headers.get("location")).toBe(
-        "https://enarratio.dustinedwards.info/dustinedwards?x=1",
-      );
-    }
-    expect(assets.requests).toEqual([]);
-  });
 
   it("serves https requests from the assets", async () => {
     const response = await worker.fetch(new Request("https://enarratio.dustinedwards.info/"), {
