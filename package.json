@@ -116,7 +116,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
-    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.14.0",
+    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.15.0",
     "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.13.3",
     "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.24.0",
     "@fontsource/martian-mono": "5.3.0",
@@ -127,7 +127,7 @@
     "@types/pngjs": "6.0.5",
     "@vitest/coverage-v8": "4.1.11",
     "axe-core": "4.13.0",
-    "capsomer": "github:DrDustinEdwards/capsomer#v0.27.0",
+    "capsomer": "github:DrDustinEdwards/capsomer#v0.28.1",
     "d3-force": "3.0.0",
     "linkedom": "0.18.13",
     "pixelmatch": "7.2.0",
