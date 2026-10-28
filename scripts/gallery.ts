@@ -156,22 +156,19 @@ const FAMILY = "rose";
 /**
  * The gallery's own layout, from Capsomer's tokens, in the NASA manual theme: a sign for the running
  * head, the facts in form boxes, the charts as numbered parts in ruled boxes and the contents as a
- * leader index beside them on a wide screen. The charts' column stays 52rem, so each chart is drawn
- * at the width its stored images were taken at.
+ * leader index above them. The page is Capsomer's family column (.cap-page), so the letterhead, the
+ * charts and the footer line up on every site. The charts' column stays 52rem, so each chart is
+ * drawn at the width its stored images were taken at.
  */
 const GALLERY_CSS = `
-:root { --header-max: calc(1180px - 2 * var(--space-5)); }
-.gallery { max-width: 1180px; margin: 0 auto; padding: var(--space-6) var(--space-5) var(--space-9); }
+.gallery { padding-block: var(--space-6) var(--space-9); }
 .gallery-head h1 { margin: 0 0 var(--space-3); font-size: clamp(2rem, 1.5rem + 2vw, 3rem); line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance; }
 .gallery-head .cap-form-boxes { margin-block: var(--space-5) 0; }
 .gallery-intro { max-width: var(--measure); margin: 0 0 var(--space-4); color: var(--muted); }
 .gallery-body { display: grid; gap: var(--space-7); margin-block-start: var(--space-7); }
 .gallery-main { min-width: 0; max-width: 52rem; }
+@media (min-width: 64rem) { .gallery-contents .cap-leader-index { columns: 2; column-gap: var(--space-8); } .gallery-contents li { break-inside: avoid; } }
 .gallery-contents h2 { margin: 0 0 var(--space-3); font: 600 0.75rem / 1.5 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
-@media (min-width: 75rem) {
-  .gallery-body { grid-template-columns: 52rem minmax(0, 1fr); align-items: start; }
-  .gallery-contents { position: sticky; top: var(--space-5); order: 2; }
-}
 .gallery .report { border-radius: 0; border-color: var(--text); }
 .gallery .cap-panel { margin-block-start: var(--space-6); border-color: var(--text); border-radius: 0; box-shadow: none; }
 .gallery .cap-panel-head { display: grid; gap: var(--space-1); background: transparent; border-block-end: 1px solid var(--line); }
@@ -189,7 +186,7 @@ const GALLERY_CSS = `
 .guide h2 { margin: var(--space-7) 0 var(--space-3); }
 .guide p, .guide ul { max-width: var(--measure); }
 .guide pre { overflow-x: auto; margin: var(--space-3) 0; padding: var(--space-4); border-radius: var(--radius-m); background: var(--sunken); font: 400 var(--fs-detail) / 1.6 var(--mono); }
-.site-foot { max-width: 1180px; margin: 0 auto; padding: 0 var(--space-5) var(--space-6); }
+.site-foot { padding-block-end: var(--space-6); }
 `;
 
 /** Capsomer for the whole gallery: the faces, the tokens and base, then each component's CSS. */
@@ -318,7 +315,7 @@ function siteFooter(): string {
 </div>
 <p class="cap-family-footer-stamp"><span>Release ${escapeText(VERSION)}</span></p>
 </div>`;
-  return `<footer class="site-foot">${familyFooterHtml({ site: "enarratio", center })}</footer>`;
+  return `<footer class="cap-page site-foot">${familyFooterHtml({ site: "enarratio", center })}</footer>`;
 }
 
 /**
@@ -350,7 +347,7 @@ ${head(`Enarratio gallery: ${theme.name} theme`, `Every Enarratio chart, server-
 </head>
 <body>
 ${siteHeader(links)}
-<main class="gallery" id="main" tabindex="-1">
+<main class="cap-page gallery" id="main" tabindex="-1">
 <header class="gallery-head">
 <h1>Enarratio gallery</h1>
 <p class="gallery-intro">Every Enarratio chart in the ${escapeText(theme.name)} theme. Each was drawn on the server and reads without scripts; the enhancement layer adds hover details, keyboard navigation, filters and brushing.</p>
@@ -689,7 +686,7 @@ ${head("Not found: Enarratio gallery", "There is no page at this address.")}
 </head>
 <body>
 ${siteHeader(links(""))}
-<main class="gallery" id="main" tabindex="-1">
+<main class="cap-page gallery" id="main" tabindex="-1">
 <header class="gallery-head"><h1>Not found</h1>
 <p class="gallery-intro">There is no page at this address. The gallery is at <a href="/">enarratio.dustinedwards.info</a>, and the code at <a href="https://github.com/DrDustinEdwards/enarratio">github.com/DrDustinEdwards/enarratio</a>.</p></header>
 </main>
