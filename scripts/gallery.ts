@@ -9,7 +9,7 @@
  *   node scripts/gallery.ts [outDir]
  */
 
-import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -118,21 +118,6 @@ function inlineCss(file: string): string {
   );
 }
 
-/** The faces Capsomer's tokens name, latin only: the gallery is in English. */
-const FONTS = [
-  [
-    "Schibsted Grotesk",
-    "400",
-    "@fontsource/schibsted-grotesk/files/schibsted-grotesk-latin-400-normal.woff2",
-  ],
-  [
-    "Schibsted Grotesk",
-    "600",
-    "@fontsource/schibsted-grotesk/files/schibsted-grotesk-latin-600-normal.woff2",
-  ],
-  ["Martian Mono", "400", "@fontsource/martian-mono/files/martian-mono-latin-400-normal.woff2"],
-] as const;
-
 /**
  * The Capsomer components the page uses, in the order their CSS loads: then the NASA manual theme
  * the family's public sites share, and the family footer.
@@ -188,16 +173,15 @@ const GALLERY_CSS = `
 .guide pre { overflow-x: auto; margin: var(--space-3) 0; padding: var(--space-4); border-radius: var(--radius-m); background: var(--sunken); font: 400 var(--fs-detail) / 1.6 var(--mono); }
 `;
 
-/** Capsomer for the whole gallery: the faces, the tokens and base, then each component's CSS. */
+/**
+ * Capsomer for the whole gallery: the family's faces (capsomer/fonts.css, with its fonts/ copied
+ * beside the stylesheet), the tokens and base, then each component's CSS.
+ */
 function capsomerCss(fontDir: string): string {
-  const faces = FONTS.map(([family, weight, file]) => {
-    const name = basename(file);
-    copyFileSync(packageFile(file), join(fontDir, name));
-    return `@font-face { font-family: "${family}"; font-style: normal; font-weight: ${weight}; font-display: swap; src: url("fonts/${name}") format("woff2"); }`;
-  });
+  cpSync(join(capsomerDir, "fonts"), fontDir, { recursive: true });
   return [
     "/* Built by scripts/gallery.ts from Capsomer: its faces, tokens, base and the components the gallery uses. */",
-    ...faces,
+    inlineCss(join(capsomerDir, "css", "fonts.css")).replaceAll("../fonts/", "fonts/"),
     inlineCss(join(capsomerDir, "css", "tokens.css")),
     inlineCss(join(capsomerDir, "css", "base.css")),
     `@layer cap.tokens {\n${inlineCss(join(capsomerDir, "tokens", `family-${FAMILY}.css`))}\n}`,
@@ -314,7 +298,7 @@ function siteFooter(): string {
 </div>
 <p class="cap-family-footer-stamp"><span>Release ${escapeText(VERSION)}</span></p>
 </div>`;
-  return `<footer class="cap-page site-foot">${familyFooterHtml({ site: "enarratio", center })}</footer>`;
+  return `<footer class="cap-page">${familyFooterHtml({ site: "enarratio", center })}</footer>`;
 }
 
 /**
@@ -488,7 +472,7 @@ ${head(`${ASTRO_TITLE}: Enarratio`, ASTRO_DESCRIPTION, "index.css", pathOf(ASTRO
 </head>
 <body>
 ${siteHeader(links(ASTRO_PAGE))}
-<main class="gallery guide" id="main" tabindex="-1">
+<main class="cap-page gallery guide" id="main" tabindex="-1">
 <header class="gallery-head">
 <h1>${ASTRO_TITLE}</h1>
 <p class="gallery-intro">Enarratio's charts in Astro pages, in Markdown, and as a block in the EmDash editor.</p>
@@ -558,7 +542,6 @@ ${siteFooter()}
 }
 
 const examples = await loadExamples();
-mkdirSync(join(outDir, "fonts"), { recursive: true });
 writeFileSync(join(outDir, "capsomer.css"), capsomerCss(join(outDir, "fonts")));
 /** Each page's theme, file and stylesheet. */
 const pages: [Theme, string, string][] = [
