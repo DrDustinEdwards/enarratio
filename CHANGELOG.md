@@ -11,6 +11,8 @@ change the public API; every such change is listed here.
 
 - The gallery wears the family letterhead (Capsomer v0.28.1, `letterheadHtml`): the rose stripe over the band, the mark with "Dustin Edwards" over Enarratio, the theme button, and the page links (Home first) in a second row, pinned at the top. It replaces the old one-row header and the running head sign.
 - The gallery's page is Capsomer's family column (Capsomer v0.29.0, `.cap-page`), so its letterhead, charts and footer line up with every other family site. Its own 1180px width and `--header-max` are gone, and the chart list sits above the charts in two columns instead of in a narrow column beside them.
+- The gallery's footer is Capsomer's family footer as it ships (Capsomer v0.30.0), the same on every family site. Its own `.site-foot` padding is gone, and the gallery keeps only its top padding.
+- devkit v0.14.0, the newest release (its family check now also flags a site's own value for a Capsomer token).
 - The old gallery address, abscissa.dustinedwards.info, no longer redirects; the gallery answers only at enarratio.dustinedwards.info.
 - The gallery's Worker is named `enarratio`, after its site, as every family Worker serving a product's site is.
 - The gallery takes the NASA manual theme the family's public sites share, in its own color, rose (Capsomer v0.27.0, record [0020](docs/design/0020-gallery-in-the-manual-theme.md)): a running head sign, the facts in form boxes, each chart numbered with a leader index beside them, and the family footer with Enarratio in its strip of sites.
