@@ -146,7 +146,6 @@ const FAMILY = "rose";
  * drawn at the width its stored images were taken at.
  */
 const GALLERY_CSS = `
-body { font-size: 17px; line-height: 1.55; }
 .gallery { padding-block-start: var(--space-6); }
 .gallery-head h1 { margin: 0 0 var(--space-3); font-size: clamp(2rem, 1.5rem + 2vw, 3rem); line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance; }
 .gallery-head .cap-form-boxes { margin-block: var(--space-5) 0; }
