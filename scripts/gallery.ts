@@ -161,7 +161,7 @@ const FAMILY = "rose";
  * drawn at the width its stored images were taken at.
  */
 const GALLERY_CSS = `
-.gallery { padding-block: var(--space-6) var(--space-9); }
+.gallery { padding-block-start: var(--space-6); }
 .gallery-head h1 { margin: 0 0 var(--space-3); font-size: clamp(2rem, 1.5rem + 2vw, 3rem); line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance; }
 .gallery-head .cap-form-boxes { margin-block: var(--space-5) 0; }
 .gallery-intro { max-width: var(--measure); margin: 0 0 var(--space-4); color: var(--muted); }
@@ -186,7 +186,6 @@ const GALLERY_CSS = `
 .guide h2 { margin: var(--space-7) 0 var(--space-3); }
 .guide p, .guide ul { max-width: var(--measure); }
 .guide pre { overflow-x: auto; margin: var(--space-3) 0; padding: var(--space-4); border-radius: var(--radius-m); background: var(--sunken); font: 400 var(--fs-detail) / 1.6 var(--mono); }
-.site-foot { padding-block-end: var(--space-6); }
 `;
 
 /** Capsomer for the whole gallery: the faces, the tokens and base, then each component's CSS. */
