@@ -9,6 +9,7 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- The gallery moves to Capsomer v0.34.1, so a short page keeps the scrollbar's room and its letterhead sits on the same pixels as a long page's.
 - The gallery moves to Capsomer v0.34.0. Home starts at the same place as on every family site, x 496 at 1536px, whatever the site's name.
 - The gallery moves to Capsomer v0.32.0: the family's 1280px page (now on the Astro page too, which was missing `.cap-page`), its faces from `capsomer/fonts.css` with Capsomer's own font files (one variable file each for Schibsted Grotesk and Martian Mono, so the footer's bold name is the same face as on every family site), the family footer in a plain `.cap-page` wrapper, and the family's 17px body from `.cap-page`. The `@fontsource/schibsted-grotesk` and `@fontsource/martian-mono` dev dependencies are gone.
 - devkit v0.15.0, the newest release (its family check now also fails a site that loads the family's faces itself).
