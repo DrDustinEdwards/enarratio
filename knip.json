@@ -21,6 +21,6 @@
     "examples/**/*.{ts,mjs}",
     "*.{ts,mjs}"
   ],
-  "ignoreDependencies": ["@fontsource/martian-mono", "@fontsource/schibsted-grotesk", "axe-core"],
+  "ignoreDependencies": ["axe-core"],
   "ignoreUnresolved": ["^\\./enhance\\.js$"]
 }
