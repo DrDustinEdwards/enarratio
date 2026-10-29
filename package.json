@@ -125,7 +125,7 @@
     "@types/pngjs": "6.0.5",
     "@vitest/coverage-v8": "4.1.12",
     "axe-core": "4.14.0",
-    "capsomer": "github:DrDustinEdwards/capsomer#v0.34.1",
+    "capsomer": "github:DrDustinEdwards/capsomer#v0.35.0",
     "d3-force": "3.0.0",
     "linkedom": "0.18.14",
     "pixelmatch": "7.2.0",
