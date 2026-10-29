@@ -9,6 +9,7 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- The gallery moves to Capsomer v0.37.0 (exact times in American English), with site-runtime v0.27.0 and devkit v0.17.0's workflows, the newest releases.
 - The gallery moves to Capsomer v0.35.0: in dark, muted text, links and borders are stronger, and with "Increase contrast" on it takes Capsomer's stronger set.
 - The gallery moves to Capsomer v0.34.1, so a short page keeps the scrollbar's room and its letterhead sits on the same pixels as a long page's.
 - The gallery moves to Capsomer v0.34.0. Home starts at the same place as on every family site, x 496 at 1536px, whatever the site's name.
