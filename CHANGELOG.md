@@ -26,7 +26,7 @@ Contrast, theming, export and embed from the area 10 verification ([0027](docs/d
 - `ColorScheme.seriesLabels` and `ColorScheme.sequentialEdges`, optional: the shades for series names on the background and for the edges of pale ramp steps. Left out, `stylesheet()` derives them.
 - `readableShade(color, background, minimum)`: the least darkening or lightening of a color that reaches a contrast.
 - `--enarratio-cell-edge-width` (default `1px`).
-- Export (C3): "Download SVG" (the drawing with its computed colors and fonts, and the background) and "Download PNG" (the same, on a canvas at twice its size), from the enhancement layer, with no new dependency.
+- Export (C3): "Download SVG" (the drawing with its computed colors and fonts, and the background) and "Download PNG" (the same, on a canvas at twice its size), from the enhancement layer, with no new dependency. The drawing code loads on the first click (a dynamic import), so the enhancement layer stays at 8.4 kB on first load.
 - `maxXTicks` on line and area charts, as on bar charts.
 - Embed (C4): "Copy embed" copies `<a href="{page}#{id}">{title}</a>` for a figure with an `id`.
 - `enarratio/redraw`: draws a server's bar, line or area chart again at its frame's width in the browser (with `enarratio/lite`), or swaps in a narrow server drawing for any other chart under 30rem, and enhances each drawing. Moved from Prelum's `render/chart-enhance`, so Prelum and Capsomer share one copy: `redrawAttribute(spec)` on the server, `redrawCharts()` in the page.
