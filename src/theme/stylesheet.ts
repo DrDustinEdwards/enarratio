@@ -90,6 +90,17 @@ const BASE_RULES = `
 /* The frame is the container the SVG's own font-size measures, so text grows as it shrinks (B3). */
 .enarratio-frame { overflow-x: auto; container-type: inline-size; }
 .enarratio-frame-wide > svg { min-width: 30rem; }
+/* A wide drawing keeps its text size and scrolls in a column under 30rem (A13); a shadow at the
+   edge that has more shows that it does, without script. The covers move with the drawing and
+   hide each shadow at the end it has reached. */
+.enarratio-frame-wide {
+  --enarratio-scroll-shadow: color-mix(in srgb, var(--enarratio-text) 30%, transparent);
+  background:
+    linear-gradient(to right, var(--enarratio-background) 40%, transparent) left / 1.5rem 100% no-repeat local,
+    linear-gradient(to left, var(--enarratio-background) 40%, transparent) right / 1.5rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, var(--enarratio-scroll-shadow), transparent) left / 0.75rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, var(--enarratio-scroll-shadow), transparent) right / 0.75rem 100% no-repeat scroll;
+}
 .enarratio svg {
   display: block;
   max-width: 100%;
@@ -487,7 +498,7 @@ ${LINE_DASHES.map(
 @media print {
   .enarratio, .enarratio-tooltip { color-scheme: light; }
   .enarratio { break-inside: avoid; }
-  .enarratio-frame { overflow: visible; }
+  .enarratio-frame { overflow: visible; background: none; }
   .enarratio-frame-wide > svg { min-width: 0; }
   .enarratio-data::details-content { content-visibility: visible; block-size: auto; }
   .enarratio-tooltip, .enarratio-brush, .enarratio [data-enarratio-control], .enarratio-export {

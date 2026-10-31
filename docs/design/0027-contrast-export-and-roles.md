@@ -93,6 +93,12 @@ on 2026-10-31 and found, in Enarratio's own drawing:
      by both renderers (`leftMargin`, `bottomMargin` and `rightMargin`); renderPlot draws again
      with the wider margin when Plot's first drawing needs it.
    - A scatter's first point sat on the axes over a tick label; points are inset from them.
+   - A rounded axis was rounded for ten ticks but drew about one per 35 units, so data reaching
+     23 ended above a top tick of 20. It is now rounded to the step of the ticks it draws.
+   - A drawing 480 or wider keeps its text size and scrolls under 30rem, as designed (A13), but
+     nothing showed that it did: the "Reads per sample" bar at 480 hid S3 and S4 at 320 px while
+     a 288-wide line chart beside it scaled. The frame now shows a shadow at the edge that has
+     more (background covers that scroll with the drawing), with no script.
 9. **Forced colors are already in the visual suite (B57).** `test/browser/visual.test.ts`
    screenshots every gallery example in forced colors (`forced-colors: active`, emulated in
    Chrome) in both the default and the example theme, beside light and dark, and CI compares them

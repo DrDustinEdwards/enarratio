@@ -117,18 +117,19 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
     hi = Math.max(hi, a, b);
   }
   const counts = model.countTicks;
+  const valueRange: [number, number] = horizontal
+    ? [frame.marginLeft, width - frame.marginRight]
+    : [height - frame.marginBottom, frame.marginTop];
+  const tickCount = horizontal
+    ? (valueRange[1] - valueRange[0]) / 80
+    : (valueRange[0] - valueRange[1]) / 35;
+  // Rounded to the step of the ticks drawn, so the axis ends on a tick (as renderPlot does).
   const domain: [number, number] = counts
     ? [0, counts[counts.length - 1] ?? 1]
     : model.valueAxis.flat
       ? [0, 1]
-      : (niceLinear([lo, hi]) as [number, number]);
-  const valueRange: [number, number] = horizontal
-    ? [frame.marginLeft, width - frame.marginRight]
-    : [height - frame.marginBottom, frame.marginTop];
+      : (niceLinear([lo, hi], tickCount) as [number, number]);
   const value: Continuous = continuous("linear", domain, valueRange);
-  const tickCount = horizontal
-    ? (valueRange[1] - valueRange[0]) / 80
-    : (valueRange[0] - valueRange[1]) / 35;
   const valueTicks: Tick[] = counts
     ? counts.map((t) => ({ at: value(t), label: model.format(t) }))
     : (() => {

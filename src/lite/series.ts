@@ -84,10 +84,11 @@ export function seriesFrame(
   if (y.zero && (yDomain[0] > 0 || yDomain[1] < 0)) {
     yDomain = yDomain[0] > 0 ? [0, yDomain[1]] : [yDomain[0], 0];
   }
-  yDomain = y.log ? niceLog(yDomain) : niceLinear(yDomain);
+  // Rounded to the step of the ticks drawn, so the axis ends on a tick (as renderPlot does).
+  const yCount = (height - marginBottom - marginTop) / 35;
+  yDomain = y.log ? niceLog(yDomain) : niceLinear(yDomain, yCount);
   const yScale = continuous(y.log ? "log" : "linear", yDomain, [height - marginBottom, marginTop]);
 
-  const yCount = (height - marginBottom - marginTop) / 35;
   const yAt = y.log ? logTicks(yDomain, yCount) : ticks(yDomain[0], yDomain[1], yCount);
   const yFormat = y.log
     ? logTickFormat(yDomain, yCount)
