@@ -27,8 +27,14 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
   const render = keyed(
     points,
     model.datum,
-    // A link is read on its own, so it carries its own name.
-    options.href ? (el, p) => el.setAttribute("aria-label", model.describe(p)) : undefined,
+    // A link carries its own name, for the enhancement layer, and stays out of the tab order:
+    // the SVG is one image, so the data table carries the same links for keyboards (0026).
+    options.href
+      ? (el, p) => {
+          el.setAttribute("aria-label", model.describe(p));
+          el.setAttribute("tabindex", "-1");
+        }
+      : undefined,
   );
 
   const link = model.link;
@@ -110,7 +116,7 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
       marks: [bar, horizontal ? Plot.ruleX([0]) : Plot.ruleY([0]), ...errorMarks(model)],
     },
     model.alt,
-    options.href ? "group" : "img",
+    "img",
     steps(
       model.directLabels ? (svg) => labelSegments(svg) : undefined,
       model.bounds ? capErrorBars : undefined,

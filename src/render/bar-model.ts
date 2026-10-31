@@ -517,6 +517,8 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
             ...intervalColumns,
           ],
           rows,
+          // The bars' links, which the image does not expose, are reached here (0026).
+          ...(linkOf ? { links: xNames.map((name) => safeHref(KIND, linkOf(name))) } : {}),
         },
       }),
   };

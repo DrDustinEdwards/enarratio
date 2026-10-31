@@ -2,7 +2,12 @@
 
 import { datumAttributes } from "../render/datum.js";
 import type { ScaleDescription } from "../render/figure.js";
-import type { Point, SeriesChartOptions, SeriesModel } from "../render/line-model.js";
+import {
+  dayTicks,
+  type Point,
+  type SeriesChartOptions,
+  type SeriesModel,
+} from "../render/line-model.js";
 import { axisLabel, axisTickLabels, axisTicks, type Frame, grid, type Tick } from "./axis.js";
 import {
   type Continuous,
@@ -85,7 +90,8 @@ export function seriesFrame(
   if (model.yearTicks) {
     xTicks = model.yearTicks.map((t) => ({ at: x(t), label: String(t) }));
   } else if (prepared.time) {
-    const at = timeTicks(xDomain[0], xDomain[1], xCount);
+    const at =
+      dayTicks(prepared, xRange[1] - xRange[0]) ?? timeTicks(xDomain[0], xDomain[1], xCount);
     const labels = timeTickLabels(at);
     xTicks = at.map((t, i) => ({ at: x(t), label: labels[i] ?? "" }));
   } else {

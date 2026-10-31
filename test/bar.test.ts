@@ -73,6 +73,23 @@ describe("barChart", () => {
     expect(fig.querySelector(".enarratio-csv")?.getAttribute("download")).toBe("entries.csv");
   });
 
+  it("moves hover titles to a data attribute with hoverTitles: false, linked bars too", () => {
+    const fig = parse(
+      barChart({
+        data: entries,
+        x: "year",
+        series: "type",
+        href: (year) => `?year=${year}`,
+        hoverTitles: false,
+        alt: "a",
+      }),
+    );
+    expect(fig.querySelector("title")).toBeNull();
+    const shapes = [...fig.querySelectorAll('[data-enarratio-mark="bar"] rect')];
+    expect(shapes.length).toBeGreaterThan(0);
+    for (const shape of shapes) expect(shape.getAttribute("data-enarratio-label")).toMatch(/: /);
+  });
+
   it("emits an equivalent data table, zero-filling counts", () => {
     const fig = parse(barChart({ data: entries, x: "year", series: "type", alt: "a" }));
     const rows = [...fig.querySelectorAll("tbody tr")].map((tr) =>

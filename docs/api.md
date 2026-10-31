@@ -160,6 +160,7 @@ spreads them into each chart.
 | `id` | `string` | The figure's `id`, reported as `chartId` in events. |
 | `width`, `height` | `number` | Drawing size in CSS pixels, positive and finite. Drawings 480 pixels or wider keep at least 30rem on narrow screens and scroll sideways inside the figure, so their text stays readable. That frame is in the tab order (`tabindex="0"`) and named "{title}, scrolls sideways" ("Chart" without a title), so a keyboard can scroll it; `enhance()` drops that tab stop once the marks take focus. |
 | `dataTable` | `"details"` or `"visually-hidden"` | How the always-present data table is shown. Default `"details"`, closed, labeled "Show data" (and "Hide data" when open). |
+| `hoverTitles` | `boolean` | The browser's hover title (a `<title>`) on each mark, on by default. `false` leaves them out, for a site that shows no hover tooltips; each mark's details move to `data-enarratio-label`, which `enhance()` still names its points with, and the data stay in the table. |
 
 Bar, line, area and scatter charts, and the diverging, waterfall, small
 multiples, histogram, density, box, strip, dot, range and dumbbell charts and
@@ -358,8 +359,9 @@ one row per item (a CV entry, a case) is enough.
 - `filterBy`: what a click filters by once enhanced, `"series"` (the default
   when there are series) or `"x"` (the bar's category, such as its year).
 - `href`: a function from category to link. Without script each bar is a link
-  (and the SVG a named group rather than one image, so the links stay
-  reachable); with the enhancement layer the bar filters instead, and the link
+  for the pointer, out of the tab order, and each category in the data table
+  is the same link, which keyboards and screen readers reach (the SVG stays one
+  image); with the enhancement layer the bar filters instead, and the link
   is kept in `data-enarratio-href`. Only relative and `http(s)` links are
   allowed.
 - `maxXTicks`: the most category labels to print; with more categories, every
@@ -510,12 +512,15 @@ A note or a highlighted range, given to `barChart`, `lineChart`, `areaChart`,
   and y fields. Offset by `dx`, `dy` pixels, an arrow runs from the text to the
   point.
 - `{ type: "range", axis: "x" | "y", from, to, label? }`: a shaded band across
-  the chart between two positions on one axis, behind the marks.
+  the chart between two positions on one axis, behind the marks. A range from
+  a value to itself (`from` equal to `to` on a continuous axis) is drawn as a
+  dashed line there.
 
 On bar charts `x` is the category axis whichever way the bars run. Every note
 and range is also added to the chart's text alternative ("Notes on the chart:
-…"), since the drawing is one image to a screen reader. A position off the
-axis throws.
+…"), since the drawing is one image to a screen reader. A range is said with
+its axis's unit ("Target: 500 to 630 words"), or after the axis's label when
+there is no unit ("Target: Words 500 to 630"). A position off the axis throws.
 
 ### `AnnotationValue`
 
@@ -1301,7 +1306,7 @@ A test keeps this table and the stylesheet in step.
 | `--enarratio-padding-expanded` | `1rem` | Padding of an expanded chart |
 | `--enarratio-opacity-brush` | `0.15` | Fill of a brushed range |
 | `--enarratio-opacity-texture` | `0.6` | Textures on filled series 2 to 8 and their legend swatches (1 under more contrast and forced colors) |
-| `--enarratio-bar-gap` | `1px` | The background-colored edge between adjacent bars and stacked segments |
+| `--enarratio-bar-gap` | `1px` | The grid-colored edge between adjacent bars and stacked segments |
 | `--enarratio-halo-width` | `3px` | The halo of bar color behind a name printed on a textured bar |
 | `--enarratio-focus-width-inner` | `5px` | Inner (background) ring on a focused point, twice its width |
 | `--enarratio-focus-width-outer` | `2.5px` | Outer (focus color) ring on a focused point |

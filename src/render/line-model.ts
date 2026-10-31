@@ -178,11 +178,29 @@ function yearTicks(from: number, to: number): number[] {
   return ticks;
 }
 
+/**
+ * Whole-day x ticks for date-only data drawn `plotWidth` pixels wide, where the axis would
+ * otherwise tick by the hour ("12 AM", "12 PM") between dates: one tick a day from the first
+ * date to the last. Undefined when the axis would tick by the day or coarser on its own (about
+ * one tick per 80 pixels, as Plot and the light charts count them), so those ticks are unchanged.
+ */
+export function dayTicks(prepared: Prepared, plotWidth: number): number[] | undefined {
+  if (!prepared.dates) return undefined;
+  const ats = prepared.points.map((p) => p.at);
+  const [from, to] = [minOf(ats), maxOf(ats)];
+  if ((to - from) / (plotWidth / 80) >= DAY) return undefined;
+  const ticks: number[] = [];
+  for (let t = from; t <= to; t += DAY) ticks.push(t);
+  return ticks;
+}
+
 /** A line or area chart's rows, read and checked, with what its axes and table need. */
 export interface Prepared {
   readonly points: Point[];
   readonly seriesNames: string[];
   readonly time: boolean;
+  /** Whether x is time and every value a whole day (no time of day). */
+  readonly dates: boolean;
   readonly years: boolean;
   readonly format: (value: number) => string;
   readonly strings: Strings;
@@ -308,6 +326,7 @@ function prepare<T extends object>(kind: string, options: Forecastable<T>): Prep
     points,
     seriesNames,
     time,
+    dates: time && !subDaily,
     years,
     format,
     strings,

@@ -102,6 +102,27 @@ export interface FigureOptions extends IssueOptions {
    * assistive technology. It is always present.
    */
   readonly dataTable?: "details" | "visually-hidden";
+  /**
+   * The browser's hover title on each mark (a `<title>` inside it), on by default. `false`
+   * leaves them out, for a site that shows no hover tooltips: each mark's details move to a
+   * `data-enarratio-label` attribute, which `enhance()` still names its points with, and the
+   * data stay in the table.
+   */
+  readonly hoverTitles?: boolean;
+}
+
+/**
+ * The SVG without its marks' hover titles: each `<title>` becomes its mark's
+ * `data-enarratio-label`, so the enhancement layer can still name the point.
+ */
+function withoutTitles(svg: string): string {
+  return svg
+    .replace(
+      /<([a-zA-Z]+)((?:\s[^<>]*)?)(?<!\/)><title>([^<]*)<\/title>/g,
+      (_, tag: string, attrs: string, text: string) =>
+        `<${tag}${attrs} data-enarratio-label="${text.replaceAll('"', "&quot;")}">`,
+    )
+    .replace(/<title>[^<]*<\/title>/g, "");
 }
 
 /** Units for a chart's axes, added to the axis labels and table headers: "Weight (kg)" (B23). */
@@ -135,6 +156,8 @@ export interface ScaleDescription {
 export interface DataTable {
   readonly columns: readonly string[];
   readonly rows: readonly (readonly string[])[];
+  /** A link for each row's header cell, by row, where the chart's marks are links. */
+  readonly links?: readonly (string | undefined)[];
 }
 
 /** One legend entry. */
@@ -242,16 +265,17 @@ function tableMarkup(table: DataTable, caption: string): string {
     table.columns.map((c) => element("th", { scope: "col" }, escapeHtml(c))).join(""),
   );
   const body = table.rows
-    .map((row) =>
+    .map((row, r) =>
       element(
         "tr",
         {},
         row
-          .map((cell, i) =>
-            i === 0
-              ? element("th", { scope: "row" }, escapeHtml(cell))
-              : element("td", {}, escapeHtml(cell)),
-          )
+          .map((cell, i) => {
+            if (i > 0) return element("td", {}, escapeHtml(cell));
+            const href = table.links?.[r];
+            const name = escapeHtml(cell);
+            return element("th", { scope: "row" }, href ? element("a", { href }, name) : name);
+          })
           .join(""),
       ),
     )
@@ -428,9 +452,10 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
         "alt is missing, so the description was generated; write one that states the finding",
     });
   }
+  const drawn = options.hoverTitles === false ? withoutTitles(parts.svg) : parts.svg;
   const svg = given
-    ? parts.svg
-    : parts.svg.replace(/^(<svg\b[^>]*?\saria-label=)"[^"]*"/, `$1"${escapeHtml(alt)}"`);
+    ? drawn
+    : drawn.replace(/^(<svg\b[^>]*?\saria-label=)"[^"]*"/, `$1"${escapeHtml(alt)}"`);
 
   const legend = legendMarkup(parts);
   const wide = !parts.fixed && (options.width ?? DEFAULT_WIDTH) >= WIDE_WIDTH;

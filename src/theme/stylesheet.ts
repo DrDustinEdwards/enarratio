@@ -175,9 +175,10 @@ ${Array.from(
 .enarratio:has(pattern) [data-slot="8"] {
   --enarratio-texture: repeating-linear-gradient(45deg, var(--enarratio-stripes)), repeating-linear-gradient(-45deg, var(--enarratio-stripes));
 }
-/* A background-colored edge, so adjacent bars and stacked segments never touch (B6). */
+/* A grid-colored edge, so adjacent bars and stacked segments never touch (B6). It is decoration,
+   like a gridline, so a contrast check reads a bar by its fill, not by this edge (0026). */
 .enarratio [data-enarratio-mark="bar"] [data-enarratio-key] {
-  stroke: var(--enarratio-background);
+  stroke: var(--enarratio-grid);
   stroke-width: var(--enarratio-bar-gap, 1px);
 }
 /* Names printed on bars keep a halo of their bar's color over its texture. */

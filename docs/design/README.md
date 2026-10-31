@@ -41,6 +41,7 @@ Each record says where a decision came from:
 | [0023](0023-the-figure-in-words.md) | The figure in words: finding, overview, summary, source and data |
 | [0024](0024-more-chart-types.md) | The chart types of 0.4.0, and how each stays accessible |
 | [0025](0025-new-charts-on-the-figure.md) | The new chart types on the figure, in both renderers |
+| [0026](0026-rollout-fixes.md) | Fixes from the 0.4.0 rollout: linked bars, bar edges and hover titles |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

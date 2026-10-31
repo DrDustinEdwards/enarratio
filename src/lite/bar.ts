@@ -266,11 +266,17 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
         const keys = Object.fromEntries(datumAttributes(model.datum(p)));
         const shape = { ...box, fill: model.plan.range[rowOf.get(p.series) ?? 0] };
         const title = el("title", {}, text(model.describe(p)));
-        // A link is read on its own, so it carries its own name.
+        // As in the Plot chart: named, and out of the tab order, its link also in the table.
         return model.link
           ? el(
               "a",
-              { href: model.link(p), fill: "inherit", ...keys, "aria-label": model.describe(p) },
+              {
+                href: model.link(p),
+                fill: "inherit",
+                ...keys,
+                "aria-label": model.describe(p),
+                tabindex: "-1",
+              },
               el("rect", shape, title),
             )
           : el("rect", { ...shape, ...keys }, title);
@@ -373,5 +379,5 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
   }
   parts.push(notes.above);
 
-  return svgRoot(width, height, model.alt, options.href ? "group" : "img", parts.join(""));
+  return svgRoot(width, height, model.alt, "img", parts.join(""));
 }
