@@ -1,5 +1,6 @@
 /** One enhanced chart: tooltips, keyboard navigation, filters, the range brush and updates. */
 
+import { measure, onResize } from "./batch.js";
 import { button, expander, fill, sortTable, viewSwitch } from "./controls.js";
 import {
   center,
@@ -16,7 +17,7 @@ import {
 } from "./marks.js";
 import { animateFrom, DURATION, geometry, reducedMotion } from "./motion.js";
 import { sanitize } from "./sanitize.js";
-import { hitAreas } from "./targets.js";
+import { drawHits, measureHits } from "./targets.js";
 import type { BrushDetail, EnhancedChart, ResolvedOptions, SelectDetail } from "./types.js";
 
 /** How far a pointer moves, in SVG units, before a press becomes a drag (the brush). */
@@ -71,6 +72,8 @@ export class Chart implements EnhancedChart {
   private expandButton: HTMLButtonElement | null = null;
   /** Places the points over the marks again, after the drawing moved or resized. */
   private layout: () => void = () => {};
+  /** Counts teardowns, so a batched read queued before one is dropped (batch.ts). */
+  private runs = 0;
   /** A wide frame whose tab stop attach() removed, given back by destroy(). */
   private untabbedFrame: HTMLElement | null = null;
   private hideTimer: ReturnType<typeof setTimeout> | undefined;
@@ -96,6 +99,17 @@ export class Chart implements EnhancedChart {
 
   private get strings(): ResolvedOptions["strings"] {
     return this.options.strings;
+  }
+
+  /** A layout read and its write, batched with every other chart's and dropped after a teardown. */
+  private later<T>(read: () => T, write: (value: T) => void): void {
+    const run = this.runs;
+    measure(
+      () => (run === this.runs ? read() : undefined),
+      (value) => {
+        if (run === this.runs) write(value as T);
+      },
+    );
   }
 
   private listen(target: EventTarget, type: string, handler: (event: Event) => void): void {
@@ -141,22 +155,26 @@ export class Chart implements EnhancedChart {
       });
     }
 
-    const hits = hitAreas(this.marks);
-    this.marks.forEach((mark, i) => {
+    const pointAt = (mark: SVGGraphicsElement, target: Element): void => {
       const href = mark.getAttribute("data-enarratio-href");
-      const targets: Element[] = [mark];
-      const hit = hits[i];
-      if (hit) {
-        targets.push(hit);
-        this.cleanup.push(() => hit.remove());
-      }
-      for (const target of targets) {
-        this.listen(target, "pointerenter", () => this.hover(mark));
-        this.listen(target, "pointerleave", () => this.hover(null));
-        if (this.filters(mark)) this.listen(target, "click", () => this.toggleMark(mark));
-        else if (href !== null) this.listen(target, "click", () => location.assign(href));
-      }
-    });
+      this.listen(target, "pointerenter", () => this.hover(mark));
+      this.listen(target, "pointerleave", () => this.hover(null));
+      if (this.filters(mark)) this.listen(target, "click", () => this.toggleMark(mark));
+      else if (href !== null) this.listen(target, "click", () => location.assign(href));
+    };
+    const marks = this.marks;
+    for (const mark of marks) pointAt(mark, mark);
+    this.later(
+      () => measureHits(marks),
+      (sizes) => {
+        drawHits(marks, sizes).forEach((hit, i) => {
+          const mark = marks[i];
+          if (!hit || !mark) return;
+          pointAt(mark, hit);
+          this.cleanup.push(() => hit.remove());
+        });
+      },
+    );
 
     if (this.options.filter) this.attachLegend();
     if (this.options.brush && parseScale(this.figure)) this.attachBrush(svg);
@@ -253,35 +271,38 @@ export class Chart implements EnhancedChart {
       this.untabbedFrame = frame;
     }
 
-    this.layout = () => {
+    // Every box is read before any style is written, and beside every other chart's (batch.ts),
+    // so the page is laid out once, not once per mark or per chart.
+    const read = () => {
       const parent = layer.parentElement;
-      if (!parent) return;
-      // Every box is read before any style is written, so the page is laid out once, not once per mark.
-      const base = parent.getBoundingClientRect();
-      const box = svg.getBoundingClientRect();
-      const rects = this.marks.map((mark) => mark.getBoundingClientRect());
+      if (!parent) return null;
+      return {
+        x: parent.clientLeft - parent.scrollLeft,
+        y: parent.clientTop - parent.scrollTop,
+        base: parent.getBoundingClientRect(),
+        box: svg.getBoundingClientRect(),
+        rects: this.marks.map((mark) => mark.getBoundingClientRect()),
+      };
+    };
+    const write = (boxes: ReturnType<typeof read>): void => {
+      if (!boxes) return;
+      const { x, y, base, box, rects } = boxes;
       const place = (el: HTMLElement, r: DOMRect, x: number, y: number): void => {
         el.style.left = `${r.left - x}px`;
         el.style.top = `${r.top - y}px`;
         el.style.width = `${r.width}px`;
         el.style.height = `${r.height}px`;
       };
-      place(
-        layer,
-        box,
-        base.left + parent.clientLeft - parent.scrollLeft,
-        base.top + parent.clientTop - parent.scrollTop,
-      );
+      place(layer, box, base.left + x, base.top + y);
       rects.forEach((rect, i) => {
         const point = this.points[i];
         if (point) place(point, rect, box.left, box.top);
       });
     };
+    this.layout = () => this.later(read, write);
     // Also when a chart enhanced while hidden is shown, and when the window resizes.
     if (typeof ResizeObserver === "function") {
-      const observer = new ResizeObserver(() => this.layout());
-      observer.observe(svg);
-      this.cleanup.push(() => observer.disconnect());
+      this.cleanup.push(onResize(svg, () => this.layout()));
     } else {
       this.layout();
     }
@@ -499,12 +520,16 @@ export class Chart implements EnhancedChart {
     if (reducedMotion() || typeof IntersectionObserver !== "function") return;
     const svg = this.svg;
     if (!svg) return;
-    // Measured before any is written, so the lines cost one layout, not one each.
+    // Measured before any is written, beside every other chart's, so the lines cost one layout.
     const paths = [...svg.querySelectorAll<SVGPathElement>('[data-enarratio-mark="line"] > path')];
-    const lengths = paths.map((path) => Math.ceil(path.getTotalLength()));
-    paths.forEach((path, i) => {
-      path.style.setProperty("--enarratio-length", String(lengths[i]));
-    });
+    this.later(
+      () => paths.map((path) => Math.ceil(path.getTotalLength())),
+      (lengths) => {
+        paths.forEach((path, i) => {
+          path.style.setProperty("--enarratio-length", String(lengths[i]));
+        });
+      },
+    );
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
@@ -845,6 +870,7 @@ export class Chart implements EnhancedChart {
 
   private teardown(): void {
     if (this.figure.hasAttribute("data-enarratio-view-table")) this.viewButton?.click();
+    this.runs++;
     for (const undo of this.cleanup.splice(0)) undo();
     clearTimeout(this.hideTimer);
     this.rangeStart = null;
