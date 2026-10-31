@@ -5,7 +5,7 @@ import { enhance as enhanceHeader } from "capsomer/behavior/site-header";
 import { enhance as enhanceTheme } from "capsomer/behavior/theme-switch";
 import { enhance } from "./enhance.js";
 
-enhance();
+enhance(document, { expand: true, url: true });
 enhanceHeader();
 enhanceTheme();
 

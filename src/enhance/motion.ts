@@ -2,7 +2,7 @@
 
 import { MARK, shape } from "./marks.js";
 
-const DURATION = 450;
+export const DURATION = 450;
 const ANIMATED = ["x", "y", "width", "height", "cx", "cy", "r", "x1", "x2", "y1", "y2"] as const;
 
 export const reducedMotion = (): boolean =>

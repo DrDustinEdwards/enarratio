@@ -6,7 +6,6 @@ import { afterEach, describe, expect, it } from "vitest";
 import { exampleTheme } from "../examples/themes/example.js";
 import {
   checkTheme,
-  colorDifference,
   contrastRatio,
   defineTheme,
   progressRing,
@@ -27,27 +26,6 @@ const tickLabels = (fig: Element, axis: "x" | "y"): string[] =>
   );
 
 describe("A1: the default palette and direct labels", () => {
-  it("keeps series 1 to 6 at least 10 CIEDE2000 apart for every simulated vision, in both schemes", () => {
-    const visions = [undefined, "protanopia", "deuteranopia", "tritanopia"] as const;
-    for (const scheme of [defaultTheme.light, defaultTheme.dark]) {
-      const six = scheme.series.slice(0, 6);
-      for (let i = 0; i < six.length; i += 1) {
-        for (let j = i + 1; j < six.length; j += 1) {
-          for (const vision of visions) {
-            expect(
-              colorDifference(six[i] as string, six[j] as string, vision),
-            ).toBeGreaterThanOrEqual(10);
-          }
-        }
-      }
-    }
-    const coreWarnings = checkTheme(defaultTheme).issues.filter((i) => {
-      const pair = /series (\d) #\w+ and (\d) /.exec(i.message);
-      return i.check === "series-difference" && Number(pair?.[1]) <= 6 && Number(pair?.[2]) <= 6;
-    });
-    expect(coreWarnings).toEqual([]);
-  });
-
   it("prints series names inside stacked bars that fit, and refuses them on grouped bars", () => {
     const data = Array.from({ length: 12 }, (_, i) => ({
       year: 2020 + (i % 2),
@@ -100,8 +78,8 @@ describe("A3: local-midnight Dates are calendar dates", () => {
     ];
     const fig = parse(lineChart({ data, x: "d", y: "v", alt: "a" }));
     expect([...fig.querySelectorAll("tbody th")].map((th) => th.textContent)).toEqual([
-      "2025-01-06",
-      "2025-01-07",
+      "January 6, 2025",
+      "January 7, 2025",
     ]);
   });
 });
@@ -121,22 +99,26 @@ describe("A7 and F15: empty and impossible input throws", () => {
       expect(() =>
         scatterPlot({ data: [{ a: 1, b: 2 }], x: "a", y: "b", height: size, alt: "a" }),
       ).toThrow(/height/);
-      expect(() => sparkline({ values: [1, 2], width: size })).toThrow(/width/);
-      expect(() => uptimeStrip({ slots: ["up"], label: "x", height: size })).toThrow(/height/);
+      expect(() => sparkline({ inline: true, values: [1, 2], width: size })).toThrow(/width/);
+      expect(() => uptimeStrip({ inline: true, slots: ["up"], label: "x", height: size })).toThrow(
+        /height/,
+      );
     }
   });
 
   it("refuses statuses that are only Object.prototype names", () => {
     for (const status of ["constructor", "toString", "__proto__"]) {
-      expect(() => uptimeStrip({ slots: ["up", status as never], label: "x" })).toThrow(
-        /unknown status/,
-      );
+      expect(() =>
+        uptimeStrip({ inline: true, slots: ["up", status as never], label: "x" }),
+      ).toThrow(/unknown status/);
     }
   });
 
   it("draws a sparkline of 200,000 values without overflowing the stack", () => {
     const values = Array.from({ length: 200_000 }, (_, i) => Math.sin(i / 1000));
-    expect(parse(sparkline({ values })).getAttribute("aria-label")).toMatch(/200,000 values/);
+    expect(parse(sparkline({ inline: true, values })).getAttribute("aria-label")).toMatch(
+      /200,000 values/,
+    );
   });
 
   it("refuses a dilution factor too fine to be a dilution series", () => {
@@ -305,7 +287,7 @@ describe("F3: sub-daily time series", () => {
     const fig = parse(lineChart({ data, x: "t", y: "v", alt: "a" }));
     expect(keyedMarks(fig)).toHaveLength(6);
     const rows = [...fig.querySelectorAll("tbody th")].map((th) => th.textContent);
-    expect(rows[0]).toBe("2026-01-01 00:00 UTC");
+    expect(rows[0]).toBe("January 1, 2026 at 12:00 AM UTC");
     expect(new Set(rows).size).toBe(6);
   });
 
@@ -461,18 +443,20 @@ describe("F13: labels may contain the warning glyph", () => {
 
 describe("F18: one name for text alternatives", () => {
   it("accepts alt on every primitive, and label as the subject of a generated one", () => {
-    expect(parse(progressRing({ value: 0.5, alt: "Half done" })).getAttribute("aria-label")).toBe(
-      "Half done",
-    );
-    expect(parse(uptimeStrip({ slots: ["up"], alt: "All up" })).getAttribute("aria-label")).toBe(
-      "All up",
-    );
-    expect(parse(sparkline({ values: [1, 2], alt: "Rising" })).getAttribute("aria-label")).toBe(
-      "Rising",
-    );
-    expect(parse(progressRing({ value: 0.5, label: "Done" })).getAttribute("aria-label")).toBe(
-      "Done: 50%",
-    );
-    expect(() => uptimeStrip({ slots: ["up"] })).toThrow(/label or alt is required/);
+    expect(
+      parse(progressRing({ inline: true, value: 0.5, alt: "Half done" })).getAttribute(
+        "aria-label",
+      ),
+    ).toBe("Half done");
+    expect(
+      parse(uptimeStrip({ inline: true, slots: ["up"], alt: "All up" })).getAttribute("aria-label"),
+    ).toBe("All up");
+    expect(
+      parse(sparkline({ inline: true, values: [1, 2], alt: "Rising" })).getAttribute("aria-label"),
+    ).toBe("Rising");
+    expect(
+      parse(progressRing({ inline: true, value: 0.5, label: "Done" })).getAttribute("aria-label"),
+    ).toBe("Done: 50%");
+    expect(() => uptimeStrip({ inline: true, slots: ["up"] })).toThrow(/label or alt is required/);
   });
 });

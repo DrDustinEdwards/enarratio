@@ -13,7 +13,7 @@ import {
   type Theme,
 } from "../src/index.js";
 import { deltaE2000 } from "../src/theme/color.js";
-import { defaultTheme } from "../src/themes/index.js";
+import { defaultTheme, highContrastTheme } from "../src/themes/index.js";
 
 describe("contrastRatio", () => {
   it("is 21 for black on white and 1 for a color on itself", () => {
@@ -64,9 +64,10 @@ describe("color vision simulation", () => {
 });
 
 describe("checkTheme", () => {
-  it("passes the built-in theme and the gallery's example theme with no errors", () => {
-    expect(checkTheme(defaultTheme).ok).toBe(true);
-    expect(checkTheme(exampleTheme).ok).toBe(true);
+  it("passes the built-in themes and the gallery's example theme with no findings (B1, B7)", () => {
+    for (const theme of [defaultTheme, highContrastTheme, exampleTheme]) {
+      expect(checkTheme(theme).issues).toEqual([]);
+    }
   });
 
   it("reports low text contrast as an error, per scheme", () => {
@@ -81,12 +82,13 @@ describe("checkTheme", () => {
     });
   });
 
-  it("warns once per pair of series colors that could be confused", () => {
+  it("fails once per pair of series colors that could be confused, and stylesheet refuses it", () => {
     const [first, , ...rest] = defaultTheme.light.series;
     const confusable: Theme = {
       ...defaultTheme,
       light: { ...defaultTheme.light, series: [first, first, ...rest] },
     };
+    expect(() => stylesheet(confusable)).toThrow(/series 1 #\w+ and 2 .* differ by 0/);
     const warnings = checkTheme(confusable).issues.filter(
       (i) =>
         i.check === "series-difference" &&
@@ -94,7 +96,7 @@ describe("checkTheme", () => {
         i.message.includes(" 2 "),
     );
     expect(warnings).toHaveLength(1);
-    expect(warnings[0]?.measured).toBe(0);
+    expect(warnings[0]).toMatchObject({ severity: "error", measured: 0 });
   });
 
   it("errors when the sequential ramp does not grow away from the background", () => {
@@ -167,7 +169,7 @@ describe("the CSS custom property contract", () => {
 
   it("finds the tunable properties", () => {
     expect(tunable.size).toBeGreaterThan(30);
-    expect(tunable.get("--enarratio-font-size-mark")).toBe("12px");
+    expect(tunable.get("--enarratio-font-size-mark")).toBe("0.75rem");
     expect(tunable.get("--enarratio-duration-grow")).toBe("600ms");
   });
 
@@ -181,8 +183,10 @@ describe("the CSS custom property contract", () => {
     expect(stylesheet(defaultTheme)).toContain(base);
   });
 
-  it("defines no theme value itself", () => {
-    expect(base).not.toMatch(/--enarratio-(?:series|sequential|status)-\d*[a-z-]*:/);
+  it("defines no theme value itself, outside the system colors of forced-colors mode", () => {
+    expect(base.replace(/@media \(forced-colors: active\)[\s\S]*?\n}\n/, "")).not.toMatch(
+      /--enarratio-(?:series|sequential|status)-\d*[a-z-]*:/,
+    );
     expect(base).not.toMatch(/#[0-9a-f]{3,6}\b/i);
   });
 });

@@ -53,6 +53,9 @@ const GALLERY = [
   "line",
   "forecast",
   "area",
+  "percent-area",
+  "error-bars",
+  "annotations",
 ];
 
 describe("light charts draw the gallery as the Plot charts do", () => {
@@ -191,8 +194,52 @@ const barCases: [string, Parameters<typeof plot.barChart<(typeof sales)[number]>
   ],
 ];
 
+// Error bars and annotations (record 0024), drawn by both renderers from the same scales.
+const measured = [
+  { site: "North", arm: "A", mean: 12, lo: 9, hi: 15.5 },
+  { site: "North", arm: "B", mean: 8, lo: 6.5, hi: 9 },
+  { site: "South", arm: "A", mean: 14, lo: null, hi: null },
+  { site: "South", arm: "B", mean: 11, lo: 7, hi: 13 },
+];
+const errorBars = { lower: "lo", upper: "hi", label: "95% CI" } as const;
+const notes = [
+  { type: "note", x: "South", y: 11, text: "Lowest arm", dx: 30, dy: -24 },
+  { type: "range", axis: "x", from: "North", to: "North", label: "Pilot" },
+  { type: "range", axis: "y", from: 8, to: 10 },
+] as const;
+const one = measured.filter((m) => m.arm === "B");
+const intervalCases: [string, Parameters<typeof plot.barChart<(typeof measured)[number]>>[0]][] = [
+  ["error bars", { data: one, x: "site", y: "mean", errorBars, alt: "Means" }],
+  [
+    "grouped error bars with a missing interval",
+    { data: measured, x: "site", y: "mean", series: "arm", layout: "grouped", errorBars, alt: "M" },
+  ],
+  [
+    "horizontal grouped error bars",
+    {
+      data: measured,
+      x: "site",
+      y: "mean",
+      series: "arm",
+      layout: "grouped",
+      orientation: "horizontal",
+      errorBars,
+      alt: "Means",
+    },
+  ],
+  ["annotations", { data: one, x: "site", y: "mean", errorBars, annotations: notes, alt: "M" }],
+  [
+    "horizontal annotations",
+    { data: one, x: "site", y: "mean", orientation: "horizontal", annotations: notes, alt: "M" },
+  ],
+];
+
 describe("light barChart", () => {
   it.each(barCases)("matches the Plot chart: %s", (_, options) => {
+    same(lite.barChart(options), plot.barChart(options));
+  });
+
+  it.each(intervalCases)("matches the Plot chart: %s", (_, options) => {
     same(lite.barChart(options), plot.barChart(options));
   });
 
@@ -216,7 +263,7 @@ describe("light barChart", () => {
     },
   );
 
-  it("draws values that are all zero as bars of no height, where the Plot chart fills the frame", () => {
+  it("draws values that are all zero as bars of no height on a 0 to 1 axis, as Plot does (B41)", () => {
     const options = {
       data: [
         { a: "x", v: 0 },
@@ -226,11 +273,11 @@ describe("light barChart", () => {
       y: "v",
       alt: "Zero",
     } as const;
-    const bars = [...parse(lite.barChart(options)).querySelectorAll("rect")];
-    expect(bars.map((b) => b.getAttribute("height"))).toEqual(["0", "0"]);
-    // The known difference (design record 0017): Plot's zero-width domain draws full bars.
-    const drawn = [...parse(plot.barChart(options)).querySelectorAll("rect")];
-    expect(drawn.map((b) => b.getAttribute("height"))).toEqual(["256", "256"]);
+    // Before 0.4.0 Plot's zero-width domain drew full bars (design record 0017); both now agree.
+    for (const chart of [lite.barChart(options), plot.barChart(options)]) {
+      const bars = [...parse(chart).querySelectorAll("rect")];
+      expect(bars.map((b) => b.getAttribute("height"))).toEqual(["0", "0"]);
+    }
   });
 
   it("throws the Plot chart's errors", () => {
@@ -377,6 +424,25 @@ const lineCases: [string, () => [string, string]][] = [
   ],
 ];
 
+lineCases.push([
+  "annotations on a time axis",
+  () => {
+    const o = {
+      data: weekly,
+      x: "at",
+      y: "v",
+      series: "s",
+      annotations: [
+        { type: "note", x: "2025-02-17", y: 50, text: "Peak", dx: -20, dy: -20 },
+        { type: "range", axis: "x", from: new Date(t0 + 21 * D), to: new Date(t0 + 42 * D) },
+        { type: "range", axis: "y", from: 20, to: 40, label: "Band" },
+      ],
+      alt: "Weekly",
+    } as const;
+    return [lite.lineChart(o), plot.lineChart(o)];
+  },
+]);
+
 for (const [step, n, label] of [
   [1000, 40, "seconds"],
   [15_000, 50, "seconds by fifteen"],
@@ -428,6 +494,14 @@ const areaCases: [string, () => [string, string]][] = [
     "years",
     () => {
       const o = { data: years, x: "year", y: "v", alt: "Years" } as const;
+      return [lite.areaChart(o), plot.areaChart(o)];
+    },
+  ],
+  [
+    "stacked to 100%",
+    () => {
+      const data = weekly.map((w) => ({ ...w, v: w.v === null ? null : Math.abs(w.v) }));
+      const o = { data, x: "at", y: "v", series: "s", percent: true, alt: "Shares" } as const;
       return [lite.areaChart(o), plot.areaChart(o)];
     },
   ],

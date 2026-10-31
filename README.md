@@ -56,9 +56,10 @@ websites who want charts that:
 
 - **render on the server** as inline SVG inside semantic HTML, with no client
   code required;
-- **are accessible by construction**: a required written description, an
-  equivalent data table, keyboard access and screen reader announcements for
-  every interaction, and no reliance on color alone;
+- **are accessible by construction**: a written description (generated from
+  the data when none is given), an equivalent data table, keyboard access and
+  screen reader announcements for every interaction, and no reliance on color
+  alone;
 - **follow a site's theme** in light and dark mode from one render, with
   palettes checked for contrast and for color vision deficiency;
 - **include scientific chart types** designed alongside the general ones,
@@ -78,9 +79,9 @@ it draws:
 
 | Import | Holds | Also install |
 |---|---|---|
-| `enarratio` | Core and primitives | Nothing |
-| `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` | `@observablehq/plot linkedom` |
-| `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | `@observablehq/plot d3-force linkedom` |
+| `enarratio` | Core, primitives and `tableChart` | Nothing |
+| `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` and the charts below | `@observablehq/plot linkedom` |
+| `enarratio/science` | `genomeTrack`, `titerPlot`, `doseResponse`, `survivalPlot`, `forestPlot`, `phylogeneticTree`, `networkChart`, and their statistics | `@observablehq/plot d3-force linkedom` |
 | `enarratio/lite` | `barChart`, `lineChart`, `areaChart` without Observable Plot, for the browser; also `enarratio/lite/bar`, `/line`, `/area` | Nothing |
 | `enarratio/enhance` | Browser interaction | Nothing |
 | `enarratio/themes` | `defaultTheme` | Nothing |
@@ -88,9 +89,10 @@ it draws:
 
 (`linkedom` is dropped from browser bundles, which use the browser's own
 document.) To draw bar, line and area charts in the browser, import them from
-`enarratio/lite`: the same options give the same SVG, with no Observable Plot,
-linkedom or DOM, in under 10 kB per chart bundled, minified and gzipped. Enarratio is ESM only and needs Node.js 22 or later (or any runtime with
-standard ES modules). TypeScript types are included.
+`enarratio/lite`: the same options (error bars and annotations included) give
+the same SVG, with no Observable Plot, linkedom or DOM, in 15 to 16 kB per chart
+bundled, minified and gzipped. Enarratio is ESM only and needs Node.js 22 or
+later (or any runtime with standard ES modules). TypeScript types are included.
 
 ## Five-minute start
 
@@ -150,17 +152,20 @@ document.addEventListener("enarratio:select", (event) => {
 });
 ```
 
-Now bars show details on hover and focus, arrow keys move between them,
-Enter or a click filters by the bar's series (and fires `enarratio:select`),
-legend entries become toggle buttons, and a drag or Shift with the arrow keys
-picks a range on time axes (`enarratio:brush`). Escape clears. Everything is
-announced to screen readers and motion stops under `prefers-reduced-motion`.
+Now bars show details on hover and focus, arrow keys move between them (along
+a series and between series), Enter or a click filters by the bar's series
+(and fires `enarratio:select`), legend entries become toggle buttons, a drag,
+Shift with the arrow keys or a from-and-to form picks a range on time axes
+(`enarratio:brush`), and the data table sorts and can replace the chart.
+Escape clears. Everything is announced to screen readers and motion stops
+under `prefers-reduced-motion`. `{ expand: true, url: true }` adds an expanded
+view and keeps the filter in the address; `strings` translates the layer.
 
 Without a bundler, serve `node_modules/enarratio/dist/enhance/index.js` as a
 file (it has no imports of its own) and load it with
 `<script type="module">import { enhance } from "/enhance.js"; enhance();</script>`,
 or from a CDN such as
-`https://cdn.jsdelivr.net/npm/enarratio@0.3.1/dist/enhance/index.js`.
+`https://cdn.jsdelivr.net/npm/enarratio@0.4.0/dist/enhance/index.js`.
 
 To redraw a chart in place, pass new server markup to `update()` on the chart
 `enhance()` returns. That markup should come from Enarratio: it is sanitized
@@ -174,14 +179,27 @@ all into `site/dist`.
 
 | Function | Import | Draws |
 |---|---|---|
-| `barChart` | `enarratio/plot` | Bars, stacked or grouped, vertical or horizontal, on a category or a time axis; counts rows when no value is given |
+| `barChart` | `enarratio/plot` | Bars, stacked or grouped, vertical or horizontal, on a category or a time axis; counts rows when no value is given; error bars |
+| `divergingBarChart` | `enarratio/plot` | Signed values about zero, each bar labeled with its sign |
+| `waterfallChart` | `enarratio/plot` | A bridge from one total to another through increases and decreases |
 | `lineChart` | `enarratio/plot` | Lines over time or any number, with gaps, reference lines, event markers, direct labels, log y, and a forecast band with the line dashed after a chosen x |
-| `areaChart` | `enarratio/plot` | Stacked areas over time |
-| `scatterPlot` | `enarratio/plot` | Points on linear or log axes, symbols per series, optional regression with 95% band |
+| `areaChart` | `enarratio/plot` | Stacked areas over time, or stacked to 100% |
+| `smallMultiples` | `enarratio/plot` | One bar or line chart per group, on shared scales |
+| `scatterPlot` | `enarratio/plot` | Points on linear or log axes, symbols per series, optional regression with 95% band, bubbles with a size legend, error bars |
+| `histogram`, `densityPlot` | `enarratio/plot` | Distributions: binned counts, and kernel density curves |
+| `boxPlot`, `stripPlot` | `enarratio/plot` | Box plots, and every value as a beeswarm |
+| `dotPlot`, `rangePlot`, `dumbbellPlot` | `enarratio/plot` | One row per item: dots (with intervals), low-to-high ranges, and two values joined |
+| `slopeChart` | `enarratio/plot` | Each item's value at two times, labeled at both ends |
+| `pieChart` | `enarratio/plot` | A pie or donut, reported as an issue past six slices |
 | `heatmap` | `enarratio/plot` | A grid on the theme's sequential ramp, with printed values and labeled bins |
+| `tableChart` | `enarratio` | One sortable table with inline bars, heat cells and sparklines |
 | `networkChart` | `enarratio/science` | A force-directed network laid out on the server, deterministic |
 | `titerPlot` | `enarratio/science` | Titers on a dilution axis with geometric mean, 95% CI and limit of detection |
 | `genomeTrack` | `enarratio/science` | Features to scale on a nucleotide axis, arrows by strand, overlaps in lanes |
+| `doseResponse` | `enarratio/science` | A four-parameter logistic curve, fitted or given, with the EC50 marked |
+| `survivalPlot` | `enarratio/science` | Kaplan-Meier curves with censor marks, confidence bands and the number at risk |
+| `forestPlot` | `enarratio/science` | Study estimates with intervals, and a pooled estimate (fixed or random effects) |
+| `phylogeneticTree` | `enarratio/science` | A tree from Newick, rectangular, tips colored by group, support at the nodes |
 | `sparkline` | `enarratio` | A word-sized trend line |
 | `progressRing` | `enarratio` | Progress toward a total |
 | `uptimeStrip` | `enarratio` | Up, degraded, down or unmeasured, one tick per period |
@@ -232,7 +250,7 @@ those properties, so one server render serves every theme and both schemes.
 
 ```ts
 import { checkTheme, defineTheme, stylesheet } from "enarratio";
-import { defaultTheme } from "enarratio/themes";
+import { defaultTheme, highContrastTheme } from "enarratio/themes";
 
 const theme = defineTheme({
   ...defaultTheme,
@@ -240,11 +258,11 @@ const theme = defineTheme({
   fonts: { body: "Inter, system-ui, sans-serif" },
   light: { ...defaultTheme.light, background: "#fbfaf7" },
 });
-const css = stylesheet(theme);
 const report = checkTheme(theme);
 // report.issues: text below 4.5:1, marks below 3:1 (WCAG 2.2),
 // and series colors closer than 10 CIEDE2000 units under simulated
-// protanopia, deuteranopia or tritanopia.
+// protanopia, deuteranopia or tritanopia. stylesheet() throws on any of them.
+const css = stylesheet(theme, { highContrast: highContrastTheme });
 ```
 
 A site whose colors and type already live in its own design tokens can skip the
@@ -256,23 +274,44 @@ setting none changes nothing. The full list is in the
 [API reference](docs/api.md#custom-properties).
 
 Any chart can override a series color with `colors: { Talks: "#8a4a1b" }` or a
-light and dark pair. One theme ships with the package, `defaultTheme` in `enarratio/themes`. The
+light and dark pair. The chart carries it in a data attribute, never a `style`
+attribute, so a strict Content-Security-Policy needs no `'unsafe-inline'`: add
+`colorStyles(html)` to the page's CSS. Two themes ship with the package in
+`enarratio/themes`: `defaultTheme`, and `highContrastTheme`, which the example
+above uses for readers who ask for more contrast. The
 gallery's second page uses a neutral, heavily commented example theme,
 [examples/themes/example.ts](examples/themes/example.ts), written to be copied
 and edited.
 
 ## Accessibility
 
-- `alt` is required. It names the chart's SVG (`role="img"`), and belongs to
-  the SVG rather than the figure so that the caption and table stay readable.
+- Every chart is a figure with a title, a visible one-sentence finding (its
+  `alt`), a screen reader overview (type, axes and ranges, series and points),
+  a summary computed from the data (trend, extremes, outliers, intervals, at
+  grade 9 or below), notes, a source line, a "Download CSV" link and the data
+  table, all in the HTML with scripts off. Primitives are figures too, unless
+  `inline`.
+- `alt` names the chart's SVG (`role="img"`), and belongs to the SVG rather
+  than the figure so that the caption and table stay readable. A chart without
+  one names itself from its data and reports an issue; `strict: true` turns
+  every issue (no alt or title, an unlabeled axis, too many series or points,
+  text above grade 9) into an error that fails the build.
+- Numbers, dates and every generated string follow `locale` and `strings`.
 - Every chart carries an equivalent data table, in a disclosure or visually
   hidden.
 - Every mark has hover details that work without script, through SVG `<title>`.
-- Series are distinguished by more than hue: legends and direct labels,
+- Series are distinguished by more than hue: textures on filled bars and
+  areas, legends and direct labels (moved apart so they never overlap),
   symbols in scatter plots, hollow points below a limit of detection, heights
   in uptime strips, dashed outlines for missing values.
-- Enhanced charts are keyboard operable, announce filters and ranges through a
-  live region, and respect `prefers-reduced-motion`.
+- Text in the drawing follows the browser's font size and never renders under
+  12px at default zoom, down to a 320px screen.
+- Charts follow forced colors (Windows High Contrast), `prefers-contrast:
+  more`, `prefers-reduced-motion` and print, and carry no `style` attribute.
+- Enhanced charts are keyboard operable with one tab stop, through native
+  buttons over the marks and a described key hint; they announce each point's
+  place, filters, ranges, sorts and updates through a live region, and respect
+  `prefers-reduced-motion`.
 - The test suite runs axe-core over the gallery in both themes, light and
   dark, with and without scripts.
 

@@ -33,9 +33,9 @@ const ALLOWED_ELEMENTS = new Set([
   "a",
   "defs",
   "clippath",
+  "pattern",
 ]);
 const LINK_ATTRIBUTES = new Set(["href", "xlink:href"]);
-const SAFE_STYLE = /^(\s*--enarratio-[a-z0-9-]+\s*:\s*[^;{}<>]*;?)*\s*$/i;
 
 /** Relative and http(s) links only, with no user or password before the host, as the server allows (A11). */
 function safeLink(value: string): boolean {
@@ -65,7 +65,7 @@ export function sanitize(root: Element): void {
       if (
         lower.startsWith("on") ||
         (LINK_ATTRIBUTES.has(lower) && !safeLink(value)) ||
-        (lower === "style" && !SAFE_STYLE.test(value)) ||
+        lower === "style" ||
         lower === "srcdoc" ||
         lower === "ping" ||
         lower.startsWith("form")

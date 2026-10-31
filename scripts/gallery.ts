@@ -23,7 +23,7 @@ import { familyFooterHtml } from "capsomer/behavior/family-footer";
 import { letterheadHtml } from "capsomer/behavior/site-header";
 import { checkTheme, stylesheet, type Theme } from "enarratio";
 import { barChart } from "enarratio/lite";
-import { defaultTheme } from "enarratio/themes";
+import { defaultTheme, highContrastTheme } from "enarratio/themes";
 import { rolldown } from "rolldown";
 import { exampleTheme } from "../examples/themes/example.ts";
 import { HOST, writeHeadersFile } from "./security-headers.ts";
@@ -55,14 +55,36 @@ const NAMES: Record<string, string> = {
   runs: "Runs per day",
   "grouped-bar": "Grouped bars",
   "horizontal-bar": "Horizontal bars",
+  "diverging-bar": "Diverging bars",
+  "error-bars": "Error bars",
+  waterfall: "Waterfall",
   line: "Line",
   forecast: "Forecast",
+  annotations: "Annotations",
   area: "Stacked areas",
+  "percent-area": "100% stacked areas",
+  "small-multiples": "Small multiples",
+  "small-multiples-bar": "Small multiples, bars",
   scatter: "Scatter",
+  bubble: "Bubbles",
+  histogram: "Histogram",
+  density: "Density",
+  box: "Box plot",
+  beeswarm: "Beeswarm",
+  dot: "Dot plot",
+  range: "Range plot",
+  dumbbell: "Dumbbell",
+  slope: "Slope chart",
+  donut: "Donut",
   heatmap: "Heatmap",
+  "table-chart": "Table with graphics",
   network: "Network",
   titer: "Titers",
   genome: "Genome map",
+  "dose-response": "Dose-response",
+  survival: "Survival",
+  forest: "Forest plot",
+  tree: "Phylogenetic tree",
   sparkline: "Sparklines",
   primitives: "Rings and uptime",
   "heat-strip": "Heat strip",
@@ -567,7 +589,8 @@ const links = (current: string): Link[] => [
   { label: "Code", href: "https://github.com/DrDustinEdwards/enarratio", current: false },
 ];
 for (const [theme, file, css] of pages) {
-  writeFileSync(join(outDir, css), stylesheet(theme));
+  // Readers who ask for more contrast get the high-contrast theme's colors on every page.
+  writeFileSync(join(outDir, css), stylesheet(theme, { highContrast: highContrastTheme }));
   writeFileSync(join(outDir, file), page(theme, file, css, examples, links(file)));
 }
 writeFileSync(join(outDir, ASTRO_PAGE), astroPage());

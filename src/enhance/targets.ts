@@ -1,4 +1,4 @@
-/** The shapes the layer draws over marks: pointer targets and the focus ring. */
+/** The pointer targets the layer draws under small marks. */
 
 import { SVG_NS, shape } from "./marks.js";
 
@@ -28,34 +28,4 @@ export function hitArea(mark: SVGGraphicsElement): SVGRectElement | null {
   hit.setAttribute("height", String(height));
   parent.insertBefore(hit, parent.firstChild);
   return hit;
-}
-
-/**
- * The focus ring around a mark: a background-colored ring inside a focus-colored one, so the ring
- * shows against any series color beside it, not only against the background (F7).
- */
-export function focusRing(mark: SVGGraphicsElement): SVGGElement | null {
-  const parent = mark.parentElement;
-  if (!parent) return null;
-  const box = (shape(mark) as SVGGraphicsElement).getBBox();
-  const scale = mark.getScreenCTM()?.a || 1;
-  const pad = 2 / scale;
-  const ring = document.createElementNS(SVG_NS, "g");
-  ring.setAttribute("class", "enarratio-focus-ring");
-  ring.setAttribute("aria-hidden", "true");
-  for (const [cls, extra] of [
-    ["enarratio-focus-ring-inner", pad],
-    ["enarratio-focus-ring-outer", pad + 3.5 / scale],
-  ] as const) {
-    const rect = document.createElementNS(SVG_NS, "rect");
-    rect.setAttribute("class", cls);
-    rect.setAttribute("x", String(box.x - extra));
-    rect.setAttribute("y", String(box.y - extra));
-    rect.setAttribute("width", String(box.width + 2 * extra));
-    rect.setAttribute("height", String(box.height + 2 * extra));
-    rect.setAttribute("rx", String(2 / scale));
-    ring.append(rect);
-  }
-  parent.append(ring);
-  return ring;
 }

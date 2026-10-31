@@ -132,6 +132,19 @@ describe("genomeTrack", () => {
     expect(rows[1]).toEqual(["B", "Gene", "300", "700", "401", "-"]);
   });
 
+  it("summarizes lengths, strands and overlaps within a track", () => {
+    const fig = parse(
+      genomeTrack({
+        length: 1000,
+        features: [...features, { name: "D", start: 1, end: 400, strand: 1, track: "Other" }],
+        alt: "a",
+      }),
+    );
+    expect(fig.querySelector(".enarratio-summary")?.textContent).toBe(
+      "4 features, from 201 nt (C) to 401 nt (B) long. Strands: 2 forward, 1 reverse and 1 with no strand. 1 pair of features overlaps.",
+    );
+  });
+
   it("refuses features outside the sequence", () => {
     expect(() =>
       genomeTrack({ length: 100, features: [{ name: "X", start: 50, end: 150 }], alt: "a" }),

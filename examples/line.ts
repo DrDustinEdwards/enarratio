@@ -24,7 +24,13 @@ export default lineChart({
   markers: [{ x: "2025-11-24", label: "Holiday" }],
   directLabels: true,
   title: "Weekly positive tests by county",
-  alt: "Lines of weekly positive tests in three counties from October 2025 to January 2026. All three peak in the week of 8 December; Travis peaks near 80, above the alert threshold of 60, while Hays and Williamson stay below it. Hays did not report in the week of 17 November.",
+  subtitle: "One line per county. The dashed line is the alert threshold.",
+  alt: "All three counties peaked in the week of 8 December, and only Travis passed the alert threshold of 60.",
   caption:
-    "Illustrative data. Drag across the chart, or hold Shift with the arrow keys, to pick a range.",
+    "Drag across the chart, or hold Shift with the arrow keys, to pick a range. Hays did not report in the week of 17 November.",
+  notes: "A positive test is one lab-confirmed result.",
+  source: {
+    name: "Sample health department (illustrative data)",
+    href: "https://example.com/data",
+  },
 });

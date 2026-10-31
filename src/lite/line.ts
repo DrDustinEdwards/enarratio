@@ -5,8 +5,14 @@
  * @packageDocumentation
  */
 
-import { type LineChartOptions, lineModel, type Point } from "../render/line-model.js";
+import {
+  type LineChartOptions,
+  lineModel,
+  type Point,
+  spreadLabels,
+} from "../render/line-model.js";
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
+import { annotationMarkup, continuousScale } from "./annotate.js";
 import {
   annotations,
   areaPath,
@@ -85,8 +91,13 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
   };
 
   const hollow = forecast !== undefined;
+  // Annotations from the same scales Plot's are placed with: ranges behind the marks, notes last.
+  const notes = annotationMarkup("lineChart", options.annotations, (axis) =>
+    continuousScale(axis === "x" ? x : y),
+  );
   const parts = [
     layout.axes,
+    notes.behind,
     prepared.band
       ? pathGroup(
           "area",
@@ -133,15 +144,16 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
   if (model.directLabels) {
     // Each series named at its last point.
     const last = bySeries(present).map((group) => group[group.length - 1] as Point);
+    const ys = spreadLabels(last.map((p) => y(p.value ?? 0)));
     parts.push(
       el(
         "g",
         { "data-enarratio-mark": "text", "text-anchor": "start", transform: translate(6, 0) },
         last
-          .map((p) =>
+          .map((p, i) =>
             el(
               "text",
-              { fill: color(p), transform: translate(x(p.at), y(p.value ?? 0)), y: "0.32em" },
+              { fill: color(p), transform: translate(x(p.at), ys[i] as number), y: "0.32em" },
               text(p.series),
             ),
           )
@@ -150,8 +162,10 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
     );
   }
 
+  parts.push(notes.above);
+
   return model.figure(
-    svgRoot(layout.frame.width, layout.frame.height, options.alt, "img", parts.join("")),
+    svgRoot(layout.frame.width, layout.frame.height, model.alt, "img", parts.join("")),
     layout.xScale,
   );
 }

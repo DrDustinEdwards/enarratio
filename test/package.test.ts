@@ -122,10 +122,42 @@ describe.skipIf(!built)("the built package", () => {
     expect(core["sparkline"]).toBeTypeOf("function");
     expect(core).not.toHaveProperty("barChart");
     expect(Object.keys(await load("plot/index.js")).sort()).toEqual(
-      ["areaChart", "barChart", "heatmap", "lineChart", "scatterPlot"].sort(),
+      [
+        "areaChart",
+        "barChart",
+        "boxPlot",
+        "densityPlot",
+        "divergingBarChart",
+        "dotPlot",
+        "dumbbellPlot",
+        "heatmap",
+        "histogram",
+        "lineChart",
+        "pieChart",
+        "rangePlot",
+        "scatterPlot",
+        "slopeChart",
+        "smallMultiples",
+        "stripPlot",
+        "waterfallChart",
+      ].sort(),
     );
     expect(Object.keys(await load("science/index.js")).sort()).toEqual(
-      ["genomeTrack", "geometricSummary", "networkChart", "titerPlot"].sort(),
+      [
+        "doseResponse",
+        "fitLogistic",
+        "forestPlot",
+        "genomeTrack",
+        "geometricSummary",
+        "kaplanMeier",
+        "logistic",
+        "networkChart",
+        "parseNewick",
+        "phylogeneticTree",
+        "poolEstimates",
+        "survivalPlot",
+        "titerPlot",
+      ].sort(),
     );
     expect(Object.keys(await load("lite/index.js")).sort()).toEqual(
       ["areaChart", "barChart", "lineChart"].sort(),

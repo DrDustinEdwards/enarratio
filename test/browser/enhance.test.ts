@@ -15,84 +15,99 @@ afterAll(async () => {
 });
 
 const STACKED = '[data-example="stacked-bar"]';
+const POINTS = ".enarratio-points > *";
 
-/** The focused mark's category and series. */
+/** The focused point's label, without its place in the series. */
 const focused = (p: Page): Promise<string> =>
-  p.evaluate(() => {
-    const el = document.activeElement;
-    return `${el?.getAttribute("data-enarratio-x")}|${el?.getAttribute("data-enarratio-series")}`;
-  });
+  p.evaluate(
+    () => document.activeElement?.getAttribute("aria-label")?.replace(/, \d+ of \d+$/, "") ?? "",
+  );
 
 const eventLog = (p: Page, example: string): Promise<string> =>
   p.$eval(`${example} .events`, (el) => el.textContent ?? "");
+
+const liveText = (p: Page, example: string): Promise<string> =>
+  p.$eval(`${example} figure [aria-live]`, (el) => el.textContent?.trim() ?? "");
 
 describe("enhance: stacked bar", () => {
   beforeAll(async () => {
     page = await harness.open("index.html", "light");
   });
 
-  it("turns marks into named buttons with one tab stop", async () => {
-    const marks = await page.$$eval(`${STACKED} [data-enarratio-key]`, (els) =>
-      els.map((el) => [
-        el.getAttribute("role"),
-        el.getAttribute("tabindex"),
-        el.getAttribute("aria-label"),
-      ]),
+  it("lays a named native button over each mark, with one tab stop and the keys described", async () => {
+    const points = await page.$$eval(`${STACKED} ${POINTS}`, (els) =>
+      els.map((el) => [el.tagName, el.getAttribute("tabindex"), el.getAttribute("aria-label")]),
     );
-    expect(marks.every(([role]) => role === "button")).toBe(true);
-    expect(marks.filter(([, tab]) => tab === "0")).toHaveLength(1);
-    expect(marks[0]?.[2]).toBe("Year 2019, Publications: 3");
-    expect(await page.$eval(`${STACKED} svg`, (svg) => svg.getAttribute("role"))).toBe("group");
+    expect(points.every(([tag]) => tag === "BUTTON")).toBe(true);
+    expect(points.filter(([, tab]) => tab === "0")).toHaveLength(1);
+    expect(points[0]?.[2]).toBe("Year 2019, Publications: 3, 1 of 6");
+    expect(await page.$eval(`${STACKED} svg`, (svg) => svg.getAttribute("role"))).toBe("img");
     expect(await page.$(`${STACKED} [data-enarratio-key] title`)).toBeNull();
-    // The marks scroll the frame into view, so the frame is no longer a tab stop of its own.
+    const hint = await page.$eval(`${STACKED} .enarratio-points`, (layer) => [
+      layer.getAttribute("role"),
+      document.getElementById(layer.getAttribute("aria-describedby") ?? "")?.textContent,
+    ]);
+    expect(hint[0]).toBe("application");
+    expect(hint[1]).toMatch(/^Arrow keys move between points/);
+    // The points scroll the frame into view, so the frame is no longer a tab stop of its own.
     expect(
       await page.$eval(`${STACKED} .enarratio-frame`, (el) => el.getAttribute("tabindex")),
     ).toBeNull();
   });
 
-  it("moves by column with left and right, and through a stack with up and down", async () => {
-    // SVG elements take focus from script; Puppeteer's page.focus() accepts only HTML elements.
-    await page.$eval(`${STACKED} [data-enarratio-key][tabindex="0"]`, (el) =>
-      (el as SVGElement).focus(),
+  it("walks along a series, between series, by tens, to the ends and back", async () => {
+    await page.focus(`${STACKED} ${POINTS}[tabindex="0"]`);
+    expect(await focused(page)).toBe("Year 2019, Publications: 3");
+    // The hint shows while a point has focus.
+    expect(await page.$eval(`${STACKED} .enarratio-hint`, (el) => el.clientWidth)).toBeGreaterThan(
+      100,
     );
-    expect(await focused(page)).toBe("2019|Publications");
-    await page.keyboard.press("ArrowUp");
-    expect(await focused(page)).toBe("2019|Talks");
-    await page.keyboard.press("ArrowUp");
-    expect(await focused(page)).toBe("2019|Talks");
-    await page.keyboard.press("ArrowRight");
-    expect(await focused(page)).toBe("2020|Publications");
-    await page.keyboard.press("ArrowLeft");
-    expect(await focused(page)).toBe("2019|Publications");
-    await page.keyboard.press("End");
-    expect(await focused(page)).toBe("2024|Talks");
+    const walk: [string, string][] = [
+      ["ArrowUp", "Year 2019, Talks: 1"],
+      ["ArrowUp", "Year 2019, Talks: 1"],
+      // 2020 has no talks: along the series is the next year that has one.
+      ["ArrowRight", "Year 2021, Talks: 2"],
+      ["PageDown", "Year 2024, Talks: 2"],
+      ["Home", "Year 2019, Talks: 1"],
+      ["End", "Year 2024, Talks: 2"],
+      ["Backspace", "Year 2019, Talks: 1"],
+      ["ArrowDown", "Year 2019, Publications: 3"],
+      ["ArrowLeft", "Year 2019, Publications: 3"],
+    ];
+    for (const [key, expected] of walk) {
+      await page.keyboard.press(key as "ArrowUp");
+      expect(await focused(page), key).toBe(expected);
+    }
   });
 
-  it("shows hover details for the focused mark", async () => {
+  it("shows hover details for the focused mark and fades the other series", async () => {
     const tip = await page.$eval(".enarratio-tooltip:not([hidden])", (el) => el.textContent);
-    expect(tip).toBe("Year 2024, Talks: 2");
+    expect(tip).toBe("Year 2019, Publications: 3");
+    const faded = await page.$$eval(`${STACKED} [data-enarratio-faded]`, (els) => [
+      ...new Set(els.map((el) => el.getAttribute("data-enarratio-series"))),
+    ]);
+    expect(faded.sort()).toEqual(["Grants", "Talks"]);
   });
 
   it("filters with Enter, dims other series, and clears with Escape", async () => {
     await page.keyboard.press("Enter");
     expect(await eventLog(page, STACKED)).toBe(
-      'enarratio:select {"chartId":"entries-by-year","field":"type","value":"Talks","x":"2024"}',
+      'enarratio:select {"chartId":"entries-by-year","field":"type","value":"Publications","x":"2019"}',
     );
     const dimmed = await page.$$eval(`${STACKED} [data-enarratio-dimmed]`, (els) =>
       els.map((el) => el.getAttribute("data-enarratio-series")),
     );
     expect(dimmed.length).toBeGreaterThan(0);
-    expect(dimmed).not.toContain("Talks");
-    expect(await page.$eval(`${STACKED} figure [aria-live]`, (el) => el.textContent)).toBe(
-      "Filtered to Talks",
-    );
+    expect(dimmed).not.toContain("Publications");
+    expect(await liveText(page, STACKED)).toBe("Filtered to Publications");
     await page.keyboard.press("Escape");
     expect(await eventLog(page, STACKED)).toContain('"value":null');
     expect(await page.$(`${STACKED} [data-enarratio-dimmed]`)).toBeNull();
   });
 
-  it("filters from the legend by pointer", async () => {
-    await page.click(`${STACKED} .enarratio-legend li[data-enarratio-series="Grants"] button`);
+  it("filters from the legend by pointer, and clears it by keyboard", async () => {
+    const grants = `${STACKED} .enarratio-legend li[data-enarratio-series="Grants"] button`;
+    await page.click(grants);
     expect(await eventLog(page, STACKED)).toBe(
       'enarratio:select {"chartId":"entries-by-year","field":"type","value":"Grants"}',
     );
@@ -100,6 +115,10 @@ describe("enhance: stacked bar", () => {
       els.map((el) => el.getAttribute("aria-pressed")),
     );
     expect(pressed).toEqual(["false", "true", "false"]);
+    await page.focus(grants);
+    await page.keyboard.press("Enter");
+    expect(await eventLog(page, STACKED)).toContain('"value":null');
+    expect(await liveText(page, STACKED)).toBe("Filter cleared");
   });
 
   it("filters by clicking a mark, and a second click clears it", async () => {
@@ -116,6 +135,74 @@ describe("enhance: stacked bar", () => {
 
   afterAll(async () => {
     await page.close();
+  });
+});
+
+describe("enhance: table, view switch, expand and address", () => {
+  it("sorts the table by a column, and switches between chart and table", async () => {
+    const p = await harness.open("index.html", "light");
+    const button = (text: string): Promise<void> =>
+      p.$$eval(
+        `${STACKED} .enarratio-controls button`,
+        (els, t) => (els.find((el) => el.textContent === t) as HTMLElement).click(),
+        text,
+      );
+    const years = (): Promise<(string | null)[]> =>
+      p.$$eval(`${STACKED} .enarratio-data tbody th`, (els) => els.map((el) => el.textContent));
+    expect(await years()).toEqual(["2019", "2020", "2021", "2022", "2023", "2024"]);
+    await button("Show table");
+    const shown = await p.$eval(`${STACKED} figure`, (f) => [
+      getComputedStyle(f.querySelector(".enarratio-frame") as Element).display,
+      (f.querySelector(".enarratio-data") as HTMLDetailsElement).open,
+    ]);
+    expect(shown).toEqual(["none", true]);
+    const publications = `${STACKED} .enarratio-data thead th:nth-child(2)`;
+    await p.click(`${publications} button`);
+    expect(await p.$eval(publications, (th) => th.getAttribute("aria-sort"))).toBe("ascending");
+    expect(await years()).toEqual(["2019", "2020", "2023", "2021", "2022", "2024"]);
+    await p.click(`${publications} button`);
+    expect(await years()).toEqual(["2024", "2022", "2021", "2020", "2023", "2019"]);
+    expect(await liveText(p, STACKED)).toBe("Sorted by Publications, descending");
+    await button("Show chart");
+    expect(await p.$eval(`${STACKED} .enarratio-data`, (d) => (d as HTMLDetailsElement).open)).toBe(
+      false,
+    );
+    // The gallery turns expand on: Escape closes it.
+    await button("Expand");
+    expect(await p.$eval(`${STACKED} figure`, (f) => getComputedStyle(f).position)).toBe("fixed");
+    await p.keyboard.press("Escape");
+    expect(await p.$(`${STACKED} [data-enarratio-expanded]`)).toBeNull();
+    await p.close();
+  });
+
+  it("sorts a table chart's one table, with no chart and table switch", async () => {
+    const p = await harness.open("index.html", "light");
+    const TABLE = '[data-example="table-chart"]';
+    const first = `${TABLE} .enarratio-data thead th:nth-child(2)`;
+    expect(await p.$(`${TABLE} .enarratio-controls`)).toBeNull();
+    await p.click(`${first} button`);
+    expect(await p.$eval(first, (th) => th.getAttribute("aria-sort"))).toBe("ascending");
+    expect(await liveText(p, TABLE)).toMatch(/^Sorted by /);
+    await p.close();
+  });
+
+  it("keeps a filter in the address, and shows it again from a link", async () => {
+    const p = await harness.open("index.html", "light");
+    await p.click(`${STACKED} [data-enarratio-x="2021"][data-enarratio-series="Talks"]`);
+    const search = await p.evaluate(() => location.search);
+    expect(new URLSearchParams(search).get("entries-by-year")).toBe("type:Talks");
+    await p.close();
+    const shared = await harness.open(`index.html${search}`, "light");
+    expect(await eventLog(shared, STACKED)).toBe(
+      'enarratio:select {"chartId":"entries-by-year","field":"type","value":"Talks"}',
+    );
+    expect(
+      await shared.$eval(
+        `${STACKED} .enarratio-legend li[data-enarratio-series="Talks"] button`,
+        (b) => b.getAttribute("aria-pressed"),
+      ),
+    ).toBe("true");
+    await shared.close();
   });
 });
 
@@ -143,12 +230,14 @@ describe("enhance: update and destroy", () => {
       template.content.querySelector('[data-enarratio-x="Contact"]')?.setAttribute("width", "100");
       const next = template.innerHTML;
       chart.update(next);
+      const announced = figure.querySelector("[aria-live]")?.textContent;
       const during = figure.querySelector('[data-enarratio-x="Contact"]')?.getAttribute("width");
       await new Promise((r) => setTimeout(r, 700));
       const after = figure.querySelector('[data-enarratio-x="Contact"]')?.getAttribute("width");
       chart.destroy();
       return {
         before,
+        announced,
         during,
         after,
         role: figure.querySelector("svg")?.getAttribute("role"),
@@ -156,6 +245,7 @@ describe("enhance: update and destroy", () => {
         frameTab: figure.querySelector(".enarratio-frame")?.getAttribute("tabindex"),
       };
     });
+    expect(result.announced).toBe("Chart updated");
     expect(Number(result.during)).toBeLessThan(100);
     expect(result.after).toBe("100");
     expect(result.role).toBe("img");
@@ -198,7 +288,7 @@ describe("enhance: brush on a time axis", () => {
 
   it("picks a range with Shift and the arrow keys, and clears it with Escape", async () => {
     const p = await harness.open("index.html", "light");
-    await p.$eval(`${LINE} [data-enarratio-key][tabindex="0"]`, (el) => (el as SVGElement).focus());
+    await p.focus(`${LINE} ${POINTS}[tabindex="0"]`);
     await p.keyboard.down("Shift");
     await p.keyboard.press("ArrowRight");
     await p.keyboard.press("ArrowRight");
@@ -212,6 +302,32 @@ describe("enhance: brush on a time axis", () => {
     expect(await eventLog(p, LINE)).toBe(
       'enarratio:brush {"chartId":"weekly-cases","range":null,"time":true}',
     );
+    await p.close();
+  });
+});
+
+describe("enhance: the range form", () => {
+  it("picks a range from typed dates, and clears it", async () => {
+    const p = await harness.open("index.html", "light");
+    const LINE = '[data-example="line"]';
+    await p.$eval(`${LINE} .enarratio-range`, (d) => {
+      (d as HTMLDetailsElement).open = true;
+    });
+    await p.$$eval(`${LINE} .enarratio-range input`, (inputs) => {
+      (inputs[0] as HTMLInputElement).value = "2025-11-03";
+      (inputs[1] as HTMLInputElement).value = "2025-12-01";
+    });
+    await p.focus(`${LINE} .enarratio-range input`);
+    await p.keyboard.press("Enter");
+    expect(await eventLog(p, LINE)).toBe(
+      `enarratio:brush {"chartId":"weekly-cases","range":[${Date.UTC(2025, 10, 3)},${Date.UTC(2025, 11, 1)}],"time":true}`,
+    );
+    expect(await liveText(p, LINE)).toBe("Range selected: 2025-11-03 to 2025-12-01");
+    await p.$$eval(`${LINE} .enarratio-range button`, (els) => (els[1] as HTMLElement).click());
+    expect(await eventLog(p, LINE)).toContain('"range":null');
+    expect(
+      await p.$eval(`${LINE} .enarratio-range input`, (i) => (i as HTMLInputElement).value),
+    ).toBe("");
     await p.close();
   });
 });
@@ -248,18 +364,24 @@ describe("enhance: selecting a year, page-set filters and links", () => {
         events += 1;
       });
       chart.setFilter({ field: "year", value: "2020" });
-      const pressed = chart.figure
-        .querySelector('[aria-pressed="true"]')
-        ?.getAttribute("data-enarratio-x");
+      const year = (): string | undefined =>
+        chart.figure
+          .querySelector('.enarratio-points [aria-pressed="true"]')
+          ?.getAttribute("aria-label")
+          ?.split(",")[0];
+      const pressed = year();
       chart.update(server);
-      const stillPressed = chart.figure
-        .querySelector('[aria-pressed="true"]')
-        ?.getAttribute("data-enarratio-x");
+      const stillPressed = year();
       chart.clear();
       const afterClear = chart.figure.querySelectorAll("[data-enarratio-dimmed]").length;
       return { events, pressed, stillPressed, afterClear };
     });
-    expect(result).toEqual({ events: 0, pressed: "2020", stillPressed: "2020", afterClear: 0 });
+    expect(result).toEqual({
+      events: 0,
+      pressed: "Year 2020",
+      stillPressed: "Year 2020",
+      afterClear: 0,
+    });
     await p.close();
   });
 
@@ -277,9 +399,9 @@ describe("enhance: selecting a year, page-set filters and links", () => {
       await on.$eval(`${YEARS} [data-enarratio-x="2012"][data-enarratio-series="Grants"]`, (a) => [
         a.getAttribute("href"),
         a.getAttribute("data-enarratio-href"),
-        a.getAttribute("role"),
       ]),
-    ).toEqual([null, "?year=2012", "button"]);
+    ).toEqual([null, "?year=2012"]);
+    expect(await on.$(`${YEARS} button[aria-label^="Year 2012, Grants:"]`)).not.toBeNull();
     await on.close();
   });
 });
@@ -334,20 +456,18 @@ describe("enhance: series filters on a year chart, and focus across update()", (
   it("keeps keyboard focus and the tab stop on the same mark through update(), so Escape still works", async () => {
     const p = await harness.open("index.html", "light");
     await prepare(p);
-    await p.$eval(`${YEARS} [data-enarratio-x="2012"][data-enarratio-series="Grants"]`, (el) =>
-      (el as SVGElement).focus(),
-    );
+    await p.focus(`${YEARS} button[aria-label^="Year 2012, Grants:"]`);
     await p.keyboard.press("Enter");
     await p.evaluate(`window.__chart.update(window.__server)`);
     const after = (await p.evaluate(`(() => {
       const figure = window.__chart.figure;
       return {
-        focused: document.activeElement?.getAttribute("data-enarratio-key") ?? null,
-        stops: [...figure.querySelectorAll('[data-enarratio-key][tabindex="0"]')].map((m) => m.getAttribute("data-enarratio-key")),
+        focused: document.activeElement?.getAttribute("aria-label") ?? null,
+        stops: [...figure.querySelectorAll('.enarratio-points [tabindex="0"]')].map((m) => m.getAttribute("aria-label")),
       };
     })()`)) as { focused: string | null; stops: string[] };
-    const key = JSON.stringify(["2012", "Grants"]);
-    expect(after).toEqual({ focused: key, stops: [key] });
+    expect(after.focused).toMatch(/^Year 2012, Grants:/);
+    expect(after.stops).toEqual([after.focused]);
     await p.keyboard.press("Escape");
     const last = (await p.evaluate("window.__events.at(-1)")) as { value: string | null };
     expect(last.value).toBeNull();
@@ -357,9 +477,7 @@ describe("enhance: series filters on a year chart, and focus across update()", (
   it("moves focus to the same year when the focused mark is gone after update()", async () => {
     const p = await harness.open("index.html", "light");
     await prepare(p);
-    await p.$eval(`${YEARS} [data-enarratio-x="2012"][data-enarratio-series="Grants"]`, (el) =>
-      (el as SVGElement).focus(),
-    );
+    await p.focus(`${YEARS} button[aria-label^="Year 2012, Grants:"]`);
     const focused = await p.evaluate(`(() => {
       const template = document.createElement("template");
       template.innerHTML = window.__server;
@@ -369,9 +487,9 @@ describe("enhance: series filters on a year chart, and focus across update()", (
       const next = template.innerHTML;
       window.__chart.update(next);
       const el = document.activeElement;
-      return [el?.getAttribute("data-enarratio-x"), el?.getAttribute("tabindex")];
+      return [el?.getAttribute("aria-label")?.split(",")[0], el?.getAttribute("tabindex")];
     })()`);
-    expect(focused).toEqual(["2012", "0"]);
+    expect(focused).toEqual(["Year 2012", "0"]);
     await p.close();
   });
 });

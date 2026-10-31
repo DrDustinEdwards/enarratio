@@ -1,6 +1,5 @@
 import * as Plot from "@observablehq/plot";
 import {
-  defaultFormat,
   domainOf,
   type KeysOfType,
   markKey,
@@ -14,6 +13,7 @@ import {
 import { type FigureOptions, figure, type RampItem, validateFigure } from "../render/figure.js";
 import { decorate, keyed, renderPlot } from "../render/plot.js";
 import { DEFAULT_WIDTH } from "../render/size.js";
+import { stringsFor, valueFormat } from "../render/text.js";
 
 /** Options for {@link heatmap}. */
 export interface HeatmapOptions<T extends object> extends FigureOptions {
@@ -61,7 +61,8 @@ export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
   const { data, x, y, value } = options;
   validateFigure(KIND, options);
   if (data.length === 0) throw new Error(`${KIND}: data is empty`);
-  const format = options.formatValue ?? defaultFormat;
+  const format = valueFormat(options);
+  const strings = stringsFor(options.strings);
   const valueLabel = options.valueLabel ?? value;
   const xs = data.map((row, i) => readCategory(KIND, row, x, i));
   const ys = data.map((row, i) => readCategory(KIND, row, y, i));
@@ -96,7 +97,7 @@ export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
   const xColumn = options.xLabel ?? x;
   const yColumn = options.yLabel ?? y;
   const describe = (c: Cell): string =>
-    `${yColumn} ${c.y}, ${xColumn} ${c.x}: ${c.value === null ? "no data" : `${format(c.value)} ${valueLabel}`}`;
+    `${yColumn} ${c.y}, ${xColumn} ${c.x}: ${c.value === null ? strings.terms.noData : `${format(c.value)} ${valueLabel}`}`;
   const showLabels = options.cellLabels ?? cells.length <= 100;
 
   const longest = Math.max(maxOf(yNames.map((n) => n.length)), 1);
@@ -172,15 +173,35 @@ export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
     step,
     label:
       step === 1
-        ? `below ${format(edges[1] as number)}`
+        ? strings.below(format(edges[1] as number))
         : step === 5
-          ? `${format(edges[4] as number)} or more`
-          : `${format(edges[step - 1] as number)} to ${format(edges[step] as number)}`,
+          ? strings.orMore(format(edges[4] as number))
+          : strings.range(format(edges[step - 1] as number), format(edges[step] as number)),
   }));
   const cellOf = new Map(cells.map((c) => [`${c.x}|${c.y}`, c]));
 
   return figure(options, {
     kind: "heatmap",
+    description: {
+      axes: [
+        {
+          position: "x",
+          label: options.xLabel === null ? "" : xColumn,
+          from: xNames[0] ?? "",
+          to: xNames.at(-1) ?? "",
+        },
+        {
+          position: "y",
+          label: options.yLabel === null ? "" : yColumn,
+          from: yNames[0] ?? "",
+          to: yNames.at(-1) ?? "",
+        },
+      ],
+      format,
+      series: [
+        { name: valueLabel, points: cells.map((c) => ({ at: `${c.y}, ${c.x}`, value: c.value })) },
+      ],
+    },
     svg,
     ramp,
     table: {

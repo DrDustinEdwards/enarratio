@@ -13,7 +13,7 @@ export interface CheckThresholds {
   /**
    * Minimum CIEDE2000 difference between any two series colors, with typical vision and under
    * each simulated color vision deficiency. Default 10: about ten just-noticeable differences,
-   * enough to tell two small marks apart at a glance.
+   * enough to tell two small marks apart at a glance (B7).
    */
   readonly seriesDifference: number;
 }
@@ -26,8 +26,9 @@ export const DEFAULT_THRESHOLDS: CheckThresholds = {
 };
 
 /**
- * One finding. `error` means the theme fails an accessibility minimum; `warning` means two colors
- * may be confused by some readers, so charts using both should label series directly.
+ * One finding. `error` means the theme fails an accessibility minimum; every check reports
+ * errors, including two series colors that some readers could confuse. `warning` is kept for
+ * findings that do not fail a theme; none do today.
  */
 export interface CheckIssue {
   readonly severity: "error" | "warning";
@@ -150,7 +151,7 @@ function checkScheme(
       }
       if (worst.difference < t.seriesDifference) {
         issues.push({
-          severity: "warning",
+          severity: "error",
           scheme: which,
           check: "series-difference",
           message: `${which} series ${i + 1} ${a} and ${j + 1} ${b} differ by ${round(worst.difference)} (CIEDE2000) with ${worst.vision ?? "typical vision"}; needs ${t.seriesDifference}`,
@@ -169,7 +170,8 @@ function checkScheme(
  * confused with typical vision or with protanopia, deuteranopia or tritanopia (simulated after
  * Machado et al. 2009, compared with CIEDE2000).
  *
- * It reports rather than throws, so a site can decide which findings block its build.
+ * It reports rather than throws; `stylesheet()` throws on any error, so a failing theme never
+ * reaches a page.
  */
 export function checkTheme(theme: Theme, thresholds: Partial<CheckThresholds> = {}): CheckReport {
   const t: CheckThresholds = { ...DEFAULT_THRESHOLDS, ...thresholds };

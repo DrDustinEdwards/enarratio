@@ -31,27 +31,84 @@ declare global {
   }
 }
 
-/** Options for {@link enhance}. Every feature is on unless turned off. */
+/**
+ * Every string the layer writes, in English by default. `{name}` is filled in. A page passes the
+ * ones it translates as `strings` (B56); the rest stay English.
+ */
+export interface EnhanceStrings {
+  /** The keys, read as the points' description and shown while a point has focus (B10). */
+  readonly hint: string;
+  /** Added to the hint when points filter. */
+  readonly hintFilter: string;
+  /** Added to the hint when the chart has a range brush. */
+  readonly hintRange: string;
+  /** The name of the points when the chart has no title. */
+  readonly chart: string;
+  /** A point's place in its series, after its label (B20). */
+  readonly position: string;
+  readonly filtered: string;
+  readonly filterCleared: string;
+  readonly rangeStart: string;
+  readonly rangeSelected: string;
+  readonly rangeCleared: string;
+  /** Announced after `update()` (C13). */
+  readonly updated: string;
+  readonly sorted: string;
+  readonly ascending: string;
+  readonly descending: string;
+  readonly showTable: string;
+  readonly showChart: string;
+  readonly expand: string;
+  readonly collapse: string;
+  /** The range form's summary, and its fields and buttons (B15). */
+  readonly range: string;
+  readonly from: string;
+  readonly to: string;
+  readonly apply: string;
+  readonly clear: string;
+}
+
+/** Options for {@link enhance}. Every feature is on unless turned off, except `expand` and `url`. */
 export interface EnhanceOptions {
   /** Show a hover and focus tooltip with each mark's details. */
   readonly tooltips?: boolean;
   /** Let a click, Enter or Space on a mark or legend entry filter by its value. */
   readonly filter?: boolean;
-  /** Let a drag, or Shift with arrow keys, pick a range on charts with a continuous x axis. */
+  /**
+   * Let a drag, two clicks, Shift with arrow keys or a from-and-to form pick a range on charts
+   * with a continuous x axis.
+   */
   readonly brush?: boolean;
   /** Animate charts in the first time they scroll into view. */
   readonly entrance?: boolean;
+  /** Make the data table sortable and add a button that switches between chart and table. */
+  readonly table?: boolean;
+  /** Add a button that expands the chart to fill the window. Off by default. */
+  readonly expand?: boolean;
+  /**
+   * Keep each chart's filter and range in the address, so a link reproduces the view. Needs the
+   * figure's `id`. Off by default. A filter or range read from the address fires its event.
+   */
+  readonly url?: boolean;
+  /** Translations of the strings the layer writes. */
+  readonly strings?: Partial<EnhanceStrings>;
 }
+
+/** The options a chart is enhanced with, every default filled in. */
+export type ResolvedOptions = Required<Omit<EnhanceOptions, "strings">> & {
+  readonly strings: EnhanceStrings;
+};
 
 /** A chart the enhancement layer is attached to. */
 export interface EnhancedChart {
   readonly figure: HTMLElement;
   /** The options the chart was enhanced with, every default filled in. */
-  readonly options: Readonly<Required<EnhanceOptions>>;
+  readonly options: ResolvedOptions;
   /**
    * Replaces the chart with new server-rendered markup for the same chart, animating marks that
    * share a key from their old shape to their new one. The filter, the tab stop and keyboard
-   * focus stay on the mark with the same key, or the nearest one if it is gone.
+   * focus stay on the mark with the same key, or the nearest one if it is gone. The live region
+   * says the chart was updated.
    *
    * The markup should come from Enarratio. It is parsed inertly and sanitized before it touches
    * the page: only the elements and attributes Enarratio emits are kept, and event handlers,

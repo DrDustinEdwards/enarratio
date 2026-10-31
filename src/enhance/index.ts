@@ -11,9 +11,43 @@
  */
 
 import { Chart, enhanced } from "./chart.js";
-import type { EnhancedChart, EnhanceOptions } from "./types.js";
+import type { EnhancedChart, EnhanceOptions, EnhanceStrings, ResolvedOptions } from "./types.js";
 
-export type { BrushDetail, EnhancedChart, EnhanceOptions, SelectDetail } from "./types.js";
+export type {
+  BrushDetail,
+  EnhancedChart,
+  EnhanceOptions,
+  EnhanceStrings,
+  ResolvedOptions,
+  SelectDetail,
+} from "./types.js";
+
+/** The layer's English strings, which `strings` overrides one by one. */
+export const ENHANCE_STRINGS: EnhanceStrings = {
+  hint: "Arrow keys move between points: left and right along a series, up and down between series. Home and End go to the ends, Page Up and Page Down jump ten, Backspace goes back to the last point.",
+  hintFilter: "Enter filters by the point, Escape clears.",
+  hintRange: "Shift with the arrows picks a range.",
+  chart: "Chart",
+  position: "{index} of {count}",
+  filtered: "Filtered to {value}",
+  filterCleared: "Filter cleared",
+  rangeStart: "Range start set; click again to set the end",
+  rangeSelected: "Range selected: {from} to {to}",
+  rangeCleared: "Range cleared",
+  updated: "Chart updated",
+  sorted: "Sorted by {column}, {order}",
+  ascending: "ascending",
+  descending: "descending",
+  showTable: "Show table",
+  showChart: "Show chart",
+  expand: "Expand",
+  collapse: "Close expanded view",
+  range: "Pick a range",
+  from: "From",
+  to: "To",
+  apply: "Apply",
+  clear: "Clear",
+};
 
 /**
  * Enhances every Enarratio figure under `root` (the whole document by default) and returns them.
@@ -29,14 +63,20 @@ export function enhance(
   root: ParentNode = document,
   options: EnhanceOptions = {},
 ): EnhancedChart[] {
-  const resolved: Required<EnhanceOptions> = {
+  const resolved: ResolvedOptions = {
     tooltips: options.tooltips ?? true,
     filter: options.filter ?? true,
     brush: options.brush ?? true,
     entrance: options.entrance ?? true,
+    table: options.table ?? true,
+    expand: options.expand ?? false,
+    url: options.url ?? false,
+    strings: { ...ENHANCE_STRINGS, ...options.strings },
   };
-  const figures = [...root.querySelectorAll<HTMLElement>("figure.enarratio")];
-  if (root instanceof HTMLElement && root.matches("figure.enarratio")) figures.unshift(root);
+  // A primitive's figure (data-enarratio-static) has nothing to interact with.
+  const selector = "figure.enarratio:not([data-enarratio-static])";
+  const figures = [...root.querySelectorAll<HTMLElement>(selector)];
+  if (root instanceof HTMLElement && root.matches(selector)) figures.unshift(root);
   return figures.map((figure) => {
     const existing = enhanced.get(figure);
     if (existing && JSON.stringify(existing.options) === JSON.stringify(resolved)) return existing;

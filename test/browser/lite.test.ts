@@ -116,6 +116,8 @@ beforeAll(async () => {
   await bundle.close();
   harness = await startHarness();
   page = await harness.open("index.html", "light", { scripts: false });
+  // Tall enough that both figures, with their text, fit without scrolling under the pinned header.
+  await page.setViewport({ width: 800, height: 3000, deviceScaleFactor: 1 });
   await page.addScriptTag({
     content: output.map((chunk) => ("code" in chunk ? chunk.code : "")).join("\n"),
   });

@@ -7,8 +7,63 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-31
+
+### Upgrading from 0.3
+
+- `stylesheet()` throws on a theme whose series colors are too close to tell apart (a `checkTheme` error); retune those colors.
+- Primitives return a whole figure; pass `inline: true` for the bare SVG, as before.
+- A chart's `colors` override (and a primitive's `color`) is a `data-enarratio-colors` attribute: add `colorStyles(html)` to the page's CSS.
+- `enhance()` lays native point buttons over the marks: the SVG's `role="button"` marks and `.enarratio-focus-ring` are gone, so styles aimed at them no longer apply.
+- Left and Right stay on the focused series.
+- `alt` is optional: a chart without one is named from its data and reports `alt-missing`. Pass `strict: true` to keep failing on it.
+- The caption moved to a `<p class="enarratio-caption">` under the chart; the `figcaption` is now the head.
+- The data disclosure reads "Show data" and "Hide data" (was "Data table"), and `dataTableBlock` takes the strings as a fourth argument.
+- A bar `href` with a user or password before the host now throws, like a `javascript:` link.
+
+### Added
+
+- `enhance()` lays a native button (or, where a mark does not filter, a named image) over each mark, grouped as an application and described by a key hint that also shows while a point has focus, so screen readers read the chart as its image, hint and table in browse mode and switch to focus mode only inside it ([0021](docs/design/0021-native-points-and-reader-controls.md)). Each point says its place in its series ("Year 2019, Talks: 1, 1 of 5"), and focus or hover fades the other series (`--enarratio-opacity-faded`).
+- More keys, the same on every chart: Left and Right move along a series, Up and Down between series, Home and End to the ends of the series, Page Up and Page Down by ten, Backspace back to the last point. Keys with Alt, Control or Command pass through.
+- The data table sorts by any column (a button in each header, `aria-sort`), a table chart's table too, and a "Show table" button swaps the chart for the table and back (option `table`, on by default).
+- A "Pick a range" form (from and to) on charts with a brush, so a range never needs a pointer.
+- Opt-in options: `expand` (an "Expand" button that fills the window; Escape closes it) and `url` (the filter and range kept in the address, and read back from a shared link).
+- `strings` (and `ENHANCE_STRINGS`, the English defaults) translates every string the layer writes.
+- `update()` is announced ("Chart updated"), and keeps the range and the table view.
+- Escape hides a hovered tooltip wherever focus is.
+- `npm run size` checks the enhancement layer against a 9 kB budget, bundled, minified and gzipped (7.9 kB, from 5.3 kB).
+- Every chart's figure says what it shows in text, with scripts off: a `figcaption` with the title, a new `subtitle` and the `alt` shown as the finding (B2, B17, B18, B51); a screen reader overview before the chart, with its type, series and points, and each axis's label and range, its numbers written like the axis ticks ("0 to 1", not "0.000 to 1.000") (B53); and a summary computed from the data, under the chart: each series' trend with any peak or low that stands out, the highest and lowest values, values far from the rest and the last interval drawn, at grade 9 or below (B39, B24, B19). The science charts add their own: `titerPlot` each group's geometric mean titer with its 95% interval and the limit of detection, `genomeTrack` its features' lengths, strands and overlaps, and `networkChart` its nodes, links, most connected nodes and separate parts. `summary` replaces it or, `false`, leaves it out.
+- `notes`, `source` (`{ name, href }`) and `byline`, and a "Download CSV" link on every figure, built on the server from the table's rows as a `data:` URL (C1, C2). `csv: false` drops it; `csvHref` links a file the site serves, built with the new `toCsv`.
+- Issues a reader would meet are reported as a chart renders: no `alt` (the chart then names itself from its data, B52), no title, an unlabeled axis with no title (B25), more than 6 series or 1,000 points (B21), author text above grade 9 (B19) and a CSV too large to inline. They go to `onIssue` or `console.warn`; `strict: true` throws, so a build fails. New types `ChartIssue`, `IssueOptions`.
+- `locale` and `strings` on every chart and primitive: generated numbers and dates follow the locale, and every generated string can be translated (B40, B56): hover details, table headers, legends and summaries on every chart, and the primitives' text alternatives, tables and hover details (`strings.terms` holds the words, such as `noData`, `forecast` and the statuses; the option's type is `StringOverrides`). `numberFormat` (decimal, percent, currency, compact, SI, unit, `maximumSignificantDigits`), `dateFormat` (dates written out, time zone named with a time), `readingGrade`, `ENGLISH` and the `Strings`, `At` and `AxisRange` types are exported (C10, C11).
+- `xUnit` and `yUnit` on bar, line, area and scatter charts, titer plots and every new chart with axes, added to the axis label and table header (B23).
+- `labelColor` is exported from the core: the text color the stylesheet prints on a mark, the scheme's text or background color when it reaches 4.5:1, else black or white.
+- `ChartDescription`, `SummarySeries`, `SummaryPoint`, `StringOverrides` and `Terms` are exported, and `FigureParts` takes `description`, `limits`, `method` and `tableMarkup`, so a chart built on `figure()` describes itself as the library's do.
+- `datasetJsonLd`, a schema.org `Dataset` entry for data a site wants indexed (C14).
+- Every primitive (sparkline, progress ring, uptime strip, heat strip, timeline) takes `PrimitiveFigureOptions`.
+- New charts in `enarratio/plot`, each server-rendered with an alt generated when none is given, an overview and summary computed from its data, a data table and keyed marks, and series told apart by more than color: `divergingBarChart` (signed values about zero), `waterfallChart`, `smallMultiples` (bar and line panels on shared scales), `histogram` and `densityPlot`, `boxPlot` and `stripPlot` (beeswarm or jitter), `dotPlot`, `rangePlot` and `dumbbellPlot`, `slopeChart`, and `pieChart` (and donut), which reports more than six slices as an issue (`strict` throws it) and refuses more than eight. Records [0024](docs/design/0024-more-chart-types.md) and [0025](docs/design/0025-new-charts-on-the-figure.md).
+- `areaChart` stacks to 100% with `percent: true`, in `enarratio/lite` too.
+- `scatterPlot` draws bubbles (`size`, `sizeLabel`) with a size legend.
+- Error bars (`errorBars: { lower, upper, label }`) on `barChart` (in `enarratio/lite` too, with the same SVG) and `scatterPlot`, and intervals on `dotPlot`, from fields you compute. The data table and hover details carry them.
+- Annotations (`annotations`: text notes with an arrow, highlighted x or y ranges) on bar, line, area and scatter charts (bar, line and area in `enarratio/lite` too) and most new ones, also added to the text alternative.
+- `tableChart` in the core: one table with inline bars, heat cells and sparklines, its numbers printed as text: the visible table is the figure's data table, so screen readers read it and `enhance()` sorts it.
+- Lab figures in `enarratio/science`: `doseResponse` (four-parameter logistic, fitted or given, EC50 marked), `survivalPlot` (Kaplan-Meier with censor marks, confidence bands and the number at risk), `forestPlot` (pooled fixed or random effects) and `phylogeneticTree` (Newick, rectangular layout). Their statistics are exported: `fitLogistic`, `logistic`, `kaplanMeier`, `poolEstimates` and `parseNewick`.
+- **Textures for filled series** (B5, B49): bars and areas fill series 2 to 8 with an SVG pattern, the series color under a texture, and legend swatches show the same texture; series 1 stays solid. Stacked segments and bars get a 1px background-colored gap (B6), and names printed on bars a halo of their bar's color. New properties `--enarratio-opacity-texture`, `--enarratio-bar-gap` and `--enarratio-halo-width`.
+- **`highContrastTheme`** in `enarratio/themes`, and `stylesheet(theme, { highContrast })` to use its colors under `prefers-contrast: more` (B43, B49). The gallery does.
+- **Forced colors, more contrast and print** in the base rules (B43, B57, C5, D3): system colors under `forced-colors: active`, with series told apart by textures, line dashes, symbols and labels; full textures, wider gaps and stronger gridlines under `prefers-contrast: more`; and a print stylesheet (light scheme, no scroll, one page, the table open, no tooltip, focus ring or brush). The gallery's visual test gains forced-colors images.
+- **`colorStyles(html)`**: the CSS rules for the per-chart color overrides in some chart markup, for the page's own stylesheet (D4).
+- Line charts' direct labels that end close together are moved apart, so they never overlap (B8).
+- Design record [0022](docs/design/0022-readable-for-every-reader.md).
+- 22 gallery examples, one per new chart or option.
+- **The gallery's head and machine files come from Prelum** (`@drdustinedwards/site-helpers`, a gallery devDependency; the npm package does not use it). Every page now sends Open Graph and Twitter tags with a share card (`site/og-card.png`), and the gallery pages describe the library as structured data. robots.txt follows the family bot policy, and a new `/ai.txt` and the `tdm-reservation: 1` header reserve training rights while welcoming citation.
+- **The gallery has a page for Astro and EmDash** (`/astro`), on the separate enarratio-astro and enarratio-emdash packages, with structured data naming them. The gallery now also serves `sitemap.xml`, `robots.txt` (pointing to the sitemap) and `llms.txt`, and every page names its canonical address. Gallery only: the package is unchanged.
+
 ### Changed
 
+- Line and area charts write x dates out for the locale in the table, hover details and summary ("January 6, 2025", "January 1, 2026 at 12:00 AM UTC"). Mark keys, `data-enarratio-x` and filter events keep ISO dates.
+- Long category labels on bar axes are cut with an ellipsis; the table, hover details and bar names keep them whole. Values from a million up get compact tick labels (2.5M). A value axis whose values are all zero runs from 0 to 1, so the Plot bar chart no longer fills the frame (B41).
+- Text in the drawing is `0.75rem` (`--enarratio-font-size-mark`, was `12px`), so it follows the browser's text size, and each chart's SVG carries a `font-size` that grows as the drawing shrinks, so text never renders under 12px at default zoom, down to a 320px screen (B3, B47). Bar direct labels lose their fixed 11px and the progress ring's value is at least `0.75rem`. The chart frame is a size container.
+- No animation runs longer than 5 seconds, whatever its duration property says (B44).
 - The gallery moves to Capsomer v0.37.0 (exact times in American English), with site-runtime v0.27.0 and devkit v0.17.0's workflows, the newest releases.
 - The gallery moves to Capsomer v0.35.0: in dark, muted text, links and borders are stronger, and with "Increase contrast" on it takes Capsomer's stronger set.
 - The gallery moves to Capsomer v0.34.1, so a short page keeps the scrollbar's room and its letterhead sits on the same pixels as a long page's.
@@ -25,84 +80,36 @@ change the public API; every such change is listed here.
 - The gallery moves to Capsomer v0.22.0 and Prelum v0.15.0, the newest releases.
 - devkit v0.13.3, site-runtime v0.24.0 and Capsomer v0.23.0, the newest releases.
 - The repository runs devkit's no-bloat report in CI (`npm run bloat`: unused files, exports and dependencies, and duplicated blocks), as a warning.
-- The gallery serves `/.well-known/security.txt` (security@dustinedwards.info) and its IndexNow key
-  file (site-runtime builds security.txt), and the gallery deploy pings IndexNow with Prelum. A failed ping is only a
-  warning.
+- The gallery serves `/.well-known/security.txt` (security@dustinedwards.info) and its IndexNow key file (site-runtime builds security.txt), and the gallery deploy pings IndexNow with Prelum. A failed ping is only a warning.
 - The family check (devkit) runs in CI; `.family.json` records its exceptions.
 - American spelling in docs and comments. No exported name changes.
+- site-runtime (a gallery dev dependency) is at v0.12.1; the package is unchanged.
+- **The gallery's `Reporting-Endpoints` header comes from site-runtime v0.12.0's `reportingEndpoints`** in place of a hand-written string; the header and the policy are unchanged. Gallery only: site-runtime stays a dev dependency, and the package is unchanged. The gallery Worker grows to 11.6 KiB (5.0 KiB gzip), so its budget is reset to 10% over that.
+- **The gallery's page is Capsomer's.** Capsomer's fonts, tokens, site header, page head, panels and disclosures around the charts, and its theme button in place of the gallery's "Dark" button. Each chart sits on its own theme's background. Gallery only: `capsomer` and two `@fontsource` faces are dev dependencies, and the package is unchanged (record 0019).
+- Internal helpers that no subpath exports are no longer exported from their modules: the primitives' `prepare*` steps and their value types, `extent`, `markerPoints`, `tag`, and the gallery Worker's `HOST` and `OLD_HOST`. The public API does not change. One unit test that repeated the package test for `dist/base.css` is gone.
+- The enhancement layer's source is split into modules (`src/enhance/`); the build bundles them, so the published `enhance/index.js` is still one file with no imports. No change in behaviour.
+- The default chart size (640 by 320) and the enhancement layer's timings and gaps are named constants instead of numbers repeated across files. A shared `toDate` replaces two copies of the date parsing. Biome now fails on promises that are neither awaited nor handled. No change in behaviour.
+- CI fails on a high `npm audit` advisory, and bump-consumers runs only by hand, after the npm approval, never on a tag push. `.gitignore` covers `.env`, `.mcp.json` and `.dev.vars`.
+- The shared devkit workflows are pinned to devkit v0.7.0, and devkit is a dev dependency. The gallery Worker is minified with its source maps uploaded, and a new `worker-size` check holds its bundle to a budget in `.worker-size.json`.
+- **Releases tag themselves.** Merging a version bump to `main` tags it, publishes the GitHub release and stages the package; nobody pushes a tag (`docs/releasing.md`).
+- **A code map for the Capsid system explorer.** After each push to `main`, devkit's code-map workflow publishes each module's imports and each function's complexity, coverage and CRAP to the `code-map` branch; a weekly run adds Stryker mutation scores. Not part of the package.
+- **The gallery's security headers come from site-runtime.** `scripts/security-headers.ts` builds them with `@dustinedwards/site-runtime` (a devDependency, now pinned to `v0.7.0`) and the gallery build writes `_headers`; the hand-written `site/_headers` is gone. The gallery now also refuses framing, sends the cross-origin opener and resource policies, `object-src 'none'`, a two-year HSTS, `Referrer-Policy: no-referrer` and the full Permissions-Policy, and reports policy violations to `/csp-report`, where its Worker logs them. The Worker's redirects carry the same headers. A test runs site-runtime's check on them. Not part of the package, which is unchanged (record 0018).
+- **The gallery's report sink is site-runtime's shared receiver.** The Worker's own `/csp-report` handler is replaced by `receiveCspReport` from `@dustinedwards/site-runtime/csp-report`: every POST now gets 204, an oversized or malformed body included (an error status makes browsers resend), the body is read to 16 KB and no further, and OPTIONS is answered. Not part of the package.
+- **The gallery's https redirect keeps a POST a POST.** A plain-http request other than GET or HEAD now gets 308 instead of 301 (a 301 lets a browser resend a POST as a GET without its body), and the redirect is never cached, the rule dustinedwards.info uses. Not part of the package.
 
-### Security
+### Removed and breaking
 
-- A bar `href` with a user or password before the host (`https://trusted.example@other.example/`)
-  now throws, like a `javascript:` link. `update()` drops such links too, along with `ping`, any
-  `form*` attribute and `button` elements, none of which the server emits.
-
-### Removed
-
+- **Primitives return a whole figure by default**: title (their `label`), finding, drawing, summary, CSV link and data table (B30, B51). Pass `inline: true` for the bare word-sized SVG, as before. `enhance()` skips these figures (`data-enarratio-static`).
+- **`alt` is optional**: a chart without one is named from its overview and summary and reports `alt-missing`, instead of throwing. Pass `strict: true` to keep failing on it.
+- The data table's disclosure reads "Show data", and "Hide data" when open (was "Data table"); `dataTableBlock` takes the strings as a fourth argument.
+- The caption is a `<p class="enarratio-caption">` under the chart; the figure's `figcaption` is now its head.
+- `checkTheme` reports series colors closer than 10 CIEDE2000 units (typical vision, protanopia, deuteranopia or tritanopia) as an error, not a warning, and `stylesheet()` throws on a theme with any error (B7). `defaultTheme`'s light series 7 is `#574d00` (was `#4f5500`, 6.0 units from series 8 under tritanopia), and the gallery's example theme is retuned to pass.
+- A chart's `colors` override (and a primitive's `color`) is written as `data-enarratio-colors`, never a `style` attribute, so charts need no `style-src-attr 'unsafe-inline'` (D4). Add `colorStyles(html)` to the page's CSS to apply them. `update()` now drops every `style` attribute and keeps `<pattern>`. The gallery's policy no longer allows style attributes.
+- Enhanced: the SVG is one image again (links, if any, become the points), and its marks keep no ARIA of their own. The focus ring is the point's own outline, drawn above every mark, in place of the ring drawn into the SVG, and Enter and Space are the buttons' own. Left and Right now stay on the focused series instead of returning to the bottom of the next category.
+- **Security:** a bar `href` with a user or password before the host (`https://trusted.example@other.example/`) now throws, like a `javascript:` link. `update()` drops such links too, along with `ping`, any `form*` attribute and `button` elements, none of which the server emits.
 - Removed docs/AI_USAGE.md.
 - Removed the remaining AI-use mentions, including the paper's disclosure section.
-- Removed the dated test baseline (`docs/research/`) and its report script
-  (`scripts/report-mutation.mjs`); the code-map workflow keeps the mutation results now.
-
-### Added
-
-- **The gallery's head and machine files come from Prelum** (`@drdustinedwards/site-helpers`, a
-  gallery devDependency; the npm package does not use it). Every page now sends Open Graph and
-  Twitter tags with a share card (`site/og-card.png`), and the gallery pages describe the library as
-  structured data. robots.txt follows the family bot policy, and a new `/ai.txt` and the
-  `tdm-reservation: 1` header reserve training rights while welcoming citation.
-- **The gallery has a page for Astro and EmDash** (`/astro`), on the separate enarratio-astro and
-  enarratio-emdash packages, with structured data naming them. The gallery now also serves
-  `sitemap.xml`, `robots.txt` (pointing to the sitemap) and `llms.txt`, and every page names its
-  canonical address. Gallery only: the package is unchanged.
-
-### Changed
-
-- site-runtime (a gallery dev dependency) is at v0.12.1; the package is unchanged.
-- **The gallery's `Reporting-Endpoints` header comes from site-runtime v0.12.0's
-  `reportingEndpoints`** in place of a hand-written string; the header and the policy are
-  unchanged. Gallery only: site-runtime stays a dev dependency, and the package is unchanged.
-  The gallery Worker grows to 11.6 KiB (5.0 KiB gzip), so its budget is reset to 10% over that.
-- **The gallery's page is Capsomer's.** Capsomer's fonts, tokens, site header, page head, panels
-  and disclosures around the charts, and its theme button in place of the gallery's "Dark"
-  button. Each chart sits on its own theme's background. Gallery only: `capsomer` and two
-  `@fontsource` faces are dev dependencies, and the package is unchanged (record 0019).
-- Internal helpers that no subpath exports are no longer exported from their modules: the
-  primitives' `prepare*` steps and their value types, `extent`, `markerPoints`, `tag`, and the
-  gallery Worker's `HOST` and `OLD_HOST`. The public API does not change. One unit test that
-  repeated the package test for `dist/base.css` is gone.
-- The enhancement layer's source is split into modules (`src/enhance/`); the build bundles them, so
-  the published `enhance/index.js` is still one file with no imports. No change in behaviour.
-- The default chart size (640 by 320) and the enhancement layer's timings and gaps are named
-  constants instead of numbers repeated across files. A shared `toDate` replaces two copies of the
-  date parsing. Biome now fails on promises that are neither awaited nor handled. No change in
-  behaviour.
-- CI fails on a high `npm audit` advisory, and bump-consumers runs only by hand, after the npm
-  approval, never on a tag push. `.gitignore` covers `.env`, `.mcp.json` and `.dev.vars`.
-- The shared devkit workflows are pinned to devkit v0.7.0, and devkit is a dev dependency. The
-  gallery Worker is minified with its source maps uploaded, and a new `worker-size` check holds
-  its bundle to a budget in `.worker-size.json`.
-- **Releases tag themselves.** Merging a version bump to `main` tags it, publishes the GitHub
-  release and stages the package; nobody pushes a tag (`docs/releasing.md`).
-- **A code map for the Capsid system explorer.** After each push to `main`, devkit's code-map
-  workflow publishes each module's imports and each function's complexity, coverage and CRAP to
-  the `code-map` branch; a weekly run adds Stryker mutation scores. Not part of the package.
-- **The gallery's security headers come from site-runtime.** `scripts/security-headers.ts`
-  builds them with `@dustinedwards/site-runtime` (a devDependency, now pinned to `v0.7.0`) and the
-  gallery build writes `_headers`; the hand-written `site/_headers` is gone. The gallery now
-  also refuses framing, sends the cross-origin opener and resource policies, `object-src 'none'`,
-  a two-year HSTS, `Referrer-Policy: no-referrer` and the full Permissions-Policy, and reports
-  policy violations to `/csp-report`, where its Worker logs them. The Worker's redirects carry
-  the same headers. A test runs site-runtime's check on them. Not part of the package, which
-  is unchanged (record 0018).
-- **The gallery's report sink is site-runtime's shared receiver.** The Worker's own `/csp-report`
-  handler is replaced by `receiveCspReport` from `@dustinedwards/site-runtime/csp-report`: every POST now gets 204, an oversized or malformed body included (an error
-  status makes browsers resend), the body is read to 16 KB and no further, and OPTIONS is
-  answered. Not part of the package.
-- **The gallery's https redirect keeps a POST a POST.** A plain-http request other than GET or
-  HEAD now gets 308 instead of 301 (a 301 lets a browser resend a POST as a GET without its
-  body), and the redirect is never cached, the rule dustinedwards.info uses. Not part of the
-  package.
+- Removed the dated test baseline (`docs/research/`) and its report script (`scripts/report-mutation.mjs`); the code-map workflow keeps the mutation results now.
 
 ## [0.3.1] - 2026-10-14
 

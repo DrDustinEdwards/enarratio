@@ -20,5 +20,7 @@ export default defineConfig({
     exclude: ["test/browser/**"],
     // A cold first import of Observable Plot can take several seconds on a slow runner (A15).
     testTimeout: 30_000,
+    // Most test charts have no title, which a chart reports as an issue; tests that care catch them.
+    onConsoleLog: (log) => !log.startsWith("enarratio: "),
   },
 });

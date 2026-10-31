@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-export { areaChart } from "./area.js";
+export { type AreaChartOptions, areaChart } from "./area.js";
 export { type BarChartOptions, barChart } from "./bar.js";
 export {
   type EventMarker,

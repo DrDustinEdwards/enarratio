@@ -7,8 +7,10 @@
 import * as Plot from "@observablehq/plot";
 import { createDocument } from "#document";
 import { escapeHtml } from "../html.js";
+import { roundNumbers } from "../lite/svg.js";
 import { datumAttributes, type MarkDatum } from "./datum.js";
 import type { ScaleDescription } from "./figure.js";
+import { markFontSize } from "./size.js";
 
 export type { MarkDatum } from "./datum.js";
 
@@ -57,7 +59,6 @@ function tag(el: Element, datum: MarkDatum): void {
   for (const [name, value] of datumAttributes(datum)) el.setAttribute(name, value);
 }
 
-const NUMBER = /-?\d+\.\d{3,}(?:e-?\d+)?/g;
 const ROUNDED_ATTRIBUTES = new Set([
   "x",
   "y",
@@ -82,10 +83,7 @@ function roundCoordinates(root: Element): void {
       if (!ROUNDED_ATTRIBUTES.has(name)) continue;
       const value = el.getAttribute(name);
       if (value === null) continue;
-      el.setAttribute(
-        name,
-        value.replace(NUMBER, (n) => String(Math.round(Number(n) * 100) / 100)),
-      );
+      el.setAttribute(name, roundNumbers(value));
     }
   }
 }
@@ -124,7 +122,7 @@ export interface RenderedPlot {
  */
 export function renderPlot(
   options: Plot.PlotOptions,
-  alt: string,
+  alt: string | undefined,
   role: "img" | "group" = "img",
   after?: (svg: SVGSVGElement) => void,
 ): RenderedPlot {
@@ -142,7 +140,7 @@ export function renderPlot(
   );
   if (warning) {
     throw new Error(
-      `Observable Plot warned while drawing "${alt}": ${warning.querySelector("title")?.textContent ?? ""}`,
+      `Observable Plot warned while drawing "${alt ?? "a chart"}": ${warning.querySelector("title")?.textContent ?? ""}`,
     );
   }
   if (svg.localName !== "svg") {
@@ -152,7 +150,8 @@ export function renderPlot(
   }
 
   for (const style of svg.querySelectorAll("style")) style.remove();
-  for (const name of ["class", "font-family", "font-size", "style"]) svg.removeAttribute(name);
+  for (const name of ["class", "font-family", "style"]) svg.removeAttribute(name);
+  svg.setAttribute("font-size", markFontSize(Number(svg.getAttribute("width"))));
   // Plot names groups with aria-label, which is invalid on a <g> without a role and hidden anyway
   // inside role="img". The name moves to a data attribute for CSS and the enhancement layer.
   for (const group of svg.querySelectorAll("[aria-label]")) {
@@ -169,7 +168,7 @@ export function renderPlot(
   // A chart whose marks are links cannot be one image: role="img" would hide the links.
   svg.setAttribute("role", role);
   if (role === "group") svg.setAttribute("aria-roledescription", "chart");
-  svg.setAttribute("aria-label", alt);
+  svg.setAttribute("aria-label", alt ?? "");
 
   let x: ScaleDescription | undefined;
   const scale = svg.scale("x");

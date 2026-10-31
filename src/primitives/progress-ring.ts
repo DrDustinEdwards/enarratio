@@ -1,9 +1,16 @@
 import { element, escapeHtml } from "../html.js";
 import { type SeriesColor, slotStyle } from "../render/figure.js";
-import { type PrimitiveTable, type PrimitiveTableOptions, primitiveTable } from "./companion.js";
+import {
+  type PrimitiveFigureOptions,
+  type PrimitiveTable,
+  type PrimitiveTableOptions,
+  primitiveFigure,
+  primitiveTable,
+  primitiveText,
+} from "./companion.js";
 
 /** Options for {@link progressRing}. */
-export interface ProgressRingOptions {
+export interface ProgressRingOptions extends PrimitiveFigureOptions {
   /** Progress so far, from 0 to `max`. */
   readonly value: number;
   /** The value that fills the ring (default 1). */
@@ -35,6 +42,8 @@ interface ProgressRingValues {
   readonly fraction: number;
   /** The real percentage, which may pass 100. */
   readonly percent: number;
+  /** The percentage as text, for the locale: "58%". */
+  readonly percentText: string;
   readonly size: number;
   readonly thickness: number;
   readonly subject: string;
@@ -69,18 +78,23 @@ function prepareProgressRing(options: ProgressRingOptions): ProgressRingValues {
   // The ring can only be full, but the number says how far past the total the value is (A7).
   const fraction = Math.min(1, value / max);
   const percent = Math.round((value / max) * 100);
-  const over = value > max ? ", more than the total" : "";
+  const text = primitiveText(options);
+  const percentText = text.percent(percent / 100);
   const summary =
     subject === ""
       ? ""
-      : max === 1
-        ? `${subject}: ${percent}%${over}`
-        : `${subject}: ${value} of ${max} (${percent}%${over})`;
+      : text.strings.progressSummary({
+          subject,
+          ...(max === 1 ? {} : { value: text.count(value), max: text.count(max) }),
+          percent: percentText,
+          over: value > max,
+        });
   return {
     value,
     max,
     fraction,
     percent,
+    percentText,
     size,
     thickness,
     subject,
@@ -97,13 +111,13 @@ function prepareProgressRing(options: ProgressRingOptions): ProgressRingValues {
  * progressRing({ value: 7, max: 12, label: "Chapters drafted" });
  */
 export function progressRing(options: ProgressRingOptions): string {
-  const { fraction, percent, size, thickness, alt } = prepareProgressRing(options);
+  const { fraction, percentText, size, thickness, alt } = prepareProgressRing(options);
   const radius = (size - thickness) / 2;
   const circumference = 2 * Math.PI * radius;
   const c = size / 2;
   const showValue = options.showValue ?? size >= 36;
 
-  return element(
+  const drawing = element(
     "svg",
     {
       class: "enarratio enarratio-progress-ring",
@@ -114,7 +128,7 @@ export function progressRing(options: ProgressRingOptions): string {
       height: size,
       role: "img",
       "aria-label": alt,
-      style: slotStyle(options.color ? new Map([[1, options.color]]) : undefined),
+      "data-enarratio-colors": slotStyle(options.color ? new Map([[1, options.color]]) : undefined),
     },
     [
       element("title", {}, escapeHtml(alt)),
@@ -148,13 +162,17 @@ export function progressRing(options: ProgressRingOptions): string {
               "text-anchor": "middle",
               "dominant-baseline": "central",
               fill: "var(--enarratio-text)",
-              "font-size": round(size * 0.28),
+              // Never under 12px, and larger with the reader's font size (B3, B47).
+              "font-size": `max(0.75rem, ${round(size * 0.28)}px)`,
               class: "enarratio-numeric",
             },
-            `${percent}%`,
+            escapeHtml(percentText),
           )
         : "",
     ].join(""),
+  );
+  return primitiveFigure("progress-ring", drawing, alt, options.label?.trim() ?? "", options, () =>
+    progressRingTable(options),
   );
 }
 
@@ -171,13 +189,16 @@ export function progressRingTable(
   display?: PrimitiveTableOptions,
 ): PrimitiveTable {
   const p = prepareProgressRing(options);
+  const { strings, count } = primitiveText(options);
+  const { terms } = strings;
   return primitiveTable(
     p.summary || p.alt,
     {
-      columns: ["Measure", "Value", "Total", "Percent"],
-      rows: [[p.subject || "Progress", String(p.value), String(p.max), `${p.percent}%`]],
+      columns: [terms.measure, terms.value, terms.total, terms.percent],
+      rows: [[p.subject || terms.progress, count(p.value), count(p.max), p.percentText]],
     },
     p.subject || p.alt,
     display,
+    strings,
   );
 }

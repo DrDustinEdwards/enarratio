@@ -14,6 +14,7 @@ import {
 } from "../render/bar-model.js";
 import { markKey } from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
+import { annotationMarkup, bandScale, continuousScale, errorBar } from "./annotate.js";
 import {
   axisLabel,
   axisTickLabels,
@@ -32,7 +33,7 @@ import {
   ticks as linearTicks,
   niceLinear,
 } from "./scale.js";
-import { el, markGroup, svgRoot, text } from "./svg.js";
+import { el, markGroup, svgRoot, text, translate } from "./svg.js";
 
 interface Box {
   readonly x: number;
@@ -100,14 +101,21 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
   // The value scale: the stacks' extent and zero, made round, or the count ticks as given.
   let lo = 0;
   let hi = 0;
-  for (const [a, b] of extents.values()) {
+  // Error bars reach past their bars, and the axis takes them in, as Plot's does.
+  const bounds = [...(model.bounds?.values() ?? [])].map((b): [number, number] => [
+    b.lower,
+    b.upper,
+  ]);
+  for (const [a, b] of [...extents.values(), ...bounds]) {
     lo = Math.min(lo, a, b);
     hi = Math.max(hi, a, b);
   }
   const counts = model.countTicks;
   const domain: [number, number] = counts
     ? [0, counts[counts.length - 1] ?? 1]
-    : (niceLinear([lo, hi]) as [number, number]);
+    : model.valueAxis.flat
+      ? [0, 1]
+      : (niceLinear([lo, hi]) as [number, number]);
   const valueRange: [number, number] = horizontal
     ? [frame.marginLeft, width - frame.marginRight]
     : [height - frame.marginBottom, frame.marginTop];
@@ -118,7 +126,7 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
   const valueTicks: Tick[] = counts
     ? counts.map((t) => ({ at: value(t), label: model.format(t) }))
     : (() => {
-        const format = linearTickFormat(domain, tickCount);
+        const format = model.valueAxis.format ?? linearTickFormat(domain, tickCount);
         return linearTicks(domain[0], domain[1], tickCount).map((t) => ({
           at: value(t),
           label: format(t),
@@ -189,7 +197,7 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
         facets.map((f) => ({
           dx: f.dx,
           dy: f.dy,
-          ...(thinned && !thinned.has(f.name) ? {} : { label: f.name }),
+          ...(thinned && !thinned.has(f.name) ? {} : { label: model.tickLabel(f.name) }),
         })),
         inner,
       ),
@@ -200,7 +208,8 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
   const categoryAxis = (k: "x" | "y"): void => {
     const ticks = xNames
       .map((name, i) => ({ at: category.at(i), label: name }))
-      .filter((t) => !thinned || thinned.has(t.label));
+      .filter((t) => !thinned || thinned.has(t.label))
+      .map((t) => ({ ...t, label: model.tickLabel(t.label) }));
     const offset = category.bandwidth / 2;
     parts.push(
       axisTicks(
@@ -267,6 +276,17 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
           : el("rect", { ...shape, ...keys }, title);
       })
       .join("");
+  // Annotations from the same scales Plot's are placed with: ranges behind the bars, notes last.
+  const notes = annotationMarkup(
+    "barChart",
+    options.annotations,
+    (axis) =>
+      (axis === "x") === !horizontal
+        ? bandScale(category, xNames, categoryRange)
+        : continuousScale(value),
+    horizontal,
+  );
+  parts.push(notes.behind);
   parts.push(
     markGroup(
       { "data-enarratio-mark": "bar" },
@@ -304,7 +324,6 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
           // Labels sit on the bars they name; pointer events go through them to the bar.
           "pointer-events": "none",
           "text-anchor": "middle",
-          "font-size": "11",
         },
         labels,
       ),
@@ -324,5 +343,35 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
     ),
   );
 
-  return svgRoot(width, height, options.alt, options.href ? "group" : "img", parts.join(""));
+  // Each bar's error bar, a rule across its value at the middle of its slot.
+  if (model.bounds) {
+    const offset = category.bandwidth / 2;
+    const barsOf = (list: readonly BarPoint[]): string =>
+      list
+        .map((p) => {
+          const b = model.bounds?.get(p);
+          if (!b) return "";
+          const at = category.at(grouped ? (rowOf.get(p.series) ?? 0) : (columnOf.get(p.x) ?? 0));
+          const [v1, v2] = [value(b.lower), value(b.upper)];
+          return errorBar(
+            horizontal ? { x1: v1, x2: v2, y1: at, y2: at } : { x1: at, x2: at, y1: v1, y2: v2 },
+          );
+        })
+        .join("");
+    parts.push(
+      markGroup(
+        {
+          "data-enarratio-mark": "error bar",
+          transform: horizontal ? translate(0, offset) : translate(offset, 0),
+        },
+        { stroke: "var(--enarratio-text)", "stroke-width": "1.5" },
+        drawn
+          ? drawn.map((f) => ({ dx: f.dx, dy: f.dy, children: barsOf(f.points) }))
+          : barsOf(points),
+      ),
+    );
+  }
+  parts.push(notes.above);
+
+  return svgRoot(width, height, model.alt, options.href ? "group" : "img", parts.join(""));
 }

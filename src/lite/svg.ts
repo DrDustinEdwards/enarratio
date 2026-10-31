@@ -1,12 +1,17 @@
 /** SVG markup as strings, written the way the Plot renderer serializes its drawing. */
 
 import { escapeHtml } from "../html.js";
+import { markFontSize } from "../render/size.js";
 
 /** Attribute values; `undefined` omits the attribute. */
 export type Attrs = Readonly<Record<string, string | number | undefined>>;
 
 /** A coordinate rounded to two decimals, as the Plot renderer rounds its output. */
 export const num = (value: number): string => String(Math.round(value * 100) / 100);
+
+/** Every number in a text with three or more decimals, rounded to two (paths, transforms). */
+export const roundNumbers = (value: string): string =>
+  value.replace(/-?\d+\.\d{3,}(?:e-?\d+)?/g, (n) => String(Math.round(Number(n) * 100) / 100));
 
 /** `translate(x,y)`, rounded. */
 export const translate = (x: number, y: number): string => `translate(${num(x)},${num(y)})`;
@@ -89,7 +94,7 @@ export function textElement(
 export function svgRoot(
   width: number,
   height: number,
-  alt: string,
+  alt: string | undefined,
   role: "img" | "group",
   children: string,
 ): string {
@@ -98,13 +103,14 @@ export function svgRoot(
     {
       fill: "currentColor",
       "text-anchor": "middle",
+      "font-size": markFontSize(width),
       width,
       height,
       viewBox: `0 0 ${num(width)} ${num(height)}`,
       role,
       // A chart whose marks are links cannot be one image: role="img" would hide the links.
       "aria-roledescription": role === "group" ? "chart" : undefined,
-      "aria-label": alt,
+      "aria-label": alt ?? "",
     },
     children,
   );

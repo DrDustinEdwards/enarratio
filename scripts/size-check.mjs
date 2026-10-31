@@ -6,7 +6,8 @@
  *
  * The light chart entries (`enarratio/lite` and its subpaths) are also measured the way a browser
  * app ships them: bundled for the browser with everything they import, minified, then gzipped.
- * Each must stay under LITE_LIMIT and import nothing outside this package.
+ * Each must stay under LITE_LIMIT and import nothing outside this package. The enhancement layer
+ * (`enarratio/enhance`) is measured the same way and must stay under ENHANCE_LIMIT.
  *
  * It fails when core gains a runtime dependency: if package.json lists any `dependencies`, or if
  * the core entry imports anything outside this package.
@@ -20,6 +21,8 @@ import { rolldown } from "rolldown";
 
 /** The most a light chart entry may weigh, bundled, minified and gzipped (40 kB). */
 const LITE_LIMIT = 40_000;
+/** The most the enhancement layer may weigh, bundled, minified and gzipped (D6). */
+const ENHANCE_LIMIT = 9_000;
 
 const root = resolve(import.meta.dirname, "..");
 const pkg = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
@@ -102,6 +105,13 @@ for (const [name, target] of Object.entries(pkg.exports)) {
   }
 }
 
+const enhanceBytes = await bundled(resolve(root, pkg.exports["./enhance"].default));
+if (enhanceBytes > ENHANCE_LIMIT) {
+  failures.push(
+    `./enhance is ${enhanceBytes} bytes bundled, minified and gzipped; the limit is ${ENHANCE_LIMIT}`,
+  );
+}
+
 const width = Math.max(...rows.map((r) => r[0].length));
 console.log(`${"entry".padEnd(width)}  gzipped  imports from outside`);
 for (const [label, bytes, outside] of rows) {
@@ -115,8 +125,13 @@ console.log(
 for (const [label, bytes] of lite) {
   console.log(`${label.padEnd(width)}  ${`${(bytes / 1000).toFixed(1)} kB`.padStart(7)}`);
 }
+console.log(
+  `\nenhancement layer, the same way (limit ${ENHANCE_LIMIT / 1000} kB):\n${"./enhance".padEnd(width)}  ${`${(enhanceBytes / 1000).toFixed(1)} kB`.padStart(7)}`,
+);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`FAIL: ${failure}`);
   process.exit(1);
 }
-console.log("ok: core has no runtime dependency; every light chart is within its limit");
+console.log(
+  "ok: core has no runtime dependency; every light chart and the enhancement layer are within their limits",
+);
