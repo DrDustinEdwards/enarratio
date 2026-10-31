@@ -31,6 +31,7 @@ import {
   validateFigure,
 } from "./figure.js";
 import { planSeries, type SeriesPlan } from "./series.js";
+import { charWidth, textGrowth } from "./size.js";
 import {
   dateFormat,
   defaultFormat,
@@ -40,6 +41,8 @@ import {
   valueAxis,
 } from "./text.js";
 import { texture } from "./texture.js";
+
+export { fitTicks } from "./size.js";
 
 /** A horizontal line across the chart at a value: a threshold, a limit, a target. */
 export interface ReferenceLine {
@@ -95,6 +98,11 @@ export interface SeriesChartOptions<T extends object> extends FigureOptions, Axi
   readonly references?: readonly ReferenceLine[];
   /** Vertical event markers, each labeled on the chart. */
   readonly markers?: readonly EventMarker[];
+  /**
+   * The most x tick labels to print. Without it, ticks are thinned to what fits the width, so
+   * labels never overlap on a narrow chart; with it, to the fewer of the two.
+   */
+  readonly maxXTicks?: number;
 }
 
 /**
@@ -442,6 +450,8 @@ export interface SeriesModel {
   readonly multi: boolean;
   /** Whole-year x ticks, when x holds years. */
   readonly yearTicks: number[] | undefined;
+  /** The caller's limit on x tick labels, checked. */
+  readonly maxXTicks: number | undefined;
   readonly markers: readonly MarkerPoint[];
   /** The y axis's tick format for huge values, and whether every value is zero (B41). */
   readonly valueAxis: ReturnType<typeof valueAxis>;
@@ -462,6 +472,10 @@ function seriesModel<T extends object>(
 ): SeriesModel {
   const plan = planSeries(kind, prepared.seriesNames, options.colors);
   check?.();
+  const max = options.maxXTicks;
+  if (max !== undefined && (!Number.isInteger(max) || max < 1)) {
+    throw new Error(`${kind}: maxXTicks must be a whole number of 1 or more`);
+  }
   const noted = withNotes(options);
   const multi = options.series !== undefined;
   const xColumn = prepared.xLabel ?? options.x;
@@ -501,6 +515,7 @@ function seriesModel<T extends object>(
     plan,
     multi,
     yearTicks: prepared.years ? yearTicks(minOf(ats), maxOf(ats)) : undefined,
+    maxXTicks: options.maxXTicks,
     markers: markerPoints(options, prepared.time, kind),
     valueAxis: valueAxis(
       [...values, ...(options.references ?? []).map((r) => r.y)],
@@ -600,6 +615,19 @@ export function lineModel<T extends object>(options: LineChartOptions<T>): LineM
   };
 }
 
+/**
+ * The right margin a line chart leaves: room for the longest series name as a direct label (6
+ * from the line's end, at the text size of the width drawn), else 24. A drawing 480 or wider
+ * keeps at least 96, so desktop charts share one gutter; a narrower one takes only what its
+ * labels need, and the plot keeps the rest.
+ */
+export function rightMargin(model: LineModel, width: number): number {
+  if (!model.directLabels) return 24;
+  const longest = Math.max(...model.prepared.seriesNames.map((n) => n.length));
+  const need = Math.ceil(6 + longest * charWidth(width) + 4);
+  return Math.max(width >= 480 ? 96 : 24, need);
+}
+
 /** The least distance between two direct labels' baselines, in user units. */
 const LABEL_GAP = 16;
 
@@ -608,23 +636,25 @@ const LABEL_GAP = 16;
  * cluster, centered on where its labels would sit, and clusters that then touch merge. Order is
  * kept. Both renderers place their labels with it.
  */
-export function spreadLabels(ys: readonly number[]): number[] {
+export function spreadLabels(ys: readonly number[], width: number): number[] {
+  // The gap grows with the text, which grows as the drawing shrinks (record 0022).
+  const gap = LABEL_GAP * textGrowth(width);
   const at = (i: number): number => ys[i] as number;
   const clusters: { members: number[]; top: number }[] = [];
   for (const i of ys.map((_, i) => i).sort((a, b) => at(a) - at(b))) {
     clusters.push({ members: [i], top: at(i) });
     for (let n = clusters.length; n > 1; n -= 1) {
       const [a, b] = clusters.slice(-2) as [(typeof clusters)[0], (typeof clusters)[0]];
-      if (a.top + a.members.length * LABEL_GAP <= b.top) break;
+      if (a.top + a.members.length * gap <= b.top) break;
       const members = [...a.members, ...b.members];
       const mean = members.reduce((sum, m) => sum + at(m), 0) / members.length;
-      clusters.splice(-2, 2, { members, top: mean - ((members.length - 1) * LABEL_GAP) / 2 });
+      clusters.splice(-2, 2, { members, top: mean - ((members.length - 1) * gap) / 2 });
     }
   }
   const out = [...ys];
   for (const c of clusters)
     c.members.forEach((m, k) => {
-      out[m] = c.top + k * LABEL_GAP;
+      out[m] = c.top + k * gap;
     });
   return out;
 }

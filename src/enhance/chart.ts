@@ -2,6 +2,7 @@
 
 import { measure, onResize } from "./batch.js";
 import { button, expander, fill, sortTable, viewSwitch } from "./controls.js";
+import { exportControls } from "./export.js";
 import {
   center,
   invert,
@@ -338,6 +339,12 @@ export class Chart implements EnhancedChart {
     }
     const scale = parseScale(this.figure);
     if (this.brushRect && scale) bar.append(this.rangeForm(scale));
+    const svg = this.svg;
+    if (svg) {
+      this.cleanup.push(
+        exportControls(this.figure, svg, this.options, s, bar, (m) => this.announce(m)),
+      );
+    }
     if (bar.childElementCount === 0) return;
     (this.hint ?? after).after(bar);
     this.cleanup.push(() => bar.remove());

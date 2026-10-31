@@ -1,6 +1,6 @@
 {
   "name": "enarratio",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Accessible, server-rendered charts and scientific figures for the web",
   "keywords": [
     "charts",
@@ -40,6 +40,10 @@
     "./enhance": {
       "types": "./dist/enhance/index.d.ts",
       "default": "./dist/enhance/index.js"
+    },
+    "./redraw": {
+      "types": "./dist/redraw/index.d.ts",
+      "default": "./dist/redraw/index.js"
     },
     "./themes": {
       "types": "./dist/themes/index.d.ts",

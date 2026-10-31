@@ -70,6 +70,36 @@ describe("checkTheme", () => {
     }
   });
 
+  it("derives series labels at 4.5:1 and ramp edges at 3:1, and fails given ones that fall short (B1)", () => {
+    const css = stylesheet(defaultTheme);
+    // Series 2 (#a06f30, 4.36:1 on white) is darkened for text; series 1 already passes as it is.
+    const label2 = /--enarratio-series-label-2: (#[0-9a-f]{6});/.exec(css)?.[1] ?? "";
+    expect(contrastRatio(label2, "#ffffff")).toBeGreaterThanOrEqual(4.5);
+    expect(css).toContain("--enarratio-series-label-1: #084fba;");
+    // The palest step gets an edge at 3:1; the darkest needs none.
+    const edge1 = /--enarratio-sequential-edge-1: (#[0-9a-f]{6});/.exec(css)?.[1] ?? "";
+    expect(contrastRatio(edge1, "#ffffff")).toBeGreaterThanOrEqual(3);
+    expect(css).toContain("--enarratio-sequential-edge-5: transparent;");
+
+    const given: Theme = {
+      ...defaultTheme,
+      light: { ...defaultTheme.light, seriesLabels: [...defaultTheme.light.series] },
+    };
+    const issue = checkTheme(given).issues.find((i) => i.check === "series-label-contrast");
+    expect(issue).toMatchObject({ scheme: "light", colors: ["#a06f30", "#ffffff"] });
+  });
+
+  it("takes a site's custom property as a color and measures its fallback", () => {
+    const token = (mutedText: `var(--${string}, #${string})`): Theme =>
+      defineTheme({ ...defaultTheme, light: { ...defaultTheme.light, mutedText } });
+    expect(checkTheme(token("var(--site-muted, #57606a)")).ok).toBe(true);
+    expect(stylesheet(token("var(--site-muted, #57606a)"))).toContain(
+      "--enarratio-text-muted: var(--site-muted, #57606a);",
+    );
+    expect(checkTheme(token("var(--site-muted, #bbbbbb)")).ok).toBe(false);
+    expect(() => token("var(--site-muted)" as `var(--${string}, #${string})`)).toThrow(/fallback/);
+  });
+
   it("reports low text contrast as an error, per scheme", () => {
     const pale: Theme = { ...defaultTheme, light: { ...defaultTheme.light, mutedText: "#bbbbbb" } };
     const report = checkTheme(pale);

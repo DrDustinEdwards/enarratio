@@ -62,6 +62,27 @@ interface ScatterPoint {
   readonly bounds: Bounds | null;
 }
 
+/**
+ * A linear axis's domain, widened by a twentieth of its span on each side before Plot rounds it,
+ * so the lowest and highest points fall between ticks rather than on the end ticks beside their
+ * labels. It never crosses zero. A log axis keeps Plot's domain.
+ */
+function padded(
+  type: string | undefined,
+  values: readonly number[],
+): { domain?: [number, number] } {
+  if ((type ?? "linear") !== "linear" || values.length === 0) return {};
+  const lo = Math.min(...values);
+  const hi = Math.max(...values);
+  const pad = (hi - lo || Math.abs(hi) || 1) / 20;
+  return {
+    domain: [
+      lo >= 0 ? Math.max(0, lo - pad) : lo - pad,
+      hi <= 0 ? Math.min(0, hi + pad) : hi + pad,
+    ],
+  };
+}
+
 /** The largest bubble's radius, in pixels. */
 const MAX_RADIUS = 18;
 
@@ -198,11 +219,16 @@ export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): str
       marginLeft: yLabel === null ? 48 : 64,
       marginBottom: 44,
       // Room for the size legend, and for the largest bubbles at the edges.
+      // Points never sit on the axes, where the first one would cover a tick label (inset).
       ...(size === undefined
-        ? {}
+        ? { inset: 8 }
         : { marginRight: 112, inset: MAX_RADIUS, r: { range: [0, MAX_RADIUS] } }),
       x: {
         type: options.xType ?? "linear",
+        ...padded(
+          options.xType,
+          points.map((p) => p.x),
+        ),
         // Log axes label powers of ten only; Plot's default adds every minor tick.
         ...(options.xType === "log" ? { ticks: 5 } : {}),
         label: xLabel,
@@ -213,6 +239,10 @@ export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): str
       },
       y: {
         type: options.yType ?? "linear",
+        ...padded(
+          options.yType,
+          points.flatMap((p) => (p.bounds ? [p.y, p.bounds.lower, p.bounds.upper] : [p.y])),
+        ),
         // Log axes label powers of ten only; Plot's default adds every minor tick.
         ...(options.yType === "log" ? { ticks: 5 } : {}),
         label: yLabel,

@@ -14,6 +14,7 @@ import {
 } from "../render/bar-model.js";
 import { markKey } from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
+import { bottomMargin, leftMargin } from "../render/size.js";
 import { annotationMarkup, bandScale, continuousScale, errorBar } from "./annotate.js";
 import {
   axisLabel,
@@ -22,6 +23,7 @@ import {
   type Frame,
   facetTickLabels,
   grid,
+  labelLines,
   type Placement,
   type Tick,
 } from "./axis.js";
@@ -88,12 +90,17 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
 
 function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>): string {
   const { width, height, horizontal, grouped, xNames, seriesNames, points } = model;
-  const frame: Frame = {
+  let frame: Frame = {
     width,
     height,
     marginTop: MARGIN_TOP,
     marginRight: MARGIN_RIGHT,
-    marginBottom: MARGIN_BOTTOM,
+    // Room below for the x labels and title, as renderPlot fits Plot's.
+    marginBottom: bottomMargin(
+      MARGIN_BOTTOM,
+      (horizontal ? model.valueLabel : model.categoryLabel) !== null,
+      width,
+    ),
     marginLeft: model.marginLeft,
   };
   const extents = stack(model);
@@ -111,18 +118,20 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
     hi = Math.max(hi, a, b);
   }
   const counts = model.countTicks;
+  const valueRange: [number, number] = horizontal
+    ? [frame.marginLeft, width - frame.marginRight]
+    : [height - frame.marginBottom, frame.marginTop];
+  const tickCount = horizontal
+    ? (valueRange[1] - valueRange[0]) / 80
+    : (valueRange[0] - valueRange[1]) / 35;
+  // A vertical value axis is rounded to the step of the ticks drawn, so it ends on a tick; a
+  // horizontal one keeps d3's finer rounding (as renderPlot does).
   const domain: [number, number] = counts
     ? [0, counts[counts.length - 1] ?? 1]
     : model.valueAxis.flat
       ? [0, 1]
-      : (niceLinear([lo, hi]) as [number, number]);
-  const valueRange: [number, number] = horizontal
-    ? [frame.marginLeft, width - frame.marginRight]
-    : [height - frame.marginBottom, frame.marginTop];
+      : (niceLinear([lo, hi], horizontal ? undefined : tickCount) as [number, number]);
   const value: Continuous = continuous("linear", domain, valueRange);
-  const tickCount = horizontal
-    ? (valueRange[1] - valueRange[0]) / 80
-    : (valueRange[0] - valueRange[1]) / 35;
   const valueTicks: Tick[] = counts
     ? counts.map((t) => ({ at: value(t), label: model.format(t) }))
     : (() => {
@@ -132,6 +141,19 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
           label: format(t),
         }));
       })();
+
+  // Room for the value labels and the axis title beside them, as renderPlot makes for Plot's.
+  if (!horizontal) {
+    frame = {
+      ...frame,
+      marginLeft: leftMargin(
+        frame.marginLeft,
+        valueTicks.map((t) => t.label),
+        model.valueLabel !== null,
+        width,
+      ),
+    };
+  }
 
   // The category scale, and for grouped bars the facets, one per category.
   const categoryRange: [number, number] = horizontal
@@ -219,15 +241,15 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
         offset,
       ),
       axisTickLabels(k, ticks, frame, { offset }),
-      axisLabel(k, label, frame),
+      axisLabel(k, label, frame, frame, labelLines(ticks)),
     );
   };
   const valueAxis = (k: "x" | "y", placement: Placement): void => {
     parts.push(
       grid(k, valueAt, inner, drawn),
       axisTicks(k, valueAt, inner, 0, placement),
-      axisTickLabels(k, valueTicks, inner, { tabular: true, placement }),
-      axisLabel(k, model.valueLabel, outer ?? frame, frame),
+      axisTickLabels(k, valueTicks, inner, { placement }),
+      axisLabel(k, model.valueLabel, outer ?? frame, frame, labelLines(valueTicks)),
     );
   };
   if (horizontal) {

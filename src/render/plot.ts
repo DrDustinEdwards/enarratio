@@ -10,7 +10,7 @@ import { escapeHtml } from "../html.js";
 import { roundNumbers } from "../lite/svg.js";
 import { datumAttributes, type MarkDatum } from "./datum.js";
 import type { ScaleDescription } from "./figure.js";
-import { markFontSize } from "./size.js";
+import { bottomMargin, leftMargin, markFontSize, TITLE_LINES } from "./size.js";
 
 export type { MarkDatum } from "./datum.js";
 
@@ -115,19 +115,104 @@ export interface RenderedPlot {
   readonly x?: ScaleDescription;
 }
 
+type Scale = { nice?: unknown; ticks?: unknown; type?: string } | undefined;
+
 /**
- * Draws a Plot specification into SVG markup named by `alt`: one image, or a group when its
- * marks are links. Throws if Plot warns, because a warning means the chart shown would not be the
+ * Rounds a `nice` linear y scale to the step of the ticks Plot will draw (one per 35 units of
+ * height), not d3's default of ten, so the domain ends on a tick: data reaching 23 on a 0, 5, 10
+ * axis end at 25, not at 24 above a top tick of 20. The light charts round the same way. Faceted
+ * rows tick by their own height, so a chart with `fy` keeps Plot's rounding. The x scale keeps
+ * d3's finer rounding: at a narrow width its few ticks would stretch data from 1 to 5 to 0 to 10.
+ */
+function niceToTicks(options: Plot.PlotOptions): Plot.PlotOptions {
+  const margin = (value: unknown, fallback: number): number =>
+    typeof value === "number" ? value : fallback;
+  const inset = margin(options.inset, 0) * 2;
+  const down =
+    (options.height ?? 400) -
+    margin(options.marginTop, 20) -
+    margin(options.marginBottom, 30) -
+    inset;
+  const rounded = (scale: Scale, count: number): Scale =>
+    scale?.nice === true &&
+    scale.ticks === undefined &&
+    (scale.type === undefined || scale.type === "linear")
+      ? { ...scale, nice: Math.max(1, count) }
+      : scale;
+  const y =
+    options.fy === undefined ? rounded(options.y as Scale, down / 35) : (options.y as Scale);
+  return { ...options, ...(y ? { y } : {}) } as Plot.PlotOptions;
+}
+
+/** The most lines in any x tick label: two on a time axis that names its month ("24" over "Oct"). */
+function tickLines(svg: Element): number {
+  const labels = [...svg.querySelectorAll('[aria-label="x-axis tick label"] text')];
+  return Math.max(1, ...labels.map((t) => t.querySelectorAll("tspan").length));
+}
+
+/**
+ * Sets the x axis title a fixed number of ems below the tick labels' lines (TITLE_LINES), not at
+ * the foot of the bottom margin. The margin is sized for the text a narrow column grows it to
+ * (record 0022); measured from the foot, the title stood far below the ticks wherever the
+ * drawing was shown at its own size. The light charts place it the same way.
+ */
+function placeXTitle(svg: Element): void {
+  const group = svg.querySelector('[aria-label="x-axis label"]');
+  const ticks = svg.querySelector('[aria-label="x-axis tick label"]');
+  const title = group?.querySelector("text");
+  // A title over several lines, or under rotated tick labels, stays where Plot put it.
+  if (!group || !ticks || !title || title.querySelector("tspan")) return;
+  if (ticks.querySelector('[transform*="rotate"]')) return;
+  const offset = (el: Element): number =>
+    Number(
+      /translate\([^,]+,([^)]+)\)/.exec(el.getAttribute("transform") ?? "")?.[1] ?? Number.NaN,
+    );
+  const y = offset(ticks);
+  // Only an axis below the frame: its ticks and its title both sit under the frame's edge.
+  if (!(y > 0 && offset(group) > 0)) return;
+  group.setAttribute("transform", `translate(0,${y})`);
+  title.setAttribute("y", `${tickLines(svg) + TITLE_LINES}em`);
+}
+
+/**
+ * Draws a Plot specification into SVG markup named by `alt`: one image (record 0027). Throws if Plot warns, because a warning means the chart shown would not be the
  * chart intended.
  */
 export function renderPlot(
   options: Plot.PlotOptions,
   alt: string | undefined,
-  role: "img" | "group" = "img",
+  role: "img" = "img",
   after?: (svg: SVGSVGElement) => void,
 ): RenderedPlot {
   const document = createDocument();
-  const svg = Plot.plot({ ...options, document }) as unknown as SVGSVGElement & Plot.Plot;
+  let svg = Plot.plot({ ...niceToTicks(options), document }) as unknown as SVGSVGElement &
+    Plot.Plot;
+  // Axis labels and titles that would overlap at a narrow width get the margins they need, as
+  // the light charts compute them: the bottom first, since it sets the y ticks, then the left.
+  const width = Number(svg.getAttribute("width"));
+  let fitted = options;
+  if (typeof options.marginBottom === "number") {
+    const title = svg.querySelector('[aria-label$="x-axis label"]') !== null;
+    const lines = tickLines(svg);
+    const needed = bottomMargin(options.marginBottom, title, width, lines);
+    if (needed > options.marginBottom) {
+      fitted = { ...fitted, marginBottom: needed };
+      svg = Plot.plot({ ...niceToTicks(fitted), document }) as unknown as SVGSVGElement & Plot.Plot;
+    }
+  }
+  if (typeof options.marginLeft === "number") {
+    const labels = [...svg.querySelectorAll('[aria-label="y-axis tick label"] text')].map(
+      (t) => t.textContent ?? "",
+    );
+    const title = svg.querySelector('[aria-label="y-axis label"]') !== null;
+    const needed = leftMargin(options.marginLeft, labels, title, width);
+    if (needed > options.marginLeft) {
+      fitted = { ...fitted, marginLeft: needed };
+      svg = Plot.plot({ ...niceToTicks(fitted), document }) as unknown as SVGSVGElement & Plot.Plot;
+    }
+  }
+
+  placeXTitle(svg);
 
   // Plot's warning is its own node: a top-level <text> whose <title> counts the warnings. Found by
   // that structure, not by the glyph, which data may contain (F13).
@@ -163,11 +248,12 @@ export function renderPlot(
       group.setAttribute("aria-hidden", "true");
     }
   }
+  // Proportional figures on axes: tabular ones widen the comma in some faces ("1 , 600").
+  for (const el of svg.querySelectorAll("[font-variant]")) el.removeAttribute("font-variant");
   after?.(svg);
   roundCoordinates(svg);
-  // A chart whose marks are links cannot be one image: role="img" would hide the links.
+  // Every drawing is one named image, enhanced or not; interaction lives outside it (0027).
   svg.setAttribute("role", role);
-  if (role === "group") svg.setAttribute("aria-roledescription", "chart");
   svg.setAttribute("aria-label", alt ?? "");
 
   let x: ScaleDescription | undefined;

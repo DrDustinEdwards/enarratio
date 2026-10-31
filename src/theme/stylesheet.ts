@@ -1,7 +1,8 @@
 import { checkTheme } from "./check.js";
 import { labelColor } from "./color.js";
 import { assertCssText, defineTheme } from "./define.js";
-import type { ColorScheme, Gridlines, HexColor, Theme } from "./types.js";
+import { sequentialEdges, seriesLabels } from "./shades.js";
+import type { ColorScheme, Gridlines, Theme } from "./types.js";
 
 /** Options for {@link stylesheet}. */
 export interface StylesheetOptions {
@@ -22,7 +23,11 @@ export interface StylesheetOptions {
 type Variables = ReadonlyArray<readonly [name: string, light: string, dark: string]>;
 
 function colorVariables(light: ColorScheme, dark: ColorScheme): Variables {
-  const pairs: [string, HexColor, HexColor][] = [
+  const lightLabels = seriesLabels(light);
+  const darkLabels = seriesLabels(dark);
+  const lightEdges = sequentialEdges(light);
+  const darkEdges = sequentialEdges(dark);
+  const pairs: [string, string, string][] = [
     ["background", light.background, dark.background],
     ["text", light.text, dark.text],
     ["text-muted", light.mutedText, dark.mutedText],
@@ -42,6 +47,8 @@ function colorVariables(light: ColorScheme, dark: ColorScheme): Variables {
       labelColor(color, light.text, light.background),
       labelColor(darkColor, dark.text, dark.background),
     ]);
+    // A series name written on the background (a direct label) takes a shade at 4.5:1 there (B1).
+    pairs.push([`series-label-${i + 1}`, lightLabels[i] ?? color, darkLabels[i] ?? darkColor]);
   });
   light.sequential.forEach((color, i) => {
     const darkColor = dark.sequential[i] ?? color;
@@ -51,6 +58,12 @@ function colorVariables(light: ColorScheme, dark: ColorScheme): Variables {
       `sequential-text-${i + 1}`,
       labelColor(color, light.text, light.background),
       labelColor(darkColor, dark.text, dark.background),
+    ]);
+    // A step too pale to see on the background gets an edge at 3:1 (B1).
+    pairs.push([
+      `sequential-edge-${i + 1}`,
+      lightEdges[i] ?? "transparent",
+      darkEdges[i] ?? "transparent",
     ]);
   });
   return pairs;
@@ -77,6 +90,17 @@ const BASE_RULES = `
 /* The frame is the container the SVG's own font-size measures, so text grows as it shrinks (B3). */
 .enarratio-frame { overflow-x: auto; container-type: inline-size; }
 .enarratio-frame-wide > svg { min-width: 30rem; }
+/* A wide drawing keeps its text size and scrolls in a column under 30rem (A13); a shadow at the
+   edge that has more shows that it does, without script. The covers move with the drawing and
+   hide each shadow at the end it has reached. */
+.enarratio-frame-wide {
+  --enarratio-scroll-shadow: color-mix(in srgb, var(--enarratio-text) 30%, transparent);
+  background:
+    linear-gradient(to right, var(--enarratio-background) 40%, transparent) left / 1.5rem 100% no-repeat local,
+    linear-gradient(to left, var(--enarratio-background) 40%, transparent) right / 1.5rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, var(--enarratio-scroll-shadow), transparent) left / 0.75rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, var(--enarratio-scroll-shadow), transparent) right / 0.75rem 100% no-repeat scroll;
+}
 .enarratio svg {
   display: block;
   max-width: 100%;
@@ -86,7 +110,9 @@ const BASE_RULES = `
 }
 .enarratio svg:not([font-size]) { font-size: var(--enarratio-font-size-mark, 0.75rem); }
 svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; height: auto; }
-.enarratio [data-enarratio-mark$="tick label"],
+/* Tick labels in the numeric face with proportional figures: tabular figures widen the comma in
+   some faces ("1 , 600"), and end-anchored labels need no columns. Other numbers keep columns. */
+.enarratio [data-enarratio-mark$="tick label"] { font-family: var(--enarratio-font-numeric); }
 .enarratio .enarratio-numeric {
   font-family: var(--enarratio-font-numeric);
   font-variant-numeric: tabular-nums;
@@ -109,6 +135,18 @@ svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; 
 }
 .enarratio-caption, .enarratio-note, .enarratio-source { color: var(--enarratio-text-muted); }
 .enarratio-source a { color: inherit; }
+/* The export and embed buttons beside the CSV link read as the link does (C3, C4). */
+.enarratio-source .enarratio-export {
+  min-height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
 .enarratio-data:not([open]) .enarratio-hide, .enarratio-data[open] .enarratio-show { display: none; }
 .enarratio-legend {
   display: flex;
@@ -156,7 +194,25 @@ ${Array.from(
   (_, i) =>
     `.enarratio [data-step="${i + 1}"] { --enarratio-slot: var(--enarratio-sequential-${i + 1}); --enarratio-slot-ink: var(--enarratio-sequential-text-${i + 1}); }`,
 ).join("\n")}
-.enarratio, .enarratio-tooltip { --enarratio-texture: none; }
+/* Series names written on the background (direct labels, curve labels, at-risk rows) take the
+   series' label shade, at 4.5:1 on the background (B1). A site defining only the series colors
+   gets a mix toward the text color instead; colorStyles() gives a chart's own override the same. */
+${Array.from({ length: 8 }, (_, i) => {
+  const n = i + 1;
+  const mix = `color-mix(in srgb, var(--enarratio-series-${n}) 55%, var(--enarratio-text))`;
+  return `.enarratio text[fill="var(--enarratio-series-${n})"], .enarratio g[fill="var(--enarratio-series-${n})"] > text { fill: var(--enarratio-series-label-${n}, ${mix}); }`;
+}).join("\n")}
+/* Each ramp step's cells and swatches carry an edge at 3:1 on the background where the step's own
+   fill is paler than that (B1); transparent where it is not. A site defining only the ramp gets
+   the muted text color round the three palest steps. */
+${Array.from({ length: 5 }, (_, i) => {
+  const n = i + 1;
+  const edge = `var(--enarratio-sequential-edge-${n}, ${n <= 3 ? "var(--enarratio-text-muted)" : "transparent"})`;
+  return `.enarratio [fill="var(--enarratio-sequential-${n})"] { stroke: ${edge}; stroke-width: var(--enarratio-cell-edge-width, 1px); }
+.enarratio [data-step="${n}"] { --enarratio-slot-edge: ${edge}; }`;
+}).join("\n")}
+.enarratio, .enarratio-tooltip { --enarratio-texture: none; --enarratio-slot-edge: transparent; }
+.enarratio-swatch { box-sizing: border-box; border: var(--enarratio-border-width, 1px) solid var(--enarratio-slot-edge); }
 .enarratio-swatch { background: var(--enarratio-texture), var(--enarratio-slot); }
 /* Filled series 2 to 8 carry a texture as well as a color (B5); the legend shows the same ones. */
 .enarratio-texture { stroke-opacity: var(--enarratio-opacity-texture, 0.6); }
@@ -360,12 +416,14 @@ ${Array.from(
     width: auto;
     height: auto;
     margin: 0;
-    padding: 0 0 0 var(--enarratio-timeline-list-indent, 1.25em);
+    padding: 0 0 0 var(--enarratio-timeline-list-indent, 2.25em);
     overflow: visible;
     clip-path: none;
     white-space: normal;
   }
   .enarratio-timeline-list li { margin: 0 0 var(--enarratio-space, 0.5em); }
+  /* Proportional marker figures: a tabular period is a full figure wide ("1 ."). */
+  .enarratio-timeline-list li::marker { font-variant-numeric: proportional-nums; }
 }
 @keyframes enarratio-grow { from { transform: scaleY(0); } }
 @keyframes enarratio-grow-x { from { transform: scaleX(0); } }
@@ -421,12 +479,12 @@ ${Array.from(
 ${Array.from(
   { length: 8 },
   (_, i) =>
-    `    --enarratio-series-${i + 1}: CanvasText;\n    --enarratio-series-text-${i + 1}: Canvas;`,
+    `    --enarratio-series-${i + 1}: CanvasText;\n    --enarratio-series-text-${i + 1}: Canvas;\n    --enarratio-series-label-${i + 1}: CanvasText;`,
 ).join("\n")}
 ${[10, 25, 40, 70, 100]
   .map(
     (mix, i) =>
-      `    --enarratio-sequential-${i + 1}: color-mix(in srgb, CanvasText ${mix}%, Canvas);\n    --enarratio-sequential-text-${i + 1}: ${i < 3 ? "CanvasText" : "Canvas"};`,
+      `    --enarratio-sequential-${i + 1}: color-mix(in srgb, CanvasText ${mix}%, Canvas);\n    --enarratio-sequential-text-${i + 1}: ${i < 3 ? "CanvasText" : "Canvas"};\n    --enarratio-sequential-edge-${i + 1}: CanvasText;`,
   )
   .join("\n")}
   }
@@ -442,10 +500,10 @@ ${LINE_DASHES.map(
 @media print {
   .enarratio, .enarratio-tooltip { color-scheme: light; }
   .enarratio { break-inside: avoid; }
-  .enarratio-frame { overflow: visible; }
+  .enarratio-frame { overflow: visible; background: none; }
   .enarratio-frame-wide > svg { min-width: 0; }
   .enarratio-data::details-content { content-visibility: visible; block-size: auto; }
-  .enarratio-tooltip, .enarratio-brush, .enarratio [data-enarratio-control] {
+  .enarratio-tooltip, .enarratio-brush, .enarratio [data-enarratio-control], .enarratio-export {
     display: none !important;
   }
 }
@@ -557,7 +615,13 @@ export function colorStyles(markup: string): string {
     if (!COLOR_OVERRIDE.test(value) || /url\s*\(/i.test(value)) {
       throw new Error(`"${value}" is not a color override Enarratio writes`);
     }
-    rules.add(`.enarratio[data-enarratio-colors="${value}"] { ${value}; }`);
+    // Series names written on the background follow the override, mixed toward the text color
+    // as the base rules do for a site that defines no label shades (B1).
+    const labels = [...value.matchAll(/--enarratio-series-([1-8]): ([^;]+)/g)].map(
+      ([, n, color]) =>
+        `--enarratio-series-label-${n}: color-mix(in srgb, ${color} 55%, var(--enarratio-text))`,
+    );
+    rules.add(`.enarratio[data-enarratio-colors="${value}"] { ${[value, ...labels].join("; ")}; }`);
   }
   return [...rules].join("\n");
 }

@@ -1,6 +1,15 @@
 /** Axes and grids drawn as Plot draws them: the same groups, positions and offsets. */
 
-import { type Attrs, el, type FacetContent, markGroup, textElement, translate } from "./svg.js";
+import { TITLE_LINES } from "../render/size.js";
+import {
+  type Attrs,
+  el,
+  type FacetContent,
+  markGroup,
+  text,
+  textElement,
+  translate,
+} from "./svg.js";
 
 /** The drawing area: the SVG's size and the margins around the plotted frame. */
 export interface Frame {
@@ -82,13 +91,14 @@ export function axisTicks(
 
 /**
  * Tick labels beside the ticks. `padding` is the gap from the frame: 9 beside a tick mark, as
- * on value and category axes. `tabular` sets tabular figures, for numbers and dates.
+ * on value and category axes. Figures are proportional: tabular
+ * figures widen the comma in some faces ("1 , 600"), and end-anchored labels need no columns.
  */
 export function axisTickLabels(
   k: "x" | "y" | "fx" | "fy",
   ticks: readonly Tick[],
   frame: Frame,
-  options: { offset?: number; tabular?: boolean; placement?: Placement } = {},
+  options: { offset?: number; placement?: Placement } = {},
 ): string {
   const vertical = k === "y" || k === "fy";
   const label = (t: Tick): string =>
@@ -106,7 +116,6 @@ export function axisTickLabels(
     transform: vertical ? translate(-9, offset) : translate(offset, 9),
   };
   const styles: Attrs = {
-    "font-variant": options.tabular ? "tabular-nums" : undefined,
     "text-anchor": vertical ? "end" : undefined,
   };
   // A tick without a label (between powers of ten on a log axis) still gets an empty text.
@@ -158,16 +167,37 @@ export function facetTickLabels(
  * An axis label: centered below the frame for x, or rotated and centered beside it for y. The
  * position comes from `frame`; the offset from `inset`, the margins as given.
  */
+/** The most lines in any of the ticks' labels: the `lines` axisLabel takes. */
+export const labelLines = (ticks: readonly { readonly label: string }[]): number =>
+  Math.max(1, ...ticks.map((t) => t.label.split(/\r\n?|\n/).length));
+
 export function axisLabel(
   k: "x" | "y" | "fx" | "fy",
   label: string | null,
   frame: Frame,
   inset: Frame = frame,
+  lines?: number,
 ): string {
   // An empty label is still drawn, as Plot draws it; only null hides it.
   if (label === null) return "";
   const { width, height, marginTop, marginRight, marginBottom, marginLeft } = frame;
   const horizontal = k === "x" || k === "fx";
+  // Below a bottom x axis, the title sits a fixed number of ems under the tick labels' lines, as
+  // renderPlot places Plot's (placeXTitle).
+  if (k === "x" && lines !== undefined && !/[\r\n]/.test(label)) {
+    return el(
+      "g",
+      { ...HIDDEN, "data-enarratio-mark": "x-axis label", transform: translate(0, 9) },
+      el(
+        "text",
+        {
+          transform: translate((marginLeft + width - marginRight) / 2, height - marginBottom),
+          y: `${lines + TITLE_LINES}em`,
+        },
+        text(label),
+      ),
+    );
+  }
   const node = horizontal
     ? textElement(
         { transform: translate((marginLeft + width - marginRight) / 2, height - marginBottom) },

@@ -42,6 +42,7 @@ Each record says where a decision came from:
 | [0024](0024-more-chart-types.md) | The chart types of 0.4.0, and how each stays accessible |
 | [0025](0025-new-charts-on-the-figure.md) | The new chart types on the figure, in both renderers |
 | [0026](0026-rollout-fixes.md) | Fixes from the 0.4.0 rollout: linked bars, bar edges and hover titles |
+| [0027](0027-contrast-export-and-roles.md) | Text-safe series shades, ramp edges, export and embed, and the drawing's role |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

@@ -205,11 +205,30 @@ export function pieChart<T extends object>(options: PieChartOptions<T>): string 
       ].join("");
     })
     .join("");
+  // The center label sits on the hole, painted in the background color, with a halo of it where
+  // the label is wider than the hole, so it is read, and measured, against the background (B1).
   const center =
     options.donut && options.centerLabel
-      ? el(
+      ? el("circle", {
+          cx: n2(cx),
+          cy: n2(cy),
+          r: n2(Math.max(0, inner - 1)),
+          fill: "var(--enarratio-background)",
+          "aria-hidden": "true",
+        }) +
+        el(
           "text",
-          { x: n2(cx), y: n2(cy), dy: "0.32em", "font-weight": "600" },
+          {
+            x: n2(cx),
+            y: n2(cy),
+            dy: "0.32em",
+            "font-weight": "600",
+            // A halo in the background color, for a label wider than the hole.
+            stroke: "var(--enarratio-background)",
+            "stroke-width": 4,
+            "stroke-linejoin": "round",
+            "paint-order": "stroke",
+          },
           text(options.centerLabel),
         )
       : "";

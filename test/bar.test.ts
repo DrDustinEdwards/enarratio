@@ -28,6 +28,17 @@ describe("barChart", () => {
     expect(marks[3]?.querySelector("title")?.textContent).toBe("year 2024, Publications: 2");
   });
 
+  it("adds a unit to an axis title only when the title does not already name it", () => {
+    const title = (yLabel: string, yUnit: string): string | null | undefined =>
+      parse(barChart({ data: entries, x: "year", yLabel, yUnit, alt: "a" })).querySelector(
+        '[data-enarratio-mark="y-axis label"] text',
+      )?.textContent;
+    expect(title("reads", "reads")).toBe("reads");
+    expect(title("Reads per sample", "reads")).toBe("Reads per sample");
+    expect(title("Spreads", "reads")).toBe("Spreads (reads)");
+    expect(title("Dose", "mg/L")).toBe("Dose (mg/L)");
+  });
+
   it("names the SVG, not the figure, and puts every text part in the HTML outside role=img", () => {
     const fig = parse(
       barChart({
@@ -197,7 +208,11 @@ describe("barChart", () => {
     });
     expect(html).not.toContain("style=");
     const value = "--enarratio-series-2: light-dark(#112233, #aabbcc)";
-    expect(colorStyles(html)).toBe(`.enarratio[data-enarratio-colors="${value}"] { ${value}; }`);
+    const label =
+      "--enarratio-series-label-2: color-mix(in srgb, light-dark(#112233, #aabbcc) 55%, var(--enarratio-text))";
+    expect(colorStyles(html)).toBe(
+      `.enarratio[data-enarratio-colors="${value}"] { ${value}; ${label}; }`,
+    );
   });
 
   it("escapes caller text", () => {
@@ -317,7 +332,7 @@ describe("barChart", () => {
     const labels = [...fig.querySelectorAll('[data-enarratio-mark="x-axis tick label"] text')].map(
       (t) => t.textContent,
     );
-    expect(labels).toEqual(["2000", "2004", "2008", "2012", "2016"]);
+    expect(labels).toEqual(["2000", "2005", "2010", "2015"]);
     expect(() => barChart({ data: years, x: "year", maxXTicks: 0, alt: "a" })).toThrow(/maxXTicks/);
   });
 });

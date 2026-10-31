@@ -7,6 +7,30 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-31
+
+Contrast, theming, export and embed from the area 10 verification ([0027](docs/design/0027-contrast-export-and-roles.md)).
+
+### Upgrading from 0.4
+
+- Series names written on the background (direct labels, survival curve labels, at-risk rows) are drawn in each series' new label shade, `--enarratio-series-label-N`, at 4.5:1 (was the series color). A site that sets `--enarratio-*` itself (`base.css`) gets a mix of the series and text colors until it defines them.
+- Sequential ramp steps under 3:1 on the background get a 1px edge, `--enarratio-sequential-edge-N`, on heatmap and heat strip cells and ramp legend swatches. On `base.css` alone, steps 1 to 3 get the muted text color as their edge.
+- `checkTheme` (and so `stylesheet()`) adds three checks: `series-label-contrast`, `sequential-edge`, and `status.unknown` at 3:1. A theme with a given `seriesLabels` or `sequentialEdges` that falls short now fails; derived ones always pass. A theme whose unknown color is under 3:1 now fails.
+- Theme colors are typed `ThemeColor` (hex, or `var(--token, #hex)`), not `HexColor`; code that reads a theme's colors as `HexColor` widens its type. `CheckIssue.colors` stays hex.
+- `enhance()` adds "Download SVG" and "Download PNG" beside "Download CSV", and "Copy embed" on a figure with an `id`. Pass `download: false` or `embed: false` to leave them out. New strings: `downloadSvg`, `downloadPng`, `copyEmbed`, `embedCopied`, `exportFailed`.
+- The default theme's light unknown gray is #818a94 (was #8c959f, 2.99:1).
+
+### Added
+
+- Theme colors may be a site's own custom property with a hex fallback, `var(--site-token, #hex)`: the stylesheet writes it as given, and `checkTheme` measures the fallback.
+- `ColorScheme.seriesLabels` and `ColorScheme.sequentialEdges`, optional: the shades for series names on the background and for the edges of pale ramp steps. Left out, `stylesheet()` derives them.
+- `readableShade(color, background, minimum)`: the least darkening or lightening of a color that reaches a contrast.
+- `--enarratio-cell-edge-width` (default `1px`).
+- Export (C3): "Download SVG" (the drawing with its computed colors and fonts, and the background) and "Download PNG" (the same, on a canvas at twice its size), from the enhancement layer, with no new dependency.
+- `maxXTicks` on line and area charts, as on bar charts.
+- Embed (C4): "Copy embed" copies `<a href="{page}#{id}">{title}</a>` for a figure with an `id`.
+- `enarratio/redraw`: draws a server's bar, line or area chart again at its frame's width in the browser (with `enarratio/lite`), or swaps in a narrow server drawing for any other chart under 30rem, and enhances each drawing. Moved from Prelum's `render/chart-enhance`, so Prelum and Capsomer share one copy: `redrawAttribute(spec)` on the server, `redrawCharts()` in the page.
+
 ### Enhancement layer
 
 - Charts read layout together. Each chart used to measure its marks right after the chart before it changed the page, so a page of charts was laid out once per chart; the gallery spent about 450 ms in one task on a throttled phone. Every chart now queues its reads (pointer targets, the points over the marks, line lengths for the entrance) and they run together after the next frame is drawn, when layout is already done, and then all the writes. One resize observer serves every chart, so charts resized together share one layout too. The longest task on the gallery fell to about 170 ms. The pointer targets and the points' places arrive a frame after `enhance()` returns; the marks answer the pointer from the start. No API change.
@@ -17,10 +41,27 @@ change the public API; every such change is listed here.
 
 ### Fixed
 
+- Contrast (B1): network links draw at full strength (were at half opacity, 2.1 to 2.9:1); the donut's hole is painted in the background, and its center label has a background halo, so the label is never read against a slice.
+- An axis title that already names its unit is not repeated: `yLabel: "reads"` with `yUnit: "reads"` reads "reads", not "reads (reads)".
+- Tick labels use proportional figures (Plot's `font-variant="tabular-nums"` is removed, and the base rules no longer set tabular figures on tick labels): in faces whose tabular figures include a figure-width comma, such as Schibsted Grotesk, "1,600" read as "1 , 600". Table cells and other numbers keep tabular figures.
+- At narrow widths, a numeric y axis's widest tick label and its rotated title no longer overlap, nor do the x tick labels (two lines on a time axis) and the x title: each chart's left and bottom margins grow to fit them, at the size the text reaches as the drawing shrinks, in both renderers.
+- Direct labels on line charts are spread by a gap that grows with the text, and the right margin fits the longest series name, so close end values (225 and 195 in a 440-wide chart drawn in a narrow column) no longer collide or run off the edge.
+- A linear y axis (and a vertical bar's value axis) is rounded to the step of the ticks drawn, not to d3's default of ten ticks, so it ends on a tick: data reaching 23 on a 0, 5, ..., 20 axis now end at a 25 tick, not at 24 above the last one. Both renderers. An x axis keeps d3's finer rounding, so a narrow scatter of doses 1 to 5 runs 1 to 5, not 0 to 10.
+- A wide drawing (480 or more) that scrolls in a column under 30rem shows a shadow at the edge that has more, without script.
+- Scatter plots inset their points from the axes, so the first point no longer sits on the axes over a tick label at narrow widths.
+- Scatter plots widen each linear axis by a twentieth of its span before rounding it, so the lowest and highest points fall between ticks, not on the end tick beside its label ("2" under the lowest point of a 320 px dot chart).
+- The x axis title sits one and a half ems below its tick labels' last line, in both renderers, instead of at the foot of a bottom margin sized for text grown in a narrow column: on a 440-wide line chart shown at its own size the title stood far below "24 Oct". A time axis counts a second line of tick label only when a tick uses one.
+- Line and area charts thin their x tick labels to fit the width, in both renderers, so year or day labels no longer run together on a narrow chart (Prelum, a two-series line chart at 239 px). Every label prints when they fit (2020 to 2023 at 288 px), and a thinned axis keeps its first and last ticks when an even step allows.
+- Category labels under vertical bars are thinned by the same rule as line charts' x ticks when they would come within the least gap at the width drawn, so seven day names at 254 px print every other one (Thu, Sat, Mon, Wed) instead of touching; `maxXTicks` still sets the count. A time axis thins by that rule too, so it may print one label fewer than before when no even step reaches the last.
+- Direct labels' right margin is sized to the labels at the width drawn: under 480 it no longer keeps the desktop's 96, in both renderers.
+- The timeline's plain list on narrow screens indents 2.25em (was 1.25em), so its markers ("1.", "10.") are not clipped by the frame.
+- A summary capitalizes a sentence that opens with a lowercase word ("posts rose" reads "Posts rose"), but not one that opens with a domain or identifier: "carrel.app rose" stays as written.
 - `enhance` reads every mark's size before it writes anything: the pointer targets, the point layer and the line lengths for the entrance. Measuring between writes laid the whole page out once per mark. On the gallery (40 charts, 10,000 elements) that cost 7.7 s of blocking time on a throttled phone, and it now costs 70 ms.
 
 ### Changed
 
+- `npm run size` holds the enhancement layer to 9.5 kB (was 9 kB): export, embed and layout batching bring it to 9.2 kB, and it stays one file with no imports (0027).
+- The renderers drop their unused `role="group"` option: every chart's SVG is `role="img"`, enhanced or not (B28, recorded in 0027 with the WAI-ARIA and APG reasons).
 - Gallery: its pages, sitemap, icon, security.txt and 404 page name `charset=utf-8` (`headersFile` with `charset: true`, and the Worker sends every file through `applyHeaderSet`, on site-runtime v0.49.0). Not part of the package, which is unchanged.
 - Gallery: the co-authorship network example uses a made-up name (Rivera) in place of a real one, and a link-safety test uses example.com instead of a real site. Not part of the package, which is unchanged.
 

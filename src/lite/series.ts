@@ -4,11 +4,21 @@ import { datumAttributes } from "../render/datum.js";
 import type { ScaleDescription } from "../render/figure.js";
 import {
   dayTicks,
+  fitTicks,
   type Point,
   type SeriesChartOptions,
   type SeriesModel,
 } from "../render/line-model.js";
-import { axisLabel, axisTickLabels, axisTicks, type Frame, grid, type Tick } from "./axis.js";
+import { bottomMargin, leftMargin } from "../render/size.js";
+import {
+  axisLabel,
+  axisTickLabels,
+  axisTicks,
+  type Frame,
+  grid,
+  labelLines,
+  type Tick,
+} from "./axis.js";
 import {
   type Continuous,
   continuous,
@@ -58,16 +68,31 @@ export interface SeriesFrame {
  */
 export function seriesFrame(
   model: SeriesModel,
-  frame: Frame,
+  given: Frame,
   xs: Iterable<number>,
   ys: Iterable<number | null>,
   y: { readonly log: boolean; readonly zero: boolean },
 ): SeriesFrame {
   const { prepared } = model;
-  const { width, height, marginTop, marginRight, marginBottom, marginLeft } = frame;
   const xDomain = extent(xs) ?? [0, 1];
-  const xRange: Pair = [marginLeft, width - marginRight];
-  const x = continuous(prepared.time ? "utc" : "linear", xDomain, xRange);
+  // Room below for the x labels and title, before the y scale, as renderPlot fits Plot's: as
+  // many lines of tick label as the ticks drawn at the margins given use.
+  const givenWidth = given.width - given.marginLeft - given.marginRight;
+  const firstTicks = (): number[] => {
+    const days = dayTicks(prepared, givenWidth);
+    if (days) return fitTicks(days, () => "Jun 07", given.width, givenWidth, model.maxXTicks);
+    const count = Math.min(model.maxXTicks ?? Infinity, givenWidth / 80);
+    return timeTicks(xDomain[0], xDomain[1], count);
+  };
+  const lines =
+    prepared.time && !model.yearTicks
+      ? labelLines(timeTickLabels(firstTicks()).map((label) => ({ label })))
+      : 1;
+  const asked: Frame = {
+    ...given,
+    marginBottom: bottomMargin(given.marginBottom, prepared.xLabel !== null, given.width, lines),
+  };
+  const { width, height, marginTop, marginRight, marginBottom } = asked;
 
   const values = [...ys].filter((v): v is number => v !== null && (!y.log || v > 0));
   let yDomain: Pair =
@@ -75,23 +100,43 @@ export function seriesFrame(
   if (y.zero && (yDomain[0] > 0 || yDomain[1] < 0)) {
     yDomain = yDomain[0] > 0 ? [0, yDomain[1]] : [yDomain[0], 0];
   }
-  yDomain = y.log ? niceLog(yDomain) : niceLinear(yDomain);
+  // Rounded to the step of the ticks drawn, so the axis ends on a tick (as renderPlot does).
+  const yCount = (height - marginBottom - marginTop) / 35;
+  yDomain = y.log ? niceLog(yDomain) : niceLinear(yDomain, yCount);
   const yScale = continuous(y.log ? "log" : "linear", yDomain, [height - marginBottom, marginTop]);
 
-  const yCount = (height - marginBottom - marginTop) / 35;
   const yAt = y.log ? logTicks(yDomain, yCount) : ticks(yDomain[0], yDomain[1], yCount);
   const yFormat = y.log
     ? logTickFormat(yDomain, yCount)
     : (model.valueAxis.format ?? linearTickFormat(yDomain, yCount));
   const yTicks: Tick[] = yAt.map((t) => ({ at: yScale(t), label: yFormat(t) }));
 
-  const xCount = (xRange[1] - xRange[0]) / 80;
+  // Ticks chosen by span are fitted to the width the chart asked for, as the Plot charts are
+  // before Plot widens the margin for the y labels (leftMargin, in renderPlot).
+  const askedWidth = width - asked.marginLeft - marginRight;
+  const marginLeft = leftMargin(
+    asked.marginLeft,
+    yTicks.map((t) => t.label),
+    prepared.yLabel !== null,
+    width,
+  );
+  const frame: Frame = { ...asked, marginLeft };
+  const xRange: Pair = [marginLeft, width - marginRight];
+  const x = continuous(prepared.time ? "utc" : "linear", xDomain, xRange);
+
+  // About one tick per 80 units, as Plot counts them, and no more than maxXTicks.
+  const plotWidth = xRange[1] - xRange[0];
+  const xCount =
+    model.maxXTicks === undefined ? plotWidth / 80 : Math.min(model.maxXTicks, askedWidth / 80);
+  // Ticks chosen by span (years, days) are thinned to fit the width, as the Plot charts do.
+  const thin = (at: readonly number[], label: (t: number) => string): number[] =>
+    fitTicks(at, label, width, askedWidth, model.maxXTicks);
   let xTicks: Tick[];
   if (model.yearTicks) {
-    xTicks = model.yearTicks.map((t) => ({ at: x(t), label: String(t) }));
+    xTicks = thin(model.yearTicks, String).map((t) => ({ at: x(t), label: String(t) }));
   } else if (prepared.time) {
-    const at =
-      dayTicks(prepared, xRange[1] - xRange[0]) ?? timeTicks(xDomain[0], xDomain[1], xCount);
+    const days = dayTicks(prepared, askedWidth);
+    const at = days ? thin(days, () => "Jun 07") : timeTicks(xDomain[0], xDomain[1], xCount);
     const labels = timeTickLabels(at);
     xTicks = at.map((t, i) => ({ at: x(t), label: labels[i] ?? "" }));
   } else {
@@ -110,15 +155,15 @@ export function seriesFrame(
       yTicks.map((t) => t.at),
       frame,
     ),
-    axisTickLabels("y", yTicks, frame, { tabular: true }),
+    axisTickLabels("y", yTicks, frame),
     axisLabel("y", prepared.yLabel, frame),
     axisTicks(
       "x",
       xTicks.map((t) => t.at),
       frame,
     ),
-    axisTickLabels("x", xTicks, frame, { tabular: true }),
-    axisLabel("x", prepared.xLabel, frame),
+    axisTickLabels("x", xTicks, frame),
+    axisLabel("x", prepared.xLabel, frame, frame, labelLines(xTicks)),
   ].join("");
 
   return {

@@ -4,11 +4,12 @@ import {
   type AreaChartOptions,
   areaModel,
   dayTicks,
+  fitTicks,
   type LineChartOptions,
   lineModel,
   type MarkerPoint,
   type Point,
-  type Prepared,
+  rightMargin,
   type SeriesChartOptions,
   type SeriesModel,
   spreadLabels,
@@ -53,18 +54,30 @@ function annotations(
   return marks;
 }
 
-/** The x scale shared by line and area charts. */
-function xScale(prepared: Prepared, yearTicks: number[] | undefined, plotWidth: number) {
+/** The x scale shared by line and area charts, its ticks thinned to fit the width. */
+function xScale(model: SeriesModel, width: number, plotWidth: number) {
+  const { prepared, yearTicks, maxXTicks } = model;
   const base = {
     type: prepared.time ? "utc" : "linear",
     label: prepared.xLabel,
     labelAnchor: "center",
     labelArrow: "none",
   } as const;
-  if (yearTicks) return { ...base, ticks: yearTicks, tickFormat: (d: number) => String(d) };
+  if (yearTicks) {
+    return {
+      ...base,
+      ticks: fitTicks(yearTicks, String, width, plotWidth, maxXTicks),
+      tickFormat: (d: number) => String(d),
+    };
+  }
   const days = dayTicks(prepared, plotWidth);
-  // As Dates, so Plot labels them as it labels its own time ticks.
-  return days ? { ...base, ticks: days.map((t) => new Date(t)) } : base;
+  // As Dates, so Plot labels them as it labels its own time ticks ("Jun 7", about 6 characters).
+  if (days) {
+    const fitted = fitTicks(days, () => "Jun 07", width, plotWidth, maxXTicks);
+    return { ...base, ticks: fitted.map((t) => new Date(t)) };
+  }
+  // Plot's own ticks come about one per 80 pixels; a limit lowers the count.
+  return maxXTicks === undefined ? base : { ...base, ticks: Math.min(maxXTicks, plotWidth / 80) };
 }
 
 /** The y scale's domain when every value is zero, and its tick format for huge values (B41). */
@@ -170,7 +183,10 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
             const at = texts.map((t) =>
               /translate\(([^,]+),([^)]+)\)/.exec(t.getAttribute("transform") ?? ""),
             );
-            const ys = spreadLabels(at.map((m) => Number(m?.[2])));
+            const ys = spreadLabels(
+              at.map((m) => Number(m?.[2])),
+              dimensions.width,
+            );
             for (const [i, t] of texts.entries()) {
               t.setAttribute("transform", `translate(${at[i]?.[1]},${ys[i]})`);
             }
@@ -183,7 +199,7 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
 
   const width = options.width ?? DEFAULT_WIDTH;
   const marginLeft = prepared.yLabel === null ? 48 : 64;
-  const marginRight = model.directLabels ? 96 : 24;
+  const marginRight = rightMargin(model, width);
   const rendered = renderPlot(
     {
       width,
@@ -192,7 +208,7 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
       marginLeft,
       marginRight,
       marginBottom: 44,
-      x: xScale(prepared, model.yearTicks, width - marginLeft - marginRight),
+      x: xScale(model, width, width - marginLeft - marginRight),
       y: {
         type: model.log ? "log" : "linear",
         label: prepared.yLabel,
@@ -238,7 +254,7 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
       marginLeft,
       marginBottom: 44,
       // Plot's default right margin is 20.
-      x: xScale(prepared, model.yearTicks, width - marginLeft - 20),
+      x: xScale(model, width, width - marginLeft - 20),
       y: {
         label: prepared.yLabel,
         labelAnchor: "center",

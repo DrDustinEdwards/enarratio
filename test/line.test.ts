@@ -105,6 +105,29 @@ describe("lineChart", () => {
     }
   });
 
+  it("thins x ticks to fit a narrow width, and to maxXTicks, in both renderers", () => {
+    const years = [2019, 2020, 2021, 2022, 2023, 2024].flatMap((year) => [
+      { year, site: "A", n: year - 2010 },
+      { year, site: "B", n: year - 2012 },
+    ]);
+    const labels = (html: string): string[] =>
+      [...parse(html).querySelectorAll('[data-enarratio-mark="x-axis tick label"] text')].map(
+        (t) => t.textContent ?? "",
+      );
+    for (const chart of [lineChart, liteLineChart]) {
+      const base = { data: years, x: "year", y: "n", series: "site", alt: "a" } as const;
+      expect(labels(chart(base))).toHaveLength(6);
+      // At 239 wide, six years (about 40 units each) do not fit in the plot's 150 or so.
+      const narrow = labels(chart({ ...base, width: 239 }));
+      expect(narrow.length).toBeLessThan(6);
+      expect(narrow[0]).toBe("2019");
+      expect(labels(chart({ ...base, maxXTicks: 2 }))).toEqual(["2019", "2024"]);
+    }
+    expect(() =>
+      lineChart({ data: years, x: "year", y: "n", series: "site", maxXTicks: 0, alt: "a" }),
+    ).toThrow(/maxXTicks/);
+  });
+
   it("refuses duplicate points and bad dates", () => {
     expect(() =>
       lineChart({ data: [weekly[0], weekly[0]] as typeof weekly, x: "week", y: "cases", alt: "a" }),

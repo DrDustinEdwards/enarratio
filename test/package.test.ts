@@ -30,7 +30,7 @@ function reach(entry: string, seen = new Set<string>()): Set<string> {
 }
 
 describe("package entries", () => {
-  it("has the ten subpaths and no others", () => {
+  it("has the eleven subpaths and no others", () => {
     expect(Object.keys(pkg.exports).sort()).toEqual(
       [
         ".",
@@ -42,6 +42,7 @@ describe("package entries", () => {
         "./lite/line",
         "./package.json",
         "./plot",
+        "./redraw",
         "./science",
         "./themes",
       ].sort(),

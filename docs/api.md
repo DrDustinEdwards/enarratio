@@ -11,6 +11,7 @@ ships only what it uses.
 | `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | Peers `@observablehq/plot` and `d3-force`, and `linkedom` outside a browser |
 | `enarratio/lite` | `barChart`, `lineChart`, `areaChart` drawn without Observable Plot; also one entry per chart: `enarratio/lite/bar`, `enarratio/lite/line`, `enarratio/lite/area` | Nothing |
 | `enarratio/enhance` | Interaction for charts already on the page; runs in the browser | Nothing |
+| `enarratio/redraw` | Draws a server's chart again at its frame's width in the browser, then enhances it | Nothing |
 | `enarratio/themes` | The themes that ship with the package | Nothing |
 
 `@observablehq/plot`, `d3-force` and `linkedom` are optional peer dependencies:
@@ -198,7 +199,9 @@ its numbers written as the chart's ticks and table write them ("0 to 1", not
 ### `AxisUnits`
 
 `xUnit` and `yUnit`: units added to the axis label and the table header,
-"Weight (kg)" (B23). A hidden (`null`) label stays hidden.
+"Weight (kg)" (B23). A hidden (`null`) label stays hidden, and a label that
+already names the unit as a word ("Reads per sample", unit `reads`) is left as
+it is rather than "Reads per sample (reads)".
 
 ### `ChartIssue`
 
@@ -366,7 +369,9 @@ one row per item (a CV entry, a case) is enough.
   follows its link, and its point is that link. Only relative and `http(s)`
   links are allowed.
 - `maxXTicks`: the most category labels to print; with more categories, every
-  nth label is printed from the first.
+  nth label is printed from the first. Without it, labels under vertical bars
+  are thinned the same way when they would come within 12 units of each other
+  at the width drawn (seven day names at 254), as line charts' x ticks are.
 - `directLabels`: print each series' name inside the stacked segments it fits
   in, so series are told apart by text as well as color. Stacked layout only.
 - `xType: "time"`, with `interval`, `formatX`: a time axis. `x` is a Date, an
@@ -415,8 +420,13 @@ as percentages. `enarratio/lite` draws `percent` too, identically.
 
 Options shared by line and area charts: `data`, `x`, `y`, `series`, `xType`
 (`"time"` or `"linear"`), `seriesDomain`, `colors`, `xLabel`, `yLabel`,
-`formatValue`, `formatX`, `references`, `markers`.
+`formatValue`, `formatX`, `references`, `markers`, `maxXTicks`.
 
+- x tick labels are thinned to what fits the drawing's width (every nth from
+  the first, about 7 units a character), so they never overlap on a narrow
+  chart; `maxXTicks` caps them lower still (on a plain number or time axis it
+  is the count asked for, which nice steps may round). Both renderers thin
+  alike.
 - `x` holds Dates or ISO 8601 strings (time) or numbers (linear). `xType` is
   inferred from the first row, so epoch milliseconds, being numbers, need
   `xType: "time"`.
@@ -1160,16 +1170,25 @@ of the column's range) or `"sparkline"` (a field holding an array of numbers).
 ### `ColorScheme`
 
 `background`, `text`, `mutedText`, `grid`, `focus`, `series`
-(`SeriesPalette`), `sequential` (`SequentialRamp`), `status` (`StatusColors`).
-All hex colors.
+(`SeriesPalette`), `sequential` (`SequentialRamp`), `status` (`StatusColors`),
+and two optional sets of shades:
+
+- `seriesLabels?` (`SeriesPalette`): the colors series names are written in on
+  the background (direct labels, curve labels). Left out, each series color is
+  darkened (light scheme) or lightened (dark scheme) until it reaches 4.5:1.
+- `sequentialEdges?` (`SequentialRamp`): the edge round each ramp step's cells
+  and swatches. Left out, a step that reaches 3:1 on the background has none,
+  and a paler one gets its own color darkened or lightened to 3:1.
+
+Every color is a [`ThemeColor`](#themecolor).
 
 ### `SeriesPalette`
 
-Exactly eight `HexColor`s, assigned to series in order.
+Exactly eight `ThemeColor`s, assigned to series in order.
 
 ### `SequentialRamp`
 
-Exactly five `HexColor`s, from least to most.
+Exactly five `ThemeColor`s, from least to most.
 
 ### `StatusColors`
 
@@ -1178,6 +1197,17 @@ Exactly five `HexColor`s, from least to most.
 ### `HexColor`
 
 `` `#${string}` ``: `#rgb` or `#rrggbb`.
+
+### `ThemeColor`
+
+A `HexColor`, or a site's own custom property with a hex fallback,
+`` `var(--${string}, #${string})` ``. The stylesheet writes it as given, so
+charts follow the site's token wherever it changes; `checkTheme` and the
+shades Enarratio derives (series labels, ramp edges, labels on marks) measure
+the fallback. Keep the fallback equal to the token's value, and give
+`seriesLabels` and `sequentialEdges` as tokens too when the series and ramp
+are tokens, so the shades follow the site as well. See the README, "Your own
+theme".
 
 ### `Gridlines`
 
@@ -1263,8 +1293,10 @@ them itself. They have no fallback: undefined, a rule using one is ignored.
 | `--enarratio-grid`, `--enarratio-focus` | Gridlines and rules; the focus ring |
 | `--enarratio-series-1` to `--enarratio-series-8` | The eight series colors, in order |
 | `--enarratio-series-text-1` to `-8` | The label color that reads best on each series color |
+| `--enarratio-series-label-1` to `-8` | Each series' shade for its name written on the background, at 4.5:1. Undefined, the base rules mix the series color 55% with the text color |
 | `--enarratio-sequential-1` to `--enarratio-sequential-5` | The five-step ramp, least to most |
 | `--enarratio-sequential-text-1` to `-5` | The label color that reads best on each ramp step |
+| `--enarratio-sequential-edge-1` to `-5` | The edge round each ramp step's cells and legend swatch, at 3:1, or `transparent`. Undefined, the base rules draw steps 1 to 3 with an edge in the muted text color |
 | `--enarratio-status-good`, `-warning`, `-bad`, `-unknown` | Status colors |
 | `--enarratio-font`, `--enarratio-font-numeric` | Body and numeric font stacks |
 
@@ -1307,13 +1339,14 @@ A test keeps this table and the stylesheet in step.
 | `--enarratio-padding-expanded` | `1rem` | Padding of an expanded chart |
 | `--enarratio-opacity-brush` | `0.15` | Fill of a brushed range |
 | `--enarratio-opacity-texture` | `0.6` | Textures on filled series 2 to 8 and their legend swatches (1 under more contrast and forced colors) |
+| `--enarratio-cell-edge-width` | `1px` | The edge round a ramp step's cells (heatmap, heat strip) |
 | `--enarratio-bar-gap` | `1px` | The grid-colored edge between adjacent bars and stacked segments |
 | `--enarratio-halo-width` | `3px` | The halo of bar color behind a name printed on a textured bar |
 | `--enarratio-focus-width-inner` | `5px` | Inner (background) ring on a focused point, twice its width |
 | `--enarratio-focus-width-outer` | `2.5px` | Outer (focus color) ring on a focused point |
 | `--enarratio-focus-outline-width` | `3px` | Outline on a focused button, field or frame |
 | `--enarratio-focus-outline-offset` | `2px` | Distance of that outline |
-| `--enarratio-timeline-list-indent` | `1.25em` | Indent of the timeline's plain list on narrow screens |
+| `--enarratio-timeline-list-indent` | `2.25em` | Indent of the timeline's plain list on narrow screens |
 | `--enarratio-duration-hover` | `150ms` | Dimming and un-dimming |
 | `--enarratio-duration-grow` | `600ms` | Bars growing in |
 | `--enarratio-duration-fade` | `500ms` | Dots, areas and cells fading in |
@@ -1355,8 +1388,10 @@ The base rules follow what the reader has asked for (record
 ### `checkTheme`
 
 `checkTheme(theme: Theme, thresholds?: Partial<CheckThresholds>): CheckReport`.
-Measures text and mark contrast (WCAG 2.2), the contrast of labels printed on
-every series and ramp color, the order of the sequential ramp, and the
+Measures text and mark contrast (WCAG 2.2), including the unknown status
+color, series names written on the background (each series' label shade at
+4.5:1), each ramp step by its fill or its edge at 3:1, the contrast of labels
+printed on every series and ramp color, the order of the sequential ramp, and the
 difference between every pair of series colors with typical vision and
 simulated protanopia, deuteranopia and tritanopia. Reports rather than throws.
 The focus ring needs no check against series colors: it is drawn in two tones,
@@ -1393,6 +1428,15 @@ background color, whichever contrasts more, when it reaches 4.5:1 on the fill,
 otherwise black or white, one of which always does. The stylesheet picks bar
 label colors this way.
 
+### `readableShade`
+
+`readableShade(color: string, background: string, minimum: number): HexColor`.
+`color` itself when it reaches `minimum` contrast on `background`, otherwise
+the least mix toward black (light background) or white (dark) that does. The
+stylesheet derives series labels (to 4.6:1) and ramp edges (to 3.1:1) this way,
+a tenth over each minimum so a page background a shade off the theme's keeps
+them over it.
+
 ### `colorDifference`
 
 `colorDifference(a: string, b: string, vision?: ColorVision): number`. CIEDE2000
@@ -1422,7 +1466,7 @@ re-applies them.
 
 ### `EnhanceOptions`
 
-`{ tooltips?; filter?; brush?; entrance?; table?; expand?; url?; strings? }`.
+`{ tooltips?; filter?; brush?; entrance?; table?; expand?; url?; download?; embed?; strings? }`.
 
 | Option | Default | Does |
 |---|---|---|
@@ -1433,6 +1477,8 @@ re-applies them.
 | `table` | `true` | The data table sorts by any column (a button in each header, `aria-sort`), and a "Show table" button swaps the chart for the table and back |
 | `expand` | `false` | An "Expand" button fills the window with the chart; Escape, the button, or focus leaving the chart closes it |
 | `url` | `false` | Keeps the filter and range in the address as `?{id}={field}:{value}` and `?{id}-range={low}..{high}`, so a link reproduces the view. Needs the figure's `id`. A view read from the address fires `enarratio:select` or `enarratio:brush`, so the page can follow it |
+| `download` | `true` | "Download SVG" and "Download PNG" beside the CSV link (or in the control bar when the figure has none): the drawing as shown, its computed colors and fonts written onto each element and the background painted in; the PNG is that SVG on a canvas at twice its size. A PNG uses the fonts the browser has for a standalone image, so a web font may fall back |
+| `embed` | `true` | "Copy embed" copies a link to the chart, `<a href="{page}#{id}">{title}</a>`, to paste into another page. Needs the figure's `id` and the Clipboard API; without either there is no button |
 | `strings` | English | Translations of any of the [`EnhanceStrings`](#enhancestrings) |
 
 ### `ResolvedOptions`
@@ -1523,3 +1569,51 @@ wherever focus is.
   to clear.
 - On a continuous x axis, drag to pick a range, or click the plot once for one
   end and again for the other: dragging is never the only way.
+
+## Redraw to the frame: `enarratio/redraw`
+
+A chart drawn on the server keeps the width it was drawn at; in a narrower column its text
+shrinks below the mark size, or a wide frame scrolls. `enarratio/redraw` draws it again in the
+browser at its frame's width, whenever that width changes, and enhances each drawing. Bar, line
+and area charts are drawn again by `enarratio/lite` from their options; any other chart may give
+a narrow drawing made on the server, used under 30rem. A line chart narrower than 400 drops its
+end labels (its legend names the series); under 200 the server's drawing stays and scrolls.
+
+```ts
+// On the server, beside the chart:
+import { redrawAttribute } from "enarratio/redraw";
+const html = `<div ${redrawAttribute({ chart: "line", options })}>${lineChart(options)}</div>`;
+
+// In the page's own script:
+import { redrawCharts } from "enarratio/redraw";
+redrawCharts();
+```
+
+Without the script, the server's drawing stands, with its table. The options must survive JSON.
+
+### `RedrawSpec`
+
+`{ chart: "bar" | "line" | "area", options }`, the light chart and the options it was drawn
+with, or `{ narrow }`, the frame markup of a drawing about 240 wide.
+
+### `REDRAW_ATTRIBUTE`
+
+`"data-enarratio-redraw"`: the attribute that carries the spec.
+
+### `redrawAttribute`
+
+`redrawAttribute(spec)` returns the attribute, escaped, for the element around the figure.
+
+### `redrawCharts`
+
+`redrawCharts(root?, options?)` starts every chart under `root` (the document) that carries a
+spec, once each, and returns them. `options` are `enhance`'s.
+
+### `redrawChart`
+
+`redrawChart(host, spec, options?)` starts one chart, for a host that carries its spec some other
+way.
+
+### `RedrawnChart`
+
+`{ host, destroy() }`: `destroy` stops following the width and removes the enhancement.

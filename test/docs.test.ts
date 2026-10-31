@@ -30,6 +30,7 @@ const ENTRIES = [
   "src/themes/index.ts",
   "src/enhance/index.ts",
   "src/lite/index.ts",
+  "src/redraw/index.ts",
 ];
 
 describe("documentation", () => {

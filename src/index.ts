@@ -87,6 +87,7 @@ export {
   contrastRatio,
   labelColor,
   type Rgb,
+  readableShade,
   simulateColorVision,
 } from "./theme/color.js";
 export { defineTheme } from "./theme/define.js";
@@ -104,4 +105,5 @@ export type {
   SeriesPalette,
   StatusColors,
   Theme,
+  ThemeColor,
 } from "./theme/types.js";
