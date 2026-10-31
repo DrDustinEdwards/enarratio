@@ -300,7 +300,7 @@ describe("barChart", () => {
       "javascript:alert(1)",
       " java\tscript:x",
       "data:text/html,x",
-      "https://dustinedwards.info@evil.example/login",
+      "https://example.com@evil.example/login",
     ]) {
       expect(() => barChart({ data: entries, x: "year", href: () => bad, alt: "a" })).toThrow(
         /not a relative or http\(s\) link/,
