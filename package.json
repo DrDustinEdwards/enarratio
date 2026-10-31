@@ -95,7 +95,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "test": "vitest run",
-    "gallery": "node scripts/gallery.ts",
+    "gallery": "node scripts/gallery.ts && site-runtime-headers --site enarratio --out site/dist/_headers --header \"tdm-reservation: 1\"",
     "deploy:gallery": "npm run build && npm run gallery && npx --yes wrangler@4.143.0 deploy",
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "prepare": "npm run build",
