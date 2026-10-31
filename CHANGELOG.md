@@ -9,7 +9,7 @@ change the public API; every such change is listed here.
 
 ### Changed
 
-- CI: devkit v0.20.2, with its workflow and dependency audits. The release job turns off setup-node's package cache, and no checkout keeps its credentials.
+- CI: devkit v0.20.3, with its workflow and dependency audits. The release job turns off setup-node's package cache, and no checkout keeps its credentials.
 
 ## [0.4.0] - 2026-10-31
 
