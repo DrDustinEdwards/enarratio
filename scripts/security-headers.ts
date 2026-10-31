@@ -9,7 +9,7 @@
 
 import { TDM_RESERVATION_HEADERS } from "@drdustinedwards/site-helpers/robots";
 import { buildContentSecurityPolicy, reportingEndpoints } from "@dustinedwards/site-runtime/csp";
-import { buildSecurityHeaders } from "@dustinedwards/site-runtime/headers";
+import { buildSecurityHeaders, headersFile } from "@dustinedwards/site-runtime/headers";
 
 /** The gallery's address. */
 export const HOST = "enarratio.dustinedwards.info";
@@ -52,12 +52,17 @@ export const securityHeaders: Readonly<Record<string, string>> = Object.freeze({
  */
 const CACHE_CONTROL = "public, max-age=300, must-revalidate";
 
-/** The `_headers` file for the static assets: the security set and the cache rule, on every path. */
-export function headersFile(): string {
-  const lines = Object.entries({ ...securityHeaders, "Cache-Control": CACHE_CONTROL }).map(
-    ([name, value]) => `  ${name}: ${value}`,
+/**
+ * The `_headers` file for the static assets, from site-runtime's builder: the set and the cache
+ * rule on every path. The builder leaves the policy out of the set, since a page's policy can carry
+ * a nonce; the gallery's has none and is the same on every page, so it goes back on `/*` as its own
+ * rule, which Cloudflare joins with the first.
+ */
+export function galleryHeadersFile(): string {
+  return headersFile(
+    { ...securityHeaders, "Cache-Control": CACHE_CONTROL },
+    { paths: { "/*": { [csp.name]: csp.value } } },
   );
-  return `/*\n${lines.join("\n")}\n`;
 }
 
 /**
@@ -66,5 +71,5 @@ export function headersFile(): string {
  */
 export function writeHeadersFile(outDir: string): void {
   const { writeFileSync } = process.getBuiltinModule("node:fs");
-  writeFileSync(`${outDir}/_headers`, headersFile());
+  writeFileSync(`${outDir}/_headers`, galleryHeadersFile());
 }

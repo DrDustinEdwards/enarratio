@@ -10,6 +10,7 @@ change the public API; every such change is listed here.
 ### Changed
 
 - CI: devkit v0.20.3, with its workflow and dependency audits. The release job turns off setup-node's package cache, and no checkout keeps its credentials.
+- Gallery: each example sits in Capsomer's chart frame (`frameHtml`), as on the family's sites, and a new page, /capsomer, shows every chart in `capsomerTheme` (with `capsomerMoreTheme` for more contrast). The gallery loads `capsomer/base.css`, writes `_headers` with site-runtime's `headersFile`, and pins Capsomer v0.53.0, Prelum v0.21.0, site-runtime v0.46.0 and devkit v0.20.4. Not part of the package, which is unchanged.
 
 ## [0.4.0] - 2026-10-31
 

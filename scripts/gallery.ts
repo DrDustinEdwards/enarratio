@@ -2,15 +2,16 @@
  * Builds the gallery: one page per theme showing every example in examples/, its source, and the
  * events the enhancement layer fires. Run after `npm run build`; the examples import "enarratio",
  * which resolves to this package's own dist. The page around the charts is Capsomer's (its fonts,
- * tokens, site header, page head, panels and disclosures); the charts are drawn in each page's own
- * Enarratio theme, on that theme's background. Gallery tooling only: the npm package never
- * imports Capsomer.
+ * tokens, site header, page head, panels and disclosures), and each chart sits in Capsomer's chart
+ * frame, as on the family's sites; the charts are drawn in each page's own Enarratio theme, on that
+ * theme's background, and one page is Capsomer's own theme. Gallery tooling only: the npm package
+ * never imports Capsomer.
  *
  *   node scripts/gallery.ts [outDir]
  */
 
 import { copyFileSync, cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
+import { createRequire, registerHooks } from "node:module";
 import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { headHtml, headTags } from "@drdustinedwards/site-helpers/head";
@@ -21,12 +22,21 @@ import { sitemapDocument } from "@drdustinedwards/site-helpers/sitemap";
 import { securityTxt } from "@dustinedwards/site-runtime/security-txt";
 import { familyFooterHtml } from "capsomer/behavior/family-footer";
 import { letterheadHtml } from "capsomer/behavior/site-header";
+import { capsomerMoreTheme, capsomerTheme } from "capsomer/enarratio-theme";
 import { checkTheme, stylesheet, type Theme } from "enarratio";
 import { barChart } from "enarratio/lite";
 import { defaultTheme, highContrastTheme } from "enarratio/themes";
 import { rolldown } from "rolldown";
 import { exampleTheme } from "../examples/themes/example.ts";
 import { HOST, writeHeadersFile } from "./security-headers.ts";
+
+// Capsomer's chart frame imports "enarratio", its peer; here that is this package itself.
+const self = import.meta.resolve("enarratio");
+registerHooks({
+  resolve: (specifier, context, next) =>
+    next(specifier === "enarratio" ? self : specifier, context),
+});
+const { frameHtml } = await import("capsomer/behavior/chart-frame");
 
 const root = resolve(import.meta.dirname, "..");
 const outDir = resolve(process.argv[2] ?? join(root, "site", "dist"));
@@ -153,6 +163,7 @@ const COMPONENTS = [
   "page-head",
   "panel",
   "disclosure",
+  "chart-frame",
   "manual",
   "family-footer",
 ];
@@ -205,7 +216,7 @@ function capsomerCss(fontDir: string): string {
     "/* Built by scripts/gallery.ts from Capsomer: its faces, tokens, base and the components the gallery uses. */",
     inlineCss(join(capsomerDir, "css", "fonts.css")).replaceAll("../fonts/", "fonts/"),
     inlineCss(join(capsomerDir, "css", "tokens.css")),
-    inlineCss(join(capsomerDir, "css", "base.css")),
+    inlineCss(packageFile("capsomer/base.css")),
     `@layer cap.tokens {\n${inlineCss(join(capsomerDir, "tokens", `family-${FAMILY}.css`))}\n}`,
     ...COMPONENTS.map((name) => inlineCss(join(capsomerDir, "components", name, `${name}.css`))),
     GALLERY_CSS,
@@ -315,7 +326,7 @@ function siteFooter(): string {
   const center = `<div class="cap-family-footer-center">
 <div><p class="cap-family-footer-center-name">Enarratio</p><p class="cap-family-footer-about">Accessible charts and scientific figures, drawn on the server into the HTML. Open source, MIT licensed.</p></div>
 <div class="cap-family-footer-columns">
-<ul class="cap-family-footer-links"><li><a href="/">Default theme</a></li><li><a href="/example">Example theme</a></li><li><a href="/astro">Astro and EmDash</a></li></ul>
+<ul class="cap-family-footer-links"><li><a href="/">Default theme</a></li><li><a href="/example">Example theme</a></li><li><a href="/capsomer">Capsomer theme</a></li><li><a href="/astro">Astro and EmDash</a></li></ul>
 <ul class="cap-family-footer-links"><li><a href="https://github.com/DrDustinEdwards/enarratio">Source</a></li><li><a href="https://www.npmjs.com/package/enarratio">npm</a></li><li><a href="https://github.com/DrDustinEdwards/enarratio/blob/main/CHANGELOG.md">Changes</a></li></ul>
 </div>
 <p class="cap-family-footer-stamp"><span>Release ${escapeText(VERSION)}</span></p>
@@ -380,7 +391,7 @@ ${examples
     ) => `<section class="cap-panel example" id="${e.id}" data-example="${e.id}" aria-labelledby="${e.id}-title">
 <header class="cap-panel-head"><h2 id="${e.id}-title"><span class="cap-part-no">${i + 1}</span>${escapeText(e.name)}</h2><p>${escapeText(e.title)}</p></header>
 <div class="cap-panel-body example-chart">
-${e.markup}
+${frameHtml(e.markup)}
 <p class="events" aria-live="polite"></p>
 </div>
 <details class="cap-disclosure example-source" data-variant="accordion"><summary>Source: examples/${e.id}.ts</summary><div class="cap-disclosure-body"><pre tabindex="0"><code>${escapeText(e.source)}</code></pre></div></details>
@@ -530,7 +541,7 @@ ${code(MARKDOWN_SAMPLE)}
 <section class="cap-panel example" id="tickets" aria-labelledby="tickets-title">
 <header class="cap-panel-head"><h3 id="tickets-title">The chart the block draws</h3></header>
 <div class="cap-panel-body example-chart">
-${sampleChart}
+${frameHtml(sampleChart)}
 </div>
 </section>
 <p>Register the plugin with Astro's Markdown processor, Sätteri (Astro 7) or remark (Astro 6):</p>
@@ -565,10 +576,14 @@ ${siteFooter()}
 
 const examples = await loadExamples();
 writeFileSync(join(outDir, "capsomer.css"), capsomerCss(join(outDir, "fonts")));
-/** Each page's theme, file and stylesheet. */
-const pages: [Theme, string, string][] = [
-  [defaultTheme, "index.html", "index.css"],
-  [exampleTheme, "example.html", "example.css"],
+/**
+ * Each page's theme, file and stylesheet, and the theme readers who ask for more contrast get.
+ * Capsomer's is the one the family's sites draw with (capsomer/enarratio-theme).
+ */
+const pages: [Theme, string, string, Theme][] = [
+  [defaultTheme, "index.html", "index.css", highContrastTheme],
+  [exampleTheme, "example.html", "example.css", highContrastTheme],
+  [capsomerTheme, "capsomer.html", "capsomer-theme.css", capsomerMoreTheme],
 ];
 /**
  * The address a page is linked at: the host (Cloudflare static assets) serves index.html at the
@@ -588,9 +603,8 @@ const links = (current: string): Link[] => [
   { label: "Astro and EmDash", href: "astro", current: current === ASTRO_PAGE },
   { label: "Code", href: "https://github.com/DrDustinEdwards/enarratio", current: false },
 ];
-for (const [theme, file, css] of pages) {
-  // Readers who ask for more contrast get the high-contrast theme's colors on every page.
-  writeFileSync(join(outDir, css), stylesheet(theme, { highContrast: highContrastTheme }));
+for (const [theme, file, css, highContrast] of pages) {
+  writeFileSync(join(outDir, css), stylesheet(theme, { highContrast }));
   writeFileSync(join(outDir, file), page(theme, file, css, examples, links(file)));
 }
 writeFileSync(join(outDir, ASTRO_PAGE), astroPage());
@@ -650,6 +664,11 @@ writeFileSync(
             title: "Gallery, example theme",
             url: `${SITE}/example`,
             description: "the same charts in a custom theme",
+          },
+          {
+            title: "Gallery, Capsomer theme",
+            url: `${SITE}/capsomer`,
+            description: "the same charts in Capsomer's theme, as the family's sites draw them",
           },
           {
             title: "Charts for Astro and EmDash",
