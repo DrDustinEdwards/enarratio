@@ -19,5 +19,5 @@ Enarratio draws accessible, server-rendered charts and scientific figures into t
 
 - Every change is in `CHANGELOG.md`.
 - Merging a version bump to `main` is the release: `.github/workflows/release.yml` tags `vX.Y.Z`, publishes the GitHub release and stages the package on npm (trusted publishing, provenance, no npm token). It goes live only when Dustin approves it on npm with 2FA. No session approves. Steps: `docs/releasing.md`.
-- The gallery deploys on every push to `main` (`.github/workflows/gallery.yml`); `npm run deploy:gallery` deploys by hand. A merge to `main` is a gallery deploy.
+- The gallery deploys on every push to `main` once CI passes (ci.yml's `deploy` job, devkit's worker-deploy: live gate on `/health`, rollback on a refusal); `npm run deploy:gallery` deploys by hand. A merge to `main` is a gallery deploy.
 - `wrangler.jsonc` is committed on purpose: it holds no account id or secret (wrangler takes the account from the login).
