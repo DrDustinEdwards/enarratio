@@ -24,20 +24,16 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
   const model = barModel(options);
   const { points, xNames, seriesNames, horizontal, grouped, thinned, categoryLabel } = model;
 
+  // The SVG is one image, so a bar holds no link: its link rides on it for enhance(), and the
+  // data table carries the same links for keyboards and screen readers (0026).
+  const link = model.link;
   const render = keyed(
     points,
     model.datum,
-    // A link is read on its own, so it carries its own name.
-    options.href ? (el, p) => el.setAttribute("aria-label", model.describe(p)) : undefined,
+    link ? (el, p) => el.setAttribute("data-enarratio-href", link(p)) : undefined,
   );
 
-  const link = model.link;
-  const common = {
-    fill: "series",
-    title: model.describe,
-    render,
-    ...(link ? { href: (p: BarPoint) => link(p) } : {}),
-  };
+  const common = { fill: "series", title: model.describe, render };
   const order = { order: [...seriesNames] };
   let bar: Plot.Markish;
   if (horizontal) {
@@ -110,7 +106,7 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
       marks: [bar, horizontal ? Plot.ruleX([0]) : Plot.ruleY([0]), ...errorMarks(model)],
     },
     model.alt,
-    options.href ? "group" : "img",
+    "img",
     steps(
       model.directLabels ? (svg) => labelSegments(svg) : undefined,
       model.bounds ? capErrorBars : undefined,

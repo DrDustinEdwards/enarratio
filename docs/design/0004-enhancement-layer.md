@@ -59,6 +59,8 @@ readers."
    filtered view. The SVG is then a named group, not one image, because
    `role="img"` would hide the links. The enhancement layer turns the links
    into filter buttons and keeps the address in `data-enarratio-href`.
+   (Replaced by [0026](0026-rollout-fixes.md): the bars carry `data-enarratio-href` and the
+   table carries the links.)
 11. **`destroy()` restores the server markup**, so a page can hand a chart back
    to server rendering, and tests can check the round trip.
 

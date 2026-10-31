@@ -10,7 +10,12 @@ export const MARK = "[data-enarratio-key]";
 export const SVG_NS = "http://www.w3.org/2000/svg";
 
 export function label(mark: Element): string {
-  return mark.getAttribute("aria-label") ?? mark.querySelector("title")?.textContent ?? "";
+  return (
+    mark.getAttribute("aria-label") ??
+    mark.querySelector("title")?.textContent ??
+    mark.getAttribute("data-enarratio-label") ??
+    ""
+  );
 }
 
 /** The element holding a mark's geometry: the mark, or the shape inside a linked mark. */

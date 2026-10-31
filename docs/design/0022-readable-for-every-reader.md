@@ -28,7 +28,8 @@ upgrading:
 4. **Textures for filled series.** Bars and areas fill series 2 to 8 with an 8-unit SVG
    pattern (series color plus a texture in the color for text on it); series 1 stays solid.
    Legend swatches show the same textures with CSS gradients. Stacked segments and bars get a
-   1px background-colored edge, and names printed on bars a halo of their bar's color.
+   1px background-colored edge (grid-colored since [0026](0026-rollout-fixes.md)), and names
+   printed on bars a halo of their bar's color.
 5. **Direct labels never overlap.** Line labels that end close together are moved apart,
    order kept, by one shared function both renderers use.
 6. **Reader settings in the base rules.** `prefers-contrast: more` (full textures, wider gaps,

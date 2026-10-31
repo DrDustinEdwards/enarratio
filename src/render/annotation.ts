@@ -57,11 +57,22 @@ export function withNotes<O extends FigureOptions & Annotated>(options: O): O {
   const strings = stringsFor(options.strings);
   const text = (v: AnnotationValue): string =>
     v instanceof Date ? date(v) : typeof v === "number" ? number(v) : v;
-  const said = notes.map((a) =>
-    a.type === "note"
-      ? a.text
-      : `${a.label ?? strings.terms.highlighted}: ${a.axis} ${strings.range(text(a.from), text(a.to))}`,
-  );
+  const fields = options as unknown as Readonly<Record<string, unknown>>;
+  // A range is said with its axis's unit ("500 to 630 words"), else after the axis's label
+  // ("Words 500 to 630"); a hidden label and no unit leave the values alone.
+  const along = (axis: "x" | "y", values: string): string => {
+    const unit = fields[`${axis}Unit`];
+    if (typeof unit === "string" && unit.trim()) return `${values} ${unit.trim()}`;
+    const given = fields[`${axis}Label`];
+    const name = given === undefined ? fields[axis] : given;
+    return typeof name === "string" && name.trim() ? `${name.trim()} ${values}` : values;
+  };
+  const said = notes.map((a) => {
+    if (a.type === "note") return a.text;
+    const values =
+      text(a.from) === text(a.to) ? text(a.from) : strings.range(text(a.from), text(a.to));
+    return `${a.label ?? strings.terms.highlighted}: ${along(a.axis, values)}`;
+  });
   // With no alt the figure names the chart from its data, so the notes join its visible notes.
   if (options.alt === undefined) {
     const given = typeof options.notes === "string" ? [options.notes] : (options.notes ?? []);
@@ -166,10 +177,26 @@ export function annotationShapes(
       const rect = horizontal(a.axis)
         ? { x: lo, width: hi - lo, y: across[0], height: across[1] - across[0] }
         : { y: lo, height: hi - lo, x: across[0], width: across[1] - across[0] };
-      behind.push({
-        tag: "rect",
-        attrs: { ...rect, fill: "var(--enarratio-text)", "fill-opacity": 0.08 },
-      });
+      // A range from a value to itself has no width to fill, so it is drawn as a line there.
+      behind.push(
+        hi - lo < 1
+          ? {
+              tag: "path",
+              attrs: {
+                d: horizontal(a.axis)
+                  ? `M${lo},${across[0]}L${lo},${across[1]}`
+                  : `M${across[0]},${lo}L${across[1]},${lo}`,
+                stroke: "var(--enarratio-text-muted)",
+                "stroke-width": 1.5,
+                "stroke-dasharray": "4,3",
+                fill: "none",
+              },
+            }
+          : {
+              tag: "rect",
+              attrs: { ...rect, fill: "var(--enarratio-text)", "fill-opacity": 0.08 },
+            },
+      );
       if (a.label) behind.push(label(rect.x + 4, rect.y + 8, a.label, "start", true));
       continue;
     }

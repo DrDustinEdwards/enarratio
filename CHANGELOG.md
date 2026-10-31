@@ -7,6 +7,28 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-31
+
+Fixes found rolling 0.4.0 out to the sites ([0026](docs/design/0026-rollout-fixes.md)).
+
+### Upgrading from 0.4.0
+
+- A bar chart with `href` draws its SVG as `role="img"` (was a named group) with no links inside it: each category in its data table is the link, and each bar is a plain mark carrying it in `data-enarratio-href` (was an `<a href>`), so without script a bar is not clickable. Enhanced, a bar that does not filter (`filter: false`) follows its link on a click, and its point is that link; `update()` checks that link like any other. Styles or tests aimed at `role="group"`, `aria-roledescription="chart"` or the bars' `<a>` no longer apply.
+- The 1px edge between adjacent bars and stacked segments is drawn in `--enarratio-grid` (was `--enarratio-background`).
+
+### Added
+
+- `hoverTitles: false` on every chart leaves out the browser's hover title (`<title>`) on each mark, for a site that shows no hover tooltips. Each mark's details move to `data-enarratio-label`, which `enhance()` still names its points with; the data stay in the table.
+
+### Fixed
+
+- The computed summary starts with a capital letter when a series is named from a lowercase field ("Posts rose from 3 ...", was "posts rose ...").
+- A range annotation from a value to itself (`from` equal to `to`) draws a dashed line there; it drew nothing.
+- A range annotation reads naturally in the chart's text alternative: with the axis's unit ("Target: 500 to 630 words"), or after its label ("Target: Words 500 to 630"), not the raw axis name ("Target: y 500 to 630"). A range from a value to itself is said as one value.
+- Line and area charts of whole-day data tick by the date where the axis ticked by the hour ("12 AM", "12 PM") between them, as with a few days drawn 720 pixels wide; both renderers agree.
+- Contrast (B1): textured bars were measured by their background-colored edge, which a contrast check reads at 1:1 because it cannot see a pattern's color; the edge is now decoration in the grid color, so the check reads the bar by its fill.
+- A bar chart with `href` was the one chart whose SVG was not `role="img"` (B28).
+
 ### Changed
 
 - CI: devkit v0.20.3, with its workflow and dependency audits. The release job turns off setup-node's package cache, and no checkout keeps its credentials.

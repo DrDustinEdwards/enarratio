@@ -266,14 +266,9 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
         const keys = Object.fromEntries(datumAttributes(model.datum(p)));
         const shape = { ...box, fill: model.plan.range[rowOf.get(p.series) ?? 0] };
         const title = el("title", {}, text(model.describe(p)));
-        // A link is read on its own, so it carries its own name.
-        return model.link
-          ? el(
-              "a",
-              { href: model.link(p), fill: "inherit", ...keys, "aria-label": model.describe(p) },
-              el("rect", shape, title),
-            )
-          : el("rect", { ...shape, ...keys }, title);
+        // As in the Plot chart: the link rides on the bar for enhance(), and is in the table (0026).
+        const link = model.link ? { "data-enarratio-href": model.link(p) } : {};
+        return el("rect", { ...shape, ...keys, ...link }, title);
       })
       .join("");
   // Annotations from the same scales Plot's are placed with: ranges behind the bars, notes last.
@@ -373,5 +368,5 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
   }
   parts.push(notes.above);
 
-  return svgRoot(width, height, model.alt, options.href ? "group" : "img", parts.join(""));
+  return svgRoot(width, height, model.alt, "img", parts.join(""));
 }

@@ -1,6 +1,6 @@
 {
   "name": "enarratio",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Accessible, server-rendered charts and scientific figures for the web",
   "keywords": [
     "charts",

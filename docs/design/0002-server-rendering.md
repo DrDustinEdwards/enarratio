@@ -51,7 +51,8 @@ its descendants presentational, so naming the figure would hide the caption
 and data table from the readers they exist for. This rule was learned on
 dustinedwards.info and is kept here. The one exception is a chart whose marks
 are links (`barChart` with `href`): its SVG is a named group instead, because
-an image cannot contain links a reader can reach.
+an image cannot contain links a reader can reach. (Replaced by
+[0026](0026-rollout-fixes.md): the SVG is an image and the table carries the links.)
 
 Every keyed mark carries a `<title>`, so hovering shows its details in any
 browser with no script at all. Every chart has a data table built from the

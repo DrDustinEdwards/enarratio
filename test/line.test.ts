@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { lineChart as liteLineChart } from "../src/lite/index.js";
 import { areaChart, lineChart } from "../src/plot/index.js";
 import { keyedMarks, parse } from "./helpers.js";
 
@@ -90,6 +91,18 @@ describe("lineChart", () => {
       }),
     );
     expect(JSON.parse(fig.getAttribute("data-enarratio-x-scale") ?? "{}").type).toBe("linear");
+  });
+
+  it("ticks whole-day data by the date, never by the hour, in both renderers", () => {
+    const days = [1, 2, 3, 4].map((d) => ({ day: `2026-01-0${d}`, runs: d }));
+    for (const chart of [lineChart, liteLineChart]) {
+      const fig = parse(chart({ data: days, x: "day", y: "runs", width: 720, alt: "a" }));
+      const ticks = [...fig.querySelectorAll('[data-enarratio-mark="x-axis tick label"] text')].map(
+        (t) => t.textContent,
+      );
+      expect(ticks.join(" ")).not.toMatch(/AM|PM/);
+      expect(ticks).toHaveLength(4);
+    }
   });
 
   it("refuses duplicate points and bad dates", () => {

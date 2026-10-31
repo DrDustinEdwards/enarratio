@@ -3,6 +3,7 @@ import {
   AREA_OPACITY,
   type AreaChartOptions,
   areaModel,
+  dayTicks,
   type LineChartOptions,
   lineModel,
   type MarkerPoint,
@@ -53,15 +54,17 @@ function annotations(
 }
 
 /** The x scale shared by line and area charts. */
-function xScale(prepared: Prepared, yearTicks: number[] | undefined) {
+function xScale(prepared: Prepared, yearTicks: number[] | undefined, plotWidth: number) {
   const base = {
     type: prepared.time ? "utc" : "linear",
     label: prepared.xLabel,
     labelAnchor: "center",
     labelArrow: "none",
   } as const;
-  if (!yearTicks) return base;
-  return { ...base, ticks: yearTicks, tickFormat: (d: number) => String(d) };
+  if (yearTicks) return { ...base, ticks: yearTicks, tickFormat: (d: number) => String(d) };
+  const days = dayTicks(prepared, plotWidth);
+  // As Dates, so Plot labels them as it labels its own time ticks.
+  return days ? { ...base, ticks: days.map((t) => new Date(t)) } : base;
 }
 
 /** The y scale's domain when every value is zero, and its tick format for huge values (B41). */
@@ -178,15 +181,18 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
     );
   }
 
+  const width = options.width ?? DEFAULT_WIDTH;
+  const marginLeft = prepared.yLabel === null ? 48 : 64;
+  const marginRight = model.directLabels ? 96 : 24;
   const rendered = renderPlot(
     {
-      width: options.width ?? DEFAULT_WIDTH,
+      width,
       height: options.height ?? DEFAULT_HEIGHT,
       marginTop: 20,
-      marginLeft: prepared.yLabel === null ? 48 : 64,
-      marginRight: model.directLabels ? 96 : 24,
+      marginLeft,
+      marginRight,
       marginBottom: 44,
-      x: xScale(prepared, model.yearTicks),
+      x: xScale(prepared, model.yearTicks, width - marginLeft - marginRight),
       y: {
         type: model.log ? "log" : "linear",
         label: prepared.yLabel,
@@ -221,15 +227,18 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
   const { prepared } = model;
   const { points, seriesNames } = prepared;
   const order = { order: seriesNames };
+  const width = options.width ?? DEFAULT_WIDTH;
+  const marginLeft = prepared.yLabel === null ? 48 : 64;
 
   const rendered = renderPlot(
     {
-      width: options.width ?? DEFAULT_WIDTH,
+      width,
       height: options.height ?? DEFAULT_HEIGHT,
       marginTop: 20,
-      marginLeft: prepared.yLabel === null ? 48 : 64,
+      marginLeft,
       marginBottom: 44,
-      x: xScale(prepared, model.yearTicks),
+      // Plot's default right margin is 20.
+      x: xScale(prepared, model.yearTicks, width - marginLeft - 20),
       y: {
         label: prepared.yLabel,
         labelAnchor: "center",

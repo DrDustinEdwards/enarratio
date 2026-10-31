@@ -385,23 +385,36 @@ describe("enhance: selecting a year, page-set filters and links", () => {
     await p.close();
   });
 
-  it("keeps bars as links without script, and turns them into filter buttons with it", async () => {
+  it("links bars from the table without script, and filters or follows the link with it", async () => {
+    const BAR = `${YEARS} [data-enarratio-x="2012"][data-enarratio-series="Grants"]`;
     const off = await harness.open("index.html", "light", { scripts: false });
-    expect(
-      await off.$eval(`${YEARS} [data-enarratio-x="2012"][data-enarratio-series="Grants"]`, (a) => [
-        a.tagName,
-        a.getAttribute("href"),
-      ]),
-    ).toEqual(["a", "?year=2012"]);
+    expect(await off.$(`${YEARS} svg a`)).toBeNull();
+    expect(await off.$eval(BAR, (bar) => bar.getAttribute("data-enarratio-href"))).toBe(
+      "?year=2012",
+    );
+    expect(await off.$(`${YEARS} tbody th a[href="?year=2012"]`)).not.toBeNull();
     await off.close();
     const on = await harness.open("index.html", "light");
-    expect(
-      await on.$eval(`${YEARS} [data-enarratio-x="2012"][data-enarratio-series="Grants"]`, (a) => [
-        a.getAttribute("href"),
-        a.getAttribute("data-enarratio-href"),
-      ]),
-    ).toEqual([null, "?year=2012"]);
     expect(await on.$(`${YEARS} button[aria-label^="Year 2012, Grants:"]`)).not.toBeNull();
+    // Without filtering, a bar's point is its link, and a click on the bar follows it.
+    await on.evaluate(async () => {
+      const load = new Function("url", "return import(url)") as (url: string) => Promise<unknown>;
+      const { enhance } = (await load(
+        "./enhance.js",
+      )) as typeof import("../../src/enhance/index.ts");
+      const section = document.querySelector('[data-example="years"]');
+      if (!section) throw new Error("no example");
+      enhance(section)[0]?.destroy();
+      enhance(section, { filter: false });
+    });
+    expect(
+      await on.$eval(`${YEARS} .enarratio-points a[aria-label^="Year 2012, Grants:"]`, (a) =>
+        a.getAttribute("href"),
+      ),
+    ).toBe("?year=2012");
+    await on.$eval(BAR, (svg) => svg.scrollIntoView({ block: "center" }));
+    await Promise.all([on.waitForNavigation(), on.click(BAR)]);
+    expect(new URL(on.url()).search).toBe("?year=2012");
     await on.close();
   });
 });
