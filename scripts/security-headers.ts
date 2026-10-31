@@ -2,14 +2,16 @@
  * The gallery's security headers: its own list of what it loads, and site-runtime's builders
  * (`@dustinedwards/site-runtime`, design record 0018). This is the only place they are set up.
  * `scripts/gallery.ts` writes `galleryHeadersFile` to `site/dist/_headers` for every static file,
- * and the Worker (`worker/index.ts`) sends `securityHeaders` on the responses it makes
- * itself (its redirects and the report endpoint). Gallery tooling only: the npm package never
+ * and the Worker (`worker/index.ts`, site-runtime's staticSite) sends `securityHeaders` on the
+ * responses it makes itself (its redirects and the report endpoint) and adds any a page's own
+ * `_headers` rules left out. Gallery tooling only: the npm package never
  * imports this or site-runtime.
  */
 
 import { TDM_RESERVATION_HEADERS } from "@drdustinedwards/site-helpers/robots";
 import { buildContentSecurityPolicy, reportingEndpoints } from "@dustinedwards/site-runtime/csp";
 import { buildSecurityHeaders, headersFile } from "@dustinedwards/site-runtime/headers";
+import { preloads } from "@dustinedwards/site-runtime/preload";
 
 /** The gallery's address. */
 export const HOST = "enarratio.dustinedwards.info";
@@ -27,14 +29,19 @@ const REPORT_GROUP = "csp-endpoint";
  * attributes are no longer allowed: charts write none (record 0022).
  */
 const csp = buildContentSecurityPolicy({
+  // Nothing unlisted: a kind not named here (media, frames, workers, a manifest) is refused.
+  denyUnlisted: true,
   sources: { img: ["data:"], connect: ["https://cloudflareinsights.com"] },
   cloudflareWebAnalytics: true,
   reportUri: REPORT_PATH,
   reportTo: REPORT_GROUP,
 });
 
-/** The shared standard set (OWASP's defaults, no overrides), which the check grades against. */
-export const standardHeaders = buildSecurityHeaders();
+/**
+ * The shared standard set (OWASP's defaults, no overrides), which the check grades against, with COEP credentialless:
+ * the gallery embeds no frame and loads nothing from another origin but the beacon, which needs no cookie.
+ */
+export const standardHeaders = buildSecurityHeaders({ coep: { value: "credentialless" } });
 
 /** Every security header the gallery sends, in the order `_headers` lists them. */
 export const securityHeaders: Readonly<Record<string, string>> = Object.freeze({
@@ -65,3 +72,16 @@ export function galleryHeadersFile(): string {
     { charset: true, paths: { "/*": { [csp.name]: csp.value } } },
   );
 }
+
+/**
+ * What the home page blocks on or paints first, sent on every page as a preload `Link` header,
+ * which Early Hints answers with a 103 (site-runtime `./preload`): Capsomer's stylesheet, the home
+ * page's own, and the headings' and text's Schibsted Grotesk. The names are not hashed (record
+ * 0008); `scripts/gallery.ts` refuses a build in which one is missing or the home page links a
+ * stylesheet not listed here.
+ */
+export const PAGE_PRELOADS = preloads([
+  { href: "/capsomer.css", as: "style" },
+  { href: "/index.css", as: "style" },
+  { href: "/fonts/schibsted-grotesk-latin-wght-normal.woff2", as: "font", type: "font/woff2" },
+]);

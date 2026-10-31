@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   worker-size:
-    uses: DrDustinEdwards/devkit/.github/workflows/worker-size.yml@d992f82350f7143b026597f89359bad90580ebfc # v0.20.9
+    uses: DrDustinEdwards/devkit/.github/workflows/worker-size.yml@12a125a581bb8b81a9ce5393aede754e5e5755b0 # v0.20.15
     with:
       install: PUPPETEER_SKIP_DOWNLOAD=true npm ci
       prepare: npm run build && npm run gallery

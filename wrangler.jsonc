@@ -12,12 +12,14 @@
   // A minified bundle with its source maps uploaded, so stack traces in the logs still read.
   "minify": true,
   "upload_source_maps": true,
-  // A tiny Worker in front of the assets redirects http: to https: (worker/index.ts).
+  // site-runtime's staticSite Worker (worker/index.ts) in front of every page: the https redirect,
+  // the report endpoint, the prefetch rules, the page headers and the private 404.
   "main": "./worker/index.ts",
   "assets": {
     "directory": "./site/dist",
     "binding": "ASSETS",
-    "run_worker_first": true,
+    // Every page runs the Worker; the fonts go straight to the asset server.
+    "run_worker_first": ["/*", "!/fonts/*"],
     // Pages are served at clean addresses (/dustinedwards); /dustinedwards.html redirects there.
     "not_found_handling": "404-page"
   },
