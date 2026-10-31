@@ -16,7 +16,7 @@ import {
 } from "./marks.js";
 import { animateFrom, DURATION, geometry, reducedMotion } from "./motion.js";
 import { sanitize } from "./sanitize.js";
-import { hitArea } from "./targets.js";
+import { hitAreas } from "./targets.js";
 import type { BrushDetail, EnhancedChart, ResolvedOptions, SelectDetail } from "./types.js";
 
 /** How far a pointer moves, in SVG units, before a press becomes a drag (the brush). */
@@ -141,10 +141,11 @@ export class Chart implements EnhancedChart {
       });
     }
 
-    for (const mark of this.marks) {
+    const hits = hitAreas(this.marks);
+    this.marks.forEach((mark, i) => {
       const href = mark.getAttribute("data-enarratio-href");
       const targets: Element[] = [mark];
-      const hit = hitArea(mark);
+      const hit = hits[i];
       if (hit) {
         targets.push(hit);
         this.cleanup.push(() => hit.remove());
@@ -155,7 +156,7 @@ export class Chart implements EnhancedChart {
         if (this.filters(mark)) this.listen(target, "click", () => this.toggleMark(mark));
         else if (href !== null) this.listen(target, "click", () => location.assign(href));
       }
-    }
+    });
 
     if (this.options.filter) this.attachLegend();
     if (this.options.brush && parseScale(this.figure)) this.attachBrush(svg);
@@ -255,8 +256,10 @@ export class Chart implements EnhancedChart {
     this.layout = () => {
       const parent = layer.parentElement;
       if (!parent) return;
+      // Every box is read before any style is written, so the page is laid out once, not once per mark.
       const base = parent.getBoundingClientRect();
       const box = svg.getBoundingClientRect();
+      const rects = this.marks.map((mark) => mark.getBoundingClientRect());
       const place = (el: HTMLElement, r: DOMRect, x: number, y: number): void => {
         el.style.left = `${r.left - x}px`;
         el.style.top = `${r.top - y}px`;
@@ -269,9 +272,9 @@ export class Chart implements EnhancedChart {
         base.left + parent.clientLeft - parent.scrollLeft,
         base.top + parent.clientTop - parent.scrollTop,
       );
-      this.marks.forEach((mark, i) => {
+      rects.forEach((rect, i) => {
         const point = this.points[i];
-        if (point) place(point, mark.getBoundingClientRect(), box.left, box.top);
+        if (point) place(point, rect, box.left, box.top);
       });
     };
     // Also when a chart enhanced while hidden is shown, and when the window resizes.
@@ -496,11 +499,12 @@ export class Chart implements EnhancedChart {
     if (reducedMotion() || typeof IntersectionObserver !== "function") return;
     const svg = this.svg;
     if (!svg) return;
-    for (const path of svg.querySelectorAll<SVGPathElement>(
-      '[data-enarratio-mark="line"] > path',
-    )) {
-      path.style.setProperty("--enarratio-length", String(Math.ceil(path.getTotalLength())));
-    }
+    // Measured before any is written, so the lines cost one layout, not one each.
+    const paths = [...svg.querySelectorAll<SVGPathElement>('[data-enarratio-mark="line"] > path')];
+    const lengths = paths.map((path) => Math.ceil(path.getTotalLength()));
+    paths.forEach((path, i) => {
+      path.style.setProperty("--enarratio-length", String(lengths[i]));
+    });
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
