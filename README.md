@@ -372,7 +372,8 @@ pins 26.
 
 The gallery is hosted at https://enarratio.dustinedwards.info as an assets-only
 Cloudflare Worker (`wrangler.jsonc`), with a strict Content-Security-Policy
-and the portfolio's shared security headers (`scripts/security-headers.ts`). `npm run deploy:gallery` builds and
+and the portfolio's shared security headers, from the gallery's entry in site-runtime's site registry
+(`worker/index.ts`, and `_headers` from `site-runtime-headers`). `npm run deploy:gallery` builds and
 deploys it; the "Deploy gallery" workflow does the same on every push to
 `main` once the repository has the `CLOUDFLARE_API_TOKEN` and
 `CLOUDFLARE_ACCOUNT_ID` secrets. See
