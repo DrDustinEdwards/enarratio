@@ -14,6 +14,8 @@ change the public API; every such change is listed here.
 
 ### Gallery
 
+- The pages enhance a chart when it comes within two screens of the viewport, nearest first and one to a task, and at once the chart a `#hash` names or a shared link's filter or range, instead of all thirty-five at load. On a phone the home page spent about 0.4 s in two long tasks, which put Lighthouse's TBT at 250 to 1,170 ms and the score at 75 to 97. The charts are drawn and read the same without it; `enhance()` itself is unchanged.
+- Each page preloads its own stylesheet (`/example.css`, `/capsomer-theme.css`) in its `Link` header and Early Hints, in place of the home page's `/index.css` on all of them; `scripts/gallery.ts` refuses a page that links a stylesheet its entry leaves out.
 - Deployed by devkit's shared deploy (worker-deploy.yml v0.20.18), a `deploy` job in ci.yml after the checks and browser
   tests, in place of gallery.yml. It deploys with `DEPLOY_SHA`, waits for `/health` (site-runtime 0.60.0's `staticSite`) to
   report the commit, checks the home page and rolls back on a refusal; IndexNow runs after it. No package change.

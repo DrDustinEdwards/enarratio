@@ -13,25 +13,40 @@
  */
 
 import { TDM_RESERVATION_HEADERS } from "@drdustinedwards/site-helpers/robots";
-import { preloads } from "@dustinedwards/site-runtime/preload";
+import { preloads, withPreloadHeader } from "@dustinedwards/site-runtime/preload";
 import { enarratio } from "@dustinedwards/site-runtime/sites";
 import { staticSite } from "@dustinedwards/site-runtime/static-site";
 
-/**
- * What the home page blocks on or paints first, sent on every page as a preload `Link` header,
- * which Early Hints answers with a 103 (site-runtime `./preload`): Capsomer's stylesheet, the home
- * page's own, and the headings' and text's Schibsted Grotesk. The names are not hashed (record
- * 0008); `scripts/gallery.ts` refuses a build in which one is missing or the home page links a
- * stylesheet not listed here.
- */
-export const PAGE_PRELOADS = preloads([
+/** Capsomer's stylesheet and the headings' and text's Schibsted Grotesk: every page paints with them. */
+const SHARED = [
   { href: "/capsomer.css", as: "style" },
-  { href: "/index.css", as: "style" },
   { href: "/fonts/schibsted-grotesk-latin-wght-normal.woff2", as: "font", type: "font/woff2" },
-]);
+] as const;
 
-export default staticSite({
-  site: enarratio,
-  headers: TDM_RESERVATION_HEADERS,
-  preload: PAGE_PRELOADS.header,
-});
+/**
+ * What each page blocks on or paints first, sent as a preload `Link` header, which Early Hints
+ * answers with a 103 (site-runtime `./preload`): Capsomer's stylesheet, the page's own (each
+ * theme page links its own, so a page that preloaded another's would fetch a file it never uses
+ * and discover its own only after the HTML), and Schibsted Grotesk. The names are not hashed
+ * (record 0008); `scripts/gallery.ts` refuses a build in which a listed file is missing or a page
+ * links a stylesheet its entry leaves out.
+ */
+const own = (href: string) => preloads([SHARED[0], { href, as: "style" }, SHARED[1]]);
+export const PAGE_PRELOADS: Readonly<Record<string, ReturnType<typeof preloads>>> = {
+  "/": own("/index.css"),
+  "/example": own("/example.css"),
+  "/capsomer": own("/capsomer-theme.css"),
+  "/astro": own("/index.css"),
+};
+
+const site = staticSite({ site: enarratio, headers: TDM_RESERVATION_HEADERS });
+
+export default {
+  async fetch(request: Request, env: Parameters<typeof site.fetch>[1]): Promise<Response> {
+    const response = await site.fetch(request, env);
+    const preload = PAGE_PRELOADS[new URL(request.url).pathname];
+    return response.status === 200 && preload
+      ? withPreloadHeader(response, preload.header)
+      : response;
+  },
+};

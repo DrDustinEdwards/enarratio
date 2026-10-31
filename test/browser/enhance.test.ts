@@ -506,3 +506,25 @@ describe("enhance: series filters on a year chart, and focus across update()", (
     await p.close();
   });
 });
+
+describe("gallery: a chart is enhanced as it nears the viewport", () => {
+  const CHART = "figure.enarratio:not([data-enarratio-static])";
+
+  it("leaves a far chart as the server drew it until it is scrolled near, and enhances at once the chart a #hash names", async () => {
+    const p = await harness.open("index.html", "light", { lazy: true });
+    // The last chart of the page, which is far below the first screen.
+    const id = await p.evaluate(
+      (selector) => [...document.querySelectorAll(selector)].at(-1)?.closest("section")?.id ?? "",
+      CHART,
+    );
+    const last = `#${id} ${CHART}`;
+    expect(await p.$eval(last, (el) => el.hasAttribute("data-enarratio-enhanced"))).toBe(false);
+    await p.$eval(last, (el) => el.scrollIntoView());
+    await p.waitForSelector(`${last}[data-enarratio-enhanced]`);
+    await p.close();
+
+    const linked = await harness.open(`index.html#${id}`, "light", { lazy: true });
+    await linked.waitForSelector(`${last}[data-enarratio-enhanced]`);
+    await linked.close();
+  });
+});
