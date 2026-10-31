@@ -31,7 +31,7 @@ import {
 } from "./figure.js";
 import { type Bounds, type IntervalFields, intervalText, readInterval } from "./interval.js";
 import { planSeries, type SeriesPlan } from "./series.js";
-import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "./size.js";
+import { DEFAULT_HEIGHT, DEFAULT_WIDTH, fitTicks } from "./size.js";
 import { stringsFor, valueAxis, valueFormat } from "./text.js";
 import { texture } from "./texture.js";
 
@@ -400,9 +400,17 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   const width = options.width ?? DEFAULT_WIDTH;
   const height =
     options.height ?? (horizontal ? Math.max(120, xNames.length * 28 + 60) : DEFAULT_HEIGHT);
-  // A time axis has many bars and long labels, so it thins them to fit unless told otherwise.
-  const fit = time ? Math.max(2, Math.floor((width - 80) / (longest * 7 + 12))) : undefined;
-  const thinned = thinTicks(xNames, options.maxXTicks ?? fit);
+  // Category labels below the bars are thinned, as line charts' x ticks are (fitTicks), when
+  // they would come closer than the least gap at the width drawn ("Sun" on "Mon" at 254 px).
+  // maxXTicks, when given, sets the count instead. The table, hover details and each bar's name
+  // keep every one.
+  thinTicks(xNames, options.maxXTicks);
+  const across = options.maxXTicks === undefined ? width - 80 : Number.POSITIVE_INFINITY;
+  const fitted =
+    horizontal && options.maxXTicks === undefined
+      ? undefined
+      : fitTicks(xNames, (n) => n, width, across, options.maxXTicks);
+  const thinned = fitted && fitted.length < xNames.length ? fitted : undefined;
 
   // Category labels longer than their room are cut with an ellipsis; the table, hover details
   // and each bar's name keep the whole text. Time labels are already sized to fit.

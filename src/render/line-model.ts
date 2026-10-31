@@ -42,6 +42,8 @@ import {
 } from "./text.js";
 import { texture } from "./texture.js";
 
+export { fitTicks } from "./size.js";
+
 /** A horizontal line across the chart at a value: a threshold, a limit, a target. */
 export interface ReferenceLine {
   readonly y: number;
@@ -182,35 +184,6 @@ function yearTicks(from: number, to: number): number[] {
   const ticks: number[] = [];
   for (let t = Math.ceil(from / step) * step; t <= to; t += step) ticks.push(t);
   return ticks;
-}
-
-/**
- * Every nth x tick, starting from the first, so that no two labels overlap and at most `max`
- * print: all of them when they fit. A label is about 7 user units a character at the mark size,
- * more on a drawing whose text grows as it shrinks (record 0022), and needs 12 more between
- * neighbors; n labels need n - 1 such gaps. A step that lands on the last tick is preferred, so
- * 2020 to 2023 thins to 2020 and 2023, not 2020 and 2022.
- */
-export function fitTicks<T>(
-  ticks: readonly T[],
-  label: (t: T) => string,
-  width: number,
-  plotWidth: number,
-  max?: number,
-): T[] {
-  const longest = Math.max(1, ...ticks.map((t) => label(t).length));
-  const fit = Math.max(2, Math.floor(plotWidth / (longest * charWidth(width) + 12)) + 1);
-  const limit = Math.max(1, Math.min(fit, max ?? fit));
-  if (ticks.length <= limit) return [...ticks];
-  if (limit === 1) return ticks.slice(0, 1);
-  const last = ticks.length - 1;
-  const least = Math.ceil(last / (limit - 1));
-  let step = least;
-  while (step < last && last % step !== 0) step++;
-  // No step ends on the last tick without leaving only the two ends: take that only when the
-  // least step would print no more than two either.
-  if (step === last && Math.floor(last / least) + 1 > 2) step = least;
-  return ticks.filter((_, i) => i % step === 0);
 }
 
 /**

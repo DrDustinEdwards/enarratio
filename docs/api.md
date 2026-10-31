@@ -369,7 +369,9 @@ one row per item (a CV entry, a case) is enough.
   follows its link, and its point is that link. Only relative and `http(s)`
   links are allowed.
 - `maxXTicks`: the most category labels to print; with more categories, every
-  nth label is printed from the first.
+  nth label is printed from the first. Without it, labels under vertical bars
+  are thinned the same way when they would come within 12 units of each other
+  at the width drawn (seven day names at 254), as line charts' x ticks are.
 - `directLabels`: print each series' name inside the stacked segments it fits
   in, so series are told apart by text as well as color. Stacked layout only.
 - `xType: "time"`, with `interval`, `formatX`: a time axis. `x` is a Date, an

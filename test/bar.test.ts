@@ -332,7 +332,7 @@ describe("barChart", () => {
     const labels = [...fig.querySelectorAll('[data-enarratio-mark="x-axis tick label"] text')].map(
       (t) => t.textContent,
     );
-    expect(labels).toEqual(["2000", "2004", "2008", "2012", "2016"]);
+    expect(labels).toEqual(["2000", "2005", "2010", "2015"]);
     expect(() => barChart({ data: years, x: "year", maxXTicks: 0, alt: "a" })).toThrow(/maxXTicks/);
   });
 });
