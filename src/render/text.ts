@@ -16,8 +16,8 @@ export {
 
 /** One axis as the overview states it: its label and the range of values on it. */
 export interface AxisRange {
-  /** The x or y axis, or point size (a bubble chart's third measure). */
-  readonly position: "x" | "y" | "size";
+  /** The x or y axis, point size (a bubble chart's or dot map's measure) or color (a choropleth's). */
+  readonly position: "x" | "y" | "size" | "color";
   readonly label: string;
   readonly from: string;
   readonly to: string;
@@ -92,6 +92,15 @@ export interface Terms {
   readonly substitutionsPerSite: string;
   /** A missing value, in hover details and the primitives' tables. */
   readonly noData: string;
+  /** A map's coordinate columns. */
+  readonly longitude: string;
+  readonly latitude: string;
+  /** A map's region column, when the caller names none. */
+  readonly region: string;
+  /** A dot map's landmarks, in the table, when the caller names none. */
+  readonly landmark: string;
+  /** After the highlighted landmark's name in the table: "Pump 7 (highlighted)". */
+  readonly highlightedLandmark: string;
   readonly forecast: string;
   /** A table cell marking a row as forecast. */
   readonly yes: string;
@@ -261,6 +270,8 @@ export interface Strings {
     readonly hubs: readonly At[];
     readonly components: string;
   }) => string;
+  /** A dot map's landmarks: how many, what they are, and the one highlighted. */
+  readonly landmarks: (count: string, name: string, highlighted?: string) => string;
   /** The primitives' generated text alternatives; `subject` is the label, or "". */
   readonly sparklineSummary: (sparkline: {
     readonly subject: string;
@@ -387,11 +398,13 @@ export const ENGLISH: Strings = {
     survival: "Survival curve",
     forest: "Forest plot",
     tree: "Phylogenetic tree",
+    "dot-map": "Dot map",
+    choropleth: "Choropleth map",
   },
   overview: (kind, points, series) =>
     `${kind} with ${series === undefined ? "" : `${plural(series, "series", "series")} and `}${plural(points, "point", "points")}.`,
   axis: (a) =>
-    `${a.position === "size" ? "Point size" : `${a.position.toUpperCase()} axis`}${a.label ? `, ${a.label}` : ""}: ${a.from} to ${a.to}.`,
+    `${a.position === "size" ? "Point size" : a.position === "color" ? "Color" : `${a.position.toUpperCase()} axis`}${a.label ? `, ${a.label}` : ""}: ${a.from} to ${a.to}.`,
   trend: (series, direction, from, to, turn) => {
     const end = `${to.value} (${to.at})`;
     if (turn) {
@@ -460,6 +473,8 @@ export const ENGLISH: Strings = {
     ]
       .filter(Boolean)
       .join(" "),
+  landmarks: (count, name, highlighted) =>
+    `${count === "1" ? "A square marks a landmark" : `${count} squares mark landmarks`} (${name})${highlighted ? `; the filled square is ${highlighted}` : ""}.`,
   sparklineSummary: (s) =>
     `${s.subject ? `${s.subject}: ` : ""}${s.values} values, from ${s.first} to ${s.last}; lowest ${s.lowest}, highest ${s.highest}.`,
   heatStripSummary: (s) =>
@@ -529,6 +544,11 @@ export const ENGLISH: Strings = {
     group: "Group",
     substitutionsPerSite: "Substitutions per site",
     noData: "no data",
+    longitude: "Longitude",
+    latitude: "Latitude",
+    region: "Region",
+    landmark: "Landmark",
+    highlightedLandmark: "highlighted",
     forecast: "Forecast",
     yes: "Yes",
     lowerBound: "Lower bound",
