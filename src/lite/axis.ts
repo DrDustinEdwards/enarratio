@@ -82,13 +82,14 @@ export function axisTicks(
 
 /**
  * Tick labels beside the ticks. `padding` is the gap from the frame: 9 beside a tick mark, as
- * on value and category axes. `tabular` sets tabular figures, for numbers and dates.
+ * on value and category axes. Figures are proportional: tabular
+ * figures widen the comma in some faces ("1 , 600"), and end-anchored labels need no columns.
  */
 export function axisTickLabels(
   k: "x" | "y" | "fx" | "fy",
   ticks: readonly Tick[],
   frame: Frame,
-  options: { offset?: number; tabular?: boolean; placement?: Placement } = {},
+  options: { offset?: number; placement?: Placement } = {},
 ): string {
   const vertical = k === "y" || k === "fy";
   const label = (t: Tick): string =>
@@ -106,7 +107,6 @@ export function axisTickLabels(
     transform: vertical ? translate(-9, offset) : translate(offset, 9),
   };
   const styles: Attrs = {
-    "font-variant": options.tabular ? "tabular-nums" : undefined,
     "text-anchor": vertical ? "end" : undefined,
   };
   // A tick without a label (between powers of ten on a log axis) still gets an empty text.

@@ -14,6 +14,7 @@ import {
 } from "../render/bar-model.js";
 import { markKey } from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
+import { bottomMargin, leftMargin } from "../render/size.js";
 import { annotationMarkup, bandScale, continuousScale, errorBar } from "./annotate.js";
 import {
   axisLabel,
@@ -88,12 +89,17 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
 
 function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>): string {
   const { width, height, horizontal, grouped, xNames, seriesNames, points } = model;
-  const frame: Frame = {
+  let frame: Frame = {
     width,
     height,
     marginTop: MARGIN_TOP,
     marginRight: MARGIN_RIGHT,
-    marginBottom: MARGIN_BOTTOM,
+    // Room below for the x labels and title, as renderPlot fits Plot's.
+    marginBottom: bottomMargin(
+      MARGIN_BOTTOM,
+      (horizontal ? model.valueLabel : model.categoryLabel) !== null,
+      width,
+    ),
     marginLeft: model.marginLeft,
   };
   const extents = stack(model);
@@ -132,6 +138,19 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
           label: format(t),
         }));
       })();
+
+  // Room for the value labels and the axis title beside them, as renderPlot makes for Plot's.
+  if (!horizontal) {
+    frame = {
+      ...frame,
+      marginLeft: leftMargin(
+        frame.marginLeft,
+        valueTicks.map((t) => t.label),
+        model.valueLabel !== null,
+        width,
+      ),
+    };
+  }
 
   // The category scale, and for grouped bars the facets, one per category.
   const categoryRange: [number, number] = horizontal
@@ -226,7 +245,7 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
     parts.push(
       grid(k, valueAt, inner, drawn),
       axisTicks(k, valueAt, inner, 0, placement),
-      axisTickLabels(k, valueTicks, inner, { tabular: true, placement }),
+      axisTickLabels(k, valueTicks, inner, { placement }),
       axisLabel(k, model.valueLabel, outer ?? frame, frame),
     );
   };

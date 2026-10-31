@@ -198,8 +198,9 @@ export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): str
       marginLeft: yLabel === null ? 48 : 64,
       marginBottom: 44,
       // Room for the size legend, and for the largest bubbles at the edges.
+      // Points never sit on the axes, where the first one would cover a tick label (inset).
       ...(size === undefined
-        ? {}
+        ? { inset: 8 }
         : { marginRight: 112, inset: MAX_RADIUS, r: { range: [0, MAX_RADIUS] } }),
       x: {
         type: options.xType ?? "linear",

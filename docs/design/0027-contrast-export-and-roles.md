@@ -79,7 +79,21 @@ on 2026-10-31 and found, in Enarratio's own drawing:
    are now thinned to every nth, from the first, until the labels fit the plot's width at about 7
    units a character (more on a drawing whose text grows as it shrinks), in both renderers, and
    `maxXTicks` caps them as it does on bar charts.
-8. **Forced colors are already in the visual suite (B57).** `test/browser/visual.test.ts`
+8. **Narrow widths.** Screenshots at 320 px and in Capsomer's narrow columns showed more:
+   - An axis title repeated its unit, "reads (reads)". A unit is now added only when the label
+     does not already name it as a word.
+   - "1,600" read as "1 , 600" in Capsomer's face. Enarratio asked for tabular figures on tick
+     labels, and Schibsted Grotesk's tabular comma is as wide as a digit (15.2 against 6.4 units
+     at 24px, measured in Chromium). Tick labels are end-anchored and need no columns, so they
+     use proportional figures; tables keep tabular ones.
+   - Fixed margins did not count the text's growth as a drawing shrinks (record 0022), so the y
+     title met the widest tick label, the x title met the tick labels ("Day" on "Sun"), direct
+     labels touched and a long series name ran off the edge. The left, bottom and (with direct
+     labels) right margins and the direct label gap now grow with the text, computed the same way
+     by both renderers (`leftMargin`, `bottomMargin` and `rightMargin`); renderPlot draws again
+     with the wider margin when Plot's first drawing needs it.
+   - A scatter's first point sat on the axes over a tick label; points are inset from them.
+9. **Forced colors are already in the visual suite (B57).** `test/browser/visual.test.ts`
    screenshots every gallery example in forced colors (`forced-colors: active`, emulated in
    Chrome) in both the default and the example theme, beside light and dark, and CI compares them
    with the stored images. No new screenshots are needed.

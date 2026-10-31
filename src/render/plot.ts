@@ -10,7 +10,7 @@ import { escapeHtml } from "../html.js";
 import { roundNumbers } from "../lite/svg.js";
 import { datumAttributes, type MarkDatum } from "./datum.js";
 import type { ScaleDescription } from "./figure.js";
-import { markFontSize } from "./size.js";
+import { bottomMargin, leftMargin, markFontSize } from "./size.js";
 
 export type { MarkDatum } from "./datum.js";
 
@@ -126,7 +126,32 @@ export function renderPlot(
   after?: (svg: SVGSVGElement) => void,
 ): RenderedPlot {
   const document = createDocument();
-  const svg = Plot.plot({ ...options, document }) as unknown as SVGSVGElement & Plot.Plot;
+  let svg = Plot.plot({ ...options, document }) as unknown as SVGSVGElement & Plot.Plot;
+  // Axis labels and titles that would overlap at a narrow width get the margins they need, as
+  // the light charts compute them: the bottom first, since it sets the y ticks, then the left.
+  const width = Number(svg.getAttribute("width"));
+  let fitted = options;
+  if (typeof options.marginBottom === "number") {
+    const title = svg.querySelector('[aria-label$="x-axis label"]') !== null;
+    const x = options.x as { type?: string } | undefined;
+    const lines = x?.type === "utc" || x?.type === "time" ? 2 : 1;
+    const needed = bottomMargin(options.marginBottom, title, width, lines);
+    if (needed > options.marginBottom) {
+      fitted = { ...fitted, marginBottom: needed };
+      svg = Plot.plot({ ...fitted, document }) as unknown as SVGSVGElement & Plot.Plot;
+    }
+  }
+  if (typeof options.marginLeft === "number") {
+    const labels = [...svg.querySelectorAll('[aria-label="y-axis tick label"] text')].map(
+      (t) => t.textContent ?? "",
+    );
+    const title = svg.querySelector('[aria-label="y-axis label"]') !== null;
+    const needed = leftMargin(options.marginLeft, labels, title, width);
+    if (needed > options.marginLeft) {
+      fitted = { ...fitted, marginLeft: needed };
+      svg = Plot.plot({ ...fitted, document }) as unknown as SVGSVGElement & Plot.Plot;
+    }
+  }
 
   // Plot's warning is its own node: a top-level <text> whose <title> counts the warnings. Found by
   // that structure, not by the glyph, which data may contain (F13).
@@ -162,6 +187,8 @@ export function renderPlot(
       group.setAttribute("aria-hidden", "true");
     }
   }
+  // Proportional figures on axes: tabular ones widen the comma in some faces ("1 , 600").
+  for (const el of svg.querySelectorAll("[font-variant]")) el.removeAttribute("font-variant");
   after?.(svg);
   roundCoordinates(svg);
   // Every drawing is one named image, enhanced or not; interaction lives outside it (0027).

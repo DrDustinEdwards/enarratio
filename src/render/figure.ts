@@ -131,9 +131,18 @@ export interface AxisUnits {
   readonly yUnit?: string;
 }
 
-/** A label with its unit, "Weight (kg)"; a hidden (null) label stays hidden. */
+/**
+ * A label with its unit, "Weight (kg)"; a hidden (null) label stays hidden, and a label that
+ * already names its unit as a word ("Reads per sample", unit "reads") is not repeated.
+ */
 export function withUnit(label: string | null, unit: string | undefined): string | null {
-  return label !== null && unit?.trim() ? `${label} (${unit.trim()})` : label;
+  const u = unit?.trim();
+  if (label === null || !u) return label;
+  const word = new RegExp(
+    `(^|[^\\p{L}\\p{N}])${u.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}($|[^\\p{L}\\p{N}])`,
+    "iu",
+  );
+  return word.test(label) ? label : `${label} (${u})`;
 }
 
 /** An axis label: the caller's (`null` hides it), else the field's name, with its unit. */

@@ -20,3 +20,50 @@ export function markFontSize(width: number): string {
   const r = (n: number): number => Math.round(n * 100) / 100;
   return `clamp(${mark}, calc(${r(12 + (12 * width) / narrowest)}px - ${r(1200 / narrowest)}cqw), ${r((12 * width) / narrowest)}px)`;
 }
+
+/**
+ * How much a drawing's text grows, in user units, at its narrowest rendering ({@link markFontSize}):
+ * 1 for a drawing no wider than that, more for one that shrinks to it.
+ */
+export function textGrowth(width: number): number {
+  return Math.max(1, width / (width >= WIDE_WIDTH ? WIDE_WIDTH : 288));
+}
+
+/** About how wide a character of mark text is, in user units, at the drawing's narrowest. */
+export function charWidth(width: number): number {
+  return 7 * textGrowth(width);
+}
+
+/** Labels a value axis prints: numbers, with grouping, signs, units of scale or percent. */
+const NUMERIC = /^[-−+]?[$€£¥]?[\d.,   ]+(?:[%kKMBTGµ]|e[-−+]?\d+)?$/;
+
+/**
+ * The left margin a drawing needs for its y tick labels and, when it has one, the rotated y axis
+ * title beside them, so the two never overlap at a narrow width: the tick gap (9), the widest
+ * label, then the title (about one line of text, 12 units, and 4 apart) 3 from the edge. Only a
+ * numeric value axis is fitted; category axes size their margins to their names already.
+ */
+export function leftMargin(
+  base: number,
+  labels: readonly string[],
+  title: boolean,
+  width: number,
+): number {
+  if (labels.length === 0 || !labels.every((l) => NUMERIC.test(l.trim()))) return base;
+  const longest = Math.max(...labels.map((l) => l.length));
+  const needed = Math.ceil(
+    9 + longest * charWidth(width) + (title ? 4 + 12 * textGrowth(width) + 3 : 3),
+  );
+  return Math.max(base, needed);
+}
+
+/**
+ * The bottom margin a drawing needs so its x tick labels and, when it has one, the x axis title
+ * below them never overlap at a narrow width: the tick gap, the space below and between (16
+ * together), then a line of growing text (13 units, room for a site's mark size a little over
+ * 12px) for each line of tick label (two on a time axis, "24" over "Oct") and one for the title.
+ * Never less than `base`.
+ */
+export function bottomMargin(base: number, title: boolean, width: number, lines = 1): number {
+  return title ? Math.max(base, Math.ceil(16 + 13 * (lines + 1) * textGrowth(width))) : base;
+}

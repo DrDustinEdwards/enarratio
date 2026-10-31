@@ -198,7 +198,9 @@ its numbers written as the chart's ticks and table write them ("0 to 1", not
 ### `AxisUnits`
 
 `xUnit` and `yUnit`: units added to the axis label and the table header,
-"Weight (kg)" (B23). A hidden (`null`) label stays hidden.
+"Weight (kg)" (B23). A hidden (`null`) label stays hidden, and a label that
+already names the unit as a word ("Reads per sample", unit `reads`) is left as
+it is rather than "Reads per sample (reads)".
 
 ### `ChartIssue`
 

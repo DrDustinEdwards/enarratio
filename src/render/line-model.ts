@@ -31,7 +31,7 @@ import {
   validateFigure,
 } from "./figure.js";
 import { planSeries, type SeriesPlan } from "./series.js";
-import { WIDE_WIDTH } from "./size.js";
+import { charWidth, textGrowth } from "./size.js";
 import {
   dateFormat,
   defaultFormat,
@@ -196,9 +196,8 @@ export function fitTicks<T>(
   plotWidth: number,
   max?: number,
 ): T[] {
-  const grow = Math.max(1, width / (width >= WIDE_WIDTH ? WIDE_WIDTH : 288));
   const longest = Math.max(1, ...ticks.map((t) => label(t).length));
-  const fit = Math.max(2, Math.floor(plotWidth / (longest * 7 * grow + 12)));
+  const fit = Math.max(2, Math.floor(plotWidth / (longest * charWidth(width) + 12)));
   const limit = Math.min(fit, max ?? fit);
   if (ticks.length <= limit) return [...ticks];
   const step = Math.ceil(ticks.length / limit);
@@ -634,6 +633,16 @@ export function lineModel<T extends object>(options: LineChartOptions<T>): LineM
   };
 }
 
+/**
+ * The right margin a line chart leaves: room for the longest series name as a direct label (6
+ * from the line's end, at the drawing's narrowest text size), at least 96 with labels, else 24.
+ */
+export function rightMargin(model: LineModel, width: number): number {
+  if (!model.directLabels) return 24;
+  const longest = Math.max(...model.prepared.seriesNames.map((n) => n.length));
+  return Math.max(96, Math.ceil(6 + longest * charWidth(width) + 4));
+}
+
 /** The least distance between two direct labels' baselines, in user units. */
 const LABEL_GAP = 16;
 
@@ -642,23 +651,25 @@ const LABEL_GAP = 16;
  * cluster, centered on where its labels would sit, and clusters that then touch merge. Order is
  * kept. Both renderers place their labels with it.
  */
-export function spreadLabels(ys: readonly number[]): number[] {
+export function spreadLabels(ys: readonly number[], width: number): number[] {
+  // The gap grows with the text, which grows as the drawing shrinks (record 0022).
+  const gap = LABEL_GAP * textGrowth(width);
   const at = (i: number): number => ys[i] as number;
   const clusters: { members: number[]; top: number }[] = [];
   for (const i of ys.map((_, i) => i).sort((a, b) => at(a) - at(b))) {
     clusters.push({ members: [i], top: at(i) });
     for (let n = clusters.length; n > 1; n -= 1) {
       const [a, b] = clusters.slice(-2) as [(typeof clusters)[0], (typeof clusters)[0]];
-      if (a.top + a.members.length * LABEL_GAP <= b.top) break;
+      if (a.top + a.members.length * gap <= b.top) break;
       const members = [...a.members, ...b.members];
       const mean = members.reduce((sum, m) => sum + at(m), 0) / members.length;
-      clusters.splice(-2, 2, { members, top: mean - ((members.length - 1) * LABEL_GAP) / 2 });
+      clusters.splice(-2, 2, { members, top: mean - ((members.length - 1) * gap) / 2 });
     }
   }
   const out = [...ys];
   for (const c of clusters)
     c.members.forEach((m, k) => {
-      out[m] = c.top + k * LABEL_GAP;
+      out[m] = c.top + k * gap;
     });
   return out;
 }

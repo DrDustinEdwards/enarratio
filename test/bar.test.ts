@@ -28,6 +28,17 @@ describe("barChart", () => {
     expect(marks[3]?.querySelector("title")?.textContent).toBe("year 2024, Publications: 2");
   });
 
+  it("adds a unit to an axis title only when the title does not already name it", () => {
+    const title = (yLabel: string, yUnit: string): string | null | undefined =>
+      parse(barChart({ data: entries, x: "year", yLabel, yUnit, alt: "a" })).querySelector(
+        '[data-enarratio-mark="y-axis label"] text',
+      )?.textContent;
+    expect(title("reads", "reads")).toBe("reads");
+    expect(title("Reads per sample", "reads")).toBe("Reads per sample");
+    expect(title("Spreads", "reads")).toBe("Spreads (reads)");
+    expect(title("Dose", "mg/L")).toBe("Dose (mg/L)");
+  });
+
   it("names the SVG, not the figure, and puts every text part in the HTML outside role=img", () => {
     const fig = parse(
       barChart({

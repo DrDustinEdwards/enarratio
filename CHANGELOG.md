@@ -33,6 +33,11 @@ Contrast, theming, export and embed from the area 10 verification ([0027](docs/d
 ### Fixed
 
 - Contrast (B1): network links draw at full strength (were at half opacity, 2.1 to 2.9:1); the donut's hole is painted in the background, and its center label has a background halo, so the label is never read against a slice.
+- An axis title that already names its unit is not repeated: `yLabel: "reads"` with `yUnit: "reads"` reads "reads", not "reads (reads)".
+- Tick labels use proportional figures (Plot's `font-variant="tabular-nums"` is removed, and the base rules no longer set tabular figures on tick labels): in faces whose tabular figures include a figure-width comma, such as Schibsted Grotesk, "1,600" read as "1 , 600". Table cells and other numbers keep tabular figures.
+- At narrow widths, a numeric y axis's widest tick label and its rotated title no longer overlap, nor do the x tick labels (two lines on a time axis) and the x title: each chart's left and bottom margins grow to fit them, at the size the text reaches as the drawing shrinks, in both renderers.
+- Direct labels on line charts are spread by a gap that grows with the text, and the right margin fits the longest series name, so close end values (225 and 195 in a 440-wide chart drawn in a narrow column) no longer collide or run off the edge.
+- Scatter plots inset their points from the axes, so the first point no longer sits on the axes over a tick label at narrow widths.
 - Line and area charts thin their x tick labels to fit the width, in both renderers, so year or day labels no longer run together on a narrow chart (Prelum, a two-series line chart at 239 px).
 - `enhance` reads every mark's size before it writes anything: the pointer targets, the point layer and the line lengths for the entrance. Measuring between writes laid the whole page out once per mark. On the gallery (40 charts, 10,000 elements) that cost 7.7 s of blocking time on a throttled phone, and it now costs 70 ms.
 

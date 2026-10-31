@@ -9,6 +9,7 @@ import {
   type LineChartOptions,
   lineModel,
   type Point,
+  rightMargin,
   spreadLabels,
 } from "../render/line-model.js";
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
@@ -67,7 +68,7 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
       width: options.width ?? DEFAULT_WIDTH,
       height: options.height ?? DEFAULT_HEIGHT,
       marginTop: 20,
-      marginRight: model.directLabels ? 96 : 24,
+      marginRight: rightMargin(model, options.width ?? DEFAULT_WIDTH),
       marginBottom: 44,
       marginLeft: prepared.yLabel === null ? 48 : 64,
     },
@@ -144,7 +145,10 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
   if (model.directLabels) {
     // Each series named at its last point.
     const last = bySeries(present).map((group) => group[group.length - 1] as Point);
-    const ys = spreadLabels(last.map((p) => y(p.value ?? 0)));
+    const ys = spreadLabels(
+      last.map((p) => y(p.value ?? 0)),
+      layout.frame.width,
+    );
     parts.push(
       el(
         "g",

@@ -9,6 +9,7 @@ import {
   lineModel,
   type MarkerPoint,
   type Point,
+  rightMargin,
   type SeriesChartOptions,
   type SeriesModel,
   spreadLabels,
@@ -182,7 +183,10 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
             const at = texts.map((t) =>
               /translate\(([^,]+),([^)]+)\)/.exec(t.getAttribute("transform") ?? ""),
             );
-            const ys = spreadLabels(at.map((m) => Number(m?.[2])));
+            const ys = spreadLabels(
+              at.map((m) => Number(m?.[2])),
+              dimensions.width,
+            );
             for (const [i, t] of texts.entries()) {
               t.setAttribute("transform", `translate(${at[i]?.[1]},${ys[i]})`);
             }
@@ -195,7 +199,7 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
 
   const width = options.width ?? DEFAULT_WIDTH;
   const marginLeft = prepared.yLabel === null ? 48 : 64;
-  const marginRight = model.directLabels ? 96 : 24;
+  const marginRight = rightMargin(model, width);
   const rendered = renderPlot(
     {
       width,

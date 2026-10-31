@@ -99,7 +99,9 @@ const BASE_RULES = `
 }
 .enarratio svg:not([font-size]) { font-size: var(--enarratio-font-size-mark, 0.75rem); }
 svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; height: auto; }
-.enarratio [data-enarratio-mark$="tick label"],
+/* Tick labels in the numeric face with proportional figures: tabular figures widen the comma in
+   some faces ("1 , 600"), and end-anchored labels need no columns. Other numbers keep columns. */
+.enarratio [data-enarratio-mark$="tick label"] { font-family: var(--enarratio-font-numeric); }
 .enarratio .enarratio-numeric {
   font-family: var(--enarratio-font-numeric);
   font-variant-numeric: tabular-nums;
