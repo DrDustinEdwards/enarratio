@@ -1343,7 +1343,7 @@ A test keeps this table and the stylesheet in step.
 | `--enarratio-focus-width-outer` | `2.5px` | Outer (focus color) ring on a focused point |
 | `--enarratio-focus-outline-width` | `3px` | Outline on a focused button, field or frame |
 | `--enarratio-focus-outline-offset` | `2px` | Distance of that outline |
-| `--enarratio-timeline-list-indent` | `1.25em` | Indent of the timeline's plain list on narrow screens |
+| `--enarratio-timeline-list-indent` | `2.25em` | Indent of the timeline's plain list on narrow screens |
 | `--enarratio-duration-hover` | `150ms` | Dimming and un-dimming |
 | `--enarratio-duration-grow` | `600ms` | Bars growing in |
 | `--enarratio-duration-fade` | `500ms` | Dots, areas and cells fading in |

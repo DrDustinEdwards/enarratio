@@ -185,9 +185,11 @@ function yearTicks(from: number, to: number): number[] {
 }
 
 /**
- * Every nth x tick, starting from the first, so that no two labels overlap and at most
- * `max` print. A label is about 7 user units a character at the mark size, more on a drawing
- * whose text grows as it shrinks (record 0022), and needs 12 more between neighbors.
+ * Every nth x tick, starting from the first, so that no two labels overlap and at most `max`
+ * print: all of them when they fit. A label is about 7 user units a character at the mark size,
+ * more on a drawing whose text grows as it shrinks (record 0022), and needs 12 more between
+ * neighbors; n labels need n - 1 such gaps. A step that lands on the last tick is preferred, so
+ * 2020 to 2023 thins to 2020 and 2023, not 2020 and 2022.
  */
 export function fitTicks<T>(
   ticks: readonly T[],
@@ -197,10 +199,17 @@ export function fitTicks<T>(
   max?: number,
 ): T[] {
   const longest = Math.max(1, ...ticks.map((t) => label(t).length));
-  const fit = Math.max(2, Math.floor(plotWidth / (longest * charWidth(width) + 12)));
-  const limit = Math.min(fit, max ?? fit);
+  const fit = Math.max(2, Math.floor(plotWidth / (longest * charWidth(width) + 12)) + 1);
+  const limit = Math.max(1, Math.min(fit, max ?? fit));
   if (ticks.length <= limit) return [...ticks];
-  const step = Math.ceil(ticks.length / limit);
+  if (limit === 1) return ticks.slice(0, 1);
+  const last = ticks.length - 1;
+  const least = Math.ceil(last / (limit - 1));
+  let step = least;
+  while (step < last && last % step !== 0) step++;
+  // No step ends on the last tick without leaving only the two ends: take that only when the
+  // least step would print no more than two either.
+  if (step === last && Math.floor(last / least) + 1 > 2) step = least;
   return ticks.filter((_, i) => i % step === 0);
 }
 
@@ -635,12 +644,15 @@ export function lineModel<T extends object>(options: LineChartOptions<T>): LineM
 
 /**
  * The right margin a line chart leaves: room for the longest series name as a direct label (6
- * from the line's end, at the drawing's narrowest text size), at least 96 with labels, else 24.
+ * from the line's end, at the text size of the width drawn), else 24. A drawing 480 or wider
+ * keeps at least 96, so desktop charts share one gutter; a narrower one takes only what its
+ * labels need, and the plot keeps the rest.
  */
 export function rightMargin(model: LineModel, width: number): number {
   if (!model.directLabels) return 24;
   const longest = Math.max(...model.prepared.seriesNames.map((n) => n.length));
-  return Math.max(96, Math.ceil(6 + longest * charWidth(width) + 4));
+  const need = Math.ceil(6 + longest * charWidth(width) + 4);
+  return Math.max(width >= 480 ? 96 : 24, need);
 }
 
 /** The least distance between two direct labels' baselines, in user units. */

@@ -22,6 +22,14 @@ const series = (name: string, values: (number | null)[]) => ({
 });
 
 describe("summarize", () => {
+  it("capitalizes a lowercase word that opens a sentence, but never a domain", () => {
+    expect(summarize({ ordered: true, series: [series("posts", [1, 2])] }, ENGLISH)).toMatch(
+      /^Posts rose/,
+    );
+    expect(summarize({ ordered: true, series: [series("carrel.app", [1, 2])] }, ENGLISH)).toMatch(
+      /^carrel\.app rose/,
+    );
+  });
   it("states a trend, and a peak that passes both ends", () => {
     expect(summarize({ ordered: true, series: [series("Cases", [10, 12, 14])] }, ENGLISH)).toBe(
       "Cases rose from 10 (2020) to 14 (2022). The highest value is 14 (2022). The lowest is 10 (2020).",

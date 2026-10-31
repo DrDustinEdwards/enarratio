@@ -169,8 +169,15 @@ export function summarize(d: ChartDescription, strings: Strings): string {
     }
   }
   if (d.sentence) sentences.push(d.sentence);
-  // A trend opens with its series' name, which may be a lowercase field ("posts rose ...").
-  return sentences.map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
+  // A trend opens with its series' name, which may be a lowercase field ("posts rose ..."). A
+  // name that is not a plain word (a domain, "carrel.app", or an identifier) keeps its case.
+  return sentences
+    .map((s) =>
+      /^\p{Ll}+[,:;]?$/u.test(/^\S+/u.exec(s)?.[0] ?? "")
+        ? s.charAt(0).toUpperCase() + s.slice(1)
+        : s,
+    )
+    .join(" ");
 }
 
 /** The overview read before the chart: its type, series and points, and each axis's range (B53). */

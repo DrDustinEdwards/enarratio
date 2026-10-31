@@ -118,20 +118,16 @@ export interface RenderedPlot {
 type Scale = { nice?: unknown; ticks?: unknown; type?: string } | undefined;
 
 /**
- * Rounds a `nice` linear scale to the step of the ticks Plot will draw (one per 35 units of
- * height, or 80 of width), not d3's default of ten, so the domain ends on a tick: data reaching
- * 23 on a 0, 5, 10 axis end at 25, not at 24 above a top tick of 20. The light charts round the
- * same way. Faceted rows tick by their own height, so a chart with `fy` keeps Plot's rounding.
+ * Rounds a `nice` linear y scale to the step of the ticks Plot will draw (one per 35 units of
+ * height), not d3's default of ten, so the domain ends on a tick: data reaching 23 on a 0, 5, 10
+ * axis end at 25, not at 24 above a top tick of 20. The light charts round the same way. Faceted
+ * rows tick by their own height, so a chart with `fy` keeps Plot's rounding. The x scale keeps
+ * d3's finer rounding: at a narrow width its few ticks would stretch data from 1 to 5 to 0 to 10.
  */
 function niceToTicks(options: Plot.PlotOptions): Plot.PlotOptions {
   const margin = (value: unknown, fallback: number): number =>
     typeof value === "number" ? value : fallback;
   const inset = margin(options.inset, 0) * 2;
-  const across =
-    (options.width ?? 640) -
-    margin(options.marginLeft, 40) -
-    margin(options.marginRight, 20) -
-    inset;
   const down =
     (options.height ?? 400) -
     margin(options.marginTop, 20) -
@@ -143,10 +139,9 @@ function niceToTicks(options: Plot.PlotOptions): Plot.PlotOptions {
     (scale.type === undefined || scale.type === "linear")
       ? { ...scale, nice: Math.max(1, count) }
       : scale;
-  const x = rounded(options.x as Scale, across / 80);
   const y =
     options.fy === undefined ? rounded(options.y as Scale, down / 35) : (options.y as Scale);
-  return { ...options, ...(x ? { x } : {}), ...(y ? { y } : {}) } as Plot.PlotOptions;
+  return { ...options, ...(y ? { y } : {}) } as Plot.PlotOptions;
 }
 
 /**

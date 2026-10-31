@@ -416,7 +416,7 @@ ${Array.from({ length: 5 }, (_, i) => {
     width: auto;
     height: auto;
     margin: 0;
-    padding: 0 0 0 var(--enarratio-timeline-list-indent, 1.25em);
+    padding: 0 0 0 var(--enarratio-timeline-list-indent, 2.25em);
     overflow: visible;
     clip-path: none;
     white-space: normal;

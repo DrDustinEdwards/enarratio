@@ -121,7 +121,7 @@ describe("lineChart", () => {
       const narrow = labels(chart({ ...base, width: 239 }));
       expect(narrow.length).toBeLessThan(6);
       expect(narrow[0]).toBe("2019");
-      expect(labels(chart({ ...base, maxXTicks: 2 }))).toEqual(["2019", "2022"]);
+      expect(labels(chart({ ...base, maxXTicks: 2 }))).toEqual(["2019", "2024"]);
     }
     expect(() =>
       lineChart({ data: years, x: "year", y: "n", series: "site", maxXTicks: 0, alt: "a" }),

@@ -37,10 +37,13 @@ Contrast, theming, export and embed from the area 10 verification ([0027](docs/d
 - Tick labels use proportional figures (Plot's `font-variant="tabular-nums"` is removed, and the base rules no longer set tabular figures on tick labels): in faces whose tabular figures include a figure-width comma, such as Schibsted Grotesk, "1,600" read as "1 , 600". Table cells and other numbers keep tabular figures.
 - At narrow widths, a numeric y axis's widest tick label and its rotated title no longer overlap, nor do the x tick labels (two lines on a time axis) and the x title: each chart's left and bottom margins grow to fit them, at the size the text reaches as the drawing shrinks, in both renderers.
 - Direct labels on line charts are spread by a gap that grows with the text, and the right margin fits the longest series name, so close end values (225 and 195 in a 440-wide chart drawn in a narrow column) no longer collide or run off the edge.
-- A linear axis is rounded to the step of the ticks drawn, not to d3's default of ten ticks, so it ends on a tick: data reaching 23 on a 0, 5, ..., 20 axis now end at a 25 tick, not at 24 above the last one. Both renderers, every chart with a rounded axis.
+- A linear y axis (and a vertical bar's value axis) is rounded to the step of the ticks drawn, not to d3's default of ten ticks, so it ends on a tick: data reaching 23 on a 0, 5, ..., 20 axis now end at a 25 tick, not at 24 above the last one. Both renderers. An x axis keeps d3's finer rounding, so a narrow scatter of doses 1 to 5 runs 1 to 5, not 0 to 10.
 - A wide drawing (480 or more) that scrolls in a column under 30rem shows a shadow at the edge that has more, without script.
 - Scatter plots inset their points from the axes, so the first point no longer sits on the axes over a tick label at narrow widths.
-- Line and area charts thin their x tick labels to fit the width, in both renderers, so year or day labels no longer run together on a narrow chart (Prelum, a two-series line chart at 239 px).
+- Line and area charts thin their x tick labels to fit the width, in both renderers, so year or day labels no longer run together on a narrow chart (Prelum, a two-series line chart at 239 px). Every label prints when they fit (2020 to 2023 at 288 px), and a thinned axis keeps its first and last ticks when an even step allows.
+- Direct labels' right margin is sized to the labels at the width drawn: under 480 it no longer keeps the desktop's 96, in both renderers.
+- The timeline's plain list on narrow screens indents 2.25em (was 1.25em), so its markers ("1.", "10.") are not clipped by the frame.
+- A summary capitalizes a sentence that opens with a lowercase word ("posts rose" reads "Posts rose"), but not one that opens with a domain or identifier: "carrel.app rose" stays as written.
 - `enhance` reads every mark's size before it writes anything: the pointer targets, the point layer and the line lengths for the entrance. Measuring between writes laid the whole page out once per mark. On the gallery (40 charts, 10,000 elements) that cost 7.7 s of blocking time on a throttled phone, and it now costs 70 ms.
 
 ### Changed

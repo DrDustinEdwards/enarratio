@@ -78,7 +78,9 @@ on 2026-10-31 and found, in Enarratio's own drawing:
    six), so at 239 pixels a two-series line chart's years ran together (found by Prelum). Ticks
    are now thinned to every nth, from the first, until the labels fit the plot's width at about 7
    units a character (more on a drawing whose text grows as it shrinks), in both renderers, and
-   `maxXTicks` caps them as it does on bar charts.
+   `maxXTicks` caps them as it does on bar charts. n labels need only n - 1 gaps, so all four of
+   2020 to 2023 print at 288 px, and a step that lands on the last tick is preferred (2020 and
+   2023, not 2020 and 2022).
 8. **Narrow widths.** Screenshots at 320 px and in Capsomer's narrow columns showed more:
    - An axis title repeated its unit, "reads (reads)". A unit is now added only when the label
      does not already name it as a word.
@@ -94,7 +96,13 @@ on 2026-10-31 and found, in Enarratio's own drawing:
      with the wider margin when Plot's first drawing needs it.
    - A scatter's first point sat on the axes over a tick label; points are inset from them.
    - A rounded axis was rounded for ten ticks but drew about one per 35 units, so data reaching
-     23 ended above a top tick of 20. It is now rounded to the step of the ticks it draws.
+     23 ended above a top tick of 20. A y axis is now rounded to the step of the ticks it draws.
+     An x axis is not: with two or three ticks across a narrow drawing, doses 1 to 5 ran 0 to 10.
+   - Direct labels kept a 96-unit gutter at every width. Under 480 it is sized to the labels.
+   - The timeline's narrow list indented 1.25em, so the frame's overflow clipped "1."; 2.25em.
+   - A summary capitalized every sentence's first letter, so "example.com: ..." and "carrel.app
+     rose" read "Example.com" and "Carrel.app". Only a sentence opening with a plain lowercase
+     word is capitalized.
    - A drawing 480 or wider keeps its text size and scrolls under 30rem, as designed (A13), but
      nothing showed that it did: the "Reads per sample" bar at 480 hid S3 and S4 at 320 px while
      a 288-wide line chart beside it scaled. The frame now shows a shadow at the edge that has
