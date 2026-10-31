@@ -28,7 +28,7 @@ import { barChart } from "enarratio/lite";
 import { defaultTheme, highContrastTheme } from "enarratio/themes";
 import { rolldown } from "rolldown";
 import { exampleTheme } from "../examples/themes/example.ts";
-import { galleryHeadersFile, HOST } from "./security-headers.ts";
+import { galleryHeadersFile, HOST, PAGE_PRELOADS } from "./security-headers.ts";
 
 // Capsomer's chart frame imports "enarratio", its peer; here that is this package itself.
 const self = import.meta.resolve("enarratio");
@@ -729,6 +729,16 @@ writeFileSync(join(outDir, "theme.js"), await bundle("theme.js", "iife"));
 writeFileSync(join(outDir, "_headers"), galleryHeadersFile());
 copyFileSync(join(root, "site", "favicon.svg"), join(outDir, "favicon.svg"));
 copyFileSync(join(root, "site", "og-card.png"), join(outDir, "og-card.png"));
+// The preload header names files that exist, and every stylesheet the home page links.
+const preloaded = PAGE_PRELOADS.links.map((link) => link.href);
+for (const href of preloaded) readFileSync(join(outDir, href));
+const homeStyles = [
+  ...readFileSync(join(outDir, "index.html"), "utf8").matchAll(
+    /<link rel="stylesheet" href="([^"]+)"/g,
+  ),
+].map((m) => new URL(m[1] ?? "", `https://${HOST}/`).pathname);
+const unlisted = homeStyles.filter((href) => !preloaded.includes(href));
+if (unlisted.length) throw new Error(`gallery: PAGE_PRELOADS leaves out ${unlisted.join(", ")}`);
 console.log(
   `gallery: ${examples.length} examples, ${pages.length} themes, the Astro page -> ${outDir}`,
 );
