@@ -12,7 +12,7 @@ change the public API; every such change is listed here.
 - Deployed by devkit's shared deploy (worker-deploy.yml v0.20.18), a `deploy` job in ci.yml after the checks and browser
   tests, in place of gallery.yml. It deploys with `DEPLOY_SHA`, waits for `/health` (site-runtime 0.60.0's `staticSite`) to
   report the commit, checks the home page and rolls back on a refusal; IndexNow runs after it. No package change.
-- Headers come from the gallery's entry in site-runtime's site registry: the Worker is `staticSite({ site: enarratio })` and `npm run gallery` writes `_headers` with `site-runtime-headers` (with the TDMRep header), so `scripts/security-headers.ts` and its header test are gone. The registry adds COEP with `report-to`, `Integrity-Policy-Report-Only` and a Report-Only policy with `require-trusted-types-for 'script'`.
+- Headers come from the gallery's entry in site-runtime's site registry: the Worker is `staticSite({ site: enarratio })` and `npm run gallery` writes `_headers` with `site-runtime-headers` (with the TDMRep header), so `scripts/security-headers.ts` and its header test are gone. The registry adds COEP with `report-to`, `Integrity-Policy-Report-Only` and a Report-Only policy with `require-trusted-types-for 'script'`. site-runtime v0.62.1, whose Workers carry only the registry's values, keeps the gallery's Worker inside its 27/11 KiB budget (26.4/10.7).
 - `theme.js` and `gallery.js` carry a sha384 `integrity` and `crossorigin`, and a `modulepreload` with its own integrity fetches `enhance.js`, the module gallery.js imports, so all three pass Integrity-Policy.
 
 ## [0.5.0] - 2026-10-31
