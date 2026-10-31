@@ -14,6 +14,7 @@ import { type FigureOptions, figure, type SeriesColor, validateFigure } from "..
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
 import { DEFAULT_WIDTH } from "../render/size.js";
+import { numberFormat, stringsFor } from "../render/text.js";
 
 /** A node in a {@link networkChart}. */
 export interface NetworkNode {
@@ -53,6 +54,24 @@ interface LaidOutNode extends SimulationNodeDatum {
 
 const KIND = "networkChart";
 const RADIUS = 6;
+/** How many of the most connected nodes the summary names. */
+const HUBS = 3;
+
+/** How many separate parts a network falls into: nodes joined by any path are one part. */
+function components(
+  nodes: readonly LaidOutNode[],
+  edges: readonly { a: LaidOutNode; b: LaidOutNode }[],
+): number {
+  const parent = new Map(nodes.map((n) => [n, n]));
+  const root = (n: LaidOutNode): LaidOutNode => {
+    let r = n;
+    while (parent.get(r) !== r) r = parent.get(r) as LaidOutNode;
+    parent.set(n, r);
+    return r;
+  };
+  for (const e of edges) parent.set(root(e.a), root(e.b));
+  return new Set(nodes.map(root)).size;
+}
 
 /**
  * A force-directed network, laid out on the server with d3-force so it needs no script and draws
@@ -72,7 +91,10 @@ export function networkChart(options: NetworkChartOptions): string {
   if (nodes.length === 0) throw new Error(`${KIND}: nodes is empty`);
   const width = options.width ?? DEFAULT_WIDTH;
   const height = options.height ?? 420;
-  const ungrouped = "Nodes";
+  const strings = stringsFor(options.strings);
+  const { terms } = strings;
+  const number = numberFormat(options.locale ? { locale: options.locale } : {});
+  const ungrouped = terms.nodes;
   const grouped = nodes.some((n) => n.group !== undefined);
 
   const byId = new Map<string, LaidOutNode>();
@@ -127,7 +149,7 @@ export function networkChart(options: NetworkChartOptions): string {
   };
   const showLabels = options.nodeLabels ?? laidOut.length <= 40;
   const describe = (n: LaidOutNode): string =>
-    `${n.label}${grouped ? ` (${n.group})` : ""}: ${n.degree} connection${n.degree === 1 ? "" : "s"}`;
+    `${n.label}${grouped ? ` (${n.group})` : ""}: ${number(n.degree)} ${n.degree === 1 ? terms.connection : terms.connections}`;
 
   const marks: Plot.Markish[] = [
     Plot.link(edges, {
@@ -192,18 +214,32 @@ export function networkChart(options: NetworkChartOptions): string {
     neighbors.get(e.b.id)?.push(e.a.label);
   }
 
+  // The most connected nodes, ties in the order given.
+  const hubs = laidOut
+    .filter((n) => n.degree > 0)
+    .sort((a, b) => b.degree - a.degree)
+    .slice(0, HUBS);
   return figure(options, {
     kind: "network",
     svg,
+    // No axes: the network in words, its size, its most connected nodes and its separate parts.
+    description: {
+      sentence: strings.networkSummary({
+        nodes: number(laidOut.length),
+        links: number(edges.length),
+        hubs: hubs.map((n) => ({ value: number(n.degree), at: n.label })),
+        components: number(components(laidOut, edges)),
+      }),
+    },
     legend: grouped ? plan.legend : [],
     ...(grouped ? { seriesField: "group" } : {}),
     slotColors: plan.slotColors,
     table: {
-      columns: ["Node", ...(grouped ? ["Group"] : []), "Connected to"],
+      columns: [terms.node, ...(grouped ? [terms.group] : []), terms.connectedTo],
       rows: laidOut.map((n) => [
         n.label,
         ...(grouped ? [n.group] : []),
-        (neighbors.get(n.id) ?? []).join(", ") || "none",
+        (neighbors.get(n.id) ?? []).join(", ") || terms.none,
       ]),
     },
   });

@@ -30,4 +30,6 @@ export default barChart({
   title: "Entries per year",
   alt: "Stacked bars of CV entries per year from 2019 to 2024. Publications lead every year except 2023, when talks matched them; 2024 is the busiest year with 10 entries.",
   caption: "Illustrative data.",
+  source: "Sample CV",
+  byline: "Sample Lab",
 });

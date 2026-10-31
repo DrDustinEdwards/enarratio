@@ -4,11 +4,12 @@
  * (`enarratio/plot`) and the light one (`enarratio/lite`).
  */
 
+import { type Annotated, withNotes } from "./annotation.js";
 import {
   calendarDates,
   DAY,
-  defaultFormat,
   domainOf,
+  formatInstant,
   type KeysOfType,
   markKey,
   maxOf,
@@ -20,13 +21,25 @@ import {
 } from "./data.js";
 import type { MarkDatum } from "./datum.js";
 import {
+  type AxisUnits,
   type FigureOptions,
   figure,
   type ScaleDescription,
   type SeriesColor,
+  slotStyle,
+  unitLabel,
   validateFigure,
 } from "./figure.js";
 import { planSeries, type SeriesPlan } from "./series.js";
+import {
+  dateFormat,
+  defaultFormat,
+  numberFormat,
+  type Strings,
+  stringsFor,
+  valueAxis,
+} from "./text.js";
+import { texture } from "./texture.js";
 
 /** A horizontal line across the chart at a value: a threshold, a limit, a target. */
 export interface ReferenceLine {
@@ -41,7 +54,7 @@ export interface EventMarker {
 }
 
 /** Options shared by `lineChart` and `areaChart`. */
-export interface SeriesChartOptions<T extends object> extends FigureOptions {
+export interface SeriesChartOptions<T extends object> extends FigureOptions, AxisUnits, Annotated {
   readonly data: readonly T[];
   /**
    * The field along the x axis: dates or numbers. Dates are Date objects or ISO 8601 strings;
@@ -73,8 +86,9 @@ export interface SeriesChartOptions<T extends object> extends FigureOptions {
   /** Formats values in hover details and the data table. */
   readonly formatValue?: (value: number) => string;
   /**
-   * Formats x values in hover details and the data table. Dates default to YYYY-MM-DD, with the
-   * UTC time added when any value falls within a day; years print without a thousands separator.
+   * Formats x values in hover details, the data table and the summary. Dates are written out
+   * for the locale ("October 6, 2025"), with the time and "UTC" added when any value falls
+   * within a day; years print without a thousands separator.
    */
   readonly formatX?: (value: number | Date) => string;
   /** Horizontal reference lines, each labeled on the chart. */
@@ -134,7 +148,10 @@ export interface Point {
   readonly x: number | Date;
   /** The x value as a number (epoch milliseconds for time), which identifies the row. */
   readonly at: number;
+  /** The x value as readers see it, in the table, hover details and summary. */
   readonly xText: string;
+  /** The x value as filter events and mark keys carry it: ISO dates, or `formatX`'s text. */
+  readonly xKey: string;
   readonly series: string;
   readonly value: number | null;
   readonly lower: number | null;
@@ -146,10 +163,7 @@ export interface Point {
   readonly row: number;
 }
 
-const pad = (n: number): string => String(n).padStart(2, "0");
 const isoDate = (d: Date): string => d.toISOString().slice(0, 10);
-const isoDateTime = (d: Date): string =>
-  `${isoDate(d)} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}${d.getUTCSeconds() ? `:${pad(d.getUTCSeconds())}` : ""} UTC`;
 
 /** Whether numbers look like years, which print without a thousands separator (F4). */
 const isYears = (values: readonly number[]): boolean =>
@@ -171,6 +185,7 @@ export interface Prepared {
   readonly time: boolean;
   readonly years: boolean;
   readonly format: (value: number) => string;
+  readonly strings: Strings;
   readonly xLabel: string | null;
   readonly yLabel: string | null;
   /** `forecastFrom` as a number (epoch milliseconds for time), when given. */
@@ -179,7 +194,7 @@ export interface Prepared {
 }
 
 type Forecastable<T extends object> = SeriesChartOptions<T> &
-  Partial<Pick<LineChartOptions<T>, "band" | "forecastFrom">>;
+  Partial<Pick<LineChartOptions<T>, "band" | "forecastFrom" | "yType">>;
 
 /** Reads and checks the rows shared by line and area charts. */
 function prepare<T extends object>(kind: string, options: Forecastable<T>): Prepared {
@@ -188,10 +203,13 @@ function prepare<T extends object>(kind: string, options: Forecastable<T>): Prep
   if (data.length === 0) throw new Error(`${kind}: data is empty`);
   const first: unknown = (data[0] as Record<string, unknown>)[x];
   const time = options.xType ? options.xType === "time" : typeof first !== "number";
-  const format = options.formatValue ?? defaultFormat;
-  const yLabel = options.yLabel === undefined ? y : options.yLabel;
-  const xLabel = options.xLabel === undefined ? x : options.xLabel;
-  const sole = yLabel ?? "Value";
+  const locale = options.locale ?? "en-US";
+  const number = numberFormat({ locale });
+  const format = options.formatValue ?? number;
+  const yLabel = unitLabel(options.yLabel, y, options.yUnit);
+  const xLabel = unitLabel(options.xLabel, x, options.xUnit);
+  const strings = stringsFor(options.strings);
+  const sole = yLabel ?? strings.terms.value;
 
   // forecastFrom is read with the data, so calendar dates treat both the same way.
   const given = options.forecastFrom;
@@ -218,10 +236,16 @@ function prepare<T extends object>(kind: string, options: Forecastable<T>): Prep
   }
   const years = !time && isYears(numbers);
   const subDaily = time && numbers.some((n) => n % DAY !== 0);
+  const written = dateFormat({ locale, time: subDaily });
+  const keyOf = (v: number | Date): string => {
+    if (options.formatX) return options.formatX(v);
+    if (v instanceof Date) return subDaily ? formatInstant(v) : isoDate(v);
+    return years ? String(v) : defaultFormat(v);
+  };
   const formatX = (v: number | Date): string => {
     if (options.formatX) return options.formatX(v);
-    if (v instanceof Date) return subDaily ? isoDateTime(v) : isoDate(v);
-    return years ? String(v) : defaultFormat(v);
+    if (v instanceof Date) return written(v);
+    return years ? String(v) : number(v);
   };
 
   const seriesOf = (row: T, i: number): string =>
@@ -260,6 +284,7 @@ function prepare<T extends object>(kind: string, options: Forecastable<T>): Prep
       x: xv,
       at,
       xText: formatX(xv),
+      xKey: keyOf(xv),
       series: name,
       value: readNumberOrNull(kind, row, y, i),
       lower,
@@ -285,6 +310,7 @@ function prepare<T extends object>(kind: string, options: Forecastable<T>): Prep
     time,
     years,
     format,
+    strings,
     xLabel,
     yLabel,
     ...(forecastBoundary !== undefined ? { forecastAt: forecastBoundary } : {}),
@@ -311,10 +337,17 @@ function markerPoints(
 }
 
 /** The data table column for one bound of a band, e.g. "Berlin 95% interval, lower". */
-function boundColumn(prepared: Prepared, series: string, multi: boolean, bound: string): string {
-  const what = prepared.band?.label ? `${prepared.band.label}, ${bound}` : `${bound} bound`;
-  if (multi) return `${series} ${what}`;
-  return `${what.charAt(0).toUpperCase()}${what.slice(1)}`;
+function boundColumn(
+  prepared: Prepared,
+  series: string,
+  multi: boolean,
+  bound: "lower" | "upper",
+): string {
+  const { terms } = prepared.strings;
+  const label = prepared.band?.label;
+  const named = bound === "lower" ? terms.lowerBound : terms.upperBound;
+  if (label) return `${multi ? `${series} ` : ""}${label}, ${terms[bound]}`;
+  return multi ? `${series} ${named.toLowerCase()}` : named;
 }
 
 function table(prepared: Prepared, xColumn: string, multi: boolean) {
@@ -333,7 +366,7 @@ function table(prepared: Prepared, xColumn: string, multi: boolean) {
       xColumn,
       ...prepared.seriesNames,
       ...bounds.map((b) => b.column),
-      ...(forecast ? ["Forecast"] : []),
+      ...(forecast ? [prepared.strings.terms.forecast] : []),
     ],
     rows: [...rowsByX].map(([at, text]) => [
       text,
@@ -345,7 +378,7 @@ function table(prepared: Prepared, xColumn: string, multi: boolean) {
         const v = cell.get(markKey(at, b.series))?.[b.which];
         return v === null || v === undefined ? "" : prepared.format(v);
       }),
-      ...(forecast ? [forecastAt(prepared, at) ? "Yes" : ""] : []),
+      ...(forecast ? [forecastAt(prepared, at) ? prepared.strings.terms.yes : ""] : []),
     ]),
   };
 }
@@ -356,15 +389,17 @@ function forecastAt(prepared: Prepared, at: number): boolean {
 }
 
 function describePoint(prepared: Prepared, multi: boolean, xColumn: string) {
+  const { strings, format } = prepared;
+  const { terms } = strings;
   return (p: Point): string => {
     const notes: string[] = [];
-    if (p.forecast) notes.push("forecast");
+    if (p.forecast) notes.push(terms.forecast.toLowerCase());
     if (prepared.band && p.lower !== null && p.upper !== null) {
       notes.push(
-        `${prepared.band.label ?? "range"} ${prepared.format(p.lower)} to ${prepared.format(p.upper)}`,
+        `${prepared.band.label ?? terms.range.toLowerCase()} ${strings.range(format(p.lower), format(p.upper))}`,
       );
     }
-    return `${multi ? `${p.series}, ` : ""}${xColumn} ${p.xText}: ${p.value === null ? "no data" : prepared.format(p.value)}${notes.length > 0 ? ` (${notes.join("; ")})` : ""}`;
+    return `${multi ? `${p.series}, ` : ""}${xColumn} ${p.xText}: ${p.value === null ? terms.noData : format(p.value)}${notes.length > 0 ? ` (${notes.join("; ")})` : ""}`;
   };
 }
 
@@ -372,8 +407,8 @@ function datum(p: Point, x: string, series: string | undefined): MarkDatum {
   const multi = series !== undefined;
   return {
     key: markKey(p.at, p.series),
-    filter: multi ? { field: series, value: p.series } : { field: x, value: p.xText },
-    x: p.xText,
+    filter: multi ? { field: series, value: p.series } : { field: x, value: p.xKey },
+    x: p.xKey,
     ...(multi ? { series: p.series } : {}),
     column: p.column,
     row: p.row,
@@ -389,10 +424,14 @@ export interface SeriesModel {
   /** Whole-year x ticks, when x holds years. */
   readonly yearTicks: number[] | undefined;
   readonly markers: readonly MarkerPoint[];
+  /** The y axis's tick format for huge values, and whether every value is zero (B41). */
+  readonly valueAxis: ReturnType<typeof valueAxis>;
   describe(p: Point): string;
   datum(p: Point): MarkDatum;
   /** Wraps the drawn SVG in the figure, with its legend and data table. */
   figure(svg: string, x: ScaleDescription | undefined): string;
+  /** The text alternative, with the annotations' notes added. */
+  readonly alt: string | undefined;
 }
 
 function seriesModel<T extends object>(
@@ -404,25 +443,63 @@ function seriesModel<T extends object>(
 ): SeriesModel {
   const plan = planSeries(kind, prepared.seriesNames, options.colors);
   check?.();
+  const noted = withNotes(options);
   const multi = options.series !== undefined;
   const xColumn = prepared.xLabel ?? options.x;
   const ats = prepared.points.map((p) => p.at);
+  const { points, format } = prepared;
+  const values = points.flatMap((p) => [p.value, p.lower, p.upper].filter((v) => v !== null));
+  const description = {
+    axes: [
+      {
+        position: "x",
+        label: prepared.xLabel ?? "",
+        from: points[0]?.xText ?? "",
+        to: points.at(-1)?.xText ?? "",
+      },
+      {
+        position: "y",
+        label: prepared.yLabel ?? "",
+        from: format(minOf(values)),
+        to: format(maxOf(values)),
+      },
+    ] as const,
+    ordered: true,
+    format,
+    log: options.yType === "log",
+    ...(prepared.band
+      ? { interval: prepared.band.label ?? prepared.strings.terms.range.toLowerCase() }
+      : {}),
+    series: prepared.seriesNames.map((name) => ({
+      name,
+      points: points
+        .filter((p) => p.series === name)
+        .map((p) => ({ at: p.xText, value: p.value, lower: p.lower, upper: p.upper })),
+    })),
+  };
   return {
     prepared,
     plan,
     multi,
     yearTicks: prepared.years ? yearTicks(minOf(ats), maxOf(ats)) : undefined,
     markers: markerPoints(options, prepared.time, kind),
+    valueAxis: valueAxis(
+      [...values, ...(options.references ?? []).map((r) => r.y)],
+      options.locale,
+    ),
     describe: describePoint(prepared, multi, xColumn),
     datum: (p) => datum(p, options.x, options.series),
+    alt: noted.alt,
     figure: (svg, x) =>
-      figure(options, {
+      figure(noted, {
         kind: figureKind,
-        svg,
+        // Area bands are filled, so they take textures; lines are told apart by labels (B5).
+        svg: figureKind === "area" ? texture(svg, slotStyle(plan.slotColors)) : svg,
         ...(x ? { x } : {}),
         legend: multi ? plan.legend : [],
         ...(multi && options.series ? { seriesField: options.series } : {}),
         slotColors: plan.slotColors,
+        description,
         table: table(prepared, xColumn, multi),
       }),
   };
@@ -498,10 +575,39 @@ export function lineModel<T extends object>(options: LineChartOptions<T>): LineM
         ? undefined
         : {
             x: time ? new Date(boundary) : boundary,
-            label: options.forecastLabel ?? "Forecast",
+            label: options.forecastLabel ?? prepared.strings.terms.forecast,
           },
     directLabels: options.directLabels === true && base.multi,
   };
+}
+
+/** The least distance between two direct labels' baselines, in user units. */
+const LABEL_GAP = 16;
+
+/**
+ * Moves direct labels apart so none overlaps the next (B8): labels closer than the gap form a
+ * cluster, centered on where its labels would sit, and clusters that then touch merge. Order is
+ * kept. Both renderers place their labels with it.
+ */
+export function spreadLabels(ys: readonly number[]): number[] {
+  const at = (i: number): number => ys[i] as number;
+  const clusters: { members: number[]; top: number }[] = [];
+  for (const i of ys.map((_, i) => i).sort((a, b) => at(a) - at(b))) {
+    clusters.push({ members: [i], top: at(i) });
+    for (let n = clusters.length; n > 1; n -= 1) {
+      const [a, b] = clusters.slice(-2) as [(typeof clusters)[0], (typeof clusters)[0]];
+      if (a.top + a.members.length * LABEL_GAP <= b.top) break;
+      const members = [...a.members, ...b.members];
+      const mean = members.reduce((sum, m) => sum + at(m), 0) / members.length;
+      clusters.splice(-2, 2, { members, top: mean - ((members.length - 1) * LABEL_GAP) / 2 });
+    }
+  }
+  const out = [...ys];
+  for (const c of clusters)
+    c.members.forEach((m, k) => {
+      out[m] = c.top + k * LABEL_GAP;
+    });
+  return out;
 }
 
 const AREA = "areaChart";
@@ -512,9 +618,45 @@ const AREA = "areaChart";
  */
 export const AREA_OPACITY = 0.3;
 
+/** Options for `areaChart`, from `enarratio/plot` or `enarratio/lite`. */
+export interface AreaChartOptions<T extends object> extends SeriesChartOptions<T> {
+  /**
+   * Stack each x to 100%: every series is drawn, described and tabled as its percentage of that
+   * x's total, for how a whole divides when the total itself changes. The y label defaults to
+   * "Share of total (%)".
+   */
+  readonly percent?: boolean;
+}
+
+/** The rows as shares of each x's total, in percent; an x whose total is zero stays at zero. */
+function asShares(prepared: Prepared): Prepared {
+  const totals = new Map<number, number>();
+  for (const p of prepared.points) totals.set(p.at, (totals.get(p.at) ?? 0) + (p.value ?? 0));
+  return {
+    ...prepared,
+    points: prepared.points.map((p) => {
+      const total = totals.get(p.at) ?? 0;
+      return p.value === null ? p : { ...p, value: total > 0 ? (100 * p.value) / total : 0 };
+    }),
+  };
+}
+
 /** Reads and checks an area chart's options. Throws on anything it cannot draw. */
-export function areaModel<T extends object>(options: SeriesChartOptions<T>): SeriesModel {
-  const prepared = prepare(AREA, options);
+export function areaModel<T extends object>(given: AreaChartOptions<T>): SeriesModel {
+  const percent = numberFormat({
+    ...(given.locale ? { locale: given.locale } : {}),
+    style: "percent",
+    maximumFractionDigits: 1,
+  });
+  const options: AreaChartOptions<T> = given.percent
+    ? {
+        ...given,
+        yLabel: given.yLabel === undefined ? "Share of total (%)" : given.yLabel,
+        formatValue: given.formatValue ?? ((v: number) => percent(v / 100)),
+      }
+    : given;
+  const read = prepare(AREA, options);
+  const prepared = options.percent ? asShares(read) : read;
   return seriesModel(AREA, "area", options, prepared, () => {
     for (const p of prepared.points) {
       if (p.value !== null && p.value < 0) {

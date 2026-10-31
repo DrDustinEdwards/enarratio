@@ -1,6 +1,9 @@
 import * as Plot from "@observablehq/plot";
 import { type BarChartOptions, type BarPoint, barModel, labelFits } from "../render/bar-model.js";
+import type { Bounds } from "../render/interval.js";
 import { keyed, renderPlot } from "../render/plot.js";
+import { drawAnnotations } from "./annotate.js";
+import { capErrorBars, named, steps } from "./marks.js";
 
 export type { BarChartOptions } from "../render/bar-model.js";
 
@@ -51,13 +54,15 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
     domain: grouped ? seriesNames : xNames,
     label: grouped ? null : categoryLabel,
     padding: grouped ? 0.05 : 0.2,
-    ...(grouped ? { axis: null } : thinned ? { ticks: thinned } : {}),
+    ...(grouped ? { axis: null } : { tickFormat: model.tickLabel }),
+    ...(!grouped && thinned ? { ticks: thinned } : {}),
   };
   const facetScale = {
     domain: xNames,
     label: categoryLabel,
     padding: 0.15,
     axis: horizontal ? "left" : "bottom",
+    tickFormat: model.tickLabel,
     ...(thinned ? { ticks: thinned } : {}),
   } as const;
   const ticks = model.countTicks;
@@ -76,7 +81,11 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
           domain: [0, ticks[ticks.length - 1] ?? 1],
           nice: false,
         }
-      : { nice: true }),
+      : {
+          nice: true,
+          ...(model.valueAxis.flat ? { domain: [0, 1] } : {}),
+          ...(model.valueAxis.format ? { tickFormat: model.valueAxis.format } : {}),
+        }),
   } as const;
 
   const { svg } = renderPlot(
@@ -98,14 +107,39 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
             ...(grouped ? { fx: facetScale } : {}),
           }),
       color: { domain: seriesNames, range: [...model.plan.range] },
-      marks: [bar, horizontal ? Plot.ruleX([0]) : Plot.ruleY([0])],
+      marks: [bar, horizontal ? Plot.ruleX([0]) : Plot.ruleY([0]), ...errorMarks(model)],
     },
-    options.alt,
+    model.alt,
     options.href ? "group" : "img",
-    model.directLabels ? (svg) => labelSegments(svg) : undefined,
+    steps(
+      model.directLabels ? (svg) => labelSegments(svg) : undefined,
+      model.bounds ? capErrorBars : undefined,
+      drawAnnotations("barChart", options.annotations, horizontal),
+    ),
   );
 
   return model.figure(svg);
+}
+
+/** Each bar's error bar, a rule across its value at the middle of the bar. */
+function errorMarks(model: ReturnType<typeof barModel>): Plot.Markish[] {
+  const { bounds } = model;
+  if (!bounds) return [];
+  const rows = [...bounds].map(([p, b]: [BarPoint, Bounds]) => ({ ...p, ...b }));
+  const render = named("error bar");
+  const style = { stroke: "var(--enarratio-text)", strokeWidth: 1.5, render };
+  if (model.horizontal) {
+    return [
+      model.grouped
+        ? Plot.ruleY(rows, { y: "series", fy: "x", x1: "lower", x2: "upper", ...style })
+        : Plot.ruleY(rows, { y: "x", x1: "lower", x2: "upper", ...style }),
+    ];
+  }
+  return [
+    model.grouped
+      ? Plot.ruleX(rows, { x: "series", fx: "x", y1: "lower", y2: "upper", ...style })
+      : Plot.ruleX(rows, { x: "x", y1: "lower", y2: "upper", ...style }),
+  ];
 }
 
 /**
@@ -122,7 +156,6 @@ function labelSegments(svg: SVGSVGElement): void {
   // Labels sit on the bars they name; pointer events go through them to the bar.
   labels.setAttribute("pointer-events", "none");
   labels.setAttribute("text-anchor", "middle");
-  labels.setAttribute("font-size", "11");
   for (const mark of group.querySelectorAll("[data-enarratio-key]")) {
     const shape = mark.localName === "rect" ? mark : mark.querySelector("rect");
     const name = mark.getAttribute("data-enarratio-series");

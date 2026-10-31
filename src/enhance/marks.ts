@@ -65,6 +65,17 @@ export function invert(scale: XScale, px: number): number {
   return d0 + t * (d1 - d0);
 }
 
+/** A position in SVG user units for a value on a continuous scale: the inverse of {@link invert}. */
+export function project(scale: XScale, value: number): number {
+  const [d0, d1] = scale.domain as [number, number];
+  const [r0, r1] = scale.range as [number, number];
+  const t =
+    scale.type === "log"
+      ? (Math.log(value) - Math.log(d0)) / (Math.log(d1) - Math.log(d0))
+      : (value - d0) / (d1 - d0);
+  return r0 + Math.min(1, Math.max(0, t)) * (r1 - r0);
+}
+
 export function svgPoint(
   svg: SVGSVGElement,
   event: { clientX: number; clientY: number },

@@ -7,11 +7,12 @@
 
 import {
   AREA_OPACITY,
+  type AreaChartOptions,
   areaModel,
   type Point,
-  type SeriesChartOptions,
 } from "../render/line-model.js";
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
+import { annotationMarkup, continuousScale } from "./annotate.js";
 import {
   annotations,
   areaPath,
@@ -24,6 +25,7 @@ import {
 import { el, svgRoot } from "./svg.js";
 
 export type {
+  AreaChartOptions,
   EventMarker,
   ReferenceLine,
   SeriesChartOptions,
@@ -37,7 +39,7 @@ export type {
  * @example
  * areaChart({ data: monthly, x: "month", y: "hours", series: "activity", alt: "..." });
  */
-export function areaChart<T extends object>(options: SeriesChartOptions<T>): string {
+export function areaChart<T extends object>(options: AreaChartOptions<T>): string {
   const model = areaModel(options);
   const { prepared } = model;
   const { points, seriesNames } = prepared;
@@ -84,8 +86,13 @@ export function areaChart<T extends object>(options: SeriesChartOptions<T>): str
   );
   const { x, y, frame } = layout;
 
+  // Annotations from the same scales Plot's are placed with: ranges behind the marks, notes last.
+  const notes = annotationMarkup("areaChart", options.annotations, (axis) =>
+    continuousScale(axis === "x" ? x : y),
+  );
   const parts = [
     layout.axes,
+    notes.behind,
     pathGroup(
       "area",
       { "fill-opacity": String(AREA_OPACITY) },
@@ -135,10 +142,11 @@ export function areaChart<T extends object>(options: SeriesChartOptions<T>): str
       }),
     ),
     annotations(options, model, layout),
+    notes.above,
   ];
 
   return model.figure(
-    svgRoot(frame.width, frame.height, options.alt, "img", parts.join("")),
+    svgRoot(frame.width, frame.height, model.alt, "img", parts.join("")),
     layout.xScale,
   );
 }

@@ -1,3 +1,4 @@
+import { checkTheme } from "./check.js";
 import { labelColor } from "./color.js";
 import { assertCssText, defineTheme } from "./define.js";
 import type { ColorScheme, Gridlines, HexColor, Theme } from "./types.js";
@@ -10,6 +11,12 @@ export interface StylesheetOptions {
    * Without them, charts follow the page's `color-scheme`, which is the preferred mechanism.
    */
   readonly colorScheme?: { readonly dark?: string; readonly light?: string };
+  /**
+   * A theme whose colors replace the main theme's when the reader asks for more contrast
+   * (`prefers-contrast: more`), e.g. `highContrastTheme` from `enarratio/themes` (B43, B49).
+   * Its fonts and gridlines are not used.
+   */
+  readonly highContrast?: Theme;
 }
 
 type Variables = ReadonlyArray<readonly [name: string, light: string, dark: string]>;
@@ -56,6 +63,9 @@ const HIDDEN_GRIDS: Readonly<Record<Gridlines, readonly string[]>> = {
   both: [],
 };
 
+/** Dashes that tell lines 2 to 8 apart when forced colors make every line the same color. */
+const LINE_DASHES = ["6 3", "2 3", "8 3 2 3", "12 4", "2 6", "4 4", "10 3 2 3 2 3"];
+
 /** Rules that do not depend on the theme: layout, legend, data table and the enhancement layer. */
 const BASE_RULES = `
 .enarratio {
@@ -64,7 +74,8 @@ const BASE_RULES = `
   font-family: var(--enarratio-font);
   font-size: var(--enarratio-font-size, 1rem);
 }
-.enarratio-frame { overflow-x: auto; }
+/* The frame is the container the SVG's own font-size measures, so text grows as it shrinks (B3). */
+.enarratio-frame { overflow-x: auto; container-type: inline-size; }
 .enarratio-frame-wide > svg { min-width: 30rem; }
 .enarratio svg {
   display: block;
@@ -72,8 +83,8 @@ const BASE_RULES = `
   height: auto;
   overflow: visible;
   font-family: inherit;
-  font-size: var(--enarratio-font-size-mark, 12px);
 }
+.enarratio svg:not([font-size]) { font-size: var(--enarratio-font-size-mark, 0.75rem); }
 svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; height: auto; }
 .enarratio [data-enarratio-mark$="tick label"],
 .enarratio .enarratio-numeric {
@@ -87,11 +98,18 @@ svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; 
   margin: 0 0 var(--enarratio-space, 0.5em);
   font-weight: var(--enarratio-font-weight-title, 600);
 }
-.enarratio-caption {
+.enarratio-head { margin: 0 0 var(--enarratio-space, 0.5em); }
+.enarratio-head p { margin: 0; }
+.enarratio-head .enarratio-title { margin: 0; }
+.enarratio-subtitle { color: var(--enarratio-text-muted); }
+.enarratio-finding { margin-top: var(--enarratio-gap-row, 0.25em) !important; }
+.enarratio-summary, .enarratio-caption, .enarratio-note, .enarratio-source {
   margin: var(--enarratio-space, 0.5em) 0 0;
-  color: var(--enarratio-text-muted);
   font-size: var(--enarratio-font-size-small, 0.875em);
 }
+.enarratio-caption, .enarratio-note, .enarratio-source { color: var(--enarratio-text-muted); }
+.enarratio-source a { color: inherit; }
+.enarratio-data:not([open]) .enarratio-hide, .enarratio-data[open] .enarratio-show { display: none; }
 .enarratio-legend {
   display: flex;
   flex-wrap: wrap;
@@ -130,14 +148,44 @@ svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; 
 ${Array.from(
   { length: 8 },
   (_, i) =>
-    `.enarratio [data-slot="${i + 1}"] { --enarratio-slot: var(--enarratio-series-${i + 1}); }`,
+    `.enarratio [data-slot="${i + 1}"] { --enarratio-slot: var(--enarratio-series-${i + 1}); --enarratio-slot-ink: var(--enarratio-series-text-${i + 1}); }
+.enarratio [data-enarratio-mark="bar label"] [fill="var(--enarratio-series-text-${i + 1})"] { stroke: var(--enarratio-series-${i + 1}); }`,
 ).join("\n")}
 ${Array.from(
   { length: 5 },
   (_, i) =>
-    `.enarratio [data-step="${i + 1}"] { --enarratio-slot: var(--enarratio-sequential-${i + 1}); }`,
+    `.enarratio [data-step="${i + 1}"] { --enarratio-slot: var(--enarratio-sequential-${i + 1}); --enarratio-slot-ink: var(--enarratio-sequential-text-${i + 1}); }`,
 ).join("\n")}
-.enarratio-swatch { background: var(--enarratio-slot); }
+.enarratio, .enarratio-tooltip { --enarratio-texture: none; }
+.enarratio-swatch { background: var(--enarratio-texture), var(--enarratio-slot); }
+/* Filled series 2 to 8 carry a texture as well as a color (B5); the legend shows the same ones. */
+.enarratio-texture { stroke-opacity: var(--enarratio-opacity-texture, 0.6); }
+.enarratio:has(pattern) [data-slot] {
+  --enarratio-ink: color-mix(in srgb, var(--enarratio-slot-ink) calc(var(--enarratio-opacity-texture, 0.6) * 100%), transparent);
+  --enarratio-stripes: transparent 0 3px, var(--enarratio-ink) 3px 4.5px;
+}
+.enarratio:has(pattern) [data-slot="2"] { --enarratio-texture: repeating-linear-gradient(-45deg, var(--enarratio-stripes)); }
+.enarratio:has(pattern) [data-slot="3"] { --enarratio-texture: radial-gradient(var(--enarratio-ink) 1px, transparent 1.5px) 0 0 / 4px 4px; }
+.enarratio:has(pattern) [data-slot="4"] { --enarratio-texture: repeating-linear-gradient(0deg, var(--enarratio-stripes)); }
+.enarratio:has(pattern) [data-slot="5"] { --enarratio-texture: repeating-linear-gradient(90deg, var(--enarratio-stripes)); }
+.enarratio:has(pattern) [data-slot="6"] { --enarratio-texture: repeating-linear-gradient(45deg, var(--enarratio-stripes)); }
+.enarratio:has(pattern) [data-slot="7"] {
+  --enarratio-texture: repeating-linear-gradient(0deg, var(--enarratio-stripes)), repeating-linear-gradient(90deg, var(--enarratio-stripes));
+}
+.enarratio:has(pattern) [data-slot="8"] {
+  --enarratio-texture: repeating-linear-gradient(45deg, var(--enarratio-stripes)), repeating-linear-gradient(-45deg, var(--enarratio-stripes));
+}
+/* A background-colored edge, so adjacent bars and stacked segments never touch (B6). */
+.enarratio [data-enarratio-mark="bar"] [data-enarratio-key] {
+  stroke: var(--enarratio-background);
+  stroke-width: var(--enarratio-bar-gap, 1px);
+}
+/* Names printed on bars keep a halo of their bar's color over its texture. */
+.enarratio [data-enarratio-mark="bar label"] text {
+  paint-order: stroke;
+  stroke-width: var(--enarratio-halo-width, 3px);
+  stroke-linejoin: round;
+}
 .enarratio-data {
   margin: var(--enarratio-space, 0.5em) 0 0;
   font-size: var(--enarratio-font-size-small, 0.875em);
@@ -150,6 +198,15 @@ ${Array.from(
   text-align: left;
 }
 .enarratio-data td { font-variant-numeric: tabular-nums; text-align: right; }
+/* tableChart's cells: heat on the ramp step, and a bar beside the number it repeats. */
+.enarratio-data .enarratio-heat { background: var(--enarratio-slot); color: var(--enarratio-slot-ink); }
+.enarratio .enarratio-cell-bar {
+  display: inline-block;
+  width: 6em;
+  height: 0.75em;
+  margin-inline-start: 0.5em;
+  vertical-align: middle;
+}
 .enarratio-visually-hidden {
   position: absolute !important;
   width: 1px;
@@ -182,20 +239,95 @@ ${Array.from(
 .enarratio[data-enarratio-interactive] [data-enarratio-field] { cursor: pointer; }
 .enarratio [data-enarratio-dimmed] { opacity: var(--enarratio-opacity-dimmed, 0.25); }
 .enarratio [data-enarratio-key]:focus { outline: none; }
-/* The focus ring: a background-colored ring inside a focus-colored one, so one of the two always
-   contrasts with whatever mark or background is next to it. */
-.enarratio-focus-ring { pointer-events: none; fill: none; }
-.enarratio-focus-ring-inner {
-  stroke: var(--enarratio-background);
-  stroke-width: var(--enarratio-focus-width-inner, 5px);
+/* The enhancement layer's points: a native control over each mark, for keyboards and screen
+   readers (pointers use the marks). Focused, it draws a background-colored ring inside a
+   focus-colored one, so one of the two always contrasts with whatever is next to it, above
+   every mark. */
+.enarratio-frame, .enarratio[data-enarratio-enhanced] { position: relative; }
+.enarratio-points { position: absolute; pointer-events: none; }
+.enarratio-points > * {
+  position: absolute;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
 }
-.enarratio-focus-ring-outer {
-  stroke: var(--enarratio-focus);
-  stroke-width: var(--enarratio-focus-width-outer, 2.5px);
+.enarratio .enarratio-points > :focus { outline: none; }
+.enarratio .enarratio-points > :focus-visible {
+  outline: var(--enarratio-focus-width-outer, 2.5px) solid var(--enarratio-focus);
+  outline-offset: calc(var(--enarratio-focus-width-inner, 5px) / 2);
+  box-shadow: 0 0 0 calc(var(--enarratio-focus-width-inner, 5px) / 2) var(--enarratio-background);
+}
+.enarratio [data-enarratio-faded] { opacity: var(--enarratio-opacity-faded, 0.5); }
+/* The keys, shown while a point has focus and read as the points' description otherwise. */
+.enarratio-frame:not(:focus-within) + .enarratio-hint {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.enarratio-hint {
+  margin: var(--enarratio-space, 0.5em) 0 0;
+  color: var(--enarratio-text-muted);
+  font-size: var(--enarratio-font-size-small, 0.875em);
+}
+.enarratio-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--enarratio-gap-row, 0.25em) var(--enarratio-gap-inline, 0.4em);
+  margin: var(--enarratio-space, 0.5em) 0 0;
+  font-size: var(--enarratio-font-size-small, 0.875em);
+}
+.enarratio-controls button, .enarratio-controls input, .enarratio-range summary {
+  min-height: 24px;
+  padding: var(--enarratio-padding-button, 0.125em 0.25em);
+  border: var(--enarratio-border-width, 1px) solid var(--enarratio-text-muted);
+  border-radius: var(--enarratio-radius, 0.25em);
+  background: var(--enarratio-background);
+  color: inherit;
+  font: inherit;
+}
+.enarratio-controls button, .enarratio-range summary { cursor: pointer; }
+.enarratio-range summary { width: fit-content; }
+.enarratio-range form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--enarratio-gap-row, 0.25em) var(--enarratio-gap-inline, 0.4em);
+  margin-top: var(--enarratio-gap-row, 0.25em);
+}
+.enarratio-legend button { min-height: 24px; }
+.enarratio-data th button {
+  min-height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+.enarratio-data th[aria-sort="ascending"] button::after { content: " \\2191" / ""; }
+.enarratio-data th[aria-sort="descending"] button::after { content: " \\2193" / ""; }
+.enarratio[data-enarratio-view-table] > :is(.enarratio-legend, .enarratio-frame, .enarratio-hint),
+.enarratio[data-enarratio-view-table] .enarratio-range { display: none; }
+.enarratio[data-enarratio-expanded] {
+  position: fixed;
+  inset: 0;
+  z-index: var(--enarratio-z-expanded, 20);
+  overflow: auto;
+  padding: var(--enarratio-padding-expanded, 1rem);
+  background: var(--enarratio-background);
 }
 /* Invisible targets that make small marks at least 24 CSS pixels to point at. */
 .enarratio-hit { fill: transparent; stroke: none; }
-.enarratio svg:focus-visible, .enarratio-legend button:focus-visible, .enarratio-frame:focus-visible {
+.enarratio svg:focus-visible, .enarratio button:focus-visible, .enarratio-range summary:focus-visible,
+.enarratio-controls input:focus-visible, .enarratio-frame:focus-visible {
   outline: var(--enarratio-focus-outline-width, 3px) solid var(--enarratio-focus);
   outline-offset: var(--enarratio-focus-outline-offset, 2px);
 }
@@ -240,7 +372,7 @@ ${Array.from(
 .enarratio[data-enarratio-entering] [data-enarratio-mark="bar"] > * {
   transform-box: fill-box;
   transform-origin: bottom;
-  animation: enarratio-grow var(--enarratio-duration-grow, 600ms)
+  animation: enarratio-grow min(var(--enarratio-duration-grow, 600ms), 5s)
     var(--enarratio-ease-grow, cubic-bezier(0.2, 0.7, 0.3, 1)) both;
 }
 .enarratio[data-enarratio-entering][data-enarratio-orientation="horizontal"] [data-enarratio-mark="bar"] > * {
@@ -250,16 +382,70 @@ ${Array.from(
 .enarratio[data-enarratio-entering] [data-enarratio-mark="dot"] > *,
 .enarratio[data-enarratio-entering] [data-enarratio-mark="area"] > *,
 .enarratio[data-enarratio-entering] [data-enarratio-mark="cell"] > * {
-  animation: enarratio-fade var(--enarratio-duration-fade, 500ms)
+  animation: enarratio-fade min(var(--enarratio-duration-fade, 500ms), 5s)
     var(--enarratio-ease-out, ease-out) both;
 }
 .enarratio[data-enarratio-entering] [data-enarratio-mark="line"] > path {
   stroke-dasharray: var(--enarratio-length);
-  animation: enarratio-draw var(--enarratio-duration-draw, 800ms)
+  animation: enarratio-draw min(var(--enarratio-duration-draw, 800ms), 5s)
     var(--enarratio-ease-out, ease-out) both;
 }
 @media (prefers-reduced-motion: reduce) {
   .enarratio *, .enarratio-tooltip { animation: none !important; transition: none !important; }
+}
+/* More contrast: full-strength textures, wider gaps, and gridlines in the muted text color (B43). */
+@media (prefers-contrast: more) {
+  .enarratio-texture { stroke-opacity: 1; }
+  .enarratio [data-enarratio-mark="bar"] [data-enarratio-key] { stroke-width: 2px; }
+  .enarratio [data-enarratio-mark$="grid"] { stroke: var(--enarratio-text-muted); }
+  .enarratio-swatch { outline: 1px solid var(--enarratio-text); }
+}
+/* Forced colors (Windows High Contrast): every color becomes one of the reader's system colors.
+   Series are all CanvasText, told apart by textures, line dashes, symbols and labels; the
+   sequential ramp becomes steps between Canvas and CanvasText. Set on the drawing and legend
+   themselves, so they win over a theme or a per-chart override set on the figure (B57, D3). */
+@media (forced-colors: active) {
+  .enarratio svg, svg.enarratio { forced-color-adjust: none; }
+  .enarratio svg, svg.enarratio, .enarratio-legend, .enarratio-tooltip {
+    --enarratio-background: Canvas;
+    --enarratio-text: CanvasText;
+    --enarratio-text-muted: CanvasText;
+    --enarratio-grid: GrayText;
+    --enarratio-focus: Highlight;
+    --enarratio-status-good: CanvasText;
+    --enarratio-status-warning: CanvasText;
+    --enarratio-status-bad: CanvasText;
+    --enarratio-status-unknown: GrayText;
+${Array.from(
+  { length: 8 },
+  (_, i) =>
+    `    --enarratio-series-${i + 1}: CanvasText;\n    --enarratio-series-text-${i + 1}: Canvas;`,
+).join("\n")}
+${[10, 25, 40, 70, 100]
+  .map(
+    (mix, i) =>
+      `    --enarratio-sequential-${i + 1}: color-mix(in srgb, CanvasText ${mix}%, Canvas);\n    --enarratio-sequential-text-${i + 1}: ${i < 3 ? "CanvasText" : "Canvas"};`,
+  )
+  .join("\n")}
+  }
+  .enarratio-texture { stroke-opacity: 1; }
+  .enarratio [data-enarratio-mark="area"] { fill-opacity: 1; }
+${LINE_DASHES.map(
+  (dash, i) =>
+    `  .enarratio [data-enarratio-mark="line"] [stroke="var(--enarratio-series-${i + 2})"] { stroke-dasharray: ${dash}; }`,
+).join("\n")}
+}
+/* Print: the light scheme, the whole drawing on one page, the data table open and no
+   interactive overlays (C5). */
+@media print {
+  .enarratio, .enarratio-tooltip { color-scheme: light; }
+  .enarratio { break-inside: avoid; }
+  .enarratio-frame { overflow: visible; }
+  .enarratio-frame-wide > svg { min-width: 0; }
+  .enarratio-data::details-content { content-visibility: visible; block-size: auto; }
+  .enarratio-tooltip, .enarratio-brush, .enarratio [data-enarratio-control] {
+    display: none !important;
+  }
 }
 `;
 
@@ -279,6 +465,17 @@ export function baseStylesheet(): string {
   return `/* Enarratio base rules */\n${BASE_RULES.trim()}`;
 }
 
+/** A theme's colors as custom properties: light, then light and dark where `light-dark()` works. */
+function colorRules(theme: Theme): string {
+  const variables = colorVariables(theme.light, theme.dark);
+  return `.enarratio, .enarratio-tooltip {\n${declarations(
+    variables.map(([name, light]) => [name, light]),
+  )}\n}\n@supports (color: light-dark(#000, #fff)) {\n  .enarratio, .enarratio-tooltip {\n${declarations(
+    variables.map(([name, light, dark]) => [name, `light-dark(${light}, ${dark})`]),
+    "    ",
+  )}\n  }\n}`;
+}
+
 function declarations(entries: ReadonlyArray<readonly [string, string]>, indent = "  "): string {
   return entries.map(([name, value]) => `${indent}--enarratio-${name}: ${value};`).join("\n");
 }
@@ -289,17 +486,25 @@ function declarations(entries: ReadonlyArray<readonly [string, string]>, indent 
  * server-rendered markup follows the theme and switches between light and dark without a re-render.
  *
  * Light or dark follows the page's `color-scheme` through CSS `light-dark()`; browsers without it
- * get the light scheme.
+ * get the light scheme. Throws when a theme fails {@link checkTheme}, so a chart is never drawn in
+ * colors some readers cannot tell apart.
  */
 export function stylesheet(theme: Theme, options: StylesheetOptions = {}): string {
   // Everything written into the CSS is checked first, so a theme from data cannot break out of
   // the stylesheet (F10). The scheme selectors are the page's own, trusted, but still may not
   // contain what would end a rule.
-  defineTheme(theme);
+  for (const t of [theme, options.highContrast]) {
+    if (!t) continue;
+    // A theme that fails the checks would draw charts some readers cannot read (B1, B7).
+    const errors = checkTheme(defineTheme(t))
+      .issues.filter((i) => i.severity === "error")
+      .map((i) => i.message);
+    if (errors.length > 0)
+      throw new Error(`theme "${t.name}" fails checkTheme: ${errors.join("; ")}`);
+  }
   for (const [which, selector] of Object.entries(options.colorScheme ?? {})) {
     if (selector !== undefined) assertCssText(`colorScheme.${which} selector`, selector);
   }
-  const variables = colorVariables(theme.light, theme.dark);
   const fonts: [string, string][] = [
     ["font", theme.fonts.body],
     ["font-numeric", theme.fonts.numeric ?? theme.fonts.body],
@@ -316,19 +521,41 @@ export function stylesheet(theme: Theme, options: StylesheetOptions = {}): strin
       : "",
   ].filter(Boolean);
 
+  const more = options.highContrast;
   return [
     `/* Enarratio theme: ${theme.name} */`, // safe: defineTheme refused comment and tag syntax
-    `.enarratio, .enarratio-tooltip {\n${declarations(fonts)}\n${declarations(
-      variables.map(([name, light]) => [name, light]),
-    )}\n}`,
-    `@supports (color: light-dark(#000, #fff)) {\n  .enarratio, .enarratio-tooltip {\n${declarations(
-      variables.map(([name, light, dark]) => [name, `light-dark(${light}, ${dark})`]),
-      "    ",
-    )}\n  }\n}`,
+    `.enarratio, .enarratio-tooltip {\n${declarations(fonts)}\n}`,
+    colorRules(theme),
+    more ? `@media (prefers-contrast: more) {\n${colorRules(more)}\n}` : "",
     ...schemeRules,
     baseStylesheet(),
     hidden,
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+/** One per-chart override as the server writes it: series slots and checked color values. */
+const COLOR_OVERRIDE =
+  /^--enarratio-series-[1-8]: [#a-z0-9(),.%\s-]+(?:; --enarratio-series-[1-8]: [#a-z0-9(),.%\s-]+)*$/i;
+
+/**
+ * The CSS for the per-chart color overrides (`colors`, `color`) in some chart markup: one rule per
+ * distinct override. Charts carry overrides in a `data-enarratio-colors` attribute, never a
+ * `style` attribute, so a page under a hash-based Content-Security-Policy adds these rules to its
+ * own stylesheet, or to a `<style>` whose hash it allows (D4).
+ *
+ * @example
+ * const html = barChart({ ..., colors: { Talks: "#8a4a1b" } });
+ * const css = colorStyles(html); // into the page's stylesheet
+ */
+export function colorStyles(markup: string): string {
+  const rules = new Set<string>();
+  for (const [, value = ""] of markup.matchAll(/data-enarratio-colors="([^"]*)"/g)) {
+    if (!COLOR_OVERRIDE.test(value) || /url\s*\(/i.test(value)) {
+      throw new Error(`"${value}" is not a color override Enarratio writes`);
+    }
+    rules.add(`.enarratio[data-enarratio-colors="${value}"] { ${value}; }`);
+  }
+  return [...rules].join("\n");
 }

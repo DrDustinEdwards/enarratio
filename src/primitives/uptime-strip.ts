@@ -1,5 +1,13 @@
 import { element, escapeHtml } from "../html.js";
-import { type PrimitiveTable, type PrimitiveTableOptions, primitiveTable } from "./companion.js";
+import type { Terms } from "../render/text.js";
+import {
+  type PrimitiveFigureOptions,
+  type PrimitiveTable,
+  type PrimitiveTableOptions,
+  primitiveFigure,
+  primitiveTable,
+  primitiveText,
+} from "./companion.js";
 import { tickGap } from "./tick-gap.js";
 
 /** The state of one period in an {@link uptimeStrip}. */
@@ -9,7 +17,7 @@ export type UptimeStatus = "up" | "degraded" | "down" | "unknown";
 export type UptimeSlot = UptimeStatus | { readonly status: UptimeStatus; readonly label?: string };
 
 /** Options for {@link uptimeStrip}. */
-export interface UptimeStripOptions {
+export interface UptimeStripOptions extends PrimitiveFigureOptions {
   /** The periods, oldest first. */
   readonly slots: readonly UptimeSlot[];
   /**
@@ -25,13 +33,14 @@ export interface UptimeStripOptions {
   readonly height?: number;
 }
 
-const STATUS: Readonly<Record<UptimeStatus, { color: string; height: number; word: string }>> = {
-  // Height encodes status as well as color, so the strip reads without hue: a shorter tick is worse.
-  up: { color: "var(--enarratio-status-good)", height: 1, word: "up" },
-  degraded: { color: "var(--enarratio-status-warning)", height: 0.66, word: "degraded" },
-  down: { color: "var(--enarratio-status-bad)", height: 0.33, word: "down" },
-  unknown: { color: "var(--enarratio-status-unknown)", height: 1, word: "no data" },
-};
+const STATUS: Readonly<Record<UptimeStatus, { color: string; height: number; word: keyof Terms }>> =
+  {
+    // Height encodes status as well as color, so the strip reads without hue: a shorter tick is worse.
+    up: { color: "var(--enarratio-status-good)", height: 1, word: "up" },
+    degraded: { color: "var(--enarratio-status-warning)", height: 0.66, word: "degraded" },
+    down: { color: "var(--enarratio-status-bad)", height: 0.33, word: "down" },
+    unknown: { color: "var(--enarratio-status-unknown)", height: 1, word: "noData" },
+  };
 
 const round = (n: number): number => Math.round(n * 100) / 100;
 
@@ -72,6 +81,8 @@ function prepareUptimeStrip(options: UptimeStripOptions): UptimeStripValues {
       throw new Error(`uptimeStrip: ${name} must be a positive number, is ${n}`);
     }
   }
+  const { strings, count, percent } = primitiveText(options);
+  const { terms } = strings;
   const counts: Record<UptimeStatus, number> = { up: 0, degraded: 0, down: 0, unknown: 0 };
   const prepared = slots.map((slot, i): PreparedSlot => {
     const status = typeof slot === "string" ? slot : slot.status;
@@ -81,20 +92,26 @@ function prepareUptimeStrip(options: UptimeStripOptions): UptimeStripValues {
     }
     counts[status] += 1;
     const own = typeof slot === "string" ? undefined : slot.label;
-    return { status, name: own ? own : `Period ${i + 1}`, word: STATUS[status].word };
+    return {
+      status,
+      name: own ? own : `${terms.period} ${count(i + 1)}`,
+      word: terms[STATUS[status].word],
+    };
   });
   const measured = counts.up + counts.degraded + counts.down;
-  const availability =
-    measured === 0
-      ? "no measurements"
-      : `${round(((counts.up + counts.degraded) / measured) * 100)}% available`;
-  const parts = (Object.keys(counts) as UptimeStatus[])
-    .filter((s) => counts[s] > 0)
-    .map((s) => `${counts[s]} ${STATUS[s].word}`);
   const summary =
     subject === ""
       ? ""
-      : `${subject}: ${slots.length} periods, ${parts.join(", ")}; ${availability}.`;
+      : strings.uptimeSummary({
+          subject,
+          periods: count(slots.length),
+          counts: (Object.keys(counts) as UptimeStatus[])
+            .filter((s) => counts[s] > 0)
+            .map((s) => ({ n: count(counts[s]), status: terms[STATUS[s].word] })),
+          ...(measured === 0
+            ? {}
+            : { available: percent((counts.up + counts.degraded) / measured) }),
+        });
   return {
     slots: prepared,
     counts,
@@ -123,7 +140,7 @@ export function uptimeStrip(options: UptimeStripOptions): string {
     const spec = STATUS[slot.status];
     const { status } = slot;
     const h = height * spec.height;
-    const title = `${slot.name}: ${spec.word}`;
+    const title = `${slot.name}: ${slot.word}`;
     const common = {
       x: round(i * step),
       y: round(height - h),
@@ -148,7 +165,7 @@ export function uptimeStrip(options: UptimeStripOptions): string {
     );
   });
 
-  return element(
+  const drawing = element(
     "svg",
     {
       class: "enarratio enarratio-uptime-strip",
@@ -161,6 +178,9 @@ export function uptimeStrip(options: UptimeStripOptions): string {
       "aria-label": alt,
     },
     ticks.join(""),
+  );
+  return primitiveFigure("uptime-strip", drawing, alt, options.label?.trim() ?? "", options, () =>
+    uptimeStripTable(options),
   );
 }
 
@@ -177,10 +197,15 @@ export function uptimeStripTable(
   display?: PrimitiveTableOptions,
 ): PrimitiveTable {
   const p = prepareUptimeStrip(options);
+  const { strings } = primitiveText(options);
   return primitiveTable(
     p.summary || p.alt,
-    { columns: ["Period", "Status"], rows: p.slots.map((s) => [s.name, s.word]) },
+    {
+      columns: [strings.terms.period, strings.terms.status],
+      rows: p.slots.map((s) => [s.name, s.word]),
+    },
     p.subject || p.alt,
     display,
+    strings,
   );
 }

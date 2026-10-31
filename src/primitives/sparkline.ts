@@ -1,10 +1,18 @@
 import { element, escapeHtml } from "../html.js";
-import { defaultFormat, maxOf, minOf } from "../render/data.js";
+import { maxOf, minOf } from "../render/data.js";
 import { type SeriesColor, slotStyle } from "../render/figure.js";
-import { type PrimitiveTable, type PrimitiveTableOptions, primitiveTable } from "./companion.js";
+import { valueFormat } from "../render/text.js";
+import {
+  type PrimitiveFigureOptions,
+  type PrimitiveTable,
+  type PrimitiveTableOptions,
+  primitiveFigure,
+  primitiveTable,
+  primitiveText,
+} from "./companion.js";
 
 /** Options for {@link sparkline}. */
-export interface SparklineOptions {
+export interface SparklineOptions extends PrimitiveFigureOptions {
   /** The values in order. `null` is a gap: the line breaks rather than dropping to zero. */
   readonly values: readonly (number | null)[];
   /** What the values measure, e.g. "Entries per year"; it starts the generated description. */
@@ -54,7 +62,8 @@ function prepareSparkline(options: SparklineOptions): SparklineValues {
       throw new Error(`sparkline: ${name} must be a positive number, is ${n}`);
     }
   }
-  const format = options.formatValue ?? defaultFormat;
+  const format = valueFormat(options);
+  const { strings, count } = primitiveText(options);
   values.forEach((v, i) => {
     if (v !== null && !Number.isFinite(v)) {
       throw new Error(`sparkline: value ${i + 1} is ${v}, not a finite number or null`);
@@ -64,7 +73,14 @@ function prepareSparkline(options: SparklineOptions): SparklineValues {
   if (present.length === 0) throw new Error("sparkline: needs at least one value");
   const min = minOf(present);
   const max = maxOf(present);
-  const summary = `${options.label ? `${options.label}: ` : ""}${defaultFormat(values.length)} values, from ${format(present[0] as number)} to ${format(present[present.length - 1] as number)}; lowest ${format(min)}, highest ${format(max)}.`;
+  const summary = strings.sparklineSummary({
+    subject: options.label ?? "",
+    values: count(values.length),
+    first: format(present[0] as number),
+    last: format(present[present.length - 1] as number),
+    lowest: format(min),
+    highest: format(max),
+  });
   return {
     values,
     present,
@@ -150,7 +166,7 @@ export function sparkline(options: SparklineOptions): string {
       : "",
   ];
 
-  return element(
+  const drawing = element(
     "svg",
     {
       class: "enarratio enarratio-sparkline",
@@ -161,9 +177,12 @@ export function sparkline(options: SparklineOptions): string {
       height,
       role: "img",
       "aria-label": alt,
-      style: slotStyle(options.color ? new Map([[1, options.color]]) : undefined),
+      "data-enarratio-colors": slotStyle(options.color ? new Map([[1, options.color]]) : undefined),
     },
     parts.join(""),
+  );
+  return primitiveFigure("sparkline", drawing, alt, options.label?.trim() ?? "", options, () =>
+    sparklineTable(options),
   );
 }
 
@@ -181,14 +200,17 @@ export function sparklineTable(
   display?: PrimitiveTableOptions,
 ): PrimitiveTable {
   const p = prepareSparkline(options);
-  const name = options.label?.trim() || "Value";
+  const { strings, count } = primitiveText(options);
+  const { terms } = strings;
+  const name = options.label?.trim() || terms.value;
   return primitiveTable(
     p.summary,
     {
-      columns: ["Position", name],
-      rows: p.values.map((v, i) => [String(i + 1), v === null ? "no data" : p.format(v)]),
+      columns: [terms.position, name],
+      rows: p.values.map((v, i) => [count(i + 1), v === null ? terms.noData : p.format(v)]),
     },
     options.label?.trim() || p.alt,
     display,
+    strings,
   );
 }

@@ -12,6 +12,7 @@
 
 export { type AttributeValue, element, escapeHtml } from "./html.js";
 export type {
+  PrimitiveFigureOptions,
   PrimitiveTable,
   PrimitiveTableOptions,
 } from "./primitives/companion.js";
@@ -39,19 +40,40 @@ export {
   uptimeStrip,
   uptimeStripTable,
 } from "./primitives/uptime-strip.js";
+export { type DatasetOptions, datasetJsonLd } from "./render/dataset.js";
+export type { ChartDescription, SummaryPoint, SummarySeries } from "./render/describe.js";
 export {
+  type AxisUnits,
+  type ChartIssue,
   type DataTable,
   dataTableBlock,
   type FigureOptions,
   type FigureParts,
   figure,
+  type IssueOptions,
   type LegendItem,
   type RampItem,
   type ScaleDescription,
   type SeriesColor,
+  type Source,
   slotStyle,
   validateFigure,
 } from "./render/figure.js";
+export { type TableChartOptions, type TableColumn, tableChart } from "./render/table-chart.js";
+export {
+  type At,
+  type AxisRange,
+  type DateFormatOptions,
+  dateFormat,
+  ENGLISH,
+  type NumberFormatOptions,
+  numberFormat,
+  readingGrade,
+  type StringOverrides,
+  type Strings,
+  type Terms,
+  toCsv,
+} from "./render/text.js";
 export {
   type CheckIssue,
   type CheckReport,
@@ -63,11 +85,17 @@ export {
   type ColorVision,
   colorDifference,
   contrastRatio,
+  labelColor,
   type Rgb,
   simulateColorVision,
 } from "./theme/color.js";
 export { defineTheme } from "./theme/define.js";
-export { baseStylesheet, type StylesheetOptions, stylesheet } from "./theme/stylesheet.js";
+export {
+  baseStylesheet,
+  colorStyles,
+  type StylesheetOptions,
+  stylesheet,
+} from "./theme/stylesheet.js";
 export type {
   ColorScheme,
   Gridlines,

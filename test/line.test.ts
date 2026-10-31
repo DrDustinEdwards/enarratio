@@ -20,7 +20,7 @@ describe("lineChart", () => {
     expect(keys).toHaveLength(5);
     expect(keys).not.toContain(JSON.stringify([Date.UTC(2025, 0, 13), "Travis"]));
     expect(keyedMarks(fig)[0]?.querySelector("title")?.textContent).toBe(
-      "Travis, week 2025-01-06: 10",
+      "Travis, week January 6, 2025: 10",
     );
   });
 
@@ -54,9 +54,9 @@ describe("lineChart", () => {
       [...tr.children].map((c) => c.textContent),
     );
     expect(rows).toEqual([
-      ["2025-01-06", "10", "4"],
-      ["2025-01-13", "", "6"],
-      ["2025-01-20", "14", "5"],
+      ["January 6, 2025", "10", "4"],
+      ["January 13, 2025", "", "6"],
+      ["January 20, 2025", "14", "5"],
     ]);
   });
 
@@ -95,7 +95,7 @@ describe("lineChart", () => {
   it("refuses duplicate points and bad dates", () => {
     expect(() =>
       lineChart({ data: [weekly[0], weekly[0]] as typeof weekly, x: "week", y: "cases", alt: "a" }),
-    ).toThrow(/two rows for x 2025-01-06/);
+    ).toThrow(/two rows for x January 6, 2025/);
     expect(() =>
       lineChart({ data: [{ t: "not a date", v: 1 }], x: "t", y: "v", alt: "a" }),
     ).toThrow(/not a date/);

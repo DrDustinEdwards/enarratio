@@ -53,7 +53,8 @@ describe("gallery security headers", () => {
       "script-src 'self' https://static.cloudflareinsights.com/beacon.min.js https://static.cloudflareinsights.com/beacon.min.js/;",
     );
     expect(policy).toContain("connect-src 'self' https://cloudflareinsights.com;");
-    expect(policy).not.toMatch(/script-src[^;]*'unsafe-/);
+    // No inline script or style anywhere, style attributes included (D4).
+    expect(policy).not.toContain("'unsafe-");
     expect(policy).toContain(`report-uri ${REPORT_PATH}`);
   });
 

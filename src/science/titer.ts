@@ -1,9 +1,18 @@
 import * as Plot from "@observablehq/plot";
 import { domainOf, type KeysOfType, maxOf, minOf, readLabel, readNumber } from "../render/data.js";
-import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
+import { categoryRange, valueRange } from "../render/describe.js";
+import {
+  type AxisUnits,
+  type FigureOptions,
+  figure,
+  type SeriesColor,
+  unitLabel,
+  validateFigure,
+} from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
 import { DEFAULT_WIDTH } from "../render/size.js";
+import { numberFormat, stringsFor } from "../render/text.js";
 import { type GeometricSummary, geometricSummary } from "./stats.js";
 
 /** A serial dilution series: the first dilution and the factor between steps. */
@@ -15,7 +24,7 @@ export interface DilutionSeries {
 }
 
 /** Options for {@link titerPlot}. */
-export interface TiterPlotOptions<T extends object> extends FigureOptions {
+export interface TiterPlotOptions<T extends object> extends FigureOptions, AxisUnits {
   readonly data: readonly T[];
   /** The field naming the group each sample belongs to: a cohort, a timepoint, a vaccine arm. */
   readonly group: KeysOfType<T, string | number>;
@@ -35,7 +44,9 @@ export interface TiterPlotOptions<T extends object> extends FigureOptions {
   readonly colors?: Readonly<Record<string, SeriesColor>>;
   /** Tick labels as ratios ("1:40", default) or reciprocal titers ("40"). */
   readonly tickLabels?: "ratio" | "reciprocal";
+  /** The group axis label (default the field name; `null` hides it), with `xUnit` added. */
   readonly groupLabel?: string | null;
+  /** The titer axis label (default "Titer"; `null` hides it), with `yUnit` added. */
   readonly titerLabel?: string | null;
 }
 
@@ -50,9 +61,6 @@ interface Sample {
 }
 
 const KIND = "titerPlot";
-
-const formatTiter = (value: number): string =>
-  value >= 100 ? String(Math.round(value)) : String(Math.round(value * 10) / 10);
 
 /**
  * Antibody or viral titers by group on a log dilution axis: every sample as a point, the
@@ -79,8 +87,20 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
     throw new Error(`${KIND}: dilution needs start above 0 and factor above 1`);
   }
   const lod = options.limitOfDetection ?? dilution.start;
-  const groupLabel = options.groupLabel === undefined ? group : options.groupLabel;
-  const titerLabel = options.titerLabel === undefined ? "Titer" : options.titerLabel;
+  const strings = stringsFor(options.strings);
+  const { terms } = strings;
+  const locale = options.locale ? { locale: options.locale } : {};
+  const count = numberFormat(locale);
+  // Titers to one decimal under 100 and whole from 100 up, ungrouped as dilutions are written
+  // (1:1280), with the locale's decimal sign.
+  const tenths = new Intl.NumberFormat(options.locale ?? "en-US", {
+    maximumFractionDigits: 1,
+    useGrouping: false,
+  });
+  const formatTiter = (value: number): string =>
+    tenths.format(value >= 100 ? Math.round(value) : value);
+  const groupLabel = unitLabel(options.groupLabel, group, options.xUnit);
+  const titerLabel = unitLabel(options.titerLabel, terms.titer, options.yUnit);
   const asRatio = (options.tickLabels ?? "ratio") === "ratio";
   const tick = (v: number): string => (asRatio ? `1:${formatTiter(v)}` : formatTiter(v));
 
@@ -134,8 +154,8 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
     ]),
   );
   const colorByGroup = options.colorByGroup ?? true;
-  const plan = planSeries(KIND, colorByGroup ? groups : ["Samples"], options.colors);
-  const colorOf = (s: Sample): string => (colorByGroup ? s.group : "Samples");
+  const plan = planSeries(KIND, colorByGroup ? groups : [terms.samples], options.colors);
+  const colorOf = (s: Sample): string => (colorByGroup ? s.group : terms.samples);
 
   const all = samples.map((s) => s.plotted);
   const top = Math.max(maxOf(all), lod);
@@ -156,13 +176,13 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
     (r) => r.s.lower !== undefined && r.s.upper !== undefined,
   );
   const describe = (s: Sample): string =>
-    `${groupLabel ?? group} ${s.group}: ${s.belowLimit ? `below the limit of detection (<${tick(lod)})` : tick(s.titer)}`;
+    `${groupLabel ?? group} ${s.group}: ${s.belowLimit ? strings.belowLimit(tick(lod)) : tick(s.titer)}`;
 
   const marks: Plot.Markish[] = [
     Plot.ruleY([lod], { strokeDasharray: "4,3" }),
     Plot.text([lod], {
       y: (d: number) => d,
-      text: () => "LOD",
+      text: () => terms.lod,
       frameAnchor: "right",
       textAnchor: "end",
       dy: -6,
@@ -243,23 +263,69 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
     options.alt,
   );
 
+  const below = samples.filter((s) => s.belowLimit).length;
   return figure(options, {
     kind: "titer",
     svg,
+    // Every sample on the drawn titer axis, judged in orders of magnitude, then each group's GMT
+    // with its interval and the limit of detection.
+    description: {
+      axes: [
+        categoryRange("x", groupLabel, groups),
+        valueRange(
+          "y",
+          titerLabel,
+          samples.map((s) => s.plotted),
+          tick,
+        ),
+      ],
+      format: tick,
+      log: true,
+      series: [
+        {
+          name: titerLabel ?? terms.titer,
+          points: groups.flatMap((g) =>
+            samples
+              .filter((s) => s.group === g)
+              .sort((a, b) => a.plotted - b.plotted)
+              .map((s) => ({ at: s.group, value: s.plotted })),
+          ),
+        },
+      ],
+      sentence: [
+        strings.geometricMeans(
+          summaryRows.map(({ g, s }) => ({
+            at: g,
+            value: formatTiter(s.mean),
+            ...(s.lower === undefined || s.upper === undefined
+              ? {}
+              : { lower: formatTiter(s.lower), upper: formatTiter(s.upper) }),
+          })),
+        ),
+        strings.limitOfDetection(tick(lod), count(below), count(samples.length)),
+      ].join(" "),
+    },
     legend: [],
     slotColors: plan.slotColors,
     table: {
-      columns: [groupLabel ?? group, "n", "GMT", "95% CI", "Below LOD", "Titers"],
+      columns: [
+        groupLabel ?? group,
+        terms.n,
+        terms.gmt,
+        terms.confidence95,
+        terms.belowLod,
+        terms.titers,
+      ],
       rows: summaryRows.map(({ g, s }) => {
         const members = samples.filter((x) => x.group === g);
         return [
           g,
-          String(s.n),
+          count(s.n),
           formatTiter(s.mean),
           s.lower === undefined || s.upper === undefined
             ? ""
-            : `${formatTiter(s.lower)} to ${formatTiter(s.upper)}`,
-          String(members.filter((x) => x.belowLimit).length),
+            : strings.range(formatTiter(s.lower), formatTiter(s.upper)),
+          count(members.filter((x) => x.belowLimit).length),
           members
             .map((x) => (x.belowLimit ? `<${formatTiter(lod)}` : formatTiter(x.titer)))
             .join(", "),

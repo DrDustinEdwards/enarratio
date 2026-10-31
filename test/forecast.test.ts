@@ -76,7 +76,7 @@ describe("lineChart band", () => {
     ]);
     expect(tableRows(fig)).toEqual(
       days.map((r, i) => [
-        r.day,
+        `March ${i + 1}, 2026`,
         String(r.cases),
         r.lo === null ? "" : String(r.lo),
         r.hi === null ? "" : String(r.hi),
@@ -87,8 +87,8 @@ describe("lineChart band", () => {
 
   it("says the same in the hover details as in the table", () => {
     const titles = keyedMarks(fig).map((m) => m.querySelector("title")?.textContent);
-    expect(titles[3]).toBe("day 2026-03-04: 22 (forecast; 95% interval 17 to 27)");
-    expect(titles[2]).toBe("day 2026-03-03: 18");
+    expect(titles[3]).toBe("day March 4, 2026: 22 (forecast; 95% interval 17 to 27)");
+    expect(titles[2]).toBe("day March 3, 2026: 18");
   });
 
   it("names bound columns per series", () => {
@@ -172,7 +172,7 @@ describe("lineChart forecastFrom", () => {
     expect(fig.textContent).toContain("Forecast");
     expect(tableRows(fig).map((r) => r[2])).toEqual(["", "", "", "Yes", "Yes", "Yes"]);
     expect(keyedMarks(fig)[4]?.querySelector("title")?.textContent).toBe(
-      "day 2026-03-05: 26 (forecast)",
+      "day March 5, 2026: 26 (forecast)",
     );
   });
 

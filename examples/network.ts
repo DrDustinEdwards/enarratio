@@ -34,6 +34,6 @@ export default networkChart({
   nodes: people.map(([id, group]) => ({ id, group })),
   links: pairs.map(([source, target]) => ({ source, target })),
   title: "Co-authorship network",
-  alt: "Network of ten co-authors in four fields. Edwards and Ramos are the hubs, each with four collaborators; Edwards links the virologists to statistics and epidemiology, and Ramos links epidemiology to public health.",
+  alt: "Network of ten co-authors in four fields. Edwards and Ramos are the hubs, with four co-authors each. Edwards links the virus team to statistics and epidemiology. Ramos links epidemiology to public health.",
   caption: "Illustrative data. Links are co-authored papers.",
 });

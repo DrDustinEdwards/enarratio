@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { colorStyles } from "../src/index.js";
 import { barChart } from "../src/plot/index.js";
 import { keyedMarks, parse } from "./helpers.js";
 
@@ -27,14 +28,21 @@ describe("barChart", () => {
     expect(marks[3]?.querySelector("title")?.textContent).toBe("year 2024, Publications: 2");
   });
 
-  it("names the SVG, not the figure, and keeps caption and table outside role=img", () => {
+  it("names the SVG, not the figure, and puts every text part in the HTML outside role=img", () => {
     const fig = parse(
       barChart({
         data: entries,
         x: "year",
         series: "type",
+        yLabel: "Entries",
+        yUnit: "count",
+        title: "Entries",
+        subtitle: "Each bar is one year.",
         alt: "Entries by year",
-        caption: "Source: CV",
+        caption: "Illustrative data.",
+        notes: ["A grant counts once."],
+        source: { name: "CV", href: "https://example.com/cv" },
+        byline: "Sample Lab",
       }),
     );
     expect(fig.tagName.toLowerCase()).toBe("figure");
@@ -42,8 +50,27 @@ describe("barChart", () => {
     const svg = fig.querySelector("svg");
     expect(svg?.getAttribute("role")).toBe("img");
     expect(svg?.getAttribute("aria-label")).toBe("Entries by year");
-    expect(svg?.querySelector("figcaption, table")).toBeNull();
-    expect(fig.querySelector("figcaption")?.textContent).toBe("Source: CV");
+    expect(svg?.querySelector("figcaption, table, p")).toBeNull();
+    // The head names the figure; the finding is visible and read once, on the SVG.
+    expect(fig.firstElementChild?.tagName.toLowerCase()).toBe("figcaption");
+    expect(fig.querySelector("figcaption")?.textContent).toBe(
+      "EntriesEach bar is one year.Entries by year",
+    );
+    expect(fig.querySelector(".enarratio-finding")?.getAttribute("aria-hidden")).toBe("true");
+    const text = (cls: string) => fig.querySelector(`.${cls}`)?.textContent;
+    expect(text("enarratio-overview")).toBe(
+      "Bar chart with 3 series and 9 points. X axis, year: 2022 to 2024. Y axis, Entries (count): 0 to 3.",
+    );
+    expect(text("enarratio-summary")).toBe(
+      "Publications rose from 1 (2022) to 2 (2024). Talks fell from 1 (2022) to 0 (2024). Grants rose from 0 (2022) to 1 (2024). The highest value is 2 (Publications, 2024). The lowest is 0 (Talks, 2023).",
+    );
+    expect(text("enarratio-note")).toBe("Notes: A grant counts once.");
+    expect(text("enarratio-source")).toBe("Source: CV · By Sample Lab · Download CSV");
+    expect(fig.querySelector(".enarratio-source a")?.getAttribute("href")).toBe(
+      "https://example.com/cv",
+    );
+    expect(fig.querySelector("th")?.textContent).toBe("year");
+    expect(fig.querySelector(".enarratio-csv")?.getAttribute("download")).toBe("entries.csv");
   });
 
   it("emits an equivalent data table, zero-filling counts", () => {
@@ -64,10 +91,13 @@ describe("barChart", () => {
     ]);
   });
 
-  it("colors series by palette slot and lists them in a legend", () => {
+  it("fills series by palette slot, textured after the first, and lists them in a legend", () => {
     const fig = parse(barChart({ data: entries, x: "year", series: "type", alt: "a" }));
     const talks = keyedMarks(fig).find((m) => m.getAttribute("data-enarratio-series") === "Talks");
-    expect(talks?.getAttribute("fill")).toBe("var(--enarratio-series-2)");
+    const id = /^url\(#(.+)\)$/.exec(talks?.getAttribute("fill") ?? "")?.[1];
+    const pattern = fig.querySelector(`pattern[id="${id}"]`);
+    expect(pattern?.querySelector("rect")?.getAttribute("fill")).toBe("var(--enarratio-series-2)");
+    expect(pattern?.querySelector(".enarratio-texture")).not.toBeNull();
     const legend = [...fig.querySelectorAll(".enarratio-legend li")];
     expect(legend.map((li) => [li.textContent, li.getAttribute("data-slot")])).toEqual([
       ["Publications", "1"],
@@ -140,17 +170,17 @@ describe("barChart", () => {
     expect(keyedMarks(fig)).toHaveLength(5);
   });
 
-  it("applies color overrides to the figure's slot", () => {
-    const fig = parse(
-      barChart({
-        data: entries,
-        x: "year",
-        series: "type",
-        colors: { Talks: { light: "#112233", dark: "#aabbcc" } },
-        alt: "a",
-      }),
-    );
-    expect(fig.getAttribute("style")).toBe("--enarratio-series-2: light-dark(#112233, #aabbcc)");
+  it("applies color overrides to the figure's slot through a rule, not a style attribute (D4)", () => {
+    const html = barChart({
+      data: entries,
+      x: "year",
+      series: "type",
+      colors: { Talks: { light: "#112233", dark: "#aabbcc" } },
+      alt: "a",
+    });
+    expect(html).not.toContain("style=");
+    const value = "--enarratio-series-2: light-dark(#112233, #aabbcc)";
+    expect(colorStyles(html)).toBe(`.enarratio[data-enarratio-colors="${value}"] { ${value}; }`);
   });
 
   it("escapes caller text", () => {
@@ -170,8 +200,35 @@ describe("barChart", () => {
     expect(barChart(options)).toBe(barChart(options));
   });
 
-  it("refuses a missing alt, bad values, unknown color keys and too many series", () => {
-    expect(() => barChart({ data: entries, x: "year", alt: "  " })).toThrow(/alt is required/);
+  it("names a chart without alt from its data, reports it, and throws when strict (B52)", () => {
+    const issues: string[] = [];
+    const fig = parse(
+      barChart({ data: entries, x: "year", alt: "  ", onIssue: (i) => issues.push(i.code) }),
+    );
+    expect(issues).toEqual(["title-missing", "alt-missing"]);
+    expect(fig.querySelector("svg")?.getAttribute("aria-label")).toBe(
+      "Bar chart with 3 points. X axis, year: 2022 to 2024. Y axis, Count: 0 to 3. Count rose from 2 (2022) to 3 (2024). The highest value is 3 (2024). The lowest is 1 (2023).",
+    );
+    expect(fig.querySelector(".enarratio-finding")).toBeNull();
+    expect(() => barChart({ data: entries, x: "year", title: "Entries", strict: true })).toThrow(
+      /bar: alt is missing/,
+    );
+    expect(() =>
+      barChart({ data: entries, x: "year", yLabel: null, alt: "a", strict: true }),
+    ).toThrow(/bar: no title/);
+    expect(() =>
+      barChart({
+        data: entries,
+        x: "year",
+        yLabel: null,
+        alt: "a",
+        title: "Entries",
+        strict: true,
+      }),
+    ).not.toThrow();
+  });
+
+  it("refuses bad values, unknown color keys and too many series", () => {
     expect(() => barChart({ data: [{ k: "a", v: Number.NaN }], x: "k", y: "v", alt: "a" })).toThrow(
       /row 1 field "v" is NaN/,
     );

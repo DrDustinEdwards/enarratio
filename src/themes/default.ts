@@ -26,7 +26,7 @@ export const defaultTheme: Theme = {
       "#811736",
       "#653161",
       "#6f73b4",
-      "#4f5500",
+      "#574d00",
       "#595959",
     ],
     sequential: ["#dbe9f6", "#a6c8ea", "#6aa3d8", "#2f78c0", "#0b4a8c"],

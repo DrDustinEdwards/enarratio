@@ -66,12 +66,42 @@ it bare. `children` is trusted markup: escape text with `escapeHtml` first.
 
 `figure(options: FigureOptions, parts: FigureParts): string`. Assembles the
 figure every chart is delivered in (title, legend, the SVG named by `alt`,
-caption and data table) from an SVG and a `DataTable`. Throws if `alt` is blank.
+caption and data table) from an SVG and a `DataTable`. Without an `alt` it
+names the SVG from the description's overview and summary and reports
+`alt-missing`.
 
 ### `FigureParts`
 
 `kind`, `svg`, `table`, and optionally `legend`, `ramp`, `seriesField`, `x`
-(a `ScaleDescription`), `orientation` and `slotColors`.
+(a `ScaleDescription`), `orientation`, `slotColors`, and:
+
+- `description`: a [`ChartDescription`](#chartdescription), from which the
+  overview and summary are written.
+- `limits`: `{ series?, points?, advice? }`, replacing the default 6 series and
+  1,000 points past which a chart reports an issue, and what the issue advises.
+- `method`: a sentence the chart writes about how it computed what it draws,
+  added to the caption after the author's text is checked for reading level.
+- `tableMarkup`: `(caption) => string`, a visible table that is the figure's
+  data table, in place of the drawing and the hidden table (`tableChart`).
+- `fixed`: a drawing that keeps its own small size (the primitives).
+
+### `ChartDescription`
+
+What a chart tells its figure so the figure can describe it in words: `axes`
+(each an [`AxisRange`](#axisrange)), `series` (each a `SummarySeries`), and
+optionally `kind` (the kind the overview names), `ordered` (points run in
+order, so a trend means something), `format`, `interval` (what a drawn
+interval is, such as "95% interval"), `log` and `sentence` (a sentence of the
+chart's own).
+
+### `SummarySeries`
+
+`{ name; points: SummaryPoint[] }`: one series of values, in display order.
+
+### `SummaryPoint`
+
+`{ at; value; lower?; upper? }`: one value, where it is as text (its
+category, date or x), and its interval when the chart draws one.
 
 ### `DataTable`
 
@@ -93,48 +123,214 @@ pointer position back into data.
 ### `validateFigure`
 
 `validateFigure(kind: string, options: FigureOptions): void`. Throws unless
-`alt` is meaningful and any `width` and `height` are positive and finite.
+any `width` and `height` are positive and finite.
 
 ### `slotStyle`
 
 `slotStyle(colors?: ReadonlyMap<number, SeriesColor>): string | undefined`. Per-figure
-palette overrides as an inline style value; throws on a color that is not hex, a
-color function or `var()`.
+palette overrides as CSS declarations, which a chart carries in its
+`data-enarratio-colors` attribute (never a `style` attribute); throws on a color
+that is not hex, a color function or `var()`.
 
 ## Common options
 
 ### `FigureOptions`
 
-Every chart (not the primitives) accepts these.
+Every chart accepts these; the primitives take the text and issue options
+through [`PrimitiveFigureOptions`](#primitivefigureoptions). A site sets the
+shared ones once (`const site = { locale: "de-DE", strict: true }`) and
+spreads them into each chart.
 
 | Option | Type | Meaning |
 |---|---|---|
-| `alt` | `string`, required | What the chart shows, including its finding. Names the SVG for assistive technology. |
-| `title` | `string` | Visible title above the chart. |
-| `caption` | `string` | Visible caption below: method, source, caveats. |
+| `alt` | `string` | What the chart shows, including its finding. Names the SVG for assistive technology and is shown as the finding under the title. Without it the chart names itself from its overview and summary and reports `alt-missing` (B52). |
+| `title` | `string` | Visible title above the chart. Without it, a `title-missing` issue. |
+| `subtitle` | `string` | A line under the title: what the chart shows, or how to read it (B17). |
+| `caption` | `string` | Visible caption below: method, caveats. |
+| `notes` | `string` or `string[]` | Notes below: definitions, exclusions (B23). |
+| `source` | `string` or `{ name, href? }` | The source line, linked when `href` is given (relative or http(s)). |
+| `byline` | `string` | Who made the chart, in the source line. |
+| `summary` | `string` or `false` | The summary under the chart. Computed from the data by default: each series' trend (with a peak or low that stands out), the highest and lowest values, values far from the rest, and the last interval drawn (B39, B24). `false` leaves it out. |
+| `csv` | `boolean` | The "Download CSV" link, built from the data table as a `data:` URL with `download` (default `true`). Over 100,000 characters there is no link and a `csv-too-large` issue. |
+| `csvHref` | `string` | A CSV file the site serves, linked instead (build it with [`toCsv`](#tocsv)). |
+| `locale` | `string` | BCP 47 locale for generated numbers and dates (default `"en-US"`). |
+| `strings` | [`StringOverrides`](#stringoverrides) | Translations of the generated text; see [`Strings`](#strings). |
+| `strict` | `boolean` | Throw on the first [issue](#chartissue) instead of reporting it, so a build fails. |
+| `onIssue` | `(issue: ChartIssue) => void` | Receives issues instead of `console.warn`. |
 | `id` | `string` | The figure's `id`, reported as `chartId` in events. |
 | `width`, `height` | `number` | Drawing size in CSS pixels, positive and finite. Drawings 480 pixels or wider keep at least 30rem on narrow screens and scroll sideways inside the figure, so their text stays readable. That frame is in the tab order (`tabindex="0"`) and named "{title}, scrolls sideways" ("Chart" without a title), so a keyboard can scroll it; `enhance()` drops that tab stop once the marks take focus. |
-| `dataTable` | `"details"` or `"visually-hidden"` | How the always-present data table is shown. Default `"details"`. |
+| `dataTable` | `"details"` or `"visually-hidden"` | How the always-present data table is shown. Default `"details"`, closed, labeled "Show data" (and "Hide data" when open). |
+
+Bar, line, area and scatter charts, and the diverging, waterfall, small
+multiples, histogram, density, box, strip, dot, range and dumbbell charts and
+dose-response curves and titer plots, also take [`AxisUnits`](#axisunits);
+survival, forest and tree plots take `xUnit`.
 
 A chart returns:
 
 ```html
 <figure class="enarratio" data-enarratio="bar" id="...">
-  <p class="enarratio-title">...</p>
+  <figcaption class="enarratio-head">
+    <p class="enarratio-title">...</p>
+    <p class="enarratio-subtitle">...</p>
+    <p class="enarratio-finding" aria-hidden="true">{alt}</p>
+  </figcaption>
+  <p class="enarratio-overview enarratio-visually-hidden">Bar chart with 18 points. X axis, Year: 2019 to 2024. ...</p>
   <ul class="enarratio-legend">...</ul>
   <div class="enarratio-frame enarratio-frame-wide" tabindex="0" role="group" aria-label="{title}, scrolls sideways">
     <svg role="img" aria-label="{alt}">... one keyed element per datum ...</svg>
   </div>
-  <figcaption class="enarratio-caption">...</figcaption>
-  <details class="enarratio-data"><summary>Data table</summary><table>...</table></details>
+  <p class="enarratio-summary">Publications rose from 3 (2019) to 7 (2024). ...</p>
+  <p class="enarratio-caption">...</p>
+  <p class="enarratio-note">Notes: ...</p>
+  <p class="enarratio-source">Source: <a href="...">...</a> · By ... · <a class="enarratio-csv" download="....csv" href="data:text/csv;...">Download CSV</a></p>
+  <details class="enarratio-data"><summary>Show data / Hide data</summary><table>...</table></details>
 </figure>
 ```
+
+The finding repeats the SVG's name for sighted readers, so it is hidden from
+assistive technology, which reads it once on the SVG. The overview (B53) is
+read before the chart: its type, series and points, and each axis's range,
+its numbers written as the chart's ticks and table write them ("0 to 1", not
+"0.000 to 1.000").
+
+### `AxisUnits`
+
+`xUnit` and `yUnit`: units added to the axis label and the table header,
+"Weight (kg)" (B23). A hidden (`null`) label stays hidden.
+
+### `ChartIssue`
+
+What a chart reports while it renders: `{ chart, code, message }`, where
+`chart` is its `data-enarratio` kind and `code` is one of `alt-missing`,
+`title-missing`, `axis-label-missing` (an axis with no label and no title),
+`too-many-series` (more than 6) or `too-many-points` (more than 1,000), both
+suggesting small multiples or a table (B21), `reading-level` (an `alt`,
+`subtitle` or `caption` of 15 words or more above grade 9, B19) and
+`csv-too-large`. Issues go to `onIssue`, else `console.warn`; with `strict`
+the first one throws an `Error` naming the chart, which fails a build.
+
+### `IssueOptions`
+
+`strict` and `onIssue`, as above.
+
+### `Source`
+
+A source line's source: a name, or `{ name, href }`.
+
+### `Strings`
+
+Every generated string: the disclosure labels, table caption, frame name,
+source and CSV labels, chart kind names (`kinds`), and the overview and
+summary sentences as functions of already formatted values, including the
+science charts' (`geometricMeans`, `limitOfDetection`, `genomeSummary`,
+`networkSummary`) and the primitives' text alternatives (`sparklineSummary`,
+`heatStripSummary`, `uptimeSummary`, `progressSummary`, `timelineSummary`).
+Pass a partial table as `strings`; the rest stay English. [`ENGLISH`](#english)
+is the default to start a translation from. `terms` holds the words charts and
+primitives print in their tables, legends, hover details and summaries (Count,
+Median, Running total, no data, Forecast, the statuses and so on); see
+[`Terms`](#terms). With `locale` as well, every string a chart or primitive
+generates is translated, and every number in it follows the locale.
+
+```ts
+barChart({ ...options, locale: "de-DE", strings: { showData: "Daten zeigen", hideData: "Daten verbergen", downloadCsv: "CSV herunterladen" } });
+```
+
+### `StringOverrides`
+
+The `strings` option: any part of [`Strings`](#strings), with `terms` partial
+too, so one word can be changed without the rest.
+
+```ts
+pieChart({ ...options, strings: { terms: { share: "Anteil", total: "Summe" } } });
+```
+
+### `Terms`
+
+The words charts print, such as `count`, `median`, `share`, `total`,
+`runningTotal`, `rising` and `falling`, `atRisk` and `survivalProbability`,
+`noData` and `forecast`, a titer plot's `gmt` and `lod`, a genome track's
+`forwardStrand` and `nucleotides`, and the primitives' `cell`, `period` and
+statuses (`up`, `down`, `ok`, `error` and the rest). `ENGLISH.terms` lists them
+all.
+
+### `ENGLISH`
+
+The English [`Strings`](#strings).
+
+### `At`
+
+A value and where it is, both formatted: `{ value, at }`, as the summary
+strings receive them.
+
+### `AxisRange`
+
+An axis as the overview states it: `{ position: "x" | "y" | "size", label, from, to }`.
+
+### `numberFormat`
+
+`numberFormat(options?: NumberFormatOptions): (value: number) => string`. A
+formatter for a locale and style, to pass as `formatValue` (C10).
+
+```ts
+numberFormat({ locale: "de-DE", style: "currency", currency: "EUR" })(1234.5); // "1.234,50 €"
+numberFormat({ style: "compact" })(1200); // "1.2K"
+numberFormat({ style: "si", unit: "B" })(1_500_000); // "1.5 MB"
+```
+
+### `NumberFormatOptions`
+
+`locale`, `style` (`"decimal"`, `"percent"`, `"currency"`, `"compact"`,
+`"si"` or `"unit"`), `currency` (ISO 4217), `unit` (an Intl unit for
+`"unit"`, any symbol after an SI prefix), `maximumFractionDigits` and
+`maximumSignificantDigits`.
+
+### `dateFormat`
+
+`dateFormat(options?: DateFormatOptions): (date: Date) => string`. Writes
+dates out for a locale ("January 5, 2026"), with the time and the time zone
+named when `time` is set (B40, C11). Line and area charts write their x
+dates this way in the table, hover details and summary; filter events and
+`data-enarratio-x` keep ISO dates.
+
+### `DateFormatOptions`
+
+`locale`, `timeZone` (IANA, default `"UTC"`) and `time`.
+
+### `readingGrade`
+
+`readingGrade(text: string): number`. The Flesch-Kincaid grade level of
+English text. Generated summaries stay at 9 or below; charts report author
+text above it (B19).
+
+### `toCsv`
+
+`toCsv(rows: string[][]): string`. Rows as CSV (RFC 4180, CRLF), the same
+encoding as the "Download CSV" link: fields with a comma, quote or line break
+are quoted, and a field a spreadsheet would run as a formula gets a leading
+apostrophe. For the file behind `csvHref`.
+
+### `datasetJsonLd`
+
+`datasetJsonLd(options: DatasetOptions): string`. A
+`<script type="application/ld+json">` schema.org `Dataset` entry for data a
+site wants indexed (C14). A data block, never run, so a strict CSP allows it.
+
+### `DatasetOptions`
+
+`name` and `description` (required), `url`, `csvHref` (as a `DataDownload`),
+`creator`, `license`, `datePublished`, `temporalCoverage`, `keywords` and
+`variables` (the measured columns).
 
 ### `SeriesColor`
 
 A color override for one series: any CSS color (`"#8a4a1b"`,
 `"var(--brand)"`), or `{ light, dark }`, rendered with CSS `light-dark()`.
-Given in a chart's `colors` option, keyed by series name. A chart with no
+Given in a chart's `colors` option, keyed by series name. The chart carries the
+override in `data-enarratio-colors`, not a `style` attribute, so it works under
+a hash-based Content-Security-Policy; the page adds the rules
+[`colorStyles`](#colorstyles) returns to its own CSS. A chart with no
 `series` field has one series whose name is its value label: `yLabel` (or
 "Count" for counted bars, "Value" when the label is hidden) for bar, line and
 area charts; "Points" for a scatter plot; "Samples" for a titer plot with
@@ -184,6 +380,13 @@ one row per item (a CV entry, a case) is enough.
   and table row. `xDomain` is not used with it, and `interval` and `formatX`
   need `xType: "time"`. More than 2000 intervals throw.
 
+- `errorBars: { lower, upper, label? }`: an error bar on each bar, from two
+  fields you computed (a 95% CI, ± one SD), capped at both ends, with a column
+  per series in the data table and the interval in hover details. Needs `y`,
+  and the grouped layout when there are series. A row's bounds must surround
+  its value. `enarratio/lite` draws them too.
+- `annotations`: see [`Annotation`](#annotation). Not on grouped bars.
+
 Links given by `href` must be relative or `http(s)`; a `//host` link, or any
 other scheme, throws. Count axes end at their last whole-number tick.
 
@@ -195,8 +398,15 @@ continuous x. `null` values are gaps. Supports `references`, `markers`,
 
 ### `areaChart`
 
-`areaChart(options: SeriesChartOptions<T>): string`. Stacked areas; values
+`areaChart(options: AreaChartOptions<T>): string`. Stacked areas; values
 must be zero or more.
+
+### `AreaChartOptions`
+
+`SeriesChartOptions` plus `percent` and `annotations`. With `percent: true`
+each x stacks to 100%: every series is drawn, described and tabled as its share
+of that x's total, the y label defaults to "Share of total (%)" and values print
+as percentages. `enarratio/lite` draws `percent` too, identically.
 
 ### `SeriesChartOptions`
 
@@ -218,8 +428,9 @@ Options shared by line and area charts: `data`, `x`, `y`, `series`, `xType`
 
 ### `LineChartOptions`
 
-`SeriesChartOptions` plus `points`, `directLabels`, `yType`, `zero`, and the
-forecast options `band`, `forecastFrom` and `forecastLabel`. With
+`SeriesChartOptions` plus `points`, `directLabels`, `yType`, `zero`,
+`annotations`, and the forecast options `band`, `forecastFrom` and
+`forecastLabel`. With
 `yType: "log"`, a value of zero or less (or a band lower bound of zero or less)
 throws.
 
@@ -258,14 +469,15 @@ as a deploy or an intervention.
 
 `barChart`, `lineChart` and `areaChart` are also exported from `enarratio/lite`,
 for drawing in the browser. They take the same options (the same types, under
-the same names) and return the same figure: the SVG is the one the Plot charts
+the same names, `errorBars` and `annotations` included) and return the same
+figure: the SVG is the one the Plot charts
 draw, element for element, with coordinates equal to the hundredth of a pixel,
 and a test holds every gallery example and a matrix of options to that. The
 two exceptions are where the Plot chart is wrong (a bar link's accessible name,
 and bars whose values are all zero), listed in design record 0017. They
 need no Observable Plot, no linkedom and no DOM (the SVG is built as a string),
 so they run in a browser, a Worker or a server alike. Bundled for the browser,
-minified and gzipped, each is under 10 kB (`npm run size` measures them and
+minified and gzipped, each is about 15 kB (`npm run size` measures them and
 fails above 40 kB); the Plot versions are about 90 kB without linkedom. Import
 one chart's entry, such as `enarratio/lite/bar`, for the smallest bundle. The
 Plot charts in `enarratio/plot` are unchanged and remain the ones for server
@@ -281,7 +493,208 @@ least-squares line with its 95% confidence band.
 
 `data`, `x`, `y`, `series`, `label` (names each point), `xType`, `yType`
 (`"linear"` or `"log"`), `regression`, `seriesDomain`, `colors`, `xLabel`,
-`yLabel`, `formatValue`.
+`yLabel`, `formatValue`, `annotations`, and:
+
+- `size`, `sizeLabel`: a field sizing each point by area (zero or more), making
+  a bubble chart. A legend of three reference circles, drawn from the chart's
+  own size scale, sits in the right margin, and the data table gains a column.
+- `errorBars: { lower, upper, label? }`: a vertical error bar on each point
+  around y, as on `barChart`.
+
+### `Annotation`
+
+A note or a highlighted range, given to `barChart`, `lineChart`, `areaChart`,
+`scatterPlot` and most charts below in `annotations`:
+
+- `{ type: "note", x, y, text, dx?, dy? }`: text at a point on the chart's x
+  and y fields. Offset by `dx`, `dy` pixels, an arrow runs from the text to the
+  point.
+- `{ type: "range", axis: "x" | "y", from, to, label? }`: a shaded band across
+  the chart between two positions on one axis, behind the marks.
+
+On bar charts `x` is the category axis whichever way the bars run. Every note
+and range is also added to the chart's text alternative ("Notes on the chart:
+…"), since the drawing is one image to a screen reader. A position off the
+axis throws.
+
+### `AnnotationValue`
+
+`number | string | Date`: a number, a date (a Date or an ISO 8601 string, on
+a time axis) or a category.
+
+### `IntervalFields`
+
+`{ lower: field; upper: field; label?: string }`: the fields holding an
+interval you computed (error bars, a confidence interval), and what it is
+called in the table and hover details. A row has both bounds or neither, and
+the bounds must surround the value.
+
+### `divergingBarChart`
+
+`divergingBarChart(options: DivergingBarChartOptions<T>): string`. Bars for
+signed values about zero (changes, differences from a baseline): positive one
+way and negative the other from a drawn zero line, in two colors, each bar
+labeled with its signed value (`+4.2`, `−3.4`), so the sign reads from position
+and text as well as color.
+
+### `DivergingBarChartOptions`
+
+`data`, `x` (category), `y` (signed value), `orientation` (`"horizontal"`, the
+default, or `"vertical"`), `sort` (`"data"` or `"descending"`),
+`positiveLabel`, `negativeLabel` (legend names; default "Above zero" and
+"Below zero"), `colors`, `xDomain`, `xLabel`, `yLabel`, `formatValue`,
+`annotations`. One row per category.
+
+### `waterfallChart`
+
+`waterfallChart(options: WaterfallChartOptions<T>): string`. A bridge from one
+total to another: each change floats from the level the last one reached,
+joined by dashed connectors, and totals stand on zero. Increases, decreases and
+totals differ in color and every bar is labeled with its signed change or its
+total. The data table gives each change and the running total.
+
+### `WaterfallChartOptions`
+
+`data`, `x` (step name), `y` (the change), `total` (a boolean field marking
+total rows), `increaseLabel`, `decreaseLabel`, `totalLabel`, `colors`,
+`xLabel`, `yLabel`, `formatValue`, `annotations`. A total row's `y` is the
+total: the first row's sets the starting level; later ones may be `null` (the
+running sum is drawn) or must equal it, or it throws.
+
+### `smallMultiples`
+
+`smallMultiples(options: SmallMultiplesOptions<T>): string`. One bar chart
+(`chart: "bar"`, stacked when there are series) or line chart
+(`chart: "line"`) per value of `facet`, in a grid, on shared scales. Each panel
+is named above it, a series keeps one color across panels, every value is keyed
+with its panel, and the data table has a row per panel and x.
+
+### `SmallMultiplesOptions`
+
+`chart`, `data`, `facet`, `facetDomain`, `columns` (panels per row, default
+3), `panelHeight` (default 160), and the panel chart's fields: for bars `x`,
+`y`, `series`, `xDomain`, `seriesDomain`, `colors`, `xLabel`, `yLabel`,
+`formatValue`; for lines the same without `xDomain`, plus `xType` and
+`formatX`. At most 24 panels.
+
+### `histogram`
+
+`histogram(options: HistogramOptions<T>): string`. Counts of one measurement
+in bins with round edges, the last bin including its upper edge, optionally
+with a Gaussian kernel density curve scaled to counts. The data table lists
+every bin, empty ones too.
+
+### `HistogramOptions`
+
+`data`, `x`, `thresholds` (a target number of bins, default Sturges' rule
+ceil(log2 n) + 1, or the ascending edges, which must cover every value),
+`density`, `color`, `xLabel`, `yLabel` (default "Count"), `formatValue`,
+`annotations`.
+
+### `densityPlot`
+
+`densityPlot(options: DensityPlotOptions<T>): string`. Gaussian kernel density
+estimates of one measurement, a curve per series on shared axes, told apart by
+color, dash and a label at each peak. The bandwidth is Silverman's rule of
+thumb, 0.9 min(SD, IQR/1.34) n^(-1/5), per series, unless given; the caption
+states n and bandwidth, and the data table gives each curve's density at 15
+evenly spaced values.
+
+### `DensityPlotOptions`
+
+`data`, `x`, `series`, `seriesDomain`, `bandwidth`, `colors`, `xLabel`,
+`yLabel` (default "Density"), `formatValue`, `annotations`.
+
+### `boxPlot`
+
+`boxPlot(options: BoxPlotOptions<T>): string`. A Tukey box plot per group: the
+box spans the quartiles (linear interpolation, R's default type 7) with a line
+at the median, whiskers reach the furthest values within 1.5 IQR, and values
+beyond are drawn as points. With `points: true` every value is drawn beside its
+box in a beeswarm. The data table gives each group's n, minimum, quartiles,
+maximum, whiskers and outliers.
+
+### `BoxPlotOptions`
+
+`data`, `x` (group), `y` (value), `xDomain`, `points`, `colorByGroup`,
+`colors`, `xLabel`, `yLabel`, `formatValue`, `annotations`.
+
+### `stripPlot`
+
+`stripPlot(options: StripPlotOptions<T>): string`. Every value as a point, a
+column per group, spread in a beeswarm (each point takes the place nearest the
+center line where it overlaps no other) or a fixed jitter. The data table lists
+every value.
+
+### `StripPlotOptions`
+
+`BoxPlotOptions` without `points`, plus `label` (names each value) and
+`layout` (`"beeswarm"`, the default, or `"jitter"`, the same on every render).
+
+### `dotPlot`
+
+`dotPlot(options: DotPlotOptions<T>): string`. A Cleveland dot plot: a row per
+item, a dot at each value, on an axis that need not start at zero. With
+`series`, each item has a dot per series, told apart by color and symbol; with
+`errorBars`, each dot has its interval.
+
+### `DotPlotOptions`
+
+`data`, `y` (item), `x` (value), `series`, `seriesDomain`, `errorBars`, `sort`
+(`"data"` or `"descending"`), `yDomain`, `colors`, `xLabel`, `yLabel`,
+`formatValue`, `zero`, `annotations`.
+
+### `rangePlot`
+
+`rangePlot(options: RangePlotOptions<T>): string`. A row per item, a bar from
+its low to its high value, with an optional marked value (a median, a current
+reading) as a tick inside it.
+
+### `RangePlotOptions`
+
+`data`, `y`, `low`, `high`, `value`, `valueLabel`, `yDomain`, `colors`,
+`xLabel`, `yLabel`, `formatValue`, `zero`, `annotations`. `low` above `high`,
+or a value outside its range, throws.
+
+### `dumbbellPlot`
+
+`dumbbellPlot(options: DumbbellPlotOptions<T>): string`. A row per item, two
+values joined by a line: `from` a hollow circle, `to` a filled one, so the ends
+differ by fill as well as color. The data table gives both and the change.
+
+### `DumbbellPlotOptions`
+
+`data`, `y`, `from`, `to`, `fromLabel`, `toLabel`, `sort` (`"data"` or
+`"change"`), `yDomain`, `colors`, `xLabel`, `yLabel`, `formatValue`, `zero`,
+`annotations`.
+
+### `slopeChart`
+
+`slopeChart(options: SlopeChartOptions<T>): string`. Each item's value at two
+time points joined by a line and labeled with its name and value at both ends,
+labels moved apart where values are close. Rising and falling lines differ in
+color and dash. At most 30 items.
+
+### `SlopeChartOptions`
+
+`data`, `label`, `from`, `to`, `fromLabel`, `toLabel`, `colors` (by
+"Rising", "Falling", "No change"), `formatValue`.
+
+### `pieChart`
+
+`pieChart(options: PieChartOptions<T>): string`. A pie, or a donut with
+`donut: true`, for the parts of one whole. Slices run clockwise from 12
+o'clock in data order, separated by a gap, each labeled outside with its name
+and share. **More than six slices are a `too-many-points` issue** (which
+`strict` throws), suggesting a bar chart or an "Other" slice: past that, angles
+are too close to compare. More than eight throw, as the palette has eight
+colors. A negative value, or a total
+of zero, throws. The data table gives each value, its share and the total.
+
+### `PieChartOptions`
+
+`data`, `label`, `value`, `donut`, `centerLabel` (text in the donut's hole),
+`colors`, `formatValue`.
 
 ### `heatmap`
 
@@ -300,7 +713,9 @@ row (the `y` field), and arrow keys move across columns and down rows.
 
 `networkChart(options: NetworkChartOptions): string`. From `enarratio/science`. A force-directed
 network laid out on the server with d3-force. The layout is deterministic: the
-same data always draws the same picture.
+same data always draws the same picture. The summary gives the number of nodes
+and links, the three most connected nodes, and how many separate parts the
+network falls into.
 
 ### `NetworkChartOptions`
 
@@ -330,7 +745,10 @@ drawn hollow at half the limit, and counted that way in the GMT.
 
 `data`, `group`, `titer`, `dilution`, `limitOfDetection`, `groupDomain`,
 `colorByGroup`, `colors`, `tickLabels` (`"ratio"` for 1:40 or `"reciprocal"`
-for 40), `groupLabel`, `titerLabel`.
+for 40), `groupLabel` and `titerLabel` (default "Titer"), with `xUnit` and
+`yUnit` added to them. The summary names the highest and lowest titers, each
+group's geometric mean titer with its 95% interval, and the limit of detection
+with how many samples fall below it; the overview gives both axes' ranges.
 
 ### `DilutionSeries`
 
@@ -341,7 +759,9 @@ step factor, e.g. `{ start: 10, factor: 2 }` for 1:10 two-fold.
 
 `genomeTrack(options: GenomeTrackOptions): string`. Features drawn to scale on
 a nucleotide axis, as arrows pointing along their strand, one row per track,
-with overlapping features packed into lanes.
+with overlapping features packed into lanes. The summary gives the number of
+features, the shortest and longest, how many run on each strand, and how many
+pairs overlap within a track; the overview gives the position axis's range.
 
 ### `GenomeTrackOptions`
 
@@ -365,13 +785,147 @@ the chart.
 `{ n: number; mean: number; lower?: number; upper?: number }`. No interval for
 a single value.
 
+### `doseResponse`
+
+`doseResponse(options: DoseResponseOptions<T>): string`. Responses as points on
+a log dose axis, the four-parameter logistic curve through them, and the EC50
+(or IC50) marked with a dashed drop line and its value. The curve is fitted by
+`fitLogistic`, or drawn from `parameters` you give. Groups differ by color,
+symbol and dash. The caption states each curve (EC50 with its 95% interval,
+Hill slope, bottom and top), and the data table gives every measurement beside
+the curve's value at its dose.
+
+### `DoseResponseOptions`
+
+`data`, `dose` (above zero), `response`, `group`, `groupDomain`, `parameters`
+(by group name: `LogisticParameters`), `midpointLabel` (default "EC50"),
+`colors`, `doseLabel`, `responseLabel`, `formatValue`.
+
+### `fitLogistic`
+
+`fitLogistic(doses: number[], responses: number[]): LogisticFit`. A
+least-squares fit of bottom + (top − bottom) / (1 + (EC50 / dose)^hill) by
+Levenberg-Marquardt, in log EC50, from several starts, keeping the best. The
+EC50's 95% interval is the Wald interval on log EC50 (± t(0.975, n − 4)
+standard errors from s²(JᵀJ)⁻¹), as GraphPad Prism reports it. Doses of zero
+are allowed (the curve's limit there); it needs four distinct positive doses,
+and five points for the interval. It matches R's `drc` (`LL.4`) on the
+ryegrass data to five digits.
+
+### `logistic`
+
+`logistic(parameters: LogisticParameters, dose: number): number`. The 4PL
+curve's value at a dose.
+
+### `LogisticParameters`
+
+`{ bottom; top; ec50; hill }`. A positive Hill slope rises with dose, a
+negative one falls.
+
+### `LogisticFit`
+
+`LogisticParameters` plus `n`, `rss` (residual sum of squares) and, from five
+points, `ec50Lower` and `ec50Upper`.
+
+### `survivalPlot`
+
+`survivalPlot(options: SurvivalPlotOptions<T>): string`. Kaplan-Meier curves:
+each group's survival as a step line from 1 at time zero, a + at each censored
+time, the 95% confidence band, and the number at risk at each time tick printed
+under the axis. Groups differ by color, dash and an end label. The caption
+gives each group's n, events and median survival; the data table gives every
+step: time, at risk, events, censored, survival and its interval.
+
+### `SurvivalPlotOptions`
+
+`data`, `time`, `event` (true or 1 for the event, false or 0 for censored),
+`group`, `groupDomain`, `confidence` (default on for one group, off for more),
+`atRisk` (default true), `colors`, `timeLabel`, `survivalLabel`.
+
+### `kaplanMeier`
+
+`kaplanMeier(times: number[], events: boolean[]): SurvivalEstimate`. The
+Kaplan-Meier product-limit estimate, with Greenwood's standard error and the
+log-log 95% interval (Kalbfleisch and Prentice), which stays within 0 and 1.
+At a time with both, events come before censoring. It matches the published
+6-MP estimates (Freireich et al. 1963) and R's `survfit(conf.type = "log-log")`.
+
+### `SurvivalEstimate`
+
+`{ n; events; steps: SurvivalStep[]; censorTimes; end; median? }`. `median`
+is the first time survival falls to 0.5 or below, absent when it never does.
+
+### `SurvivalStep`
+
+`{ time; atRisk; events; censored; survival; standardError; lower; upper }`,
+one per distinct time with an event.
+
+### `forestPlot`
+
+`forestPlot(options: ForestPlotOptions<T>): string`. Study estimates as squares
+sized by weight with their 95% intervals, against a line of no effect, and the
+pooled estimate as a diamond spanning its interval. Every estimate and
+interval is also printed in a column on the right. The caption states the
+pooling method and heterogeneity; the data table gives every row and weight.
+
+### `ForestPlotOptions`
+
+`data`, `label`, `estimate`, `lower`, `upper`, `weight`, `pooled` (`"fixed"`,
+`"random"` or a `StudyEstimate` with an optional `label`), `log` (for ratios:
+a log axis, no effect at 1), `nullValue`, `estimateLabel`, `favors` (words
+for each side of no effect), `formatValue`.
+
+### `poolEstimates`
+
+`poolEstimates(studies: StudyEstimate[], method?: "fixed" | "random", log?: boolean): PooledEstimate`.
+Inverse-variance pooling, each standard error taken from its 95% interval
+((upper − lower) / 3.92, on the log scale for ratios): the fixed-effect
+estimate, or DerSimonian and Laird's random effects. Returns the pooled
+estimate and interval, each study's share of the weight, Cochran's Q, I² and τ².
+
+### `StudyEstimate`
+
+`{ estimate; lower; upper }`: an estimate with its 95% interval.
+
+### `PooledEstimate`
+
+`StudyEstimate` plus `method`, `weights` (shares summing to 1), `q`, `i2` and
+`tau2`.
+
+### `phylogeneticTree`
+
+`phylogeneticTree(options: PhylogeneticTreeOptions): string`. A tree in the
+rectangular layout: branch lengths to scale on a distance axis (or tips aligned
+as a cladogram), tips named and colored and shaped by group, internal labels
+such as support values at their nodes. The data table lists every node with its
+parent, branch length, distance from the root, label and group.
+
+### `PhylogeneticTreeOptions`
+
+`tree` (Newick text or a `TreeNode`), `groups` (tip name to group), `groupDomain`,
+`colors`, `branchLengths` (default: to scale when every branch has a length),
+`nodeLabels` (default true), `lengthLabel` (default "Substitutions per site").
+Two tips with one name throw; more than 400 tips throw.
+
+### `parseNewick`
+
+`parseNewick(text: string): TreeNode`. Parses one Newick tree: quoted labels
+(`'Homo sapiens'`, `''` for a quote), underscores as spaces in unquoted labels,
+bracketed comments, whitespace, internal labels and branch lengths in any
+number format; the final semicolon is optional. Errors name the character.
+
+### `TreeNode`
+
+`{ name?: string; length?: number; children: TreeNode[] }`.
+
 ## Primitives
 
 From the core, `enarratio`.
 
-Primitives return an `<svg class="enarratio">` sized for inline use (the timeline, a
-`<div>` holding one), named by a
-text alternative. They use the same theme. As on charts, `alt` is the text
+Primitives return a whole figure by default, and with `inline: true` an
+`<svg class="enarratio">` sized for inline use (the timeline, a `<div>` holding
+one), named by a text alternative; see
+[`PrimitiveFigureOptions`](#primitivefigureoptions). They use the same theme. As on charts, `alt` is the text
 alternative; `label` names what is measured and is used to generate one when
 `alt` is not given. One of the two is required.
 
@@ -503,7 +1057,9 @@ The summary is the generated sentence, the same one that is the primitive's
 text alternative when `alt` is not given (when only `alt` names a primitive
 there is nothing to generate from, and the summary is that `alt`). A missing
 value reads `no data` in these tables, because a blank cell is ambiguous to a
-screen reader.
+screen reader. The sentence, the columns and the words in them come from the
+options' `strings` (and numbers from `locale`), as on a chart; the column names
+below are the English ones.
 
 | Companion | Columns | One row per |
 |---|---|---|
@@ -512,6 +1068,17 @@ screen reader.
 | `progressRingTable` | Measure, Value, Total, Percent | Ring (one row) |
 | `timelineTable` | Event, Lane, Status, Start, End | Event, in time order |
 | `heatStripTable` | Cell, Value, Ramp step | Cell |
+
+### `PrimitiveFigureOptions`
+
+Every primitive returns a whole figure by default (B30, B51): its title (the
+`label` unless `title` is given), the finding, the drawing, the companion's
+summary and table, and the CSV link, with the text and issue options of
+[`FigureOptions`](#figureoptions) (`title`, `subtitle`, `caption`, `notes`,
+`source`, `byline`, `summary`, `csv`, `csvHref`, `id`, `dataTable`, `locale`,
+`strings`, `strict`, `onIssue`). `inline: true` returns the bare drawing,
+word-sized, for a sentence or a table cell. The figure carries
+`data-enarratio-static`, so `enhance()` leaves it alone.
 
 ### `PrimitiveTable`
 
@@ -553,9 +1120,30 @@ Each cell's value and its ramp step.
 
 ### `dataTableBlock`
 
-`dataTableBlock(table: DataTable, caption: string, display?): string`. A data
-table as the markup a figure carries: a closed `<details>` (default) or visually
-hidden. `caption` names the table for assistive technology.
+`dataTableBlock(table: DataTable, caption: string, display?, strings?): string`.
+A data table as the markup a figure carries: a closed `<details>` labeled "Show
+data" and "Hide data" (default) or visually hidden. `caption` names the table
+for assistive technology; `strings` translates the labels.
+
+### `tableChart`
+
+`tableChart(options: TableChartOptions<T>): string`. From the core. A table
+with graphics in its cells: a bar to scale beside a number, heat cells on the
+sequential ramp, a sparkline per row. It is one table, and the figure's data
+table: every cell prints its value as text, the first column holds row headers,
+the bars are decorative, and each sparkline is named by its values. Screen
+readers read it as a table, and `enhance()` sorts it by any column.
+
+### `TableChartOptions`
+
+`data`, `columns`, and the `FigureOptions` except `height` and `dataTable`.
+
+### `TableColumn`
+
+`{ field; label?; kind?; formatValue? }`. `kind` is `"text"` (default for
+strings), `"number"` (default for numbers), `"bar"` (from zero; with negatives,
+from a center line, in the second series color), `"heat"` (five equal steps
+of the column's range) or `"sparkline"` (a field holding an array of numbers).
 
 ## Themes
 
@@ -600,9 +1188,21 @@ since they are written into CSS.
 
 `stylesheet(theme: Theme, options?: StylesheetOptions): string`. The CSS a
 page includes once. Light and dark follow the page's `color-scheme`. It
-validates the theme with `defineTheme` first. Labels printed on marks take the
-scheme's text or background color when it reaches 4.5:1, otherwise black or
-white.
+validates the theme with `defineTheme` first and throws when `checkTheme`
+reports an error, so a chart is never drawn in colors some readers cannot read
+or tell apart. Labels printed on marks take the scheme's text or background
+color when it reaches 4.5:1, otherwise black or white.
+
+### `colorStyles`
+
+`colorStyles(markup: string): string`. The CSS for every per-chart color
+override (`colors`, `color`) in some rendered chart markup: one rule per
+distinct override, e.g.
+`.enarratio[data-enarratio-colors="--enarratio-series-2: #8a4a1b"] { --enarratio-series-2: #8a4a1b; }`.
+Charts carry no `style` attribute, so a page under a hash-based
+Content-Security-Policy (no `'unsafe-inline'`) puts these rules in its own
+stylesheet, or in a `<style>` whose hash it allows. Throws on an attribute value
+Enarratio would not write. Record [0022](design/0022-readable-for-every-reader.md).
 
 ### `baseStylesheet`
 
@@ -617,15 +1217,25 @@ JavaScript. See [Custom properties](#custom-properties) for what a site sets.
 
 ### `StylesheetOptions`
 
-`{ colorScheme?: { dark?: string; light?: string } }`: selectors for sites
-that switch schemes with an attribute, e.g. `'[data-theme="dark"]'`. They are
-the page's own and trusted, but may not contain the characters `defineTheme`
-refuses.
+`{ colorScheme?: { dark?: string; light?: string }; highContrast?: Theme }`.
+`colorScheme`: selectors for sites that switch schemes with an attribute, e.g.
+`'[data-theme="dark"]'`. They are the page's own and trusted, but may not contain
+the characters `defineTheme` refuses. `highContrast`: a theme whose colors
+replace the theme's under `prefers-contrast: more`, e.g. `highContrastTheme`;
+it is checked like the main theme.
 
 ### `defaultTheme`
 
-From `enarratio/themes`. Enarratio's own theme: neutral surfaces, system fonts. The package's only theme;
-the gallery's example theme (`examples/themes/example.ts`) shows how to write another.
+From `enarratio/themes`. Enarratio's own theme: neutral surfaces, system fonts. The gallery's example
+theme (`examples/themes/example.ts`) shows how to write another.
+
+### `highContrastTheme`
+
+From `enarratio/themes`. Black and white surfaces, text at 15:1 or more,
+gridlines at 3:1, and series colors that each reach 4.5:1 and stay 10
+CIEDE2000 apart under every simulated color vision deficiency. Use it as a
+site's theme, or for readers who ask for more contrast with
+`stylesheet(theme, { highContrast: highContrastTheme })`.
 
 ## Custom properties
 
@@ -664,7 +1274,7 @@ A test keeps this table and the stylesheet in step.
 | Property | Fallback | Controls |
 |---|---|---|
 | `--enarratio-font-size` | `1rem` | Text size of a figure; the other text sizes are relative to it |
-| `--enarratio-font-size-mark` | `12px` | Text inside the drawing: tick labels, direct labels |
+| `--enarratio-font-size-mark` | `0.75rem` | Text inside the drawing: tick labels, direct labels. Raised on narrow screens so it never renders under 12px |
 | `--enarratio-font-size-small` | `0.875em` | Caption, legend and data table |
 | `--enarratio-font-size-tooltip` | `0.8125rem` | Tooltip text |
 | `--enarratio-font-weight-title` | `600` | The visible title |
@@ -686,10 +1296,16 @@ A test keeps this table and the stylesheet in step.
 | `--enarratio-tooltip-shadow` | `0 2px 8px rgb(0 0 0 / 15%)` | The tooltip |
 | `--enarratio-z-tooltip` | `10` | Stacking of the tooltip |
 | `--enarratio-opacity-dimmed` | `0.25` | Marks outside the current filter |
+| `--enarratio-opacity-faded` | `0.5` | Other series while a point has the pointer or focus |
+| `--enarratio-z-expanded` | `20` | Stacking of an expanded chart |
+| `--enarratio-padding-expanded` | `1rem` | Padding of an expanded chart |
 | `--enarratio-opacity-brush` | `0.15` | Fill of a brushed range |
-| `--enarratio-focus-width-inner` | `5px` | Inner (background) ring on a focused mark |
-| `--enarratio-focus-width-outer` | `2.5px` | Outer (focus color) ring on a focused mark |
-| `--enarratio-focus-outline-width` | `3px` | Outline on a focused chart or legend button |
+| `--enarratio-opacity-texture` | `0.6` | Textures on filled series 2 to 8 and their legend swatches (1 under more contrast and forced colors) |
+| `--enarratio-bar-gap` | `1px` | The background-colored edge between adjacent bars and stacked segments |
+| `--enarratio-halo-width` | `3px` | The halo of bar color behind a name printed on a textured bar |
+| `--enarratio-focus-width-inner` | `5px` | Inner (background) ring on a focused point, twice its width |
+| `--enarratio-focus-width-outer` | `2.5px` | Outer (focus color) ring on a focused point |
+| `--enarratio-focus-outline-width` | `3px` | Outline on a focused button, field or frame |
 | `--enarratio-focus-outline-offset` | `2px` | Distance of that outline |
 | `--enarratio-timeline-list-indent` | `1.25em` | Indent of the timeline's plain list on narrow screens |
 | `--enarratio-duration-hover` | `150ms` | Dimming and un-dimming |
@@ -703,9 +1319,30 @@ Not properties, on purpose: the 30rem minimum width of a wide drawing (the
 same threshold decides whether a figure scrolls, in code, from the drawing's
 `width`), the 30rem below which a timeline gives way to its plain list (a
 container query cannot use a property), and the geometry written into the SVG itself (stroke widths, tick
-lengths, the size of direct labels), which is part of each chart's drawing and
-cannot be set from CSS. Animation stops under `prefers-reduced-motion` whatever
-the durations are.
+lengths, the textures), which is part of each chart's drawing and cannot be set
+from CSS. Animation stops under `prefers-reduced-motion` whatever the durations
+are, and no animation runs longer than 5 seconds whatever they are set to.
+
+### Reader settings
+
+The base rules follow what the reader has asked for (record
+[0022](design/0022-readable-for-every-reader.md)):
+
+- **Font size.** Text in the drawing is in `rem`, so it follows the browser's
+  text size, and each chart's SVG carries a `font-size` that grows as the
+  drawing shrinks, so it never renders under 12px at default zoom.
+- **`prefers-contrast: more`.** Textures at full strength, wider gaps between
+  bars, gridlines in the muted text color, outlined legend swatches, and the
+  `highContrast` theme's colors when the stylesheet has one.
+- **`forced-colors: active`** (Windows High Contrast). Every color becomes a
+  system color: marks `CanvasText` on `Canvas`, told apart by textures, line
+  dashes, symbols and labels; the sequential ramp in steps between the two;
+  focus in `Highlight`.
+- **`prefers-reduced-motion: reduce`.** No animation or transition.
+- **Print.** The light scheme, no scrolling frame, a figure kept on one page,
+  the data table printed open (where `::details-content` is supported), and no
+  tooltip, focus ring or brush. Anything carrying `data-enarratio-control` is
+  hidden too.
 
 ## Color checks
 
@@ -721,8 +1358,10 @@ background inside focus color, so one always contrasts with its neighbor.
 
 ### `CheckReport`
 
-`{ theme: string; ok: boolean; issues: CheckIssue[] }`. `ok` is false only for
-errors; warnings about similar series colors leave it true.
+`{ theme: string; ok: boolean; issues: CheckIssue[] }`. `ok` is false when
+there is any error. Every check reports errors, two series colors closer than
+`seriesDifference` included; `warning` remains in the type for findings that
+do not fail a theme, and none do today.
 
 ### `CheckIssue`
 
@@ -739,6 +1378,14 @@ errors; warnings about similar series colors leave it true.
 ### `contrastRatio`
 
 `contrastRatio(a: string, b: string): number`. WCAG 2 contrast, 1 to 21.
+
+### `labelColor`
+
+`labelColor(fill: string, text: HexColor, background: HexColor): HexColor`. The
+color for text printed on a mark of color `fill`: the scheme's text or
+background color, whichever contrasts more, when it reaches 4.5:1 on the fill,
+otherwise black or white, one of which always does. The stylesheet picks bar
+label colors this way.
 
 ### `colorDifference`
 
@@ -769,7 +1416,34 @@ re-applies them.
 
 ### `EnhanceOptions`
 
-`{ tooltips?; filter?; brush?; entrance? }`, each `true` unless set `false`.
+`{ tooltips?; filter?; brush?; entrance?; table?; expand?; url?; strings? }`.
+
+| Option | Default | Does |
+|---|---|---|
+| `tooltips` | `true` | Hover and focus details on every mark |
+| `filter` | `true` | A click, Enter or Space on a mark or legend entry filters by it |
+| `brush` | `true` | On a continuous x axis, a range by drag, two clicks, Shift with arrows, or a from-and-to form ("Pick a range") |
+| `entrance` | `true` | Marks animate in the first time the chart scrolls into view |
+| `table` | `true` | The data table sorts by any column (a button in each header, `aria-sort`), and a "Show table" button swaps the chart for the table and back |
+| `expand` | `false` | An "Expand" button fills the window with the chart; Escape, the button, or focus leaving the chart closes it |
+| `url` | `false` | Keeps the filter and range in the address as `?{id}={field}:{value}` and `?{id}-range={low}..{high}`, so a link reproduces the view. Needs the figure's `id`. A view read from the address fires `enarratio:select` or `enarratio:brush`, so the page can follow it |
+| `strings` | English | Translations of any of the [`EnhanceStrings`](#enhancestrings) |
+
+### `ResolvedOptions`
+
+The options a chart was enhanced with, every default filled in, `strings`
+complete. `EnhancedChart.options` holds them.
+
+### `EnhanceStrings`
+
+Every string the layer writes: the key hint, the position after each point's
+label (`"{index} of {count}"`), the live region's announcements, and the
+labels of its buttons and form. `{name}` is filled in.
+
+### `ENHANCE_STRINGS`
+
+The English `EnhanceStrings`. A page passes only those it translates:
+`enhance(document, { strings: { showTable: "Tabelle zeigen" } })`.
 
 ### `EnhancedChart`
 
@@ -786,6 +1460,8 @@ re-applies them.
   that series and presses its legend entry, even on a chart whose clicks
   filter by x.
 - `clear()` removes the filter and range.
+- The live region says "Chart updated" after `update`, and announces filters,
+  ranges and table sorts.
 - The markup given to `update` should come from Enarratio. It is parsed inertly
   and sanitized first: only elements and attributes Enarratio emits survive,
   with event handlers, scripts, unsafe links and non-custom-property styles
@@ -809,20 +1485,34 @@ when cleared.
 
 ### Keyboard
 
+The chart's points are native controls laid over the marks, one per mark: a
+button where it filters, an image otherwise, each named by its details and its
+place in its series ("Year 2019, Talks: 2, 1 of 6"). They are grouped as an
+application, described by the key hint, which also shows while a point has
+focus. So screen readers read the chart as its image, hint and table in browse
+mode, and switch to focus mode only once a point has focus. The same keys work
+on every chart type.
+
 | Key | Does |
 |---|---|
-| Tab | Moves into the chart (one tab stop) and on to the next control. |
-| Left, Right | Previous or next category. |
-| Up, Down | Through a stack or group within a category. |
-| Home, End | First or last mark. |
-| Enter, Space | Filter by the focused mark; again to clear. |
-| Shift with arrows | Extend a range on a continuous axis. |
-| Escape | Hide the tooltip, and clear the filter and the range. |
+| Tab | Moves into the chart (one tab stop, on the last point used) and on to the next control. |
+| Left, Right | Previous or next point along the series. |
+| Up, Down | Next or previous series: the mark above or below in a stack or group, or the nearest point of the next series. |
+| Home, End | First or last point of the series. |
+| Page Up, Page Down | Ten points back or forward along the series. |
+| Backspace | Back to the point before the last move. |
+| Enter, Space | Filter by the focused point; again to clear. |
+| Shift with the arrows, Home, End, Page Up or Page Down | Extend a range on a continuous axis. |
+| Escape | Hide the tooltip, and clear the filter and the range; with nothing to clear, close an expanded chart. |
+
+Keys with Alt, Control or Command, and every key the chart does not use, pass
+through to the browser and the screen reader. Escape hides a hovered tooltip
+wherever focus is.
 
 ### Pointer
 
 - Hover or focus shows the mark's details in a tooltip, which stays while the
-  pointer moves onto it.
+  pointer moves onto it, and fades the other series.
 - Click a mark (or anywhere in its 24 CSS pixel target) to filter; click again
   to clear.
 - On a continuous x axis, drag to pick a range, or click the plot once for one

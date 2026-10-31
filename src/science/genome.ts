@@ -1,8 +1,16 @@
 import * as Plot from "@observablehq/plot";
-import { defaultFormat, markKey, maxOf } from "../render/data.js";
-import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
+import { markKey, maxOf } from "../render/data.js";
+import { valueRange } from "../render/describe.js";
+import {
+  type FigureOptions,
+  figure,
+  type SeriesColor,
+  validateFigure,
+  withUnit,
+} from "../render/figure.js";
 import { decorate, keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
+import { numberFormat, stringsFor } from "../render/text.js";
 
 /** One annotated feature on a genome: a gene, a coding sequence, a primer, a mutation site. */
 export interface GenomeFeature {
@@ -46,8 +54,6 @@ interface Placed {
 }
 
 const KIND = "genomeTrack";
-const DEFAULT_TRACK = "Features";
-const DEFAULT_TYPE = "Feature";
 const ROW_SEPARATOR = "\u0000";
 
 /** Greedy interval packing: each feature takes the first lane of its track where it fits. */
@@ -69,6 +75,22 @@ function packLanes(
     lanes[i] = lane;
   }
   return lanes;
+}
+
+/** Pairs of features in the same track that share at least one position. */
+function overlappingPairs(
+  features: readonly GenomeFeature[],
+  trackOf: (f: GenomeFeature) => string,
+): number {
+  const order = [...features].sort((a, b) => a.start - b.start);
+  let pairs = 0;
+  order.forEach((f, i) => {
+    for (const g of order.slice(i + 1)) {
+      if (g.start > f.end) break;
+      if (trackOf(g) === trackOf(f)) pairs += 1;
+    }
+  });
+  return pairs;
 }
 
 /**
@@ -105,8 +127,11 @@ export function genomeTrack(options: GenomeTrackOptions): string {
       );
     }
   });
-  const trackOf = (f: GenomeFeature): string => f.track ?? DEFAULT_TRACK;
-  const typeOf = (f: GenomeFeature): string => f.type ?? DEFAULT_TYPE;
+  const strings = stringsFor(options.strings);
+  const { terms } = strings;
+  const number = numberFormat(options.locale ? { locale: options.locale } : {});
+  const trackOf = (f: GenomeFeature): string => f.track ?? terms.features;
+  const typeOf = (f: GenomeFeature): string => f.type ?? terms.feature;
   const tracks = options.trackDomain
     ? [...options.trackDomain]
     : [...new Set(features.map(trackOf))];
@@ -144,10 +169,16 @@ export function genomeTrack(options: GenomeTrackOptions): string {
       rows.push(`${track}${ROW_SEPARATOR}${lane}`);
   }
 
+  const lengthOf = (f: GenomeFeature): number => f.end - f.start + 1;
+  const nt = (n: number): string => `${number(n)} ${terms.nucleotides}`;
   const strandWord = (s: GenomeFeature["strand"]): string =>
-    s === 1 ? "forward strand" : s === -1 ? "reverse strand" : "no strand";
+    s === 1 ? terms.forwardStrand : s === -1 ? terms.reverseStrand : terms.noStrand;
   const describe = (p: Placed): string =>
-    `${p.feature.name} (${p.type}): ${defaultFormat(p.feature.start)} to ${defaultFormat(p.feature.end)}, ${defaultFormat(p.feature.end - p.feature.start + 1)} nt, ${strandWord(p.feature.strand)}`;
+    `${p.feature.name} (${p.type}): ${strings.range(number(p.feature.start), number(p.feature.end))}, ${nt(lengthOf(p.feature))}, ${strandWord(p.feature.strand)}`;
+  const positionLabel =
+    options.positionLabel === undefined
+      ? withUnit(terms.position, terms.nucleotides)
+      : options.positionLabel;
 
   const width = options.width ?? 720;
   const rowHeight = 30;
@@ -264,7 +295,7 @@ export function genomeTrack(options: GenomeTrackOptions): string {
       x: {
         type: "linear",
         domain: [1, length],
-        label: options.positionLabel === undefined ? "Position (nt)" : options.positionLabel,
+        label: positionLabel,
         labelAnchor: "center",
         labelArrow: "none",
         grid: true,
@@ -283,21 +314,40 @@ export function genomeTrack(options: GenomeTrackOptions): string {
     options.alt,
   );
 
+  // The shortest and longest features, the first of each in sequence order.
+  const bySize = [...features].sort((a, b) => lengthOf(a) - lengthOf(b) || a.start - b.start);
+  const shortest = bySize[0] as GenomeFeature;
+  const longest = bySize.reduce((best, f) => (lengthOf(f) > lengthOf(best) ? f : best));
+  const strands = (s: GenomeFeature["strand"]): string =>
+    number(features.filter((f) => (f.strand ?? 0) === s).length);
   return figure(options, {
     kind: "genome",
     svg,
+    // The sequence as the axis, and the features in words: lengths, strands and overlaps.
+    description: {
+      axes: [valueRange("x", positionLabel, [1, length], number)],
+      sentence: strings.genomeSummary({
+        features: number(features.length),
+        shortest: { value: nt(lengthOf(shortest)), at: shortest.name },
+        longest: { value: nt(lengthOf(longest)), at: longest.name },
+        forward: strands(1),
+        reverse: strands(-1),
+        unstranded: strands(0),
+        overlaps: number(overlappingPairs(features, trackOf)),
+      }),
+    },
     legend: plan.legend,
     seriesField: "type",
     slotColors: plan.slotColors,
     table: {
       columns: [
-        "Feature",
-        "Type",
-        ...(tracks.length > 1 ? ["Track"] : []),
-        "Start",
-        "End",
-        "Length (nt)",
-        "Strand",
+        terms.feature,
+        terms.type,
+        ...(tracks.length > 1 ? [terms.track] : []),
+        terms.start,
+        terms.end,
+        withUnit(terms.length, terms.nucleotides) as string,
+        terms.strand,
       ],
       rows: placed
         .slice()
@@ -311,7 +361,7 @@ export function genomeTrack(options: GenomeTrackOptions): string {
           ...(tracks.length > 1 ? [p.track] : []),
           String(p.feature.start),
           String(p.feature.end),
-          String(p.feature.end - p.feature.start + 1),
+          String(lengthOf(p.feature)),
           p.feature.strand === 1 ? "+" : p.feature.strand === -1 ? "-" : "",
         ]),
     },

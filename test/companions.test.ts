@@ -27,7 +27,7 @@ describe("sparklineTable", () => {
 
   it("states the values the sparkline's text alternative states", () => {
     expect(summary).toBe("Entries per year: 5 values, from 3 to 11; lowest 3, highest 11.");
-    expect(parse(sparkline(options)).getAttribute("aria-label")).toBe(summary);
+    expect(parse(sparkline({ ...options, inline: true })).getAttribute("aria-label")).toBe(summary);
   });
 
   it("tabulates every position, with no data for a gap", () => {
@@ -43,7 +43,9 @@ describe("sparklineTable", () => {
 
   it("matches the drawn line: its heights read back as the tabulated values", () => {
     const d =
-      parse(sparkline(options)).querySelector("path:not([fill-opacity])")?.getAttribute("d") ?? "";
+      parse(sparkline({ ...options, inline: true }))
+        .querySelector("path:not([fill-opacity])")
+        ?.getAttribute("d") ?? "";
     const ys = [...d.matchAll(/[ML]([\d.]+),([\d.]+)/g)].map((m) => Number(m[2]));
     // The drawing maps min..max onto height-2.5..2.5 (an inset of 2.5), so invert it.
     const read = ys.map((y) => 3 + ((40 - 2.5 - y) * (11 - 3)) / (40 - 5));
@@ -89,7 +91,9 @@ describe("uptimeStripTable", () => {
     expect(summary).toBe(
       "API, last 5 hours: 5 periods, 2 up, 1 degraded, 1 down, 1 no data; 75% available.",
     );
-    expect(parse(uptimeStrip(options)).getAttribute("aria-label")).toBe(summary);
+    expect(parse(uptimeStrip({ ...options, inline: true })).getAttribute("aria-label")).toBe(
+      summary,
+    );
   });
 
   it("tabulates each period with its status, named as in the hover details", () => {
@@ -100,9 +104,9 @@ describe("uptimeStripTable", () => {
       ["Period 4", "down"],
       ["Period 5", "no data"],
     ]);
-    const titles = [...parse(uptimeStrip(options)).querySelectorAll("rect title")].map(
-      (t) => t.textContent,
-    );
+    const titles = [
+      ...parse(uptimeStrip({ ...options, inline: true })).querySelectorAll("rect title"),
+    ].map((t) => t.textContent);
     expect(titles).toEqual(table.rows.map((r) => `${r[0]}: ${r[1]}`));
   });
 
@@ -121,13 +125,15 @@ describe("progressRingTable", () => {
 
   it("states the value, total and percentage the ring's text alternative states", () => {
     expect(summary).toBe("Chapters drafted: 7 of 12 (58%)");
-    expect(parse(progressRing(options)).getAttribute("aria-label")).toBe(summary);
+    expect(parse(progressRing({ ...options, inline: true })).getAttribute("aria-label")).toBe(
+      summary,
+    );
   });
 
   it("tabulates the numbers the ring draws", () => {
     expect(table.columns).toEqual(["Measure", "Value", "Total", "Percent"]);
     expect(table.rows).toEqual([["Chapters drafted", "7", "12", "58%"]]);
-    const root = parse(progressRing({ ...options, size: 100, thickness: 10 }));
+    const root = parse(progressRing({ inline: true, ...options, size: 100, thickness: 10 }));
     const arc = root.querySelectorAll("circle")[1]?.getAttribute("stroke-dasharray") ?? "";
     const [filled, whole] = arc.split(" ").map(Number) as [number, number];
     expect(Math.round((filled / whole) * 100)).toBe(58);
@@ -155,7 +161,7 @@ describe("heatStripTable", () => {
     expect(summary).toBe(
       "Requests per hour: 5 cells, from 3 to 14; lowest 3, highest 14; 1 with no data.",
     );
-    expect(parse(heatStrip(options)).getAttribute("aria-label")).toBe(summary);
+    expect(parse(heatStrip({ ...options, inline: true })).getAttribute("aria-label")).toBe(summary);
   });
 
   it("tabulates each cell's value and ramp step, as drawn", () => {
@@ -167,7 +173,7 @@ describe("heatStripTable", () => {
       ["d", "9", "3"],
       ["e", "14", "5"],
     ]);
-    const drawn = [...parse(heatStrip(options)).querySelectorAll("rect")];
+    const drawn = [...parse(heatStrip({ ...options, inline: true })).querySelectorAll("rect")];
     drawn.forEach((cell, i) => {
       const step = table.rows[i]?.[2];
       expect(cell.getAttribute("fill")).toBe(step ? `var(--enarratio-sequential-${step})` : "none");
@@ -200,7 +206,11 @@ describe("timelineTable", () => {
     expect(summary).toBe(
       "Agent runs: 2 events in 2 lanes, 2026-06-09 00:00 UTC to 2026-06-09 08:00 UTC; 1 ok, 1 error.",
     );
-    expect(parse(timeline(options)).querySelector("svg")?.getAttribute("aria-label")).toBe(summary);
+    expect(
+      parse(timeline({ ...options, inline: true }))
+        .querySelector("svg")
+        ?.getAttribute("aria-label"),
+    ).toBe(summary);
   });
 
   it("tabulates every event in time order, the end blank for a point", () => {
@@ -212,7 +222,7 @@ describe("timelineTable", () => {
   });
 
   it("agrees with the drawing's plain list and hover text", () => {
-    const root = parse(timeline(options));
+    const root = parse(timeline({ ...options, inline: true }));
     const list = [...root.querySelectorAll("li")].map((li) => li.textContent);
     expect(list).toHaveLength(table.rows.length);
     table.rows.forEach((row, i) => {

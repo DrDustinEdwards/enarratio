@@ -5,3 +5,4 @@
  */
 
 export { defaultTheme } from "./default.js";
+export { highContrastTheme } from "./high-contrast.js";

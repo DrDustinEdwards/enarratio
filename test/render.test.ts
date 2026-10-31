@@ -27,7 +27,8 @@ describe("server rendering", () => {
       default: string;
     };
     const root = parse(`<div>${module.default}</div>`);
-    const svgs = [...root.querySelectorAll("svg")];
+    // Decorative drawings (a table cell's bar) are hidden; every other SVG is named.
+    const svgs = [...root.querySelectorAll('svg:not([aria-hidden="true"])')];
     expect(svgs.length).toBeGreaterThan(0);
     for (const svg of svgs) {
       // One image, or a named group when its marks are links.

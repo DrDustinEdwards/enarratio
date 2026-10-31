@@ -38,7 +38,9 @@ describe("F1: marks on continuous charts can be clicked with a real pointer", ()
     const p = await harness.open("index.html", "light");
     await mouseClick(p, selector);
     expect(await eventLog(p, example)).toMatch(/^enarratio:select .*"value":"[^"]+"/);
-    expect(await p.$eval(selector, (el) => el.getAttribute("aria-pressed"))).toBe("true");
+    expect(
+      await p.$(`[data-example="${example}"] .enarratio-points [aria-pressed="true"]`),
+    ).not.toBeNull();
     await p.close();
   });
 });
@@ -114,7 +116,7 @@ describe("F6: the tooltip can be dismissed and hovered", () => {
     await new Promise((r) => setTimeout(r, 500));
     expect(await p.$(tip)).not.toBeNull();
     await p.mouse.move(box.x, box.y);
-    await p.$eval(mark, (el) => (el as SVGElement).focus());
+    await p.focus('[data-example="stacked-bar"] .enarratio-points > [tabindex="0"]');
     expect(await p.$(tip)).not.toBeNull();
     await p.keyboard.press("Escape");
     expect(await p.$(tip)).toBeNull();
@@ -123,44 +125,38 @@ describe("F6: the tooltip can be dismissed and hovered", () => {
 });
 
 describe("F7: the focus ring has two tones", () => {
-  it("draws a background ring inside a focus ring around the focused mark", async () => {
+  it("draws a background ring inside a focus ring around the focused point, above the marks", async () => {
     const p = await harness.open("index.html", "light");
-    await p.$eval('[data-example="stacked-bar"] [data-enarratio-key]', (el) =>
-      (el as SVGElement).focus(),
-    );
-    const strokes = await p.$$eval(
-      '[data-example="stacked-bar"] .enarratio-focus-ring rect',
-      (rects) => rects.map((r) => getComputedStyle(r).stroke),
-    );
-    const colors = await p.evaluate(() => {
-      const figure = document.querySelector('[data-example="stacked-bar"] figure') as Element;
-      const css = getComputedStyle(figure);
-      return [
-        css.getPropertyValue("--enarratio-background"),
-        css.getPropertyValue("--enarratio-focus"),
-      ];
+    const point = '[data-example="stacked-bar"] .enarratio-points > [tabindex="0"]';
+    await p.focus(point);
+    const ring = await p.$eval(point, (el) => {
+      const css = getComputedStyle(el);
+      return [css.outlineStyle, css.outlineColor, css.boxShadow];
     });
-    expect(strokes).toHaveLength(2);
-    expect(strokes[0]).not.toBe(strokes[1]);
-    expect(colors.every((c) => c.trim() !== "")).toBe(true);
+    expect(ring[0]).toBe("solid");
+    expect(ring[2]).toMatch(/^rgb/);
+    expect(ring[2]?.startsWith(ring[1] ?? "")).toBe(false);
+    // The points come after the drawing, so the ring is painted over every mark (B13).
+    expect(
+      await p.$eval(point, (el) => el.parentElement?.previousElementSibling?.matches("svg")),
+    ).toBe(true);
     await p.$eval(".cap-theme-button", (el) => (el as HTMLElement).focus());
-    expect(await p.$('[data-example="stacked-bar"] .enarratio-focus-ring')).toBeNull();
+    expect(await p.$eval(point, (el) => getComputedStyle(el).outlineStyle)).toBe("none");
     await p.close();
   });
 });
 
 describe("F9: keyboard order follows the data, in facets and when enhanced while hidden", () => {
+  /** The focused point's category and series, from its label ("Assay qPCR, Manual: 64, …"). */
   const focusedPlace = (p: Page): Promise<string> =>
-    p.evaluate(
-      () =>
-        `${document.activeElement?.getAttribute("data-enarratio-x")}|${document.activeElement?.getAttribute("data-enarratio-series")}`,
-    );
+    p.evaluate(() => {
+      const [x, series] = (document.activeElement?.getAttribute("aria-label") ?? "").split(/, |: /);
+      return `${x?.split(" ").at(-1)}|${series}`;
+    });
 
   it("steps through every category of a grouped chart and up within a group", async () => {
     const p = await harness.open("index.html", "light");
-    await p.$eval('[data-example="grouped-bar"] [data-enarratio-key][tabindex="0"]', (el) =>
-      (el as SVGElement).focus(),
-    );
+    await p.focus('[data-example="grouped-bar"] .enarratio-points > [tabindex="0"]');
     expect(await focusedPlace(p)).toBe("Plaque|Manual");
     await p.keyboard.press("ArrowRight");
     expect(await focusedPlace(p)).toBe("TCID50|Manual");
@@ -186,9 +182,7 @@ describe("F9: keyboard order follows the data, in facets and when enhanced while
       enhance(section);
       section.style.display = "";
     });
-    await p.$eval('[data-example="stacked-bar"] [data-enarratio-key][tabindex="0"]', (el) =>
-      (el as SVGElement).focus(),
-    );
+    await p.focus('[data-example="stacked-bar"] .enarratio-points > [tabindex="0"]');
     expect(await focusedPlace(p)).toBe("2019|Publications");
     await p.keyboard.press("ArrowRight");
     expect(await focusedPlace(p)).toBe("2020|Publications");
@@ -252,7 +246,7 @@ describe("F18: enhancing again with other options re-applies them", () => {
       const section = document.querySelector('[data-example="stacked-bar"]') as HTMLElement;
       const [again] = enhance(section, { filter: false });
       return {
-        mark: section.querySelector("[data-enarratio-key]")?.getAttribute("role"),
+        mark: section.querySelector(".enarratio-points > *")?.getAttribute("role"),
         filter: again?.options.filter,
       };
     });
@@ -261,24 +255,27 @@ describe("F18: enhancing again with other options re-applies them", () => {
   });
 });
 
-describe("A13: text stays readable on a narrow screen", () => {
-  it("keeps tick labels at least 9 pixels tall at 320 CSS pixels wide, scrolling the chart instead", async () => {
+describe("A13, B3: text stays readable on a narrow screen", () => {
+  it("keeps tick labels at least 12 pixels at 320 CSS pixels wide, scrolling the chart instead", async () => {
     const p = await harness.open("index.html", "light");
     await p.setViewport({ width: 320, height: 800, deviceScaleFactor: 1 });
     const measures = await p.evaluate(() => {
       const text = document.querySelector(
         '[data-example="stacked-bar"] [data-enarratio-mark="x-axis tick label"] text',
-      );
+      ) as SVGTextElement;
+      const svg = text.ownerSVGElement as SVGSVGElement;
       const frame = document.querySelector(
         '[data-example="stacked-bar"] .enarratio-frame',
       ) as HTMLElement;
+      // The font size in the drawing's units, times the drawing's scale on screen.
+      const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
       return {
-        textHeight: text?.getBoundingClientRect().height ?? 0,
+        fontSize: Number.parseFloat(getComputedStyle(text).fontSize) * scale,
         frameScrolls: frame.scrollWidth > frame.clientWidth,
         pageScrolls: document.documentElement.scrollWidth > document.documentElement.clientWidth,
       };
     });
-    expect(measures.textHeight).toBeGreaterThanOrEqual(9);
+    expect(measures.fontSize).toBeGreaterThanOrEqual(12);
     expect(measures.frameScrolls).toBe(true);
     expect(measures.pageScrolls).toBe(false);
     await p.close();

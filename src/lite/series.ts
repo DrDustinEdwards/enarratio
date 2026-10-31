@@ -65,7 +65,8 @@ export function seriesFrame(
   const x = continuous(prepared.time ? "utc" : "linear", xDomain, xRange);
 
   const values = [...ys].filter((v): v is number => v !== null && (!y.log || v > 0));
-  let yDomain: Pair = extent(values) ?? (y.log ? [1, 10] : [0, 1]);
+  let yDomain: Pair =
+    !y.log && model.valueAxis.flat ? [0, 1] : (extent(values) ?? (y.log ? [1, 10] : [0, 1]));
   if (y.zero && (yDomain[0] > 0 || yDomain[1] < 0)) {
     yDomain = yDomain[0] > 0 ? [0, yDomain[1]] : [yDomain[0], 0];
   }
@@ -74,7 +75,9 @@ export function seriesFrame(
 
   const yCount = (height - marginBottom - marginTop) / 35;
   const yAt = y.log ? logTicks(yDomain, yCount) : ticks(yDomain[0], yDomain[1], yCount);
-  const yFormat = y.log ? logTickFormat(yDomain, yCount) : linearTickFormat(yDomain, yCount);
+  const yFormat = y.log
+    ? logTickFormat(yDomain, yCount)
+    : (model.valueAxis.format ?? linearTickFormat(yDomain, yCount));
   const yTicks: Tick[] = yAt.map((t) => ({ at: yScale(t), label: yFormat(t) }));
 
   const xCount = (xRange[1] - xRange[0]) / 80;

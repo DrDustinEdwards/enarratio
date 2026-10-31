@@ -1,4 +1,4 @@
-// A trend beside a number, with a text alternative generated from the data.
+// A primitive as a whole figure (the default): title, generated description, drawing, table and CSV.
 import { sparkline } from "enarratio";
 
 export default sparkline({

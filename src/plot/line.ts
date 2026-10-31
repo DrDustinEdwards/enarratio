@@ -1,6 +1,7 @@
 import * as Plot from "@observablehq/plot";
 import {
   AREA_OPACITY,
+  type AreaChartOptions,
   areaModel,
   type LineChartOptions,
   lineModel,
@@ -8,11 +9,15 @@ import {
   type Point,
   type Prepared,
   type SeriesChartOptions,
+  type SeriesModel,
+  spreadLabels,
 } from "../render/line-model.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
+import { drawAnnotations } from "./annotate.js";
 
 export type {
+  AreaChartOptions,
   EventMarker,
   LineBand,
   LineChartOptions,
@@ -57,6 +62,14 @@ function xScale(prepared: Prepared, yearTicks: number[] | undefined) {
   } as const;
   if (!yearTicks) return base;
   return { ...base, ticks: yearTicks, tickFormat: (d: number) => String(d) };
+}
+
+/** The y scale's domain when every value is zero, and its tick format for huge values (B41). */
+function yAxis(model: SeriesModel) {
+  return {
+    ...(model.valueAxis.flat ? { domain: [0, 1] } : {}),
+    ...(model.valueAxis.format ? { tickFormat: model.valueAxis.format } : {}),
+  };
 }
 
 /** The labeled rule where observed data end and the forecast begins. */
@@ -147,6 +160,19 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
           fill: "series",
           textAnchor: "start",
           dx: 6,
+          // Labels of series that end close together are moved apart (B8).
+          render: (index, scales, values, dimensions, context, next) => {
+            const group = next?.(index, scales, values, dimensions, context) ?? null;
+            const texts = [...(group?.children ?? [])];
+            const at = texts.map((t) =>
+              /translate\(([^,]+),([^)]+)\)/.exec(t.getAttribute("transform") ?? ""),
+            );
+            const ys = spreadLabels(at.map((m) => Number(m?.[2])));
+            for (const [i, t] of texts.entries()) {
+              t.setAttribute("transform", `translate(${at[i]?.[1]},${ys[i]})`);
+            }
+            return group;
+          },
         }),
       ),
     );
@@ -169,11 +195,14 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
         grid: true,
         nice: true,
         ...(model.log ? {} : { zero: options.zero ?? true }),
+        ...(model.log ? {} : yAxis(model)),
       },
       color: { domain: seriesNames, range: [...model.plan.range] },
       marks,
     },
-    options.alt,
+    model.alt,
+    "img",
+    drawAnnotations("lineChart", options.annotations),
   );
 
   return model.figure(rendered.svg, rendered.x);
@@ -181,13 +210,13 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
 
 /**
  * An area chart over time or any continuous x. Several series stack, so the top edge is their
- * total. A missing value is a gap: that series' band breaks there, has no point to hover, and
+ * total, or with `percent` each x stacks to 100%. A missing value is a gap: that series' band breaks there, has no point to hover, and
  * its table cell is blank (F5). Keyed points carry hover details as in {@link lineChart}.
  *
  * @example
  * areaChart({ data: monthly, x: "month", y: "hours", series: "activity", alt: "..." });
  */
-export function areaChart<T extends object>(options: SeriesChartOptions<T>): string {
+export function areaChart<T extends object>(options: AreaChartOptions<T>): string {
   const model = areaModel(options);
   const { prepared } = model;
   const { points, seriesNames } = prepared;
@@ -208,6 +237,7 @@ export function areaChart<T extends object>(options: SeriesChartOptions<T>): str
         grid: true,
         nice: true,
         zero: true,
+        ...yAxis(model),
       },
       color: { domain: seriesNames, range: [...model.plan.range] },
       marks: [
@@ -254,7 +284,9 @@ export function areaChart<T extends object>(options: SeriesChartOptions<T>): str
         ...annotations(options, model.markers),
       ],
     },
-    options.alt,
+    model.alt,
+    "img",
+    drawAnnotations("areaChart", options.annotations),
   );
 
   return model.figure(rendered.svg, rendered.x);

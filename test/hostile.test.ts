@@ -32,6 +32,8 @@ const PAYLOADS = [
 
 /** Elements Enarratio itself emits; anything else in the parse came from the payload. */
 const EMITTED = new Set([
+  "defs",
+  "pattern",
   "div",
   "figure",
   "p",
@@ -146,6 +148,7 @@ const RENDERERS: Record<string, Render> = {
     }),
   timeline: (p) =>
     timeline({
+      inline: true,
       label: p,
       lanes: [p, "b"],
       formatTime: (d) => `${p}${d.getUTCHours()}`,
@@ -156,6 +159,7 @@ const RENDERERS: Record<string, Render> = {
     }),
   heatStrip: (p) =>
     heatStrip({
+      inline: true,
       values: [1, 2, null],
       label: p,
       cellLabels: [p, p, p],
@@ -242,9 +246,9 @@ const RENDERERS: Record<string, Render> = {
       alt: p,
       title: p,
     }),
-  sparkline: (p) => sparkline({ values: [1, 2, 3], label: p }),
-  progressRing: (p) => progressRing({ value: 0.5, label: p }),
-  uptimeStrip: (p) => uptimeStrip({ slots: [{ status: "up", label: p }], label: p }),
+  sparkline: (p) => sparkline({ inline: true, values: [1, 2, 3], label: p }),
+  progressRing: (p) => progressRing({ inline: true, value: 0.5, label: p }),
+  uptimeStrip: (p) => uptimeStrip({ inline: true, slots: [{ status: "up", label: p }], label: p }),
 };
 
 describe("F12: hostile data cannot create markup", () => {

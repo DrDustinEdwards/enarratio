@@ -36,6 +36,11 @@ Each record says where a decision came from:
 | [0018](0018-shared-security-headers.md) | The gallery's security headers come from site-runtime |
 | [0019](0019-gallery-on-capsomer.md) | The gallery's page is Capsomer's |
 | [0020](0020-gallery-in-the-manual-theme.md) | The gallery in the family's manual theme, in rose |
+| [0021](0021-native-points-and-reader-controls.md) | Native points over the marks, the full keyboard and the reader controls |
+| [0022](0022-readable-for-every-reader.md) | Readable for every reader: text size, textures, reader settings and a strict CSP |
+| [0023](0023-the-figure-in-words.md) | The figure in words: finding, overview, summary, source and data |
+| [0024](0024-more-chart-types.md) | The chart types of 0.4.0, and how each stays accessible |
+| [0025](0025-new-charts-on-the-figure.md) | The new chart types on the figure, in both renderers |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

@@ -79,11 +79,22 @@ const pages = [
   ["default", "index.html"],
   ["example", "example.html"],
 ] as const;
-const schemes = ["light", "dark"] as const;
+/** Each color scheme, and forced colors (Windows High Contrast, B57) over the light one. */
+const schemes = ["light", "dark", "forced"] as const;
 
 describe.skipIf(!hasImages && !update).each(pages)("%s theme", (theme, file) => {
   it.each(schemes)("matches the stored images, %s", async (scheme) => {
-    const page = await harness.open(file, scheme, { scripts: false });
+    const page = await harness.open(file, scheme === "forced" ? "light" : scheme, {
+      scripts: false,
+    });
+    if (scheme === "forced") {
+      // Emulating replaces the harness's features, so it repeats them.
+      await page.emulateMediaFeatures([
+        { name: "forced-colors", value: "active" },
+        { name: "prefers-color-scheme", value: "light" },
+        { name: "prefers-reduced-motion", value: "reduce" },
+      ]);
+    }
     const sections = await page.$$("section.example");
     expect(sections.length).toBeGreaterThan(0);
     const problems: string[] = [];

@@ -4,10 +4,10 @@
  * light one (`enarratio/lite`), so both draw the same chart from the same options.
  */
 
+import { type Annotated, withNotes } from "./annotation.js";
 import {
   calendarDates,
   DAY,
-  defaultFormat,
   domainOf,
   type KeysOfType,
   markKey,
@@ -17,14 +17,26 @@ import {
   readDate,
   readLabel,
   readNumber,
+  safeHref,
 } from "./data.js";
 import type { MarkDatum } from "./datum.js";
-import { type FigureOptions, figure, type SeriesColor, validateFigure } from "./figure.js";
+import {
+  type AxisUnits,
+  type FigureOptions,
+  figure,
+  type SeriesColor,
+  slotStyle,
+  unitLabel,
+  validateFigure,
+} from "./figure.js";
+import { type Bounds, type IntervalFields, intervalText, readInterval } from "./interval.js";
 import { planSeries, type SeriesPlan } from "./series.js";
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "./size.js";
+import { stringsFor, valueAxis, valueFormat } from "./text.js";
+import { texture } from "./texture.js";
 
 /** Options for `barChart`, from `enarratio/plot` or `enarratio/lite`. */
-export interface BarChartOptions<T extends object> extends FigureOptions {
+export interface BarChartOptions<T extends object> extends FigureOptions, AxisUnits, Annotated {
   readonly data: readonly T[];
   /**
    * The field for categories along the bar axis: a label, or a number such as a year. With
@@ -102,6 +114,13 @@ export interface BarChartOptions<T extends object> extends FigureOptions {
    * the data table.
    */
   readonly directLabels?: boolean;
+  /**
+   * An error bar on each bar, from `lower` and `upper` fields (a confidence interval, ± one
+   * standard deviation), carried in the data table as a column per series and stated in the
+   * summary. Needs `y`, and the grouped layout when there are series: a stacked segment has no
+   * interval of its own.
+   */
+  readonly errorBars?: IntervalFields<T>;
 }
 
 /** One bar, or one series' segment of a bar: the rows sharing a category and series. */
@@ -205,38 +224,6 @@ function timeAxis<T extends object>(
   return { starts: periods, names, byRow: starts.map(label) };
 }
 
-/**
- * Allows relative and http(s) links only, so data can never produce a `javascript:` URL. Browsers
- * ignore control characters and spaces inside a scheme, so the scheme is read without them. A
- * leading `//` (or its backslash forms) names another host, so it is refused too (A11), and so is
- * a user or password before the host, which lets `https://trusted.example@other.example/` read as
- * the trusted name.
- */
-function safeHref(href: string): string {
-  const compact = [...href].filter((ch) => ch.charCodeAt(0) > 0x20).join("");
-  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(compact)?.[1]?.toLowerCase();
-  const otherHost = /^[/\\][/\\]/.test(compact);
-  if (
-    otherHost ||
-    (scheme !== undefined && scheme !== "http" && scheme !== "https") ||
-    hasUserinfo(compact, scheme)
-  ) {
-    throw new Error(`${KIND}: href "${href}" is not a relative or http(s) link`);
-  }
-  return href;
-}
-
-/** Whether an absolute http(s) link names a user or password before its host. */
-function hasUserinfo(compact: string, scheme: string | undefined): boolean {
-  if (scheme === undefined) return false;
-  try {
-    const url = new URL(compact);
-    return url.username !== "" || url.password !== "";
-  } catch {
-    return true;
-  }
-}
-
 /** Every nth category, when there are more than `max`, or undefined to print them all. */
 function thinTicks(names: readonly string[], max: number | undefined): string[] | undefined {
   if (max === undefined) return undefined;
@@ -292,6 +279,10 @@ export interface BarModel {
   readonly marginLeft: number;
   /** The category labels to print, when not all of them are. */
   readonly thinned: readonly string[] | undefined;
+  /** The value axis's tick format for huge values, and whether every value is zero (B41). */
+  readonly valueAxis: ReturnType<typeof valueAxis>;
+  /** A category's axis label: shortened with an ellipsis when it would not fit (B41). */
+  tickLabel(name: string): string;
   /** Whole-number value ticks for counted bars; undefined when values come from `y`. */
   readonly countTicks: readonly number[] | undefined;
   /** A bar's hover details, and its name when it is a link. */
@@ -300,12 +291,17 @@ export interface BarModel {
   datum(p: BarPoint): MarkDatum;
   /** A bar's link, checked, when the chart has `href`. */
   readonly link: ((p: BarPoint) => string) | undefined;
+  /** Each bar's error bar, when the chart has `errorBars`. */
+  readonly bounds: ReadonlyMap<BarPoint, Bounds> | undefined;
+  /** The text alternative, with the annotations' notes added. */
+  readonly alt: string | undefined;
   /** Wraps the drawn SVG in the figure, with its legend and data table. */
   figure(svg: string): string;
 }
 
 /** Reads and checks a bar chart's options and lays it out. Throws on anything it cannot draw. */
-export function barModel<T extends object>(options: BarChartOptions<T>): BarModel {
+export function barModel<T extends object>(given: BarChartOptions<T>): BarModel {
+  const options = withNotes(given);
   const { data, x, y, series } = options;
   validateFigure(KIND, options);
   if (data.length === 0) throw new Error(`${KIND}: data is empty`);
@@ -314,10 +310,14 @@ export function barModel<T extends object>(options: BarChartOptions<T>): BarMode
   }
   const horizontal = options.orientation === "horizontal";
   const grouped = options.layout === "grouped" && series !== undefined;
-  const format = options.formatValue ?? defaultFormat;
-  const valueLabel = options.yLabel === undefined ? (y ?? "Count") : options.yLabel;
-  const categoryLabel = options.xLabel === undefined ? x : options.xLabel;
-  const soleSeries = valueLabel ?? "Value";
+  if (options.annotations?.length && grouped) {
+    throw new Error(`${KIND}: annotations need the stacked layout; grouped bars are facets`);
+  }
+  const { terms } = stringsFor(options.strings);
+  const format = valueFormat(options);
+  const valueLabel = unitLabel(options.yLabel, y ?? terms.count, options.yUnit);
+  const categoryLabel = unitLabel(options.xLabel, x, options.xUnit);
+  const soleSeries = valueLabel ?? terms.value;
 
   const time = options.xType === "time";
   if (time && options.xDomain) {
@@ -342,14 +342,28 @@ export function barModel<T extends object>(options: BarChartOptions<T>): BarMode
         );
   const plan = planSeries(KIND, seriesNames, options.colors);
 
+  const errorBars = options.errorBars;
+  if (errorBars && (y === undefined || (series !== undefined && !grouped))) {
+    throw new Error(
+      `${KIND}: errorBars need a y field, and the grouped layout when there are series`,
+    );
+  }
   const cells = new Map<string, BarPoint>();
+  const bounds = errorBars ? new Map<BarPoint, Bounds>() : undefined;
   data.forEach((row, i) => {
     const point = { x: String(rawX[i]), series: seriesOf(row, i) };
     const id = markKey(point.x, point.series);
     const value = y === undefined ? 1 : readNumber(KIND, row, y, i);
     const existing = cells.get(id);
+    if (existing && errorBars) {
+      throw new Error(
+        `${KIND}: two rows for ${point.x}, ${point.series}; error bars cannot be summed`,
+      );
+    }
     if (existing) existing.value += value;
     else cells.set(id, { ...point, value });
+    const interval = errorBars ? readInterval(KIND, row, errorBars, i, value) : null;
+    if (interval) bounds?.set(cells.get(id) as BarPoint, interval);
   });
   // In category order, then series order: the reading order, and the order labels are drawn in.
   const columnOf = new Map(xNames.map((name, i) => [name, i]));
@@ -360,10 +374,15 @@ export function barModel<T extends object>(options: BarChartOptions<T>): BarMode
       (rowOf.get(a.series) ?? 0) - (rowOf.get(b.series) ?? 0),
   );
 
+  const strings = stringsFor(options.strings);
+  const intervalOf = (p: BarPoint): string => {
+    const b = bounds?.get(p);
+    return b ? ` (${intervalText(b, format, errorBars?.label, strings)})` : "";
+  };
   const describe = (p: BarPoint): string =>
     series === undefined
-      ? `${categoryLabel ?? x} ${p.x}: ${format(p.value)}`
-      : `${categoryLabel ?? x} ${p.x}, ${p.series}: ${format(p.value)}`;
+      ? `${categoryLabel ?? x} ${p.x}: ${format(p.value)}${intervalOf(p)}`
+      : `${categoryLabel ?? x} ${p.x}, ${p.series}: ${format(p.value)}${intervalOf(p)}`;
   const datum = (p: BarPoint): MarkDatum => ({
     key: markKey(p.x, p.series),
     filter:
@@ -385,13 +404,66 @@ export function barModel<T extends object>(options: BarChartOptions<T>): BarMode
   const fit = time ? Math.max(2, Math.floor((width - 80) / (longest * 7 + 12))) : undefined;
   const thinned = thinTicks(xNames, options.maxXTicks ?? fit);
 
+  // Category labels longer than their room are cut with an ellipsis; the table, hover details
+  // and each bar's name keep the whole text. Time labels are already sized to fit.
+  const room = horizontal
+    ? Math.floor((220 - 16) / 7)
+    : Math.max(4, Math.floor((width - 80) / (thinned?.length ?? xNames.length) / 7));
+  const tickLabel = (name: string): string =>
+    time || name.length <= room ? name : `${name.slice(0, room - 1).trimEnd()}…`;
+
   const rows = xNames.map((name) => [
     name,
     ...seriesNames.map((s) => {
       const cell = cells.get(markKey(name, s));
       return cell ? format(cell.value) : y === undefined ? format(0) : "";
     }),
+    ...(errorBars
+      ? seriesNames.map((s) => {
+          const cell = cells.get(markKey(name, s));
+          const b = cell ? bounds?.get(cell) : undefined;
+          return b ? strings.range(format(b.lower), format(b.upper)) : "";
+        })
+      : []),
   ]);
+  const intervalColumns = errorBars
+    ? seriesNames.map((s) =>
+        series === undefined
+          ? (errorBars.label ?? terms.interval)
+          : `${s} ${errorBars.label ?? terms.interval.toLowerCase()}`,
+      )
+    : [];
+
+  // The value axis runs over the stacks' extent (each bar's, when grouped), and zero.
+  const ends = [0];
+  const sums = new Map<string, [number, number]>();
+  for (const p of points) {
+    const id = grouped ? markKey(p.x, p.series) : p.x;
+    const [neg, pos] = sums.get(id) ?? [0, 0];
+    sums.set(id, p.value < 0 ? [neg + p.value, pos] : [neg, pos + p.value]);
+  }
+  for (const [neg, pos] of sums.values()) ends.push(neg, pos);
+  // Error bars reach past their bars, and the axis takes them in, as Plot's does.
+  for (const b of bounds?.values() ?? []) ends.push(b.lower, b.upper);
+  const ordered = time || rawX.every((v) => typeof v === "number");
+  const boundsOf = (p: BarPoint | undefined) => {
+    const b = p ? bounds?.get(p) : undefined;
+    return b ? { lower: b.lower, upper: b.upper } : {};
+  };
+  const axes = [
+    {
+      position: horizontal ? "y" : "x",
+      label: categoryLabel ?? "",
+      from: xNames[0] ?? "",
+      to: xNames.at(-1) ?? "",
+    },
+    {
+      position: horizontal ? "x" : "y",
+      label: valueLabel ?? "",
+      from: format(minOf(ends)),
+      to: format(maxOf(ends)),
+    },
+  ] as const;
 
   return {
     points,
@@ -408,22 +480,41 @@ export function barModel<T extends object>(options: BarChartOptions<T>): BarMode
     height,
     marginLeft: horizontal ? Math.min(220, longest * 7 + 16) : valueLabel === null ? 44 : 60,
     thinned,
+    tickLabel,
+    valueAxis: valueAxis(ends, options.locale),
     countTicks: y === undefined ? countTicks(points, grouped) : undefined,
     describe,
     datum,
-    link: linkOf ? (p) => safeHref(linkOf(p.x)) : undefined,
+    link: linkOf ? (p) => safeHref(KIND, linkOf(p.x)) : undefined,
+    bounds,
+    alt: options.alt,
     figure: (svg) =>
       figure(options, {
         kind: "bar",
-        svg,
+        svg: texture(svg, slotStyle(plan.slotColors)),
         orientation: horizontal ? "horizontal" : "vertical",
         legend: series === undefined ? [] : plan.legend,
         ...(series === undefined ? {} : { seriesField: series }),
         slotColors: plan.slotColors,
+        description: {
+          axes,
+          ordered,
+          format,
+          ...(errorBars ? { interval: errorBars.label ?? terms.interval.toLowerCase() } : {}),
+          series: seriesNames.map((name) => ({
+            name,
+            points: xNames.map((at) => ({
+              at,
+              value: cells.get(markKey(at, name))?.value ?? (y === undefined ? 0 : null),
+              ...boundsOf(cells.get(markKey(at, name))),
+            })),
+          })),
+        },
         table: {
           columns: [
             categoryLabel ?? x,
-            ...(series === undefined ? [valueLabel ?? "Value"] : seriesNames),
+            ...(series === undefined ? [valueLabel ?? terms.value] : seriesNames),
+            ...intervalColumns,
           ],
           rows,
         },
@@ -433,7 +524,7 @@ export function barModel<T extends object>(options: BarChartOptions<T>): BarMode
 
 /** A name fits in a segment when the segment is this much taller and wider than the text. */
 const LABEL_HEIGHT = 16;
-const CHAR_WIDTH = 6.6;
+const CHAR_WIDTH = 7.2;
 
 /**
  * Whether a series name fits inside a stacked segment of the given size, for `directLabels`.

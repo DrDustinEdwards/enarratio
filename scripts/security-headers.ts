@@ -22,13 +22,12 @@ const REPORT_GROUP = "csp-endpoint";
 
 /**
  * The policy, from what the gallery loads beyond its own origin: `data:` images (charts may embed
- * them), style attributes (record 0008: chart color overrides and Observable Plot write them), the
- * Cloudflare Web Analytics beacon the zone injects, and the beacon's reports to
- * cloudflareinsights.com, which record 0008 measured alongside the zone's own /cdn-cgi/rum.
+ * them), the Cloudflare Web Analytics beacon the zone injects, and the beacon's reports to
+ * cloudflareinsights.com, which record 0008 measured alongside the zone's own /cdn-cgi/rum. Style
+ * attributes are no longer allowed: charts write none (record 0022).
  */
 const csp = buildContentSecurityPolicy({
   sources: { img: ["data:"], connect: ["https://cloudflareinsights.com"] },
-  styleAttributesInline: true,
   cloudflareWebAnalytics: true,
   reportUri: REPORT_PATH,
   reportTo: REPORT_GROUP,

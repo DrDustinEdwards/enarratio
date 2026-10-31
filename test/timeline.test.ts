@@ -33,7 +33,7 @@ const options = {
 } as const;
 
 describe("timeline", () => {
-  const root = parse(timeline(options));
+  const root = parse(timeline({ ...options, inline: true }));
   const svg = root.querySelector("svg");
   const marks = [...root.querySelectorAll('[data-enarratio-mark="event"]')];
 
@@ -115,7 +115,7 @@ describe("timeline", () => {
     expect(y("Retry")).toBeGreaterThan(y("Nightly run"));
     // Agent B's events do not overlap: one row, so the drawing is shorter than with stacking.
     const flat = parse(
-      timeline({ ...options, events: events.filter((e) => e.lane !== "Agent A") }),
+      timeline({ inline: true, ...options, events: events.filter((e) => e.lane !== "Agent A") }),
     );
     expect(Number(flat.querySelector("svg")?.getAttribute("height"))).toBeLessThan(
       Number(svg?.getAttribute("height")),
@@ -124,7 +124,7 @@ describe("timeline", () => {
 
   it("draws lanes in the order given, empty ones too", () => {
     const out = parse(
-      timeline({ ...options, lanes: ["Agent C", "Agent B", "Agent A", "Agent D"] }),
+      timeline({ inline: true, ...options, lanes: ["Agent C", "Agent B", "Agent A", "Agent D"] }),
     );
     const labels = [...out.querySelectorAll("svg > text[text-anchor='end']")].map(
       (t) => t.textContent,
@@ -144,6 +144,7 @@ describe("timeline", () => {
   it("uses calendar ticks for a long window", () => {
     const out = parse(
       timeline({
+        inline: true,
         label: "Years",
         events: [{ lane: "L", label: "x", status: "ok", at: "2020-03-01" }],
         start: "2020-01-01",
@@ -160,6 +161,7 @@ describe("timeline", () => {
   it("defaults the window to the events, takes Dates and epoch milliseconds, and formats times", () => {
     const out = parse(
       timeline({
+        inline: true,
         label: "T",
         events: [
           { lane: "L", label: "a", status: "ok", at: new Date(Date.UTC(2026, 0, 1)) },
@@ -174,13 +176,16 @@ describe("timeline", () => {
   });
 
   it("takes its own text alternative", () => {
-    const out = parse(timeline({ ...options, label: undefined as never, alt: "Mine" }));
+    const out = parse(
+      timeline({ inline: true, ...options, label: undefined as never, alt: "Mine" }),
+    );
     expect(out.querySelector("svg")?.getAttribute("aria-label")).toBe("Mine");
   });
 
   it("clips a span that runs past the window, and keeps its real times in the list", () => {
     const out = parse(
       timeline({
+        inline: true,
         label: "T",
         start: "2026-06-09T00:00:00Z",
         end: "2026-06-09T08:00:00Z",
@@ -207,6 +212,7 @@ describe("timeline", () => {
     const name = "A very long agent name that cannot fit";
     const out = parse(
       timeline({
+        inline: true,
         label: "T",
         events: [
           { lane: name, label: "x", status: "ok", at: 1000 },
@@ -221,10 +227,10 @@ describe("timeline", () => {
 
   it("refuses what would draw wrongly", () => {
     const bad = (e: unknown, extra: Partial<TimelineOptions> = {}) =>
-      timeline({ ...options, events: [e as never], ...extra });
-    expect(() => timeline({ ...options, events: [] })).toThrow(/at least one event/);
-    expect(() => timeline({ events })).toThrow(/label or alt/);
-    expect(() => timeline({ events, label: " " })).toThrow(/label or alt/);
+      timeline({ inline: true, ...options, events: [e as never], ...extra });
+    expect(() => timeline({ inline: true, ...options, events: [] })).toThrow(/at least one event/);
+    expect(() => timeline({ inline: true, events })).toThrow(/label or alt/);
+    expect(() => timeline({ inline: true, events, label: " " })).toThrow(/label or alt/);
     expect(() => bad({ lane: "A", label: "x", status: "ok" })).toThrow(/needs a time/);
     expect(() => bad({ lane: "A", label: "x", status: "great", at: 1 })).toThrow(/unknown status/);
     expect(() => bad({ lane: "A", label: "x", status: "constructor", at: 1 })).toThrow(
@@ -254,16 +260,22 @@ describe("timeline", () => {
       bad({ lane: "Agent A", label: "x", status: "ok", at: Date.parse("2027-01-01") }),
     ).toThrow(/outside the time window/);
     expect(() =>
-      timeline({ label: "T", events: [{ lane: "A", label: "x", status: "ok", at: 5 }] }),
+      timeline({
+        inline: true,
+        label: "T",
+        events: [{ lane: "A", label: "x", status: "ok", at: 5 }],
+      }),
     ).toThrow(/no length/);
-    expect(() => timeline({ ...options, lanes: ["Agent A", "Agent A"] })).toThrow(/repeated/);
-    expect(() => timeline({ ...options, width: 0 })).toThrow(/width/);
+    expect(() => timeline({ inline: true, ...options, lanes: ["Agent A", "Agent A"] })).toThrow(
+      /repeated/,
+    );
+    expect(() => timeline({ inline: true, ...options, width: 0 })).toThrow(/width/);
   });
 });
 
 describe("heatStrip", () => {
   const values = [3, 5, null, 9, 14, 8, 2];
-  const root = parse(heatStrip({ values, label: "Requests per hour" }));
+  const root = parse(heatStrip({ inline: true, values, label: "Requests per hour" }));
   const cells = [...root.querySelectorAll("rect")];
 
   it("is an svg named by a sentence made from the values", () => {
@@ -315,6 +327,7 @@ describe("heatStrip", () => {
   it("takes a fixed range, thresholds, cell labels and a formatter", () => {
     const out = parse(
       heatStrip({
+        inline: true,
         values: [1, 50],
         alt: "Mine",
         min: 0,
@@ -334,18 +347,22 @@ describe("heatStrip", () => {
 
   it("refuses what would draw wrongly", () => {
     const base = { values: [1, 2], label: "x" };
-    expect(() => heatStrip({ ...base, values: [] })).toThrow(/at least one value/);
-    expect(() => heatStrip({ ...base, values: [null, null] })).toThrow(/every value is empty/);
-    expect(() => heatStrip({ ...base, values: [1, Number.NaN] })).toThrow(/not a finite number/);
-    expect(() => heatStrip({ values: [1] })).toThrow(/label or alt/);
-    expect(() => heatStrip({ ...base, width: -1 })).toThrow(/width/);
-    expect(() => heatStrip({ ...base, min: 5, max: 1 })).toThrow(/above max/);
-    expect(() => heatStrip({ ...base, thresholds: [1, 1, 2, 3] })).toThrow(/ascend/);
-    expect(() => heatStrip({ ...base, cellLabels: ["a"] })).toThrow(/one each/);
+    expect(() => heatStrip({ inline: true, ...base, values: [] })).toThrow(/at least one value/);
+    expect(() => heatStrip({ inline: true, ...base, values: [null, null] })).toThrow(
+      /every value is empty/,
+    );
+    expect(() => heatStrip({ inline: true, ...base, values: [1, Number.NaN] })).toThrow(
+      /not a finite number/,
+    );
+    expect(() => heatStrip({ inline: true, values: [1] })).toThrow(/label or alt/);
+    expect(() => heatStrip({ inline: true, ...base, width: -1 })).toThrow(/width/);
+    expect(() => heatStrip({ inline: true, ...base, min: 5, max: 1 })).toThrow(/above max/);
+    expect(() => heatStrip({ inline: true, ...base, thresholds: [1, 1, 2, 3] })).toThrow(/ascend/);
+    expect(() => heatStrip({ inline: true, ...base, cellLabels: ["a"] })).toThrow(/one each/);
   });
 
   it("copes with flat data", () => {
-    const out = parse(heatStrip({ values: [4, 4, 4], label: "Flat" }));
+    const out = parse(heatStrip({ inline: true, values: [4, 4, 4], label: "Flat" }));
     expect([...out.querySelectorAll("rect")].map((c) => c.getAttribute("fill"))).toEqual(
       Array(3).fill("var(--enarratio-sequential-1)"),
     );

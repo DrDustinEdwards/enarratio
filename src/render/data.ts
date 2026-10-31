@@ -6,11 +6,6 @@ export type KeysOfType<T, V> = {
 }[keyof T] &
   string;
 
-/** Formats a number for tooltips and tables when the caller gives no formatter. */
-export function defaultFormat(value: number): string {
-  return value.toLocaleString("en-US", { maximumFractionDigits: 6 });
-}
-
 /** Reads a finite number, or throws naming where it was expected. */
 export function readNumber(kind: string, row: object, key: string, index: number): number {
   const value: unknown = (row as Record<string, unknown>)[key];
@@ -189,4 +184,36 @@ export function formatInstant(date: Date): string {
   const pad = (n: number): string => String(n).padStart(2, "0");
   const seconds = date.getUTCSeconds() ? `:${pad(date.getUTCSeconds())}` : "";
   return `${date.toISOString().slice(0, 10)} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}${seconds} UTC`;
+}
+
+/**
+ * Allows relative and http(s) links only, so data can never produce a `javascript:` URL. Browsers
+ * ignore control characters and spaces inside a scheme, so the scheme is read without them. A
+ * leading `//` (or its backslash forms) names another host, so it is refused too (A11), and so is
+ * a user or password before the host, which lets `https://trusted.example@other.example/` read as
+ * the trusted name.
+ */
+export function safeHref(kind: string, href: string): string {
+  const compact = [...href].filter((ch) => ch.charCodeAt(0) > 0x20).join("");
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(compact)?.[1]?.toLowerCase();
+  const otherHost = /^[/\\][/\\]/.test(compact);
+  if (
+    otherHost ||
+    (scheme !== undefined && scheme !== "http" && scheme !== "https") ||
+    hasUserinfo(compact, scheme)
+  ) {
+    throw new Error(`${kind}: href "${href}" is not a relative or http(s) link`);
+  }
+  return href;
+}
+
+/** Whether an absolute http(s) link names a user or password before its host. */
+function hasUserinfo(compact: string, scheme: string | undefined): boolean {
+  if (scheme === undefined) return false;
+  try {
+    const url = new URL(compact);
+    return url.username !== "" || url.password !== "";
+  } catch {
+    return true;
+  }
 }

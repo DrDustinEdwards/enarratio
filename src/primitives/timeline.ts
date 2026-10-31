@@ -1,15 +1,15 @@
 import { element, escapeHtml } from "../html.js";
-import {
-  DAY,
-  defaultFormat,
-  formatInstant,
-  maxOf,
-  minOf,
-  requireSize,
-  toDate,
-} from "../render/data.js";
+import { DAY, formatInstant, maxOf, minOf, requireSize, toDate } from "../render/data.js";
 import { DEFAULT_WIDTH } from "../render/size.js";
-import { type PrimitiveTable, type PrimitiveTableOptions, primitiveTable } from "./companion.js";
+import type { Terms } from "../render/text.js";
+import {
+  type PrimitiveFigureOptions,
+  type PrimitiveTable,
+  type PrimitiveTableOptions,
+  primitiveFigure,
+  primitiveTable,
+  primitiveText,
+} from "./companion.js";
 
 /** What happened, as the theme's status colors and a shape say it. */
 export type TimelineStatus = "ok" | "warning" | "error" | "unknown";
@@ -43,7 +43,7 @@ export interface TimelineSpan {
 export type TimelineEvent = TimelinePoint | TimelineSpan;
 
 /** Options for {@link timeline}. */
-export interface TimelineOptions {
+export interface TimelineOptions extends PrimitiveFigureOptions {
   /** The events, in any order. */
   readonly events: readonly TimelineEvent[];
   /**
@@ -69,7 +69,7 @@ export interface TimelineOptions {
 }
 
 const KIND = "timeline";
-const STATUSES: Readonly<Record<TimelineStatus, { color: string; word: string }>> = {
+const STATUSES: Readonly<Record<TimelineStatus, { color: string; word: keyof Terms }>> = {
   ok: { color: "var(--enarratio-status-good)", word: "ok" },
   warning: { color: "var(--enarratio-status-warning)", word: "warning" },
   error: { color: "var(--enarratio-status-bad)", word: "error" },
@@ -81,6 +81,8 @@ interface PreparedEvent {
   readonly lane: string;
   readonly label: string;
   readonly status: TimelineStatus;
+  /** The status as readers see it, from the strings table. */
+  readonly word: string;
   readonly from: number;
   readonly to: number;
   readonly span: boolean;
@@ -121,6 +123,8 @@ function prepareTimeline(options: TimelineOptions): TimelineValues {
   const width = options.width ?? DEFAULT_WIDTH;
   requireSize(KIND, "width", width);
   const text = options.formatTime ?? formatInstant;
+  const { strings, count } = primitiveText(options);
+  const { terms } = strings;
   const at = (ms: number): string => text(new Date(ms));
 
   const raw = events.map((event, i) => {
@@ -179,22 +183,28 @@ function prepareTimeline(options: TimelineOptions): TimelineValues {
       lane: event.lane,
       label: event.label,
       status: event.status,
+      word: terms[STATUSES[event.status].word],
       from,
       to,
       span,
       fromText: at(from),
       toText: at(to),
-      when: span ? `from ${at(from)} to ${at(to)}` : at(from),
+      when: span ? strings.fromTo(at(from), at(to)) : at(from),
     };
   });
 
   const counts: Record<TimelineStatus, number> = { ok: 0, warning: 0, error: 0, unknown: 0 };
   for (const e of prepared) counts[e.status] += 1;
-  const parts = (Object.keys(counts) as TimelineStatus[])
-    .filter((s) => counts[s] > 0)
-    .map((s) => `${counts[s]} ${STATUSES[s].word}`);
-  const laneCount = new Set(prepared.map((e) => e.lane)).size;
-  const summary = `${subject === "" ? "" : `${subject}: `}${defaultFormat(prepared.length)} ${prepared.length === 1 ? "event" : "events"} in ${laneCount} ${laneCount === 1 ? "lane" : "lanes"}, ${at(windowStart)} to ${at(windowEnd)}; ${parts.join(", ")}.`;
+  const summary = strings.timelineSummary({
+    subject,
+    events: count(prepared.length),
+    lanes: count(new Set(prepared.map((e) => e.lane)).size),
+    from: at(windowStart),
+    to: at(windowEnd),
+    counts: (Object.keys(counts) as TimelineStatus[])
+      .filter((s) => counts[s] > 0)
+      .map((s) => ({ n: count(counts[s]), status: terms[STATUSES[s].word] })),
+  });
   return {
     events: prepared,
     lanes,
@@ -414,7 +424,7 @@ export function timeline(options: TimelineOptions): string {
       const title = element(
         "title",
         {},
-        escapeHtml(`${event.lane}: ${event.label}, ${STATUSES[event.status].word}, ${event.when}`),
+        escapeHtml(`${event.lane}: ${event.label}, ${event.word}, ${event.when}`),
       );
       const x0 = xOf(event.from);
       const bar = event.span
@@ -460,15 +470,18 @@ export function timeline(options: TimelineOptions): string {
         element(
           "li",
           {},
-          `<strong>${escapeHtml(e.lane)}</strong>: ${escapeHtml(e.label)}, ${STATUSES[e.status].word}, ${escapeHtml(e.when)}`,
+          `<strong>${escapeHtml(e.lane)}</strong>: ${escapeHtml(e.label)}, ${escapeHtml(e.word)}, ${escapeHtml(e.when)}`,
         ),
       )
       .join(""),
   );
-  return element(
+  const drawing = element(
     "div",
     { class: "enarratio enarratio-timeline", "data-enarratio": "timeline" },
     `${svg}${list}`,
+  );
+  return primitiveFigure("timeline", drawing, p.alt, options.label?.trim() ?? "", options, () =>
+    timelineTable(options),
   );
 }
 
@@ -486,19 +499,22 @@ export function timelineTable(
   display?: PrimitiveTableOptions,
 ): PrimitiveTable {
   const p = prepareTimeline(options);
+  const { strings } = primitiveText(options);
+  const { terms } = strings;
   return primitiveTable(
     p.summary,
     {
-      columns: ["Event", "Lane", "Status", "Start", "End"],
+      columns: [terms.event, terms.lane, terms.status, terms.start, terms.end],
       rows: sortedEvents(p.events).map((e) => [
         e.label,
         e.lane,
-        STATUSES[e.status].word,
+        e.word,
         e.fromText,
         e.span ? e.toText : "",
       ]),
     },
     p.subject || p.alt,
     display,
+    strings,
   );
 }

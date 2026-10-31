@@ -121,6 +121,15 @@ describe("networkChart", () => {
     expect(rows).toContainEqual(["Node C", "y", "b"]);
   });
 
+  it("names the most connected nodes and counts the separate parts", () => {
+    const fig = parse(
+      networkChart({ nodes: [...nodes, { id: "d", group: "y" }], links, alt: "a" }),
+    );
+    expect(fig.querySelector(".enarratio-summary")?.textContent).toBe(
+      "4 nodes and 2 links. Most connections: b (2), a (1) and Node C (1). They form 2 separate parts.",
+    );
+  });
+
   it("refuses duplicate ids and links to missing nodes", () => {
     expect(() =>
       networkChart({ nodes: [nodes[0], nodes[0]] as typeof nodes, links: [], alt: "a" }),

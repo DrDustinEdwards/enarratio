@@ -1,17 +1,18 @@
 import { element, escapeHtml } from "../html.js";
+import { maxOf, minOf, rampStep, rampThresholds, requireSize } from "../render/data.js";
+import { valueFormat } from "../render/text.js";
 import {
-  defaultFormat,
-  maxOf,
-  minOf,
-  rampStep,
-  rampThresholds,
-  requireSize,
-} from "../render/data.js";
-import { type PrimitiveTable, type PrimitiveTableOptions, primitiveTable } from "./companion.js";
+  type PrimitiveFigureOptions,
+  type PrimitiveTable,
+  type PrimitiveTableOptions,
+  primitiveFigure,
+  primitiveTable,
+  primitiveText,
+} from "./companion.js";
 import { tickGap } from "./tick-gap.js";
 
 /** Options for {@link heatStrip}. */
-export interface HeatStripOptions {
+export interface HeatStripOptions extends PrimitiveFigureOptions {
   /** One value per cell, in order. `null` is a cell with no data, drawn as a dashed outline. */
   readonly values: readonly (number | null)[];
   /**
@@ -54,6 +55,7 @@ interface HeatStripValues {
   readonly thresholds: readonly number[];
   readonly format: (value: number) => string;
   readonly cellLabel: (index: number) => string;
+  readonly noData: string;
   readonly subject: string;
   /** The sentence that names the values; the default text alternative. */
   readonly summary: string;
@@ -98,11 +100,20 @@ function prepareHeatStrip(options: HeatStripOptions): HeatStripValues {
       `${KIND}: cellLabels has ${labels.length} entries for ${values.length} values; give one each`,
     );
   }
-  const format = options.formatValue ?? defaultFormat;
+  const format = valueFormat(options);
+  const { strings, count } = primitiveText(options);
   const lowest = minOf(present);
   const highest = maxOf(present);
   const missing = values.length - present.length;
-  const summary = `${subject === "" ? "" : `${subject}: `}${defaultFormat(values.length)} cells, from ${format(present[0] as number)} to ${format(present[present.length - 1] as number)}; lowest ${format(lowest)}, highest ${format(highest)}${missing > 0 ? `; ${missing} with no data` : ""}.`;
+  const summary = strings.heatStripSummary({
+    subject,
+    cells: count(values.length),
+    first: format(present[0] as number),
+    last: format(present[present.length - 1] as number),
+    lowest: format(lowest),
+    highest: format(highest),
+    ...(missing > 0 ? { missing: count(missing) } : {}),
+  });
   return {
     values,
     steps: values.map((v) => (v === null ? 0 : rampStep(v, thresholds))),
@@ -110,7 +121,8 @@ function prepareHeatStrip(options: HeatStripOptions): HeatStripValues {
     max,
     thresholds,
     format,
-    cellLabel: (i) => labels?.[i] ?? `Cell ${i + 1}`,
+    cellLabel: (i) => labels?.[i] ?? `${strings.terms.cell} ${count(i + 1)}`,
+    noData: strings.terms.noData,
     subject,
     summary,
     width,
@@ -133,7 +145,7 @@ export function heatStrip(options: HeatStripOptions): string {
   const step = p.width / p.values.length;
   const gap = tickGap(step);
   const cells = p.values.map((value, i) => {
-    const title = `${p.cellLabel(i)}: ${value === null ? "no data" : p.format(value)}`;
+    const title = `${p.cellLabel(i)}: ${value === null ? p.noData : p.format(value)}`;
     const common = {
       x: round(i * step),
       y: 0,
@@ -164,7 +176,7 @@ export function heatStrip(options: HeatStripOptions): string {
       element("title", {}, escapeHtml(title)),
     );
   });
-  return element(
+  const drawing = element(
     "svg",
     {
       class: "enarratio enarratio-heat-strip",
@@ -177,6 +189,9 @@ export function heatStrip(options: HeatStripOptions): string {
       "aria-label": p.alt,
     },
     cells.join(""),
+  );
+  return primitiveFigure("heat-strip", drawing, p.alt, options.label?.trim() ?? "", options, () =>
+    heatStripTable(options),
   );
 }
 
@@ -193,17 +208,20 @@ export function heatStripTable(
   display?: PrimitiveTableOptions,
 ): PrimitiveTable {
   const p = prepareHeatStrip(options);
+  const { strings } = primitiveText(options);
+  const { terms } = strings;
   return primitiveTable(
     p.summary,
     {
-      columns: ["Cell", "Value", "Ramp step"],
+      columns: [terms.cell, terms.value, terms.rampStep],
       rows: p.values.map((v, i) => [
         p.cellLabel(i),
-        v === null ? "no data" : p.format(v),
+        v === null ? p.noData : p.format(v),
         v === null ? "" : String(p.steps[i]),
       ]),
     },
     p.subject || p.alt,
     display,
+    strings,
   );
 }
