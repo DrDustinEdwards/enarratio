@@ -47,6 +47,11 @@ export const ENHANCE_STRINGS: EnhanceStrings = {
   to: "To",
   apply: "Apply",
   clear: "Clear",
+  downloadSvg: "Download SVG",
+  downloadPng: "Download PNG",
+  copyEmbed: "Copy embed",
+  embedCopied: "Embed code copied",
+  exportFailed: "Could not export",
 };
 
 /**
@@ -71,6 +76,8 @@ export function enhance(
     table: options.table ?? true,
     expand: options.expand ?? false,
     url: options.url ?? false,
+    download: options.download ?? true,
+    embed: options.embed ?? true,
     strings: { ...ENHANCE_STRINGS, ...options.strings },
   };
   // A primitive's figure (data-enarratio-static) has nothing to interact with.

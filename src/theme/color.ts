@@ -4,7 +4,7 @@
  * browser.
  */
 
-import type { HexColor } from "./types.js";
+import type { HexColor, ThemeColor } from "./types.js";
 
 /** Red, green and blue in the range 0 to 1, gamma-encoded (sRGB) unless a name says linear. */
 export type Rgb = readonly [number, number, number];
@@ -16,8 +16,25 @@ export function isHexColor(value: string): value is HexColor {
   return HEX.test(value);
 }
 
-/** Parses `#rgb` or `#rrggbb` into sRGB channels from 0 to 1. Throws on anything else. */
-function parseHex(color: string): Rgb {
+/** A site's custom property with a hex fallback: `var(--site-token, #rrggbb)`. */
+const TOKEN = /^var\(--[a-z0-9_-]+,\s*(#(?:[0-9a-f]{3}|[0-9a-f]{6}))\)$/i;
+
+/** Whether a string is a theme color: hex, or a custom property with a hex fallback. */
+export function isThemeColor(value: string): value is ThemeColor {
+  return isHexColor(value) || TOKEN.test(value);
+}
+
+/** The hex a theme color is measured by: itself, or a custom property's fallback. */
+export function hexOf(color: string): HexColor {
+  return (TOKEN.exec(color)?.[1] ?? color) as HexColor;
+}
+
+/**
+ * Parses `#rgb`, `#rrggbb` or `var(--token, #hex)` (by its fallback) into sRGB channels from 0
+ * to 1. Throws on anything else.
+ */
+function parseHex(value: string): Rgb {
+  const color = hexOf(value);
   if (!isHexColor(color)) {
     throw new Error(`"${color}" is not a hex color (#rgb or #rrggbb)`);
   }
@@ -191,9 +208,40 @@ export function colorDifference(a: string, b: string, vision?: ColorVision): num
  * 4.5:1 on the mark (the better of the two), otherwise black or white, one of which always does
  * (F8).
  */
-export function labelColor(fill: string, text: HexColor, background: HexColor): HexColor {
-  const best = (a: HexColor, b: HexColor): HexColor =>
+export function labelColor(fill: string, text: ThemeColor, background: ThemeColor): ThemeColor {
+  const best = (a: ThemeColor, b: ThemeColor): ThemeColor =>
     contrastRatio(fill, a) >= contrastRatio(fill, b) ? a : b;
   const themed = best(text, background);
   return contrastRatio(fill, themed) >= 4.5 ? themed : best("#000000", "#ffffff");
+}
+
+const toHex = (rgb: Rgb): HexColor =>
+  `#${rgb
+    .map((c) =>
+      Math.round(c * 255)
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`;
+
+/**
+ * The shade of `color` that reaches `minimum` contrast on `background`: the color itself when it
+ * does, otherwise the color mixed toward black on a light background, or white on a dark one, in
+ * the least step that reaches it. Used for series names written on the background (4.5:1) and for
+ * the edge round a pale ramp step (3:1).
+ */
+export function readableShade(color: string, background: string, minimum: number): HexColor {
+  const hex = hexOf(color);
+  if (contrastRatio(hex, background) >= minimum) return hex;
+  const from = parseHex(hex);
+  const towards =
+    contrastRatio("#000000", background) >= contrastRatio("#ffffff", background) ? 0 : 1;
+  for (let step = 1; step <= 100; step += 1) {
+    const t = step / 100;
+    const shade = toHex(
+      [0, 1, 2].map((i) => (from[i] as number) * (1 - t) + towards * t) as unknown as Rgb,
+    );
+    if (contrastRatio(shade, background) >= minimum) return shade;
+  }
+  return towards === 0 ? "#000000" : "#ffffff";
 }

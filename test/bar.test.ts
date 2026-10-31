@@ -197,7 +197,11 @@ describe("barChart", () => {
     });
     expect(html).not.toContain("style=");
     const value = "--enarratio-series-2: light-dark(#112233, #aabbcc)";
-    expect(colorStyles(html)).toBe(`.enarratio[data-enarratio-colors="${value}"] { ${value}; }`);
+    const label =
+      "--enarratio-series-label-2: color-mix(in srgb, light-dark(#112233, #aabbcc) 55%, var(--enarratio-text))";
+    expect(colorStyles(html)).toBe(
+      `.enarratio[data-enarratio-colors="${value}"] { ${value}; ${label}; }`,
+    );
   });
 
   it("escapes caller text", () => {

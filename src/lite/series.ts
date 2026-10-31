@@ -4,6 +4,7 @@ import { datumAttributes } from "../render/datum.js";
 import type { ScaleDescription } from "../render/figure.js";
 import {
   dayTicks,
+  fitTicks,
   type Point,
   type SeriesChartOptions,
   type SeriesModel,
@@ -85,13 +86,18 @@ export function seriesFrame(
     : (model.valueAxis.format ?? linearTickFormat(yDomain, yCount));
   const yTicks: Tick[] = yAt.map((t) => ({ at: yScale(t), label: yFormat(t) }));
 
-  const xCount = (xRange[1] - xRange[0]) / 80;
+  // About one tick per 80 units, as Plot counts them, and no more than maxXTicks.
+  const plotWidth = xRange[1] - xRange[0];
+  const xCount = Math.min(plotWidth / 80, model.maxXTicks ?? Number.POSITIVE_INFINITY);
+  // Ticks chosen by span (years, days) are thinned to fit the width, as the Plot charts do.
+  const thin = (at: readonly number[], label: (t: number) => string): number[] =>
+    fitTicks(at, label, width, plotWidth, model.maxXTicks);
   let xTicks: Tick[];
   if (model.yearTicks) {
-    xTicks = model.yearTicks.map((t) => ({ at: x(t), label: String(t) }));
+    xTicks = thin(model.yearTicks, String).map((t) => ({ at: x(t), label: String(t) }));
   } else if (prepared.time) {
-    const at =
-      dayTicks(prepared, xRange[1] - xRange[0]) ?? timeTicks(xDomain[0], xDomain[1], xCount);
+    const days = dayTicks(prepared, plotWidth);
+    const at = days ? thin(days, () => "Jun 07") : timeTicks(xDomain[0], xDomain[1], xCount);
     const labels = timeTickLabels(at);
     xTicks = at.map((t, i) => ({ at: x(t), label: labels[i] ?? "" }));
   } else {

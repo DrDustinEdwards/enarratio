@@ -7,12 +7,38 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-31
+
+Contrast, theming, export and embed from the area 10 verification ([0027](docs/design/0027-contrast-export-and-roles.md)).
+
+### Upgrading from 0.4
+
+- Series names written on the background (direct labels, survival curve labels, at-risk rows) are drawn in each series' new label shade, `--enarratio-series-label-N`, at 4.5:1 (was the series color). A site that sets `--enarratio-*` itself (`base.css`) gets a mix of the series and text colors until it defines them.
+- Sequential ramp steps under 3:1 on the background get a 1px edge, `--enarratio-sequential-edge-N`, on heatmap and heat strip cells and ramp legend swatches. On `base.css` alone, steps 1 to 3 get the muted text color as their edge.
+- `checkTheme` (and so `stylesheet()`) adds three checks: `series-label-contrast`, `sequential-edge`, and `status.unknown` at 3:1. A theme with a given `seriesLabels` or `sequentialEdges` that falls short now fails; derived ones always pass. A theme whose unknown color is under 3:1 now fails.
+- Theme colors are typed `ThemeColor` (hex, or `var(--token, #hex)`), not `HexColor`; code that reads a theme's colors as `HexColor` widens its type. `CheckIssue.colors` stays hex.
+- `enhance()` adds "Download SVG" and "Download PNG" beside "Download CSV", and "Copy embed" on a figure with an `id`. Pass `download: false` or `embed: false` to leave them out. New strings: `downloadSvg`, `downloadPng`, `copyEmbed`, `embedCopied`, `exportFailed`.
+- The default theme's light unknown gray is #818a94 (was #8c959f, 2.99:1).
+
+### Added
+
+- Theme colors may be a site's own custom property with a hex fallback, `var(--site-token, #hex)`: the stylesheet writes it as given, and `checkTheme` measures the fallback.
+- `ColorScheme.seriesLabels` and `ColorScheme.sequentialEdges`, optional: the shades for series names on the background and for the edges of pale ramp steps. Left out, `stylesheet()` derives them.
+- `readableShade(color, background, minimum)`: the least darkening or lightening of a color that reaches a contrast.
+- `--enarratio-cell-edge-width` (default `1px`).
+- Export (C3): "Download SVG" (the drawing with its computed colors and fonts, and the background) and "Download PNG" (the same, on a canvas at twice its size), from the enhancement layer, with no new dependency.
+- `maxXTicks` on line and area charts, as on bar charts.
+- Embed (C4): "Copy embed" copies `<a href="{page}#{id}">{title}</a>` for a figure with an `id`.
+
 ### Fixed
 
+- Contrast (B1): network links draw at full strength (were at half opacity, 2.1 to 2.9:1); the donut's hole is painted in the background, and its center label has a background halo, so the label is never read against a slice.
+- Line and area charts thin their x tick labels to fit the width, in both renderers, so year or day labels no longer run together on a narrow chart (Prelum, a two-series line chart at 239 px).
 - `enhance` reads every mark's size before it writes anything: the pointer targets, the point layer and the line lengths for the entrance. Measuring between writes laid the whole page out once per mark. On the gallery (40 charts, 10,000 elements) that cost 7.7 s of blocking time on a throttled phone, and it now costs 70 ms.
 
 ### Changed
 
+- The renderers drop their unused `role="group"` option: every chart's SVG is `role="img"`, enhanced or not (B28, recorded in 0027 with the WAI-ARIA and APG reasons).
 - Gallery: its pages, sitemap, icon, security.txt and 404 page name `charset=utf-8` (`headersFile` with `charset: true`, and the Worker sends every file through `applyHeaderSet`, on site-runtime v0.49.0). Not part of the package, which is unchanged.
 
 ## [0.4.1] - 2026-10-31

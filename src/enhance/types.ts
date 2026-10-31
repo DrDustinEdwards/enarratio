@@ -66,6 +66,14 @@ export interface EnhanceStrings {
   readonly to: string;
   readonly apply: string;
   readonly clear: string;
+  /** The export buttons (C3) and the embed snippet's (C4). */
+  readonly downloadSvg: string;
+  readonly downloadPng: string;
+  readonly copyEmbed: string;
+  /** Announced when the snippet is on the clipboard. */
+  readonly embedCopied: string;
+  /** Announced when an image or the snippet could not be made. */
+  readonly exportFailed: string;
 }
 
 /** Options for {@link enhance}. Every feature is on unless turned off, except `expand` and `url`. */
@@ -90,6 +98,13 @@ export interface EnhanceOptions {
    * figure's `id`. Off by default. A filter or range read from the address fires its event.
    */
   readonly url?: boolean;
+  /** Add "Download SVG" and "Download PNG" beside the CSV link (C3). */
+  readonly download?: boolean;
+  /**
+   * Add "Copy embed", which copies a link to the chart (the page address with the figure's `id`)
+   * as HTML to paste elsewhere (C4). Needs the figure's `id`.
+   */
+  readonly embed?: boolean;
   /** Translations of the strings the layer writes. */
   readonly strings?: Partial<EnhanceStrings>;
 }

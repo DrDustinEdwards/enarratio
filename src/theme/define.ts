@@ -1,4 +1,4 @@
-import { isHexColor } from "./color.js";
+import { isThemeColor } from "./color.js";
 import type { ColorScheme, Theme } from "./types.js";
 
 const GRIDLINES = new Set(["none", "x", "y", "both"]);
@@ -32,9 +32,21 @@ function assertScheme(themeName: string, which: "light" | "dark", scheme: ColorS
     ["status.warning", scheme.status.warning],
     ["status.bad", scheme.status.bad],
     ["status.unknown", scheme.status.unknown],
+    ...(scheme.seriesLabels ?? []).map((c, i): [string, string] => [`seriesLabels[${i}]`, c]),
+    ...(scheme.sequentialEdges ?? []).map((c, i): [string, string] => [`sequentialEdges[${i}]`, c]),
   ];
   if (scheme.series.length !== 8) {
     throw new Error(`${where}: series must have exactly 8 colors, has ${scheme.series.length}`);
+  }
+  if (scheme.seriesLabels && scheme.seriesLabels.length !== 8) {
+    throw new Error(
+      `${where}: seriesLabels must have exactly 8 colors, has ${scheme.seriesLabels.length}`,
+    );
+  }
+  if (scheme.sequentialEdges && scheme.sequentialEdges.length !== 5) {
+    throw new Error(
+      `${where}: sequentialEdges must have exactly 5 colors, has ${scheme.sequentialEdges.length}`,
+    );
   }
   if (scheme.sequential.length !== 5) {
     throw new Error(
@@ -42,7 +54,11 @@ function assertScheme(themeName: string, which: "light" | "dark", scheme: ColorS
     );
   }
   for (const [name, value] of colors) {
-    if (!isHexColor(value)) throw new Error(`${where}.${name}: "${value}" is not a hex color`);
+    if (!isThemeColor(value)) {
+      throw new Error(
+        `${where}.${name}: "${value}" is not a hex color or var(--token, #hex) with a hex fallback`,
+      );
+    }
   }
 }
 

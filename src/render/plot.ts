@@ -116,14 +116,13 @@ export interface RenderedPlot {
 }
 
 /**
- * Draws a Plot specification into SVG markup named by `alt`: one image, or a group when its
- * marks are links. Throws if Plot warns, because a warning means the chart shown would not be the
+ * Draws a Plot specification into SVG markup named by `alt`: one image (record 0027). Throws if Plot warns, because a warning means the chart shown would not be the
  * chart intended.
  */
 export function renderPlot(
   options: Plot.PlotOptions,
   alt: string | undefined,
-  role: "img" | "group" = "img",
+  role: "img" = "img",
   after?: (svg: SVGSVGElement) => void,
 ): RenderedPlot {
   const document = createDocument();
@@ -165,9 +164,8 @@ export function renderPlot(
   }
   after?.(svg);
   roundCoordinates(svg);
-  // A chart whose marks are links cannot be one image: role="img" would hide the links.
+  // Every drawing is one named image, enhanced or not; interaction lives outside it (0027).
   svg.setAttribute("role", role);
-  if (role === "group") svg.setAttribute("aria-roledescription", "chart");
   svg.setAttribute("aria-label", alt ?? "");
 
   let x: ScaleDescription | undefined;

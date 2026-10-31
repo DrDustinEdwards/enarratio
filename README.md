@@ -165,7 +165,7 @@ Without a bundler, serve `node_modules/enarratio/dist/enhance/index.js` as a
 file (it has no imports of its own) and load it with
 `<script type="module">import { enhance } from "/enhance.js"; enhance();</script>`,
 or from a CDN such as
-`https://cdn.jsdelivr.net/npm/enarratio@0.4.1/dist/enhance/index.js`.
+`https://cdn.jsdelivr.net/npm/enarratio@0.5.0/dist/enhance/index.js`.
 
 To redraw a chart in place, pass new server markup to `update()` on the chart
 `enhance()` returns. That markup should come from Enarratio: it is sanitized
@@ -260,10 +260,42 @@ const theme = defineTheme({
 });
 const report = checkTheme(theme);
 // report.issues: text below 4.5:1, marks below 3:1 (WCAG 2.2),
-// and series colors closer than 10 CIEDE2000 units under simulated
+// series names below 4.5:1 on the background, ramp steps under 3:1 by fill
+// and edge, and series colors closer than 10 CIEDE2000 units under simulated
 // protanopia, deuteranopia or tritanopia. stylesheet() throws on any of them.
 const css = stylesheet(theme, { highContrast: highContrastTheme });
 ```
+
+Series names written on the background (direct labels, survival curve labels)
+are drawn in a shade of each series color that reaches 4.5:1, and ramp steps
+too pale to see on the background (a heatmap's lowest values) get an edge at
+3:1. `stylesheet()` derives both from the theme, or takes a theme's own
+`seriesLabels` and `sequentialEdges`.
+
+### Your own tokens in a theme
+
+Any theme color can be one of the site's own custom properties, with its value
+as a fallback: `var(--brand-ink, #1c1727)`. The stylesheet writes it as given,
+so charts follow the token wherever the site changes it (a family, a density, a
+dark mode of its own), and nothing is copied in hex. `checkTheme()` measures
+the fallback, so keep it equal to the token's value.
+
+```ts
+const theme = defineTheme({
+  ...defaultTheme,
+  name: "site",
+  light: {
+    ...defaultTheme.light,
+    background: "var(--surface, #fdfdfe)",
+    text: "var(--text, #1c1727)",
+    mutedText: "var(--muted, #686471)",
+  },
+});
+```
+
+When the series or the ramp are tokens, give `seriesLabels` and
+`sequentialEdges` as tokens too; otherwise their shades are derived from the
+fallbacks and stay fixed.
 
 A site whose colors and type already live in its own design tokens can skip the
 `Theme` object: link `enarratio/base.css` (or call `baseStylesheet()`), define the
@@ -308,6 +340,11 @@ and edited.
   12px at default zoom, down to a 320px screen.
 - Charts follow forced colors (Windows High Contrast), `prefers-contrast:
   more`, `prefers-reduced-motion` and print, and carry no `style` attribute.
+- A chart's drawing is one named image (`role="img"`), enhanced or not; the
+  enhancement layer's points sit beside it, in their own `role="application"`
+  layer ([record 0027](docs/design/0027-contrast-export-and-roles.md)).
+- Enhanced charts add "Download SVG", "Download PNG" and, for a figure with an
+  `id`, "Copy embed" (a link to the chart) beside "Download CSV".
 - Enhanced charts are keyboard operable with one tab stop, through native
   buttons over the marks and a described key hint; they announce each point's
   place, filters, ranges, sorts and updates through a live region, and respect

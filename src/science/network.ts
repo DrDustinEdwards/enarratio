@@ -157,8 +157,8 @@ export function networkChart(options: NetworkChartOptions): string {
       y1: (e: (typeof edges)[number]) => e.a.y ?? 0,
       x2: (e: (typeof edges)[number]) => e.b.x ?? 0,
       y2: (e: (typeof edges)[number]) => e.b.y ?? 0,
+      // Full strength: the muted text color reaches 4.5:1, so a link always reaches 3:1 (B1).
       stroke: "var(--enarratio-text-muted)",
-      strokeOpacity: 0.5,
     }),
     Plot.dot(laidOut, {
       x: (n: LaidOutNode) => n.x ?? 0,

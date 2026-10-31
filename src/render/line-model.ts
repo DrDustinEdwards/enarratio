@@ -31,6 +31,7 @@ import {
   validateFigure,
 } from "./figure.js";
 import { planSeries, type SeriesPlan } from "./series.js";
+import { WIDE_WIDTH } from "./size.js";
 import {
   dateFormat,
   defaultFormat,
@@ -95,6 +96,11 @@ export interface SeriesChartOptions<T extends object> extends FigureOptions, Axi
   readonly references?: readonly ReferenceLine[];
   /** Vertical event markers, each labeled on the chart. */
   readonly markers?: readonly EventMarker[];
+  /**
+   * The most x tick labels to print. Without it, ticks are thinned to what fits the width, so
+   * labels never overlap on a narrow chart; with it, to the fewer of the two.
+   */
+  readonly maxXTicks?: number;
 }
 
 /**
@@ -176,6 +182,27 @@ function yearTicks(from: number, to: number): number[] {
   const ticks: number[] = [];
   for (let t = Math.ceil(from / step) * step; t <= to; t += step) ticks.push(t);
   return ticks;
+}
+
+/**
+ * Every nth x tick, starting from the first, so that no two labels overlap and at most
+ * `max` print. A label is about 7 user units a character at the mark size, more on a drawing
+ * whose text grows as it shrinks (record 0022), and needs 12 more between neighbors.
+ */
+export function fitTicks<T>(
+  ticks: readonly T[],
+  label: (t: T) => string,
+  width: number,
+  plotWidth: number,
+  max?: number,
+): T[] {
+  const grow = Math.max(1, width / (width >= WIDE_WIDTH ? WIDE_WIDTH : 288));
+  const longest = Math.max(1, ...ticks.map((t) => label(t).length));
+  const fit = Math.max(2, Math.floor(plotWidth / (longest * 7 * grow + 12)));
+  const limit = Math.min(fit, max ?? fit);
+  if (ticks.length <= limit) return [...ticks];
+  const step = Math.ceil(ticks.length / limit);
+  return ticks.filter((_, i) => i % step === 0);
 }
 
 /**
@@ -442,6 +469,8 @@ export interface SeriesModel {
   readonly multi: boolean;
   /** Whole-year x ticks, when x holds years. */
   readonly yearTicks: number[] | undefined;
+  /** The caller's limit on x tick labels, checked. */
+  readonly maxXTicks: number | undefined;
   readonly markers: readonly MarkerPoint[];
   /** The y axis's tick format for huge values, and whether every value is zero (B41). */
   readonly valueAxis: ReturnType<typeof valueAxis>;
@@ -462,6 +491,10 @@ function seriesModel<T extends object>(
 ): SeriesModel {
   const plan = planSeries(kind, prepared.seriesNames, options.colors);
   check?.();
+  const max = options.maxXTicks;
+  if (max !== undefined && (!Number.isInteger(max) || max < 1)) {
+    throw new Error(`${kind}: maxXTicks must be a whole number of 1 or more`);
+  }
   const noted = withNotes(options);
   const multi = options.series !== undefined;
   const xColumn = prepared.xLabel ?? options.x;
@@ -501,6 +534,7 @@ function seriesModel<T extends object>(
     plan,
     multi,
     yearTicks: prepared.years ? yearTicks(minOf(ats), maxOf(ats)) : undefined,
+    maxXTicks: options.maxXTicks,
     markers: markerPoints(options, prepared.time, kind),
     valueAxis: valueAxis(
       [...values, ...(options.references ?? []).map((r) => r.y)],

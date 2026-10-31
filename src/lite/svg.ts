@@ -95,7 +95,7 @@ export function svgRoot(
   width: number,
   height: number,
   alt: string | undefined,
-  role: "img" | "group",
+  role: "img",
   children: string,
 ): string {
   return el(
@@ -107,9 +107,8 @@ export function svgRoot(
       width,
       height,
       viewBox: `0 0 ${num(width)} ${num(height)}`,
+      // One named image, enhanced or not; interaction lives outside it (record 0027).
       role,
-      // A chart whose marks are links cannot be one image: role="img" would hide the links.
-      "aria-roledescription": role === "group" ? "chart" : undefined,
       "aria-label": alt ?? "",
     },
     children,

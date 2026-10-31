@@ -30,7 +30,7 @@ export const defaultTheme: Theme = {
       "#595959",
     ],
     sequential: ["#dbe9f6", "#a6c8ea", "#6aa3d8", "#2f78c0", "#0b4a8c"],
-    status: { good: "#1a7f37", warning: "#9a6700", bad: "#cf222e", unknown: "#8c959f" },
+    status: { good: "#1a7f37", warning: "#9a6700", bad: "#cf222e", unknown: "#818a94" },
   },
   dark: {
     background: "#16181d",
