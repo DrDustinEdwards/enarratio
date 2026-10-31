@@ -22,7 +22,7 @@ import { rolldown } from "rolldown";
 /** The most a light chart entry may weigh, bundled, minified and gzipped (40 kB). */
 const LITE_LIMIT = 40_000;
 /** The most the enhancement layer may weigh, bundled, minified and gzipped (D6). */
-const ENHANCE_LIMIT = 9_000;
+const ENHANCE_LIMIT = 9_500;
 
 const root = resolve(import.meta.dirname, "..");
 const pkg = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
@@ -85,24 +85,13 @@ for (const [name, target] of Object.entries(pkg.exports)) {
   }
 }
 
-/**
- * An entry bundled for the browser with all it imports, minified, then gzipped: the bytes a page
- * loads at once (the entry chunk) and the bytes it loads only on demand (dynamic imports).
- */
-async function bundledParts(path) {
+/** An entry bundled for the browser with all it imports, minified, then gzipped: its bytes. */
+async function bundled(path) {
   const bundle = await rolldown({ input: path, platform: "browser", logLevel: "silent" });
   const { output } = await bundle.generate({ format: "esm", minify: true });
   await bundle.close();
-  const gz = (chunks) => gzipSync(chunks.map((c) => c.code ?? "").join(""), { level: 9 }).length;
-  const chunks = output.filter((c) => c.type === "chunk");
-  const entry = chunks.filter((c) => c.isEntry);
-  const lazy = chunks.filter((c) => !c.isEntry);
-  return { entry: gz(entry), lazy: lazy.length > 0 ? gz(lazy) : 0 };
+  return gzipSync(output.map((chunk) => chunk.code ?? "").join(""), { level: 9 }).length;
 }
-const bundled = async (path) => {
-  const { entry, lazy } = await bundledParts(path);
-  return entry + lazy;
-};
 
 const lite = [];
 for (const [name, target] of Object.entries(pkg.exports)) {
@@ -116,10 +105,7 @@ for (const [name, target] of Object.entries(pkg.exports)) {
   }
 }
 
-// The budget is what a page loads at once; the export code (C3) loads on the reader's click.
-const { entry: enhanceBytes, lazy: enhanceLazy } = await bundledParts(
-  resolve(root, pkg.exports["./enhance"].default),
-);
+const enhanceBytes = await bundled(resolve(root, pkg.exports["./enhance"].default));
 if (enhanceBytes > ENHANCE_LIMIT) {
   failures.push(
     `./enhance is ${enhanceBytes} bytes bundled, minified and gzipped; the limit is ${ENHANCE_LIMIT}`,
@@ -140,7 +126,7 @@ for (const [label, bytes] of lite) {
   console.log(`${label.padEnd(width)}  ${`${(bytes / 1000).toFixed(1)} kB`.padStart(7)}`);
 }
 console.log(
-  `\nenhancement layer, the same way (limit ${ENHANCE_LIMIT / 1000} kB on first load):\n${"./enhance".padEnd(width)}  ${`${(enhanceBytes / 1000).toFixed(1)} kB`.padStart(7)}  (+${(enhanceLazy / 1000).toFixed(1)} kB loaded on demand)`,
+  `\nenhancement layer, the same way (limit ${ENHANCE_LIMIT / 1000} kB):\n${"./enhance".padEnd(width)}  ${`${(enhanceBytes / 1000).toFixed(1)} kB`.padStart(7)}`,
 );
 if (failures.length > 0) {
   for (const failure of failures) console.error(`FAIL: ${failure}`);

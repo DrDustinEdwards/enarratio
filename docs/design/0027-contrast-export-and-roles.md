@@ -59,7 +59,7 @@ on 2026-10-31 and found, in Enarratio's own drawing:
    background painted in, and the pointer targets and brush removed. The PNG is that SVG drawn on
    a canvas at twice its size; no dependency. The embed snippet is a link,
    `<a href="{page}#{id}">{title}</a>`: an iframe of the page would embed the whole page, and a
-   chart-only endpoint is the site's to serve. The enhancement layer's budget stays at 9 kB on first load: the file export (the standalone SVG and the PNG canvas) is a dynamic import that loads on the reader's click, and `npm run size` reports it separately (about 1.5 kB).
+   chart-only endpoint is the site's to serve. The enhancement layer's budget rises from 9 to 9.5 kB, replacing the limit in 0021: export, embed and the shared layout batching bring it to 9.2 kB. Loading the export code on demand would keep the first load under 9 kB, but the published `dist/enhance/index.js` is one file with no imports so a page without a bundler can serve it (README, "Without a bundler"), and a second file would break that.
 6. **The drawing is one image, enhanced or not (B28).** Since 0.4.1 every chart's SVG is
    `role="img"` named by its `alt`, and `enhance()` does not change that. Its keyboard and
    screen reader points are native buttons in a separate `role="application"` layer beside the
