@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
@@ -35,8 +37,11 @@ jobs:
           name: visual-snapshots-linux
           path: test/browser/__snapshots__/linux/
       # A branch of its own, so the images can be fetched with git without a login. Force-pushed:
-      # it is only ever the latest render.
+      # it is only ever the latest render. The checkout keeps no credentials, so the token is given to
+      # this step alone.
       - name: Publish the images to visual-snapshots/<branch>
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -44,4 +49,4 @@ jobs:
           git rm -rf --cached . > /dev/null
           git add -f test/browser/__snapshots__/linux
           git commit -q -m "Linux visual snapshots rendered from ${GITHUB_SHA}"
-          git push --force origin "HEAD:refs/heads/visual-snapshots/${GITHUB_REF_NAME//\//-}"
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/visual-snapshots/${GITHUB_REF_NAME//\//-}"
