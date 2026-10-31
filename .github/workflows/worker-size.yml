@@ -12,9 +12,14 @@ on:
 permissions:
   contents: read
 
+# A newer push to a pull request cancels its older run; a push to the default branch never does.
+concurrency:
+  group: worker-size-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   worker-size:
-    uses: DrDustinEdwards/devkit/.github/workflows/worker-size.yml@956dc10b8a0fbf3128df41c7c21c9441392fabda # v0.20.5
+    uses: DrDustinEdwards/devkit/.github/workflows/worker-size.yml@d9d5a3448a50f183c3c8b4a5f293717728717245 # v0.20.8
     with:
       install: PUPPETEER_SKIP_DOWNLOAD=true npm ci
       prepare: npm run build && npm run gallery
