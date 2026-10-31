@@ -1,7 +1,8 @@
 # 0026. Fixes from the 0.4.0 rollout: linked bars, bar edges and hover titles
 
 Status: accepted, 2026-10-31. Replaces the linked-bar exception of
-[0002](0002-server-rendering.md) and the background-colored bar edge of
+[0002](0002-server-rendering.md), the bar links of [0004](0004-enhancement-layer.md) item 10
+and the background-colored bar edge of
 [0022](0022-readable-for-every-reader.md); builds on [0023](0023-the-figure-in-words.md).
 
 ## Problem
@@ -18,11 +19,15 @@ Rolling 0.4.0 out to the sites and running Prelum's chart audit (area 10) on the
 
 ## Decision
 
-1. **A linked bar chart is one image too.** Its SVG is `role="img"`, like every other chart. The
-   bars stay links for the pointer, out of the tab order (`tabindex="-1"`), and each category's
-   row header in the data table is the same link, so keyboards and screen readers reach every
-   link in the table, where the values are. The enhancement layer is unchanged: bars filter, and
-   the link moves to `data-enarratio-href`.
+1. **A linked bar chart is one image too.** Its SVG is `role="img"`, like every other chart, so
+   it holds no link: an image's children are presentational, and a link inside one, even out of
+   the tab order, is nested interactive content (axe `nested-interactive`). Each category's row
+   header in the data table is the link, so keyboards and screen readers reach every link in the
+   table, where the values are. Each bar is a plain mark carrying its link in
+   `data-enarratio-href`. Enhanced, a bar that filters still filters (the page can follow the
+   link on `enarratio:select`); one that does not (`filter: false`) follows its link on a click,
+   and its point, outside the SVG with the others, is that link. Without script, a bar is not
+   clickable.
 2. **The edge between bars is grid-colored.** It stays 1px (`--enarratio-bar-gap`), but is
    drawn in `--enarratio-grid`, the theme's color for decoration that is not held to a contrast
    minimum, rather than the background. Bars still never touch, and a contrast check reads a bar by

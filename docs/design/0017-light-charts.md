@@ -58,7 +58,8 @@ one chart rather than two that drift apart.
    `aria-label` to `data-enarratio-mark`, because the step that renames Plot's
    groups matches the links too. The light renderer
    keeps the `aria-label`, as the bar chart intends. The parity test reads the
-   Plot output's attribute back as `aria-label`. Second, a bar chart whose
+   Plot output's attribute back as `aria-label`. (Gone since
+   [0026](0026-rollout-fixes.md): no bar is a link.) Second, a bar chart whose
    values are all zero: Plot's value scale then has a domain of zero width and
    draws every bar the full height of the frame; the light chart draws bars of
    no height, and a test pins both. Fixing the Plot renderer is a separate

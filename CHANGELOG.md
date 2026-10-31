@@ -13,7 +13,7 @@ Fixes found rolling 0.4.0 out to the sites ([0026](docs/design/0026-rollout-fixe
 
 ### Upgrading from 0.4.0
 
-- A bar chart with `href` draws its SVG as `role="img"` (was a named group), its bars are links out of the tab order (`tabindex="-1"`), and each category in its data table is the same link. Styles or tests aimed at `role="group"` or `aria-roledescription="chart"` no longer apply.
+- A bar chart with `href` draws its SVG as `role="img"` (was a named group) with no links inside it: each category in its data table is the link, and each bar is a plain mark carrying it in `data-enarratio-href` (was an `<a href>`), so without script a bar is not clickable. Enhanced, a bar that does not filter (`filter: false`) follows its link on a click, and its point is that link; `update()` checks that link like any other. Styles or tests aimed at `role="group"`, `aria-roledescription="chart"` or the bars' `<a>` no longer apply.
 - The 1px edge between adjacent bars and stacked segments is drawn in `--enarratio-grid` (was `--enarratio-background`).
 
 ### Added

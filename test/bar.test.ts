@@ -85,7 +85,7 @@ describe("barChart", () => {
       }),
     );
     expect(fig.querySelector("title")).toBeNull();
-    const shapes = [...fig.querySelectorAll('[data-enarratio-mark="bar"] rect')];
+    const shapes = [...fig.querySelectorAll('[data-enarratio-mark="bar"] [data-enarratio-href]')];
     expect(shapes.length).toBeGreaterThan(0);
     for (const shape of shapes) expect(shape.getAttribute("data-enarratio-label")).toMatch(/: /);
   });
@@ -277,7 +277,7 @@ describe("barChart", () => {
     expect(mark?.getAttribute("data-enarratio-value")).toBe("2022");
   });
 
-  it("makes each bar a link for readers without script", () => {
+  it("puts each bar's link in the table and on the bar, with no link inside the image", () => {
     const fig = parse(
       barChart({
         data: entries,
@@ -287,10 +287,12 @@ describe("barChart", () => {
         alt: "a",
       }),
     );
+    expect(fig.querySelector("svg a, svg [tabindex]")).toBeNull();
     const marks = keyedMarks(fig);
-    expect(marks[0]?.tagName.toLowerCase()).toBe("a");
-    expect(marks[0]?.getAttribute("href")).toBe("/cv?year=2022");
-    expect(marks[0]?.querySelector("rect title")?.textContent).toBe("year 2022, Publications: 1");
+    expect(marks[0]?.tagName.toLowerCase()).toBe("rect");
+    expect(marks[0]?.getAttribute("data-enarratio-href")).toBe("/cv?year=2022");
+    expect(marks[0]?.querySelector("title")?.textContent).toBe("year 2022, Publications: 1");
+    expect(fig.querySelector("tbody th a")?.getAttribute("href")).toBe("/cv?year=2022");
   });
 
   it("refuses links that are not relative or http(s)", () => {

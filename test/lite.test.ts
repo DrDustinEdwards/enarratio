@@ -9,12 +9,7 @@ import * as lite from "../src/lite/index.js";
 import * as plot from "../src/plot/index.js";
 import { parse } from "./helpers.js";
 
-/**
- * A figure as comparable lines: each element with its attributes sorted, and text. The Plot
- * renderer moves a bar link's name from `aria-label` to `data-enarratio-mark` (its group
- * renaming catches the link too); the light renderer keeps it as `aria-label`, as intended, so
- * the comparison reads the Plot one back as `aria-label`.
- */
+/** A figure as comparable lines: each element with its attributes sorted, and text. */
 function canonical(markup: string): string[] {
   const lines: string[] = [];
   const walk = (node: Node, depth: number): void => {
@@ -27,11 +22,7 @@ function canonical(markup: string): string[] {
     const el = node as Element;
     const attrs = el
       .getAttributeNames()
-      .map((name) => {
-        const value = el.getAttribute(name) ?? "";
-        if (el.localName === "a" && name === "data-enarratio-mark") return `aria-label=${value}`;
-        return `${name}=${value}`;
-      })
+      .map((name) => `${name}=${el.getAttribute(name) ?? ""}`)
       .sort();
     lines.push(`${"  ".repeat(depth)}<${el.localName} ${attrs.join(" ")}>`);
     for (const child of el.childNodes) walk(child, depth + 1);

@@ -358,12 +358,13 @@ one row per item (a CV entry, a case) is enough.
 
 - `filterBy`: what a click filters by once enhanced, `"series"` (the default
   when there are series) or `"x"` (the bar's category, such as its year).
-- `href`: a function from category to link. Without script each bar is a link
-  for the pointer, out of the tab order, and each category in the data table
-  is the same link, which keyboards and screen readers reach (the SVG stays one
-  image); with the enhancement layer the bar filters instead, and the link
-  is kept in `data-enarratio-href`. Only relative and `http(s)` links are
-  allowed.
+- `href`: a function from category to link. Each category in the data table
+  is that link, which keyboards and screen readers reach, and each bar carries
+  it in `data-enarratio-href` (the SVG stays one image, with no links inside).
+  With the enhancement layer a bar that filters still filters, and the page can
+  follow the link on `enarratio:select`; with `filter: false` a click on a bar
+  follows its link, and its point is that link. Only relative and `http(s)`
+  links are allowed.
 - `maxXTicks`: the most category labels to print; with more categories, every
   nth label is printed from the first.
 - `directLabels`: print each series' name inside the stacked segments it fits

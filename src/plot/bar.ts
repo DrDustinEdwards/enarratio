@@ -24,26 +24,16 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
   const model = barModel(options);
   const { points, xNames, seriesNames, horizontal, grouped, thinned, categoryLabel } = model;
 
+  // The SVG is one image, so a bar holds no link: its link rides on it for enhance(), and the
+  // data table carries the same links for keyboards and screen readers (0026).
+  const link = model.link;
   const render = keyed(
     points,
     model.datum,
-    // A link carries its own name, for the enhancement layer, and stays out of the tab order:
-    // the SVG is one image, so the data table carries the same links for keyboards (0026).
-    options.href
-      ? (el, p) => {
-          el.setAttribute("aria-label", model.describe(p));
-          el.setAttribute("tabindex", "-1");
-        }
-      : undefined,
+    link ? (el, p) => el.setAttribute("data-enarratio-href", link(p)) : undefined,
   );
 
-  const link = model.link;
-  const common = {
-    fill: "series",
-    title: model.describe,
-    render,
-    ...(link ? { href: (p: BarPoint) => link(p) } : {}),
-  };
+  const common = { fill: "series", title: model.describe, render };
   const order = { order: [...seriesNames] };
   let bar: Plot.Markish;
   if (horizontal) {

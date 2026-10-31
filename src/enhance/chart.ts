@@ -71,8 +71,6 @@ export class Chart implements EnhancedChart {
   private expandButton: HTMLButtonElement | null = null;
   /** Places the points over the marks again, after the drawing moved or resized. */
   private layout: () => void = () => {};
-  /** The SVG's role as the server rendered it, restored by destroy(). */
-  private serverRole: string | null = null;
   /** A wide frame whose tab stop attach() removed, given back by destroy(). */
   private untabbedFrame: HTMLElement | null = null;
   private hideTimer: ReturnType<typeof setTimeout> | undefined;
@@ -144,6 +142,7 @@ export class Chart implements EnhancedChart {
     }
 
     for (const mark of this.marks) {
+      const href = mark.getAttribute("data-enarratio-href");
       const targets: Element[] = [mark];
       const hit = hitArea(mark);
       if (hit) {
@@ -153,7 +152,8 @@ export class Chart implements EnhancedChart {
       for (const target of targets) {
         this.listen(target, "pointerenter", () => this.hover(mark));
         this.listen(target, "pointerleave", () => this.hover(null));
-        if (this.options.filter) this.listen(target, "click", () => this.toggleMark(mark));
+        if (this.filters(mark)) this.listen(target, "click", () => this.toggleMark(mark));
+        else if (href !== null) this.listen(target, "click", () => location.assign(href));
       }
     }
 
@@ -173,9 +173,6 @@ export class Chart implements EnhancedChart {
    */
   private attachPoints(svg: SVGSVGElement, frame: HTMLElement | null): void {
     const s = this.strings;
-    this.serverRole ??= svg.getAttribute("role");
-    // The links (if any) become the points, so the drawing is one image again.
-    svg.setAttribute("role", "img");
 
     const lists = new Map<string, number[]>();
     this.marks.forEach((mark, i) => {
@@ -216,19 +213,21 @@ export class Chart implements EnhancedChart {
         this.titles.push([title, title.parentElement]);
         title.remove();
       }
-      // A bar that is a link without script becomes a filter button with it; the page can read the
-      // link from data-enarratio-href and follow it on enarratio:select if it wants to.
-      const href = mark.getAttribute("href");
-      if (href !== null) {
-        mark.setAttribute("data-enarratio-href", href);
-        mark.removeAttribute("href");
+      // A linked bar that filters stays a filter button (the page can follow data-enarratio-href
+      // on enarratio:select); one that does not is its link, outside the SVG (0026).
+      const href = mark.getAttribute("data-enarratio-href");
+      const filterable = this.filters(mark);
+      let point: HTMLElement;
+      if (filterable) {
+        point = button("", () => this.toggleMark(mark));
+        point.setAttribute("aria-pressed", "false");
+      } else if (href !== null) {
+        point = document.createElement("a");
+        point.setAttribute("href", href);
+      } else {
+        point = document.createElement("span");
+        point.setAttribute("role", "img");
       }
-      const filterable = this.options.filter && mark.hasAttribute("data-enarratio-field");
-      const point = filterable
-        ? button("", () => this.toggleMark(mark))
-        : document.createElement("span");
-      if (filterable) point.setAttribute("aria-pressed", "false");
-      else point.setAttribute("role", "img");
       const list = this.series[i] ?? [];
       point.setAttribute(
         "aria-label",
@@ -287,6 +286,11 @@ export class Chart implements EnhancedChart {
       layer.remove();
       hint.remove();
     });
+  }
+
+  /** Whether a click on the mark filters by its value. */
+  private filters(mark: Element): boolean {
+    return this.options.filter && mark.hasAttribute("data-enarratio-field");
   }
 
   private rowOf(index: number): number {
@@ -863,13 +867,7 @@ export class Chart implements EnhancedChart {
     this.teardown();
     this.live?.remove();
     this.live = null;
-    if (this.serverRole !== null) this.svg?.setAttribute("role", this.serverRole);
     for (const mark of marks) {
-      const href = mark.getAttribute("data-enarratio-href");
-      if (href !== null) {
-        mark.setAttribute("href", href);
-        mark.removeAttribute("data-enarratio-href");
-      }
       mark.removeAttribute("data-enarratio-dimmed");
       mark.removeAttribute("data-enarratio-faded");
     }

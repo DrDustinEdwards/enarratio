@@ -35,7 +35,7 @@ const ALLOWED_ELEMENTS = new Set([
   "clippath",
   "pattern",
 ]);
-const LINK_ATTRIBUTES = new Set(["href", "xlink:href"]);
+const LINK_ATTRIBUTES = new Set(["href", "xlink:href", "data-enarratio-href"]);
 
 /** Relative and http(s) links only, with no user or password before the host, as the server allows (A11). */
 function safeLink(value: string): boolean {

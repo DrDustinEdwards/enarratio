@@ -238,6 +238,7 @@ ${Array.from(
   transition: opacity var(--enarratio-duration-hover, 150ms) var(--enarratio-ease-out, ease-out);
 }
 .enarratio[data-enarratio-interactive] [data-enarratio-field] { cursor: pointer; }
+.enarratio[data-enarratio-enhanced] [data-enarratio-href] { cursor: pointer; }
 .enarratio [data-enarratio-dimmed] { opacity: var(--enarratio-opacity-dimmed, 0.25); }
 .enarratio [data-enarratio-key]:focus { outline: none; }
 /* The enhancement layer's points: a native control over each mark, for keyboards and screen

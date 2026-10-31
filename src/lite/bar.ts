@@ -266,20 +266,9 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
         const keys = Object.fromEntries(datumAttributes(model.datum(p)));
         const shape = { ...box, fill: model.plan.range[rowOf.get(p.series) ?? 0] };
         const title = el("title", {}, text(model.describe(p)));
-        // As in the Plot chart: named, and out of the tab order, its link also in the table.
-        return model.link
-          ? el(
-              "a",
-              {
-                href: model.link(p),
-                fill: "inherit",
-                ...keys,
-                "aria-label": model.describe(p),
-                tabindex: "-1",
-              },
-              el("rect", shape, title),
-            )
-          : el("rect", { ...shape, ...keys }, title);
+        // As in the Plot chart: the link rides on the bar for enhance(), and is in the table (0026).
+        const link = model.link ? { "data-enarratio-href": model.link(p) } : {};
+        return el("rect", { ...shape, ...keys, ...link }, title);
       })
       .join("");
   // Annotations from the same scales Plot's are placed with: ranges behind the bars, notes last.

@@ -98,9 +98,9 @@ export interface BarChartOptions<T extends object> extends FigureOptions, AxisUn
    */
   readonly filterBy?: "series" | "x";
   /**
-   * A link for each category, so that with scripts off a bar is a link (to a filtered page, say).
-   * Once enhanced, bars filter instead and the link moves to `data-enarratio-href`. Only relative,
-   * `http:` and `https:` links are allowed.
+   * A link for each category (to a filtered page, say): each category in the data table is that
+   * link, and each bar carries it in `data-enarratio-href`, which `enhance()` follows on a click
+   * when the bar does not filter. Only relative, `http:` and `https:` links are allowed.
    */
   readonly href?: (x: string) => string;
   /**
