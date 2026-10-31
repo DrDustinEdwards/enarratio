@@ -29,14 +29,19 @@ const REPORT_GROUP = "csp-endpoint";
  * attributes are no longer allowed: charts write none (record 0022).
  */
 const csp = buildContentSecurityPolicy({
+  // Nothing unlisted: a kind not named here (media, frames, workers, a manifest) is refused.
+  denyUnlisted: true,
   sources: { img: ["data:"], connect: ["https://cloudflareinsights.com"] },
   cloudflareWebAnalytics: true,
   reportUri: REPORT_PATH,
   reportTo: REPORT_GROUP,
 });
 
-/** The shared standard set (OWASP's defaults, no overrides), which the check grades against. */
-export const standardHeaders = buildSecurityHeaders();
+/**
+ * The shared standard set (OWASP's defaults, no overrides), which the check grades against, with COEP credentialless:
+ * the gallery embeds no frame and loads nothing from another origin but the beacon, which needs no cookie.
+ */
+export const standardHeaders = buildSecurityHeaders({ coep: { value: "credentialless" } });
 
 /** Every security header the gallery sends, in the order `_headers` lists them. */
 export const securityHeaders: Readonly<Record<string, string>> = Object.freeze({
