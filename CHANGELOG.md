@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Gallery
+
+- The gallery's Worker is site-runtime v0.52.0's `staticSite` in place of its own code (no package change). The https redirect and the report endpoint are the same; every page now carries `Speculation-Rules: "/speculation-rules.json"` (the site's own prefetch rules, in place of Cloudflare's generic ones), `Server-Timing`, and a preload `Link` header for Capsomer's stylesheet, the home page's and Schibsted Grotesk, which Early Hints answers with a 103 (`PAGE_PRELOADS` in `scripts/security-headers.ts`; `scripts/gallery.ts` refuses a build where the home page links a stylesheet it leaves out). The 404 page and a page asked for with a cookie are `private, no-store`, where the 404 was `public, max-age=300`. The fonts no longer run the Worker. `test/worker.test.ts` and the Worker cases in `test/security-headers.test.ts` are removed: the Worker is site-runtime's, tested there. The home page looks the same: screenshots before and after are identical.
+
 ### Fixed
 
 - `enhance` reads every mark's size before it writes anything: the pointer targets, the point layer and the line lengths for the entrance. Measuring between writes laid the whole page out once per mark. On the gallery (40 charts, 10,000 elements) that cost 7.7 s of blocking time on a throttled phone, and it now costs 70 ms.

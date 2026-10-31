@@ -1,45 +1,19 @@
 /**
- * The gallery's Worker: sends plain HTTP to HTTPS, receives Content-Security-Policy violation
- * reports with site-runtime's shared receiver, and serves everything else from the static assets. It runs in front of the assets (`run_worker_first`) so
- * it sees http: requests, which the assets layer would otherwise answer directly. The assets carry
- * the security headers from `_headers`; the responses made here carry the same set, from
- * scripts/security-headers.ts (record 0018), and so does every file, with charset=utf-8 on a text
- * type: no `_headers` rule can name a path with no file, so the 404 page had no charset.
+ * The gallery's Worker: site-runtime's `staticSite`, the one front door the family's static sites
+ * share. One hop from http: to https: (308 for a method other than GET and HEAD, never cached);
+ * Content-Security-Policy violation reports at /csp-report with site-runtime's shared receiver;
+ * the prefetch rules at /speculation-rules.json; and every page with the Speculation-Rules,
+ * Server-Timing and preload Link headers (Early Hints), charset=utf-8, and any header of the
+ * security set from scripts/security-headers.ts (record 0018) its `_headers` rules left out. A path
+ * with no file gets the 404 page, private and never stored, and so does a page asked for with a
+ * cookie. wrangler.jsonc runs it first for every path but /fonts/*.
  */
 
-import { receiveCspReport } from "@dustinedwards/site-runtime/csp-report";
-import { applyHeaderSet } from "@dustinedwards/site-runtime/headers";
-import { REPORT_PATH, securityHeaders } from "../scripts/security-headers.ts";
+import { staticSite } from "@dustinedwards/site-runtime/static-site";
+import { PAGE_PRELOADS, REPORT_PATH, securityHeaders } from "../scripts/security-headers.ts";
 
-/** The assets binding wrangler provides as `env.ASSETS`. */
-export interface Env {
-  readonly ASSETS: { fetch(request: Request): Promise<Response> };
-}
-
-/** A response made by the Worker, with the gallery's security headers. */
-function respond(status: number, headers: Record<string, string> = {}): Response {
-  const response = new Response(null, { status, headers });
-  applyHeaderSet(response.headers, securityHeaders);
-  return response;
-}
-
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
-    if (url.protocol === "http:") {
-      url.protocol = "https:";
-      // 308 for anything but GET and HEAD, so a POST stays a POST (a 301 lets the browser turn it into a GET and drop
-      // the body), and never cached, as on dustinedwards.info (app/lib/https-redirect.mjs).
-      const read = request.method === "GET" || request.method === "HEAD";
-      return respond(read ? 301 : 308, { Location: url.toString(), "Cache-Control": "no-store" });
-    }
-    if (url.pathname === REPORT_PATH)
-      return receiveCspReport(request, { headers: securityHeaders });
-    // Every file goes out with the set again, which adds charset=utf-8 to a bare text type: the
-    // asset layer sent the home page and the 404 page as plain text/html whatever `_headers` said.
-    const asset = await env.ASSETS.fetch(request);
-    const response = new Response(asset.body, asset);
-    applyHeaderSet(response.headers, securityHeaders);
-    return response;
-  },
-};
+export default staticSite({
+  headers: securityHeaders,
+  preload: PAGE_PRELOADS.header,
+  reportPath: REPORT_PATH,
+});

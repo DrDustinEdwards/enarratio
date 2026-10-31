@@ -1,16 +1,15 @@
 /**
  * The gallery's security headers (record 0018): the generated `_headers` passes site-runtime's
- * check against the shared standard set, and the Worker's own responses carry the same set.
+ * check against the shared standard set. The Worker is site-runtime's staticSite, tested there.
  */
 import { checkSecurityHeaders, failures } from "@dustinedwards/site-runtime/check";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   galleryHeadersFile,
   REPORT_PATH,
   securityHeaders,
   standardHeaders,
 } from "../scripts/security-headers.ts";
-import worker from "../worker/index.ts";
 
 /** The headers `_headers` sets on every path: its `/*` rules, which Cloudflare joins. */
 function parseHeadersFile(text: string): Headers {
@@ -32,17 +31,7 @@ const check = (headers: Headers) =>
     checkSecurityHeaders(headers, { standard: standardHeaders, cloudflareWebAnalytics: true }),
   );
 
-const assets = {
-  async fetch(): Promise<Response> {
-    return new Response("asset", { status: 200 });
-  },
-};
-
 describe("gallery security headers", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   it("the generated _headers passes checkSecurityHeaders", () => {
     const headers = parseHeadersFile(galleryHeadersFile());
     expect(check(headers)).toEqual([]);
@@ -58,27 +47,5 @@ describe("gallery security headers", () => {
     // No inline script or style anywhere, style attributes included (D4).
     expect(policy).not.toContain("'unsafe-");
     expect(policy).toContain(`report-uri ${REPORT_PATH}`);
-  });
-
-  it("the Worker's redirects carry the set and pass the check", async () => {
-    const response = await worker.fetch(new Request("http://enarratio.dustinedwards.info/"), {
-      ASSETS: assets,
-    });
-    expect(response.status).toBe(301);
-    expect(check(response.headers)).toEqual([]);
-  });
-
-  it("routes reports to the shared receiver, whose answers carry the set", async () => {
-    // The receiver itself is tested in site-runtime; this checks the Worker sends reports to it.
-    vi.spyOn(console, "log").mockImplementation(() => {});
-    const response = await worker.fetch(
-      new Request(`https://enarratio.dustinedwards.info${REPORT_PATH}`, {
-        method: "POST",
-        body: JSON.stringify({ "csp-report": { "violated-directive": "img-src" } }),
-      }),
-      { ASSETS: assets },
-    );
-    expect(response.status).toBe(204);
-    expect(check(response.headers)).toEqual([]);
   });
 });
