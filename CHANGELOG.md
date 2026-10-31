@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Fixed
+
+- `enhance` reads every mark's size before it writes anything: the pointer targets, the point layer and the line lengths for the entrance. Measuring between writes laid the whole page out once per mark. On the gallery (40 charts, 10,000 elements) that cost 7.7 s of blocking time on a throttled phone, and it now costs 70 ms.
+
 ### Changed
 
 - Gallery: its pages, sitemap, icon, security.txt and 404 page name `charset=utf-8` (`headersFile` with `charset: true`, and the Worker sends every file through `applyHeaderSet`, on site-runtime v0.49.0). Not part of the package, which is unchanged.
