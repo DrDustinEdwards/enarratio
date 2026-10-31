@@ -68,7 +68,7 @@ websites who want charts that:
 ## Install
 
 ```sh
-npm install enarratio@next
+npm install enarratio
 ```
 
 That is the core: the theme, the stylesheet, the color checks, and the small

@@ -68,7 +68,7 @@ terminal with your passkey keeps working too.
    **Approve**. npm asks for 2FA (your passkey). From a terminal instead:
    `npm stage list enarratio`, `npm stage download <stage-id>` to inspect the tarball, then
    `npm stage approve <stage-id>`.
-5. **Check it is live.** The package page shows the new version under the `next` tag and a
+5. **Check it is live.** The package page shows the new version under the `latest` tag and a
    provenance section naming this repository and `release.yml`.
 6. **Start the consumer bumps.** No tag starts it, because a tag exists before the version is live,
    so start it now. Click **Actions**, then **bump-consumers**, then **Run workflow**, untick
@@ -84,5 +84,5 @@ terminal with your passkey keeps working too.
 - **The tag does not match `package.json`.** Delete the tag on GitHub (**Releases**, or
   **Tags**), fix the version in a pull request, and tag again.
 
-The dist-tag comes from `publishConfig.tag` in `package.json` (`next` until 1.0) and is fixed
+The dist-tag comes from `publishConfig.tag` in `package.json` (`latest`; up to 0.5.0 it was `next`) and is fixed
 once a version is staged.

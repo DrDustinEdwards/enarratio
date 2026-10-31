@@ -7,6 +7,11 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Release
+
+- Releases publish under npm's `latest` tag (`publishConfig.tag`), so `npm install enarratio` gets the newest version.
+  Before this, they went to `next` and `latest` still pointed at 0.1.0-alpha.8.
+
 ### Gallery
 
 - Deployed by devkit's shared deploy (worker-deploy.yml v0.20.18), a `deploy` job in ci.yml after the checks and browser

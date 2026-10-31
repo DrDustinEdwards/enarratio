@@ -8,8 +8,8 @@ handler attributes.
 
 ## Supported versions
 
-Security fixes are made on the latest release, published under the npm `next` tag
-(`npm install enarratio@next`). The `latest` tag still points at an old alpha.
+Security fixes are made on the latest release, published under the npm `latest` tag
+(`npm install enarratio`).
 
 ## Reporting a vulnerability
 
