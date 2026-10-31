@@ -92,6 +92,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
       - name: Install the npm CLI that supports staged publishing
         run: npm install --global npm@11.21.0
       - name: Check the tag matches package.json and is on main
