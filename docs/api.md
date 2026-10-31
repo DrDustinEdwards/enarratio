@@ -11,6 +11,7 @@ ships only what it uses.
 | `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | Peers `@observablehq/plot` and `d3-force`, and `linkedom` outside a browser |
 | `enarratio/lite` | `barChart`, `lineChart`, `areaChart` drawn without Observable Plot; also one entry per chart: `enarratio/lite/bar`, `enarratio/lite/line`, `enarratio/lite/area` | Nothing |
 | `enarratio/enhance` | Interaction for charts already on the page; runs in the browser | Nothing |
+| `enarratio/redraw` | Draws a server's chart again at its frame's width in the browser, then enhances it | Nothing |
 | `enarratio/themes` | The themes that ship with the package | Nothing |
 
 `@observablehq/plot`, `d3-force` and `linkedom` are optional peer dependencies:
@@ -1566,3 +1567,51 @@ wherever focus is.
   to clear.
 - On a continuous x axis, drag to pick a range, or click the plot once for one
   end and again for the other: dragging is never the only way.
+
+## Redraw to the frame: `enarratio/redraw`
+
+A chart drawn on the server keeps the width it was drawn at; in a narrower column its text
+shrinks below the mark size, or a wide frame scrolls. `enarratio/redraw` draws it again in the
+browser at its frame's width, whenever that width changes, and enhances each drawing. Bar, line
+and area charts are drawn again by `enarratio/lite` from their options; any other chart may give
+a narrow drawing made on the server, used under 30rem. A line chart narrower than 400 drops its
+end labels (its legend names the series); under 200 the server's drawing stays and scrolls.
+
+```ts
+// On the server, beside the chart:
+import { redrawAttribute } from "enarratio/redraw";
+const html = `<div ${redrawAttribute({ chart: "line", options })}>${lineChart(options)}</div>`;
+
+// In the page's own script:
+import { redrawCharts } from "enarratio/redraw";
+redrawCharts();
+```
+
+Without the script, the server's drawing stands, with its table. The options must survive JSON.
+
+### `RedrawSpec`
+
+`{ chart: "bar" | "line" | "area", options }`, the light chart and the options it was drawn
+with, or `{ narrow }`, the frame markup of a drawing about 240 wide.
+
+### `REDRAW_ATTRIBUTE`
+
+`"data-enarratio-redraw"`: the attribute that carries the spec.
+
+### `redrawAttribute`
+
+`redrawAttribute(spec)` returns the attribute, escaped, for the element around the figure.
+
+### `redrawCharts`
+
+`redrawCharts(root?, options?)` starts every chart under `root` (the document) that carries a
+spec, once each, and returns them. `options` are `enhance`'s.
+
+### `redrawChart`
+
+`redrawChart(host, spec, options?)` starts one chart, for a host that carries its spec some other
+way.
+
+### `RedrawnChart`
+
+`{ host, destroy() }`: `destroy` stops following the width and removes the enhancement.

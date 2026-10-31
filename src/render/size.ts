@@ -58,12 +58,21 @@ export function leftMargin(
 }
 
 /**
+ * Where the x axis title's baseline sits, in ems below the first tick label's top, past the tick
+ * labels' own lines: about one blank line between them. Both renderers set the title there.
+ */
+export const TITLE_LINES = 1.5;
+
+/**
  * The bottom margin a drawing needs so its x tick labels and, when it has one, the x axis title
- * below them never overlap at a narrow width: the tick gap, the space below and between (16
- * together), then a line of growing text (13 units, room for a site's mark size a little over
- * 12px) for each line of tick label (two on a time axis, "24" over "Oct") and one for the title.
- * Never less than `base`.
+ * below them never overlap or leave the drawing at a narrow width: the tick gap and the space
+ * below (10 together), then a line of growing text (13 units, room for a site's mark size a
+ * little over 12px) for each line of tick label (two on a time axis that names a month, "24"
+ * over "Oct"), and TITLE_LINES and a descender's quarter more for the title. Never less than
+ * `base`.
  */
 export function bottomMargin(base: number, title: boolean, width: number, lines = 1): number {
-  return title ? Math.max(base, Math.ceil(16 + 13 * (lines + 1) * textGrowth(width))) : base;
+  return title
+    ? Math.max(base, Math.ceil(10 + 13 * (lines + TITLE_LINES + 0.25) * textGrowth(width)))
+    : base;
 }

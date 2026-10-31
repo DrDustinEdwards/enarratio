@@ -29,6 +29,7 @@ Contrast, theming, export and embed from the area 10 verification ([0027](docs/d
 - Export (C3): "Download SVG" (the drawing with its computed colors and fonts, and the background) and "Download PNG" (the same, on a canvas at twice its size), from the enhancement layer, with no new dependency.
 - `maxXTicks` on line and area charts, as on bar charts.
 - Embed (C4): "Copy embed" copies `<a href="{page}#{id}">{title}</a>` for a figure with an `id`.
+- `enarratio/redraw`: draws a server's bar, line or area chart again at its frame's width in the browser (with `enarratio/lite`), or swaps in a narrow server drawing for any other chart under 30rem, and enhances each drawing. Moved from Prelum's `render/chart-enhance`, so Prelum and Capsomer share one copy: `redrawAttribute(spec)` on the server, `redrawCharts()` in the page.
 
 ### Fixed
 
@@ -40,6 +41,8 @@ Contrast, theming, export and embed from the area 10 verification ([0027](docs/d
 - A linear y axis (and a vertical bar's value axis) is rounded to the step of the ticks drawn, not to d3's default of ten ticks, so it ends on a tick: data reaching 23 on a 0, 5, ..., 20 axis now end at a 25 tick, not at 24 above the last one. Both renderers. An x axis keeps d3's finer rounding, so a narrow scatter of doses 1 to 5 runs 1 to 5, not 0 to 10.
 - A wide drawing (480 or more) that scrolls in a column under 30rem shows a shadow at the edge that has more, without script.
 - Scatter plots inset their points from the axes, so the first point no longer sits on the axes over a tick label at narrow widths.
+- Scatter plots widen each linear axis by a twentieth of its span before rounding it, so the lowest and highest points fall between ticks, not on the end tick beside its label ("2" under the lowest point of a 320 px dot chart).
+- The x axis title sits one and a half ems below its tick labels' last line, in both renderers, instead of at the foot of a bottom margin sized for text grown in a narrow column: on a 440-wide line chart shown at its own size the title stood far below "24 Oct". A time axis counts a second line of tick label only when a tick uses one.
 - Line and area charts thin their x tick labels to fit the width, in both renderers, so year or day labels no longer run together on a narrow chart (Prelum, a two-series line chart at 239 px). Every label prints when they fit (2020 to 2023 at 288 px), and a thinned axis keeps its first and last ticks when an even step allows.
 - Direct labels' right margin is sized to the labels at the width drawn: under 480 it no longer keeps the desktop's 96, in both renderers.
 - The timeline's plain list on narrow screens indents 2.25em (was 1.25em), so its markers ("1.", "10.") are not clipped by the frame.

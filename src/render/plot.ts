@@ -10,7 +10,7 @@ import { escapeHtml } from "../html.js";
 import { roundNumbers } from "../lite/svg.js";
 import { datumAttributes, type MarkDatum } from "./datum.js";
 import type { ScaleDescription } from "./figure.js";
-import { bottomMargin, leftMargin, markFontSize } from "./size.js";
+import { bottomMargin, leftMargin, markFontSize, TITLE_LINES } from "./size.js";
 
 export type { MarkDatum } from "./datum.js";
 
@@ -144,6 +144,36 @@ function niceToTicks(options: Plot.PlotOptions): Plot.PlotOptions {
   return { ...options, ...(y ? { y } : {}) } as Plot.PlotOptions;
 }
 
+/** The most lines in any x tick label: two on a time axis that names its month ("24" over "Oct"). */
+function tickLines(svg: Element): number {
+  const labels = [...svg.querySelectorAll('[aria-label="x-axis tick label"] text')];
+  return Math.max(1, ...labels.map((t) => t.querySelectorAll("tspan").length));
+}
+
+/**
+ * Sets the x axis title a fixed number of ems below the tick labels' lines (TITLE_LINES), not at
+ * the foot of the bottom margin. The margin is sized for the text a narrow column grows it to
+ * (record 0022); measured from the foot, the title stood far below the ticks wherever the
+ * drawing was shown at its own size. The light charts place it the same way.
+ */
+function placeXTitle(svg: Element): void {
+  const group = svg.querySelector('[aria-label="x-axis label"]');
+  const ticks = svg.querySelector('[aria-label="x-axis tick label"]');
+  const title = group?.querySelector("text");
+  // A title over several lines, or under rotated tick labels, stays where Plot put it.
+  if (!group || !ticks || !title || title.querySelector("tspan")) return;
+  if (ticks.querySelector('[transform*="rotate"]')) return;
+  const offset = (el: Element): number =>
+    Number(
+      /translate\([^,]+,([^)]+)\)/.exec(el.getAttribute("transform") ?? "")?.[1] ?? Number.NaN,
+    );
+  const y = offset(ticks);
+  // Only an axis below the frame: its ticks and its title both sit under the frame's edge.
+  if (!(y > 0 && offset(group) > 0)) return;
+  group.setAttribute("transform", `translate(0,${y})`);
+  title.setAttribute("y", `${tickLines(svg) + TITLE_LINES}em`);
+}
+
 /**
  * Draws a Plot specification into SVG markup named by `alt`: one image (record 0027). Throws if Plot warns, because a warning means the chart shown would not be the
  * chart intended.
@@ -163,8 +193,7 @@ export function renderPlot(
   let fitted = options;
   if (typeof options.marginBottom === "number") {
     const title = svg.querySelector('[aria-label$="x-axis label"]') !== null;
-    const x = options.x as { type?: string } | undefined;
-    const lines = x?.type === "utc" || x?.type === "time" ? 2 : 1;
+    const lines = tickLines(svg);
     const needed = bottomMargin(options.marginBottom, title, width, lines);
     if (needed > options.marginBottom) {
       fitted = { ...fitted, marginBottom: needed };
@@ -182,6 +211,8 @@ export function renderPlot(
       svg = Plot.plot({ ...niceToTicks(fitted), document }) as unknown as SVGSVGElement & Plot.Plot;
     }
   }
+
+  placeXTitle(svg);
 
   // Plot's warning is its own node: a top-level <text> whose <title> counts the warnings. Found by
   // that structure, not by the glyph, which data may contain (F13).

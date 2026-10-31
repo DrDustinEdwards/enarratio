@@ -84,6 +84,7 @@ it draws:
 | `enarratio/science` | `genomeTrack`, `titerPlot`, `doseResponse`, `survivalPlot`, `forestPlot`, `phylogeneticTree`, `networkChart`, and their statistics | `@observablehq/plot d3-force linkedom` |
 | `enarratio/lite` | `barChart`, `lineChart`, `areaChart` without Observable Plot, for the browser; also `enarratio/lite/bar`, `/line`, `/area` | Nothing |
 | `enarratio/enhance` | Browser interaction | Nothing |
+| `enarratio/redraw` | Redraws a server's chart to its frame's width | Nothing |
 | `enarratio/themes` | `defaultTheme` | Nothing |
 | `enarratio/base.css` | The theme-free stylesheet | Nothing |
 
@@ -160,6 +161,11 @@ Shift with the arrow keys or a from-and-to form picks a range on time axes
 Escape clears. Everything is announced to screen readers and motion stops
 under `prefers-reduced-motion`. `{ expand: true, url: true }` adds an expanded
 view and keeps the filter in the address; `strings` translates the layer.
+
+To have a chart drawn on the server for a wide page fit a phone, write its spec beside it with
+`redrawAttribute` and call `redrawCharts()` (or `redrawChart` for one host) from
+`enarratio/redraw` instead: each chart is drawn again at its frame's width as that width
+changes, then enhanced.
 
 Without a bundler, serve `node_modules/enarratio/dist/enhance/index.js` as a
 file (it has no imports of its own) and load it with

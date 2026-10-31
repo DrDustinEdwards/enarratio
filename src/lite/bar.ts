@@ -23,6 +23,7 @@ import {
   type Frame,
   facetTickLabels,
   grid,
+  labelLines,
   type Placement,
   type Tick,
 } from "./axis.js";
@@ -240,7 +241,7 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
         offset,
       ),
       axisTickLabels(k, ticks, frame, { offset }),
-      axisLabel(k, label, frame),
+      axisLabel(k, label, frame, frame, labelLines(ticks)),
     );
   };
   const valueAxis = (k: "x" | "y", placement: Placement): void => {
@@ -248,7 +249,7 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
       grid(k, valueAt, inner, drawn),
       axisTicks(k, valueAt, inner, 0, placement),
       axisTickLabels(k, valueTicks, inner, { placement }),
-      axisLabel(k, model.valueLabel, outer ?? frame, frame),
+      axisLabel(k, model.valueLabel, outer ?? frame, frame, labelLines(valueTicks)),
     );
   };
   if (horizontal) {

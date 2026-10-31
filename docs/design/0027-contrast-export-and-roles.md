@@ -99,6 +99,14 @@ on 2026-10-31 and found, in Enarratio's own drawing:
      23 ended above a top tick of 20. A y axis is now rounded to the step of the ticks it draws.
      An x axis is not: with two or three ticks across a narrow drawing, doses 1 to 5 ran 0 to 10.
    - Direct labels kept a 96-unit gutter at every width. Under 480 it is sized to the labels.
+   - A scatter's lowest point sat on the "2" tick beside its label; each linear axis is
+     widened by a twentieth of its span before rounding.
+   - The x title stood at the foot of a bottom margin sized for text grown in a narrow column,
+     so at a drawing's own size it stood far below the ticks. It now sits 1.5em below the tick
+     labels' last line, and a time axis counts a second line only when a tick uses one.
+   - A server drawing 440 wide in a 320 px column shrank its text below 12px: nothing drew it
+     again. Prelum's redraw moves into the package as `enarratio/redraw`, for Prelum and
+     Capsomer to share: lite draws bar, line and area charts again at the frame's width.
    - The timeline's narrow list indented 1.25em, so the frame's overflow clipped "1."; 2.25em.
    - A summary capitalized every sentence's first letter, so "example.com: ..." and "carrel.app
      rose" read "Example.com" and "Carrel.app". Only a sentence opening with a plain lowercase

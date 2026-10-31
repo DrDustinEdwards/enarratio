@@ -10,7 +10,15 @@ import {
   type SeriesModel,
 } from "../render/line-model.js";
 import { bottomMargin, leftMargin } from "../render/size.js";
-import { axisLabel, axisTickLabels, axisTicks, type Frame, grid, type Tick } from "./axis.js";
+import {
+  axisLabel,
+  axisTickLabels,
+  axisTicks,
+  type Frame,
+  grid,
+  labelLines,
+  type Tick,
+} from "./axis.js";
 import {
   type Continuous,
   continuous,
@@ -66,15 +74,23 @@ export function seriesFrame(
   y: { readonly log: boolean; readonly zero: boolean },
 ): SeriesFrame {
   const { prepared } = model;
-  // Room below for the x labels and title, before the y scale, as renderPlot fits Plot's.
+  const xDomain = extent(xs) ?? [0, 1];
+  // Room below for the x labels and title, before the y scale, as renderPlot fits Plot's: as
+  // many lines of tick label as the ticks drawn at the margins given use.
+  const givenWidth = given.width - given.marginLeft - given.marginRight;
+  const firstTicks = (): number[] => {
+    const days = dayTicks(prepared, givenWidth);
+    if (days) return fitTicks(days, () => "Jun 07", given.width, givenWidth, model.maxXTicks);
+    const count = Math.min(model.maxXTicks ?? Infinity, givenWidth / 80);
+    return timeTicks(xDomain[0], xDomain[1], count);
+  };
+  const lines =
+    prepared.time && !model.yearTicks
+      ? labelLines(timeTickLabels(firstTicks()).map((label) => ({ label })))
+      : 1;
   const asked: Frame = {
     ...given,
-    marginBottom: bottomMargin(
-      given.marginBottom,
-      prepared.xLabel !== null,
-      given.width,
-      prepared.time ? 2 : 1,
-    ),
+    marginBottom: bottomMargin(given.marginBottom, prepared.xLabel !== null, given.width, lines),
   };
   const { width, height, marginTop, marginRight, marginBottom } = asked;
 
@@ -105,7 +121,6 @@ export function seriesFrame(
     width,
   );
   const frame: Frame = { ...asked, marginLeft };
-  const xDomain = extent(xs) ?? [0, 1];
   const xRange: Pair = [marginLeft, width - marginRight];
   const x = continuous(prepared.time ? "utc" : "linear", xDomain, xRange);
 
@@ -148,7 +163,7 @@ export function seriesFrame(
       frame,
     ),
     axisTickLabels("x", xTicks, frame),
-    axisLabel("x", prepared.xLabel, frame),
+    axisLabel("x", prepared.xLabel, frame, frame, labelLines(xTicks)),
   ].join("");
 
   return {

@@ -1,6 +1,15 @@
 /** Axes and grids drawn as Plot draws them: the same groups, positions and offsets. */
 
-import { type Attrs, el, type FacetContent, markGroup, textElement, translate } from "./svg.js";
+import { TITLE_LINES } from "../render/size.js";
+import {
+  type Attrs,
+  el,
+  type FacetContent,
+  markGroup,
+  text,
+  textElement,
+  translate,
+} from "./svg.js";
 
 /** The drawing area: the SVG's size and the margins around the plotted frame. */
 export interface Frame {
@@ -158,16 +167,37 @@ export function facetTickLabels(
  * An axis label: centered below the frame for x, or rotated and centered beside it for y. The
  * position comes from `frame`; the offset from `inset`, the margins as given.
  */
+/** The most lines in any of the ticks' labels: the `lines` axisLabel takes. */
+export const labelLines = (ticks: readonly { readonly label: string }[]): number =>
+  Math.max(1, ...ticks.map((t) => t.label.split(/\r\n?|\n/).length));
+
 export function axisLabel(
   k: "x" | "y" | "fx" | "fy",
   label: string | null,
   frame: Frame,
   inset: Frame = frame,
+  lines?: number,
 ): string {
   // An empty label is still drawn, as Plot draws it; only null hides it.
   if (label === null) return "";
   const { width, height, marginTop, marginRight, marginBottom, marginLeft } = frame;
   const horizontal = k === "x" || k === "fx";
+  // Below a bottom x axis, the title sits a fixed number of ems under the tick labels' lines, as
+  // renderPlot places Plot's (placeXTitle).
+  if (k === "x" && lines !== undefined && !/[\r\n]/.test(label)) {
+    return el(
+      "g",
+      { ...HIDDEN, "data-enarratio-mark": "x-axis label", transform: translate(0, 9) },
+      el(
+        "text",
+        {
+          transform: translate((marginLeft + width - marginRight) / 2, height - marginBottom),
+          y: `${lines + TITLE_LINES}em`,
+        },
+        text(label),
+      ),
+    );
+  }
   const node = horizontal
     ? textElement(
         { transform: translate((marginLeft + width - marginRight) / 2, height - marginBottom) },

@@ -41,6 +41,10 @@
       "types": "./dist/enhance/index.d.ts",
       "default": "./dist/enhance/index.js"
     },
+    "./redraw": {
+      "types": "./dist/redraw/index.d.ts",
+      "default": "./dist/redraw/index.js"
+    },
     "./themes": {
       "types": "./dist/themes/index.d.ts",
       "default": "./dist/themes/index.js"
