@@ -5,22 +5,24 @@
 import { checkSecurityHeaders, failures } from "@dustinedwards/site-runtime/check";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  headersFile,
+  galleryHeadersFile,
   REPORT_PATH,
   securityHeaders,
   standardHeaders,
 } from "../scripts/security-headers.ts";
 import worker from "../worker/index.ts";
 
-/** The headers `_headers` sets on a path matched by its single `/*` rule. */
+/** The headers `_headers` sets on a path matched by its `/*` rules, which Cloudflare joins. */
 function parseHeadersFile(text: string): Headers {
-  const [rule, ...lines] = text.trimEnd().split("\n");
-  expect(rule).toBe("/*");
   const headers = new Headers();
-  for (const line of lines) {
-    const match = /^ {2}([A-Za-z-]+): (.+)$/.exec(line);
-    if (!match?.[1] || !match[2]) throw new Error(`not a header line: ${JSON.stringify(line)}`);
-    headers.append(match[1], match[2]);
+  for (const block of text.trimEnd().split("\n\n")) {
+    const [rule, ...lines] = block.split("\n");
+    expect(rule).toBe("/*");
+    for (const line of lines) {
+      const match = /^ {2}([A-Za-z-]+): (.+)$/.exec(line);
+      if (!match?.[1] || !match[2]) throw new Error(`not a header line: ${JSON.stringify(line)}`);
+      headers.append(match[1], match[2]);
+    }
   }
   return headers;
 }
@@ -42,7 +44,7 @@ describe("gallery security headers", () => {
   });
 
   it("the generated _headers passes checkSecurityHeaders", () => {
-    const headers = parseHeadersFile(headersFile());
+    const headers = parseHeadersFile(galleryHeadersFile());
     expect(check(headers)).toEqual([]);
     expect(headers.get("Cache-Control")).toBe("public, max-age=300, must-revalidate");
   });
