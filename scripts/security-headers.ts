@@ -1,8 +1,8 @@
 /**
  * The gallery's security headers: its own list of what it loads, and site-runtime's builders
  * (`@dustinedwards/site-runtime`, design record 0018). This is the only place they are set up.
- * `scripts/gallery.ts` calls `writeHeadersFile` to put them in `site/dist/_headers` for every
- * static file, and the Worker (`worker/index.ts`) sends `securityHeaders` on the responses it makes
+ * `scripts/gallery.ts` writes `galleryHeadersFile` to `site/dist/_headers` for every static file,
+ * and the Worker (`worker/index.ts`) sends `securityHeaders` on the responses it makes
  * itself (its redirects and the report endpoint). Gallery tooling only: the npm package never
  * imports this or site-runtime.
  */
@@ -53,23 +53,15 @@ export const securityHeaders: Readonly<Record<string, string>> = Object.freeze({
 const CACHE_CONTROL = "public, max-age=300, must-revalidate";
 
 /**
- * The `_headers` file for the static assets, from site-runtime's builder: the set and the cache
- * rule on every path. The builder leaves the policy out of the set, since a page's policy can carry
- * a nonce; the gallery's has none and is the same on every page, so it goes back on `/*` as its own
- * rule, which Cloudflare joins with the first.
+ * The `_headers` file for the static assets, from site-runtime's `headersFile`: the set and the
+ * cache rule on every path, and charset=utf-8 on the HTML, XML, SVG and text files, which the asset
+ * server sends without one. The writer leaves the policy out of `/*`, since a page's policy can
+ * carry a nonce; the gallery's has none, so it goes back on `/*` as a second rule, which Cloudflare
+ * joins with the first. `scripts/gallery.ts` writes it into the build.
  */
 export function galleryHeadersFile(): string {
   return headersFile(
     { ...securityHeaders, "Cache-Control": CACHE_CONTROL },
-    { paths: { "/*": { [csp.name]: csp.value } } },
+    { charset: true, paths: { "/*": { [csp.name]: csp.value } } },
   );
-}
-
-/**
- * Writes `_headers` into the built gallery. node:fs is fetched when called rather than imported,
- * because the Worker imports this module and the Workers runtime here has no node:fs.
- */
-export function writeHeadersFile(outDir: string): void {
-  const { writeFileSync } = process.getBuiltinModule("node:fs");
-  writeFileSync(`${outDir}/_headers`, galleryHeadersFile());
 }

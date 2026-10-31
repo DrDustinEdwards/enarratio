@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Changed
+
+- Gallery: its pages, sitemap, icon, security.txt and 404 page name `charset=utf-8` (`headersFile` with `charset: true`, and the Worker sends the 404 page with `applyHeaderSet`). Not part of the package, which is unchanged.
+
 ## [0.4.1] - 2026-10-31
 
 Fixes found rolling 0.4.0 out to the sites ([0026](docs/design/0026-rollout-fixes.md)).

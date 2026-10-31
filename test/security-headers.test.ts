@@ -12,12 +12,12 @@ import {
 } from "../scripts/security-headers.ts";
 import worker from "../worker/index.ts";
 
-/** The headers `_headers` sets on a path matched by its `/*` rules, which Cloudflare joins. */
+/** The headers `_headers` sets on every path: its `/*` rules, which Cloudflare joins. */
 function parseHeadersFile(text: string): Headers {
   const headers = new Headers();
   for (const block of text.trimEnd().split("\n\n")) {
     const [rule, ...lines] = block.split("\n");
-    expect(rule).toBe("/*");
+    if (rule !== "/*") continue;
     for (const line of lines) {
       const match = /^ {2}([A-Za-z-]+): (.+)$/.exec(line);
       if (!match?.[1] || !match[2]) throw new Error(`not a header line: ${JSON.stringify(line)}`);

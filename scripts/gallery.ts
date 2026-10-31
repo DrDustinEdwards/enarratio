@@ -28,7 +28,7 @@ import { barChart } from "enarratio/lite";
 import { defaultTheme, highContrastTheme } from "enarratio/themes";
 import { rolldown } from "rolldown";
 import { exampleTheme } from "../examples/themes/example.ts";
-import { HOST, writeHeadersFile } from "./security-headers.ts";
+import { galleryHeadersFile, HOST } from "./security-headers.ts";
 
 // Capsomer's chart frame imports "enarratio", its peer; here that is this package itself.
 const self = import.meta.resolve("enarratio");
@@ -726,7 +726,7 @@ copyFileSync(join(root, "dist", "enhance", "index.js"), join(outDir, "enhance.js
 // shared set (record 0018).
 writeFileSync(join(outDir, "gallery.js"), await bundle("gallery.js", "esm"));
 writeFileSync(join(outDir, "theme.js"), await bundle("theme.js", "iife"));
-writeHeadersFile(outDir);
+writeFileSync(join(outDir, "_headers"), galleryHeadersFile());
 copyFileSync(join(root, "site", "favicon.svg"), join(outDir, "favicon.svg"));
 copyFileSync(join(root, "site", "og-card.png"), join(outDir, "og-card.png"));
 console.log(

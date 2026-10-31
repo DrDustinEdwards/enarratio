@@ -3,7 +3,9 @@
  * reports with site-runtime's shared receiver, and serves everything else from the static assets. It runs in front of the assets (`run_worker_first`) so
  * it sees http: requests, which the assets layer would otherwise answer directly. The assets carry
  * the security headers from `_headers`; the responses made here carry the same set, from
- * scripts/security-headers.ts (record 0018).
+ * scripts/security-headers.ts (record 0018). The 404 page goes out with that set and
+ * charset=utf-8: `_headers` gives it neither charset nor a rule of its own, since no rule can name
+ * a path with no file.
  */
 
 import { receiveCspReport } from "@dustinedwards/site-runtime/csp-report";
@@ -34,6 +36,10 @@ export default {
     }
     if (url.pathname === REPORT_PATH)
       return receiveCspReport(request, { headers: securityHeaders });
-    return env.ASSETS.fetch(request);
+    const response = await env.ASSETS.fetch(request);
+    if (response.status !== 404) return response;
+    const notFound = new Response(response.body, response);
+    applyHeaderSet(notFound.headers, securityHeaders);
+    return notFound;
   },
 };
