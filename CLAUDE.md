@@ -1,6 +1,6 @@
 # CLAUDE.md - enarratio
 
-Enarratio draws accessible, server-rendered charts and scientific figures into the HTML: the npm package `enarratio` and its gallery at https://enarratio.dustinedwards.info. Public research software, headed for a JOSS submission after the Capsid paper. Before writing anything another site might have, read what the family shares: https://github.com/DrDustinEdwards/devkit/blob/shared-list/SHARED.md (CI's family check fails on a copy).
+Enarratio draws accessible, server-rendered charts and scientific figures into the HTML: the npm package `enarratio` and its gallery at https://enarratio.dustinedwards.info. Public research software, headed for a JOSS submission after the Capsid paper. Before writing anything another site might have, read what the sites share: https://github.com/DrDustinEdwards/devkit/blob/shared-list/SHARED.md (CI's shared-code check fails on a copy).
 
 ## Rules that come first
 
