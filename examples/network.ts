@@ -2,7 +2,7 @@
 import { networkChart } from "enarratio/science";
 
 const people = [
-  ["Edwards", "Virology"],
+  ["Rivera", "Virology"],
   ["Okafor", "Virology"],
   ["Lindqvist", "Virology"],
   ["Ramos", "Epidemiology"],
@@ -14,16 +14,16 @@ const people = [
   ["Sato", "Public health"],
 ] as const;
 const pairs = [
-  ["Edwards", "Okafor"],
-  ["Edwards", "Lindqvist"],
+  ["Rivera", "Okafor"],
+  ["Rivera", "Lindqvist"],
   ["Okafor", "Lindqvist"],
-  ["Edwards", "Ramos"],
+  ["Rivera", "Ramos"],
   ["Ramos", "Chen"],
   ["Chen", "Haddad"],
   ["Ramos", "Haddad"],
   ["Chen", "Novak"],
   ["Novak", "Ibarra"],
-  ["Edwards", "Novak"],
+  ["Rivera", "Novak"],
   ["Haddad", "Mbeki"],
   ["Mbeki", "Sato"],
   ["Ramos", "Sato"],
@@ -34,6 +34,6 @@ export default networkChart({
   nodes: people.map(([id, group]) => ({ id, group })),
   links: pairs.map(([source, target]) => ({ source, target })),
   title: "Co-authorship network",
-  alt: "Network of ten co-authors in four fields. Edwards and Ramos are the hubs, with four co-authors each. Edwards links the virus team to statistics and epidemiology. Ramos links epidemiology to public health.",
+  alt: "Network of ten co-authors in four fields. Rivera and Ramos are the hubs, with four co-authors each. Rivera links the virus team to statistics and epidemiology. Ramos links epidemiology to public health.",
   caption: "Illustrative data. Links are co-authored papers.",
 });
