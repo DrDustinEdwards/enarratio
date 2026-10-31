@@ -245,7 +245,7 @@ function siteHeader(links: readonly Link[]): string {
 /** The site's address, for canonical links, the sitemap and llms.txt. */
 const SITE = `https://${HOST}`;
 
-/** The IndexNow key, served as /<key>.txt; .github/workflows/gallery.yml reads it here to ping IndexNow. Public by design. */
+/** The IndexNow key, served as /<key>.txt; .github/workflows/ci.yml's indexnow job reads it here to ping IndexNow. Public by design. */
 const INDEXNOW_KEY = "af8c0a9cc5d66f499272f9cd7b95b024";
 
 /** When security.txt lapses (RFC 9116 asks for under a year); renew it before then. */

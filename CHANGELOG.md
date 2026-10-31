@@ -7,6 +7,12 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Gallery
+
+- Deployed by devkit's shared deploy (worker-deploy.yml v0.20.18), a `deploy` job in ci.yml after the checks and browser
+  tests, in place of gallery.yml. It deploys with `DEPLOY_SHA`, waits for `/health` (site-runtime 0.60.0's `staticSite`) to
+  report the commit, checks the home page and rolls back on a refusal; IndexNow runs after it. No package change.
+
 ## [0.5.0] - 2026-10-31
 
 Contrast, theming, export and embed from the area 10 verification ([0027](docs/design/0027-contrast-export-and-roles.md)).
