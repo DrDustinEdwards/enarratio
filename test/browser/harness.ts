@@ -18,14 +18,33 @@ export interface Harness {
   /**
    * Opens a gallery page in a color scheme. Reduced motion is on unless turned off, so screenshots
    * never catch an animation; `scripts: false` blocks the enhancement layer, as a reader without
-   * JavaScript would see the page.
+   * JavaScript would see the page. The gallery enhances a chart as it nears the viewport, so the
+   * page is scrolled to its end and back, as a reader would, until every chart is enhanced;
+   * `lazy: true` leaves it as loaded.
    */
   open(
     path: string,
     scheme: "light" | "dark",
-    options?: { reducedMotion?: boolean; scripts?: boolean },
+    options?: { reducedMotion?: boolean; scripts?: boolean; lazy?: boolean },
   ): Promise<Page>;
   close(): Promise<void>;
+}
+
+/** Scrolls a page down and back up so that every chart comes near the viewport and is enhanced. */
+async function enhanceAll(page: Page): Promise<void> {
+  const unenhanced = "figure.enarratio:not([data-enarratio-static]):not([data-enarratio-enhanced])";
+  await page.evaluate(async () => {
+    for (let y = 0; y < document.documentElement.scrollHeight; y += window.innerHeight) {
+      window.scrollTo(0, y);
+      await new Promise((done) => setTimeout(done, 20));
+    }
+  });
+  await page.waitForFunction(
+    (selector) => document.querySelector(selector) === null,
+    {},
+    unenhanced,
+  );
+  await page.evaluate(() => window.scrollTo(0, 0));
 }
 
 export async function startHarness(): Promise<Harness> {
@@ -73,6 +92,7 @@ export async function startHarness(): Promise<Harness> {
       await page.evaluate((s) => {
         document.documentElement.dataset["theme"] = s;
       }, scheme);
+      if (options.scripts !== false && options.lazy !== true) await enhanceAll(page);
       return page;
     },
     async close() {

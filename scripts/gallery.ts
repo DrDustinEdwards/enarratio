@@ -752,16 +752,25 @@ ${galleryScript("/gallery.js")}
 for (const [name, code] of Object.entries(scriptFiles)) writeFileSync(join(outDir, name), code);
 copyFileSync(join(root, "site", "favicon.svg"), join(outDir, "favicon.svg"));
 copyFileSync(join(root, "site", "og-card.png"), join(outDir, "og-card.png"));
-// The preload header names files that exist, and every stylesheet the home page links.
-const preloaded = PAGE_PRELOADS.links.map((link) => link.href);
-for (const href of preloaded) readFileSync(join(outDir, href));
-const homeStyles = [
-  ...readFileSync(join(outDir, "index.html"), "utf8").matchAll(
-    /<link rel="stylesheet" href="([^"]+)"/g,
-  ),
-].map((m) => new URL(m[1] ?? "", `${SITE}/`).pathname);
-const unlisted = homeStyles.filter((href) => !preloaded.includes(href));
-if (unlisted.length) throw new Error(`gallery: PAGE_PRELOADS leaves out ${unlisted.join(", ")}`);
+// Each page's preload header names files that exist and every stylesheet the page links, and
+// every page has one.
+const fileOf = (path: string): string => (path === "/" ? "index.html" : `${path.slice(1)}.html`);
+for (const address of addresses) {
+  if (!PAGE_PRELOADS[address])
+    throw new Error(`gallery: PAGE_PRELOADS has no entry for ${address}`);
+}
+for (const [address, { links: preloadLinks }] of Object.entries(PAGE_PRELOADS)) {
+  const preloaded = preloadLinks.map((link) => link.href);
+  for (const href of preloaded) readFileSync(join(outDir, href));
+  const styles = [
+    ...readFileSync(join(outDir, fileOf(address)), "utf8").matchAll(
+      /<link rel="stylesheet" href="([^"]+)"/g,
+    ),
+  ].map((m) => new URL(m[1] ?? "", `${SITE}/`).pathname);
+  const unlisted = styles.filter((href) => !preloaded.includes(href));
+  if (unlisted.length)
+    throw new Error(`gallery: PAGE_PRELOADS for ${address} leaves out ${unlisted.join(", ")}`);
+}
 console.log(
   `gallery: ${examples.length} examples, ${pages.length} themes, the Astro page -> ${outDir}`,
 );
