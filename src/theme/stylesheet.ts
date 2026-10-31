@@ -422,6 +422,8 @@ ${Array.from({ length: 5 }, (_, i) => {
     white-space: normal;
   }
   .enarratio-timeline-list li { margin: 0 0 var(--enarratio-space, 0.5em); }
+  /* Proportional marker figures: a tabular period is a full figure wide ("1 ."). */
+  .enarratio-timeline-list li::marker { font-variant-numeric: proportional-nums; }
 }
 @keyframes enarratio-grow { from { transform: scaleY(0); } }
 @keyframes enarratio-grow-x { from { transform: scaleX(0); } }
