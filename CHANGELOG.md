@@ -14,6 +14,12 @@ change the public API; every such change is listed here.
   statement at `/accessibility` (Prelum v0.31.1's `accessibilityStatement`), linked from the footer and in the sitemap.
   No library change.
 
+### Release
+
+- Each release's `npm pack` tarball gets a GitHub artifact attestation beside npm's provenance, so
+  `gh attestation verify enarratio-<version>.tgz --repo DrDustinEdwards/enarratio` checks a download. CI pins devkit
+  v0.21.0, and `visual-snapshots.yml` grants its write permissions at the job instead of the top.
+
 ## [0.6.1] - 2026-11-01
 
 ### Changed
