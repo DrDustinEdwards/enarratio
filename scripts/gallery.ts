@@ -19,6 +19,10 @@ import { llmsDocument } from "@drdustinedwards/site-helpers/llms";
 import { aiTxt, robotsDocument } from "@drdustinedwards/site-helpers/robots";
 import { graph, thing, website } from "@drdustinedwards/site-helpers/schema";
 import { sitemapDocument } from "@drdustinedwards/site-helpers/sitemap";
+import {
+  ACCESSIBILITY_PATH,
+  accessibilityStatement,
+} from "@drdustinedwards/site-helpers/accessibility";
 import { integrityHash } from "@dustinedwards/site-runtime/csp";
 import { securityTxt } from "@dustinedwards/site-runtime/security-txt";
 import { enarratio } from "@dustinedwards/site-runtime/sites";
@@ -202,6 +206,7 @@ function inlineCss(file: string): string {
  * the family's public sites share, and the family footer.
  */
 const COMPONENTS = [
+  "link",
   "button",
   "popover",
   "dialog",
@@ -374,11 +379,11 @@ function siteFooter(): string {
 <div><p class="cap-family-footer-center-name">Enarratio</p><p class="cap-family-footer-about">Accessible charts and scientific figures, drawn on the server into the HTML. Open source, MIT licensed.</p></div>
 <div class="cap-family-footer-columns">
 <ul class="cap-family-footer-links"><li><a href="/">Default theme</a></li><li><a href="/example">Example theme</a></li><li><a href="/capsomer">Capsomer theme</a></li><li><a href="/astro">Astro and EmDash</a></li></ul>
-<ul class="cap-family-footer-links"><li><a href="https://github.com/DrDustinEdwards/enarratio">Source</a></li><li><a href="https://www.npmjs.com/package/enarratio">npm</a></li><li><a href="https://github.com/DrDustinEdwards/enarratio/blob/main/CHANGELOG.md">Changes</a></li></ul>
+<ul class="cap-family-footer-links"><li><a href="https://github.com/DrDustinEdwards/enarratio" rel="external">Source</a></li><li><a href="https://www.npmjs.com/package/enarratio" rel="external">npm</a></li><li><a href="https://github.com/DrDustinEdwards/enarratio/blob/main/CHANGELOG.md" rel="external">Changes</a></li></ul>
 </div>
 <p class="cap-family-footer-stamp"><span>Release ${escapeText(VERSION)}</span></p>
 </div>`;
-  return `<footer class="cap-page">${familyFooterHtml({ site: "enarratio", center })}</footer>`;
+  return `<footer class="cap-page">${familyFooterHtml({ site: "enarratio", center, statement: ACCESSIBILITY_PATH })}</footer>`;
 }
 
 /**
@@ -552,6 +557,46 @@ const astroData = graph(
   ),
 );
 
+/**
+ * The accessibility statement (devkit-a11y S6): Prelum's, with this site's facts and the open finding of devkit-a11y's
+ * run of 2026-11-01.
+ */
+const STATEMENT = accessibilityStatement({
+  siteName: "The Enarratio gallery",
+  contact: {
+    href: "https://dustinedwards.info/contact",
+    label: "the contact page on dustinedwards.info",
+  },
+  date: "2026-11-01",
+  capsomer: true,
+  links: "marked",
+  limitations: [
+    "At 320 pixels wide, the page for an address that does not exist scrolls sideways a little, because its introduction is wider than the screen.",
+  ],
+});
+const STATEMENT_PAGE = "accessibility.html";
+
+function statementPage(): string {
+  return `<!doctype html>
+<html lang="en" data-family="${FAMILY}">
+<head>
+${head(`${STATEMENT.title}: Enarratio`, STATEMENT.description, "index.css", ACCESSIBILITY_PATH)}
+</head>
+<body>
+${siteHeader(links(STATEMENT_PAGE))}
+<main class="cap-page gallery guide" id="main" tabindex="-1">
+<header class="gallery-head">
+<h1>${STATEMENT.title}</h1>
+</header>
+${STATEMENT.html}
+</main>
+${siteFooter()}
+${galleryScript("gallery.js")}
+</body>
+</html>
+`;
+}
+
 function astroPage(): string {
   return `<!doctype html>
 <html lang="en" data-family="${FAMILY}">
@@ -565,12 +610,12 @@ ${siteHeader(links(ASTRO_PAGE))}
 <h1>${ASTRO_TITLE}</h1>
 <p class="gallery-intro">Enarratio's charts in Astro pages, in Markdown, and as a block in the EmDash editor.</p>
 </header>
-<p>Two packages bring Enarratio to <a href="https://astro.build">Astro</a> sites and to <a href="https://github.com/emdash-cms/emdash">EmDash</a>, the CMS built on Astro. A chart arrives in the page as HTML and SVG, drawn on the server: complete before any script runs, with a written description and a data table for screen readers, numbers that search engines and language models can read, and light and dark themes. It draws bar, line, stacked area, scatter (with an optional regression line) and heatmap charts, and can add hover details, keyboard navigation and filtering where a page asks for them.</p>
+<p>Two packages bring Enarratio to <a href="https://astro.build" rel="external">Astro</a> sites and to <a href="https://github.com/emdash-cms/emdash" rel="external">EmDash</a>, the CMS built on Astro. A chart arrives in the page as HTML and SVG, drawn on the server: complete before any script runs, with a written description and a data table for screen readers, numbers that search engines and language models can read, and light and dark themes. It draws bar, line, stacked area, scatter (with an optional regression line) and heatmap charts, and can add hover details, keyboard navigation and filtering where a page asks for them.</p>
 <ul>
-<li><a href="https://www.npmjs.com/package/enarratio-astro">enarratio-astro</a>: a <code>&lt;Chart&gt;</code> component and <code>chart</code> blocks in Markdown, for Astro 6 or later.</li>
-<li><a href="https://www.npmjs.com/package/enarratio-emdash">enarratio-emdash</a>: a Chart block for EmDash 1.0 or later. An editor types <code>/chart</code>, pastes data from a spreadsheet, and describes what the chart shows.</li>
+<li><a href="https://www.npmjs.com/package/enarratio-astro" rel="external">enarratio-astro</a>: a <code>&lt;Chart&gt;</code> component and <code>chart</code> blocks in Markdown, for Astro 6 or later.</li>
+<li><a href="https://www.npmjs.com/package/enarratio-emdash" rel="external">enarratio-emdash</a>: a Chart block for EmDash 1.0 or later. An editor types <code>/chart</code>, pastes data from a spreadsheet, and describes what the chart shows.</li>
 </ul>
-<p>Both are MIT licensed. The code is at <a href="${ASTRO_REPO}">github.com/DrDustinEdwards/astro</a>.</p>
+<p>Both are MIT licensed. The code is at <a href="${ASTRO_REPO}" rel="external">github.com/DrDustinEdwards/astro</a>.</p>
 
 <h2>In an Astro page</h2>
 ${code("npm install enarratio-astro")}
@@ -691,7 +736,12 @@ for (const [theme, file, css, highContrast] of pages) {
   writeFileSync(join(outDir, file), page(theme, file, css, examples, links(file)));
 }
 writeFileSync(join(outDir, ASTRO_PAGE), astroPage());
-const addresses = [...pages.map(([, file]) => pathOf(file)), pathOf(ASTRO_PAGE)];
+writeFileSync(join(outDir, STATEMENT_PAGE), statementPage());
+const addresses = [
+  ...pages.map(([, file]) => pathOf(file)),
+  pathOf(ASTRO_PAGE),
+  pathOf(STATEMENT_PAGE),
+];
 // For search engines and language models, from Prelum: the sitemap, robots.txt (the family bot
 // policy; Cloudflare puts its own lines first), ai.txt (citation welcome, training reserved, as the
 // tdm-reservation header in _headers says) and llms.txt (https://llmstxt.org), a short guide; then
@@ -795,7 +845,7 @@ ${head("Not found: Enarratio gallery", "There is no page at this address.")}
 ${siteHeader(links(""))}
 <main class="cap-page gallery" id="main" tabindex="-1">
 <header class="gallery-head"><h1>Not found</h1>
-<p class="gallery-intro">There is no page at this address. The gallery is at <a href="/">enarratio.dustinedwards.info</a>, and the code at <a href="https://github.com/DrDustinEdwards/enarratio">github.com/DrDustinEdwards/enarratio</a>.</p></header>
+<p class="gallery-intro">There is no page at this address. The gallery is at <a href="/">enarratio.dustinedwards.info</a>, and the code at <a href="https://github.com/DrDustinEdwards/enarratio" rel="external">github.com/DrDustinEdwards/enarratio</a>.</p></header>
 </main>
 ${siteFooter()}
 ${galleryScript("/gallery.js")}

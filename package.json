@@ -124,7 +124,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.3",
-    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.29.1",
+    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.30.1",
     "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.20.22",
     "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.62.1",
     "@observablehq/plot": "0.6.17",

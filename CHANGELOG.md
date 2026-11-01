@@ -7,6 +7,13 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Gallery
+
+- The gallery takes Capsomer v0.60.0's link system (`link.css`): links are semibold in the link color with no underline,
+  and a link to another site carries ↗ (`rel="external"` on the hand-written ones). It serves its accessibility
+  statement at `/accessibility` (Prelum v0.30.1's `accessibilityStatement`), linked from the footer and in the sitemap.
+  No library change.
+
 ## [0.6.0] - 2026-11-01
 
 Phone drawings, wrapped bar labels and Play as sound ([0029](docs/design/0029-phone-drawings-and-sound.md)).
