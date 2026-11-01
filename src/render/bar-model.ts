@@ -408,7 +408,8 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   // Below vertical bars, every category keeps its label while its slot holds four characters:
   // a long one wraps onto a second line and is cut there, rather than a neighbor going unnamed
   // ("Vega-Lite configuration" between two others in a 273 px column). Narrower slots thin.
-  const slotRoom = Math.floor(((width - 80) / Math.max(1, xNames.length) - 8) / 7);
+  // Seven units a character is a capital's width, so lowercase text leaves a gap at the edges.
+  const slotRoom = Math.floor((width - 80) / Math.max(1, xNames.length) / 7);
   const named = !horizontal && !time && options.maxXTicks === undefined && slotRoom >= 4;
   const fitted =
     (horizontal && options.maxXTicks === undefined) || named
