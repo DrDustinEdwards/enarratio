@@ -29,7 +29,7 @@ import { enarratio } from "@dustinedwards/site-runtime/sites";
 import { familyFooterHtml } from "capsomer/behavior/family-footer";
 import { letterheadHtml } from "capsomer/behavior/site-header";
 import { capsomerMoreTheme, capsomerTheme } from "capsomer/enarratio-theme";
-import { checkTheme, stylesheet, type Theme } from "enarratio";
+import { baseStylesheet, checkTheme, stylesheet, type Theme } from "enarratio";
 import { barChart } from "enarratio/lite";
 import { defaultTheme, highContrastTheme } from "enarratio/themes";
 import { rolldown } from "rolldown";
@@ -197,7 +197,12 @@ function inlineCss(file: string): string {
   return readFileSync(file, "utf8").replace(
     /@import\s+"([^"]+)"(?:\s+layer\(([\w.-]+)\))?\s*;/g,
     (_, path: string, layer?: string) => {
-      const inner = inlineCss(path.startsWith(".") ? join(dirname(file), path) : packageFile(path));
+      // enarratio/base.css is this package's own, built into dist/ by `npm run build`; the gallery
+      // runs from source, so it takes the same rules from baseStylesheet(), which writes that file.
+      const inner =
+        path === "enarratio/base.css"
+          ? baseStylesheet()
+          : inlineCss(path.startsWith(".") ? join(dirname(file), path) : packageFile(path));
       return layer ? `@layer ${layer} {\n${inner}\n}` : inner;
     },
   );
