@@ -1,6 +1,6 @@
 {
   "name": "enarratio",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Accessible, server-rendered charts and scientific figures for the web",
   "keywords": [
     "charts",
@@ -124,8 +124,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.3",
-    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.30.1",
-    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.20.22",
+    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.31.1",
+    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.20.23",
     "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.62.1",
     "@observablehq/plot": "0.6.17",
     "@types/d3-force": "3.0.10",
@@ -133,7 +133,7 @@
     "@types/pngjs": "6.0.5",
     "@vitest/coverage-v8": "4.1.12",
     "axe-core": "4.14.0",
-    "capsomer": "github:DrDustinEdwards/capsomer#v0.57.0",
+    "capsomer": "github:DrDustinEdwards/capsomer#v0.60.0",
     "d3-force": "3.0.0",
     "linkedom": "0.18.14",
     "pixelmatch": "7.2.0",

@@ -3,7 +3,8 @@
     ".": "static"
   },
   "copies": {
-    "src/render/data.ts": "toDate reads a chart value (a Date, an ISO string or a timestamp) inside the published library, which takes no runtime dependency on Prelum"
+    "src/render/data.ts": "toDate reads a chart value (a Date, an ISO string or a timestamp) inside the published library, which takes no runtime dependency on Prelum",
+    "src/render/dataset.ts": "datasetJsonLd builds the Dataset JSON-LD inside the published library, which cannot import Prelum's ./schema: Prelum depends on enarratio (its chart blocks render through it), so enarratio depending on Prelum would be a dependency cycle"
   },
   "spelling": {
     "skip": ["CHANGELOG.md"]

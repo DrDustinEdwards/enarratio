@@ -14,15 +14,15 @@ import { copyFileSync, cpSync, mkdirSync, readdirSync, readFileSync, writeFileSy
 import { createRequire, registerHooks } from "node:module";
 import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import {
+  ACCESSIBILITY_PATH,
+  accessibilityStatement,
+} from "@drdustinedwards/site-helpers/accessibility";
 import { headHtml, headTags } from "@drdustinedwards/site-helpers/head";
 import { llmsDocument } from "@drdustinedwards/site-helpers/llms";
 import { aiTxt, robotsDocument } from "@drdustinedwards/site-helpers/robots";
 import { graph, thing, website } from "@drdustinedwards/site-helpers/schema";
 import { sitemapDocument } from "@drdustinedwards/site-helpers/sitemap";
-import {
-  ACCESSIBILITY_PATH,
-  accessibilityStatement,
-} from "@drdustinedwards/site-helpers/accessibility";
 import { integrityHash } from "@dustinedwards/site-runtime/csp";
 import { securityTxt } from "@dustinedwards/site-runtime/security-txt";
 import { enarratio } from "@dustinedwards/site-runtime/sites";
@@ -252,6 +252,9 @@ const GALLERY_CSS = `
 .events { min-height: 1.5em; margin: 0; font: 400 var(--fs-detail) / var(--leading) var(--mono); overflow-wrap: anywhere; }
 .primitives { display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: center; }
 .primitive-tables p { margin: var(--space-3) 0; }
+.primitive-tables figure { margin: 0 0 var(--space-6); }
+.primitive-tables figure:last-child { margin-bottom: 0; }
+.primitive-tables .enarratio-head p { margin: 0; }
 .guide > :not(.gallery-head) { max-width: 52rem; }
 .guide h2 { margin: var(--space-7) 0 var(--space-3); }
 .guide p, .guide ul { max-width: var(--measure); }

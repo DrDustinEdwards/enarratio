@@ -59,15 +59,17 @@ export {
   slotStyle,
   validateFigure,
 } from "./render/figure.js";
+export {
+  type DateFormatOptions,
+  dateFormat,
+  type NumberFormatOptions,
+  numberFormat,
+} from "./render/format.js";
 export { type TableChartOptions, type TableColumn, tableChart } from "./render/table-chart.js";
 export {
   type At,
   type AxisRange,
-  type DateFormatOptions,
-  dateFormat,
   ENGLISH,
-  type NumberFormatOptions,
-  numberFormat,
   readingGrade,
   type StringOverrides,
   type Strings,

@@ -259,6 +259,16 @@ describe("A13, B3: text stays readable on a narrow screen", () => {
   it("keeps tick labels at least 12 pixels at 320 CSS pixels wide, in the narrow drawing the gallery swaps in", async () => {
     const p = await harness.open("index.html", "light");
     await p.setViewport({ width: 320, height: 800, deviceScaleFactor: 1 });
+    // The swap runs on the frame's ResizeObserver in the next animation frame, after the resize: wait for
+    // the narrow drawing (drawn at 228 px) before measuring, or the wide one is measured mid-swap.
+    await p.waitForFunction(
+      () =>
+        (
+          document.querySelector(
+            '[data-example="stacked-bar"] .enarratio-frame svg',
+          ) as SVGSVGElement | null
+        )?.viewBox.baseVal.width === 228,
+    );
     const measures = await p.evaluate(() => {
       const text = document.querySelector(
         '[data-example="stacked-bar"] [data-enarratio-mark="x-axis tick label"] text',

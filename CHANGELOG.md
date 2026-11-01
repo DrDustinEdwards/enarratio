@@ -11,8 +11,24 @@ change the public API; every such change is listed here.
 
 - The gallery takes Capsomer v0.60.0's link system (`link.css`): links are semibold in the link color with no underline,
   and a link to another site carries ↗ (`rel="external"` on the hand-written ones). It serves its accessibility
-  statement at `/accessibility` (Prelum v0.30.1's `accessibilityStatement`), linked from the footer and in the sitemap.
+  statement at `/accessibility` (Prelum v0.31.1's `accessibilityStatement`), linked from the footer and in the sitemap.
   No library change.
+
+## [0.6.1] - 2026-11-01
+
+### Changed
+
+- `numberFormat`, `dateFormat` and the other number and date formats live in their own module, `render/format.ts`, which
+  `render/text.ts` re-exports. A page that imports only a format from `enarratio` (a site's own dates or counts, with no
+  chart) now bundles about 0.6 KB gzip of it instead of the 3.8 KB strings chunk: Foxing's notifications page grew 4 KB
+  when it moved to `dateFormat`. The API is the same.
+
+### Gallery
+
+- The "Primitives as tables" example puts the sparkline and the heat strip each in a figure whose caption gives a visible
+  title and the finding, worked out from the same values ("Entries rose from 3 in the first year to 11 in year 5, then
+  fell to 9."; "Requests peaked at 44 at 11:00; 14:00 has no reading."). The live chart check had flagged the pair for no
+  visible title, finding or caption (B18) on all three gallery pages. No package change.
 
 ## [0.6.0] - 2026-11-01
 
