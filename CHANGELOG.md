@@ -7,6 +7,13 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Gallery
+
+- The "Primitives as tables" example puts the sparkline and the heat strip each in a figure whose caption gives a visible
+  title and the finding, worked out from the same values ("Entries rose from 3 in the first year to 11 in year 5, then
+  fell to 9."; "Requests peaked at 44 at 11:00; 14:00 has no reading."). The live chart check had flagged the pair for no
+  visible title, finding or caption (B18) on all three gallery pages. No package change.
+
 ## [0.6.0] - 2026-11-01
 
 Phone drawings, wrapped bar labels and Play as sound ([0029](docs/design/0029-phone-drawings-and-sound.md)).

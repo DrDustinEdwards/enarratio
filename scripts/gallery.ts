@@ -247,6 +247,9 @@ const GALLERY_CSS = `
 .events { min-height: 1.5em; margin: 0; font: 400 var(--fs-detail) / var(--leading) var(--mono); overflow-wrap: anywhere; }
 .primitives { display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: center; }
 .primitive-tables p { margin: var(--space-3) 0; }
+.primitive-tables figure { margin: 0 0 var(--space-6); }
+.primitive-tables figure:last-child { margin-bottom: 0; }
+.primitive-tables .enarratio-head p { margin: 0; }
 .guide > :not(.gallery-head) { max-width: 52rem; }
 .guide h2 { margin: var(--space-7) 0 var(--space-3); }
 .guide p, .guide ul { max-width: var(--measure); }
