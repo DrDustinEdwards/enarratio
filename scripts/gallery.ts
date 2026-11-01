@@ -633,12 +633,15 @@ ${galleryScript("gallery.js")}
  * The scripts, bundled before any page is written so each tag carries its file's sha384
  * (site-runtime integrityHash) and crossorigin, which Integrity-Policy needs of every script, a
  * classic one included. gallery.js imports enhance.js, which a modulepreload with its own
- * integrity fetches, so the import finds it already checked.
+ * integrity fetches, so the import finds it already checked. enhance.js imports sound.js when a
+ * reader presses Play; an import() carries no integrity, so sound.js (under 1 kB) is preloaded
+ * the same way, fetched but not run until then.
  */
 const scriptFiles = {
   "gallery.js": await bundle("gallery.js", "esm"),
   "theme.js": await bundle("theme.js", "iife"),
   "enhance.js": readFileSync(join(root, "dist", "enhance", "index.js"), "utf8"),
+  "sound.js": readFileSync(join(root, "dist", "enhance", "sound.js"), "utf8"),
 };
 const scripts = Object.fromEntries(
   await Promise.all(
@@ -648,8 +651,9 @@ const scripts = Object.fromEntries(
 
 /** The enhancement layer's preload and gallery.js, at `src` (relative on the gallery pages). */
 function galleryScript(src: string): string {
-  const enhance = new URL("enhance.js", new URL(src, `${SITE}/`)).pathname;
-  return `<link rel="modulepreload" href="${enhance}" integrity="${scripts["enhance.js"]}" crossorigin="anonymous">
+  const at = (file: string): string => new URL(file, new URL(src, `${SITE}/`)).pathname;
+  return `<link rel="modulepreload" href="${at("enhance.js")}" integrity="${scripts["enhance.js"]}" crossorigin="anonymous">
+<link rel="modulepreload" href="${at("sound.js")}" integrity="${scripts["sound.js"]}" crossorigin="anonymous">
 <script type="module" src="${src}" integrity="${scripts["gallery.js"]}" crossorigin="anonymous"></script>`;
 }
 

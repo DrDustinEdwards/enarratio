@@ -71,6 +71,8 @@ export class Chart implements EnhancedChart {
   private hint: HTMLElement | null = null;
   private viewButton: HTMLButtonElement | null = null;
   private expandButton: HTMLButtonElement | null = null;
+  /** Stops the sound playing, when it is (B54). */
+  private stopSound: (() => void) | null = null;
   /** Places the points over the marks again, after the drawing moved or resized. */
   private layout: () => void = () => {};
   /** Counts teardowns, so a batched read queued before one is dropped (batch.ts). */
@@ -337,6 +339,9 @@ export class Chart implements EnhancedChart {
       this.expandButton = expander(this.figure, s, (t, type, h) => this.listen(t, type, h));
       bar.append(this.expandButton);
     }
+    if (this.options.sound && this.marks.length > 1 && "AudioContext" in window) {
+      bar.append(this.playButton());
+    }
     const scale = parseScale(this.figure);
     if (this.brushRect && scale) bar.append(this.rangeForm(scale));
     const svg = this.svg;
@@ -348,6 +353,44 @@ export class Chart implements EnhancedChart {
     if (bar.childElementCount === 0) return;
     (this.hint ?? after).after(bar);
     this.cleanup.push(() => bar.remove());
+  }
+
+  /**
+   * Play (B54): sounds each series in turn, pitch rising with the value, while the tooltip follows
+   * the note. The sound module loads on the first press. Pressing again, or Escape, stops it.
+   */
+  private playButton(): HTMLButtonElement {
+    const s = this.strings;
+    const set = (stop: (() => void) | null): void => {
+      this.stopSound?.();
+      this.stopSound = stop;
+      toggle.textContent = stop ? s.stop : s.play;
+      if (!stop) this.hover(null);
+    };
+    const toggle = button(s.play, async () => {
+      if (this.stopSound) return set(null);
+      const run = this.runs;
+      const { play } = await import("./sound.js");
+      if (run !== this.runs) return;
+      set(
+        play(
+          this.figure,
+          this.seriesOrder.map((list) => list.flatMap((i) => this.marks[i] ?? [])),
+          (name) => this.announce(fill(s.playing, { series: name })),
+          (mark) => this.hover(mark),
+          () => {
+            this.stopSound = null;
+            set(null);
+          },
+        ),
+      );
+    });
+    // Anywhere on the page, so a reader can always stop the sound (WCAG 1.4.2).
+    this.listen(document, "keydown", (e) => {
+      if ((e as KeyboardEvent).key === "Escape" && this.stopSound) set(null);
+    });
+    this.cleanup.push(() => set(null));
+    return toggle;
   }
 
   /** The range as a form (B15): from and to, in data units, for readers who cannot drag. */

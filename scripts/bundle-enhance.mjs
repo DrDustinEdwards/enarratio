@@ -1,7 +1,8 @@
 /**
- * Bundles dist/enhance/index.js into one file with no imports, so a page without a bundler can
- * serve it as a single script (README, "Without a bundler"). The source is split into modules;
- * the published file is not. Runs in `npm run build`, after tsc.
+ * Bundles dist/enhance/index.js into one file with no static imports, so a page without a bundler
+ * can serve it as a single script (README, "Without a bundler"), and the sound module (B54) into
+ * sound.js beside it, which index.js imports only when a reader presses Play. The source is split
+ * into modules; the published files are not. Runs in `npm run build`, after tsc.
  */
 import { readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -9,10 +10,12 @@ import { rolldown } from "rolldown";
 
 const dir = resolve(import.meta.dirname, "..", "dist", "enhance");
 const bundle = await rolldown({ input: join(dir, "index.js") });
-const { output } = await bundle.generate({ format: "esm" });
+const { output } = await bundle.generate({ format: "esm", chunkFileNames: "[name].js" });
 await bundle.close();
-const [chunk] = output;
-if (output.length !== 1 || chunk?.type !== "chunk") throw new Error("enhance: expected one chunk");
-// The modules it was built from are inlined now; their declarations stay for the types.
+const names = output.map((chunk) => chunk.fileName).sort();
+if (names.join() !== "index.js,sound.js" || output.some((c) => c.type !== "chunk")) {
+  throw new Error(`enhance: expected index.js and sound.js, got ${names.join(", ")}`);
+}
+// The modules they were built from are inlined now; their declarations stay for the types.
 for (const file of readdirSync(dir)) if (file.endsWith(".js")) rmSync(join(dir, file));
-writeFileSync(join(dir, "index.js"), chunk.code);
+for (const chunk of output) writeFileSync(join(dir, chunk.fileName), chunk.code);

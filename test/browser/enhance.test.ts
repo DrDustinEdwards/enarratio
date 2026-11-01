@@ -175,6 +175,31 @@ describe("enhance: table, view switch, expand and address", () => {
     await p.close();
   });
 
+  it("plays each series as sound, the tooltip following, and stops on Escape", async () => {
+    const p = await harness.open("index.html", "light");
+    const controls = `${STACKED} .enarratio-controls button`;
+    const labels = (): Promise<string> =>
+      p.$$eval(controls, (els) => els.map((el) => el.textContent).join("|"));
+    await p.$$eval(controls, (els) =>
+      (els.find((el) => el.textContent === "Play as sound") as HTMLElement).click(),
+    );
+    await p.waitForFunction(
+      (sel) => [...document.querySelectorAll(sel)].some((b) => b.textContent === "Stop sound"),
+      {},
+      controls,
+    );
+    // Each series is named as it starts; the first starts a moment after the press.
+    await p.waitForFunction(
+      (sel) => document.querySelector(sel)?.textContent?.trim() === "Playing Publications",
+      {},
+      `${STACKED} figure [aria-live]`,
+    );
+    await p.waitForSelector(".enarratio-tooltip:not([hidden])");
+    await p.keyboard.press("Escape");
+    expect(await labels()).toBe("Show table|Expand|Play as sound");
+    await p.close();
+  });
+
   it("sorts a table chart's one table, with no chart and table switch", async () => {
     const p = await harness.open("index.html", "light");
     const TABLE = '[data-example="table-chart"]';
