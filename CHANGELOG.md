@@ -7,6 +7,15 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-01
+
+### Changed
+
+- `numberFormat`, `dateFormat` and the other number and date formats live in their own module, `render/format.ts`, which
+  `render/text.ts` re-exports. A page that imports only a format from `enarratio` (a site's own dates or counts, with no
+  chart) now bundles about 0.6 KB gzip of it instead of the 3.8 KB strings chunk: Foxing's notifications page grew 4 KB
+  when it moved to `dateFormat`. The API is the same.
+
 ### Gallery
 
 - The "Primitives as tables" example puts the sparkline and the heat strip each in a figure whose caption gives a visible
