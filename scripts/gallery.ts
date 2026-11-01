@@ -416,7 +416,7 @@ function page(
   return `<!doctype html>
 <html lang="en" data-family="${FAMILY}">
 <head>
-${head(`Enarratio gallery: ${theme.name} theme`, `Every Enarratio chart, server-rendered, in the ${theme.name} theme.`, css, pathOf(file), [libraryData])}
+${head(`Enarratio gallery: ${theme.name} theme`, `Every Enarratio chart in the ${theme.name} theme, drawn on the server and readable without scripts, each with its source.`, css, pathOf(file), [libraryData])}
 </head>
 <body>
 ${siteHeader(links)}
