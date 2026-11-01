@@ -2,7 +2,7 @@
 
 Status: accepted, 2026-11-01. Builds on [0021](0021-native-points-and-reader-controls.md),
 [0022](0022-readable-for-every-reader.md) and [0027](0027-contrast-export-and-roles.md).
-Number 0028 is the maps record (A15), on its own branch.
+Number 0028 is the maps record (A15).
 
 ## Problem
 

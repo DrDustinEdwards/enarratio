@@ -7,12 +7,46 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-01
+
+Maps, the tactile export and legends that match their marks ([0028](docs/design/0028-maps.md),
+[0030](docs/design/0030-tactile-export-and-forced-colors-record.md)).
+
+### Added
+
+- `enarratio/map`, a new entry with no dependencies (A15): `dotMap` sizes points by value (by
+  area) over the caller's own streets or coastlines, with landmarks as squares and one
+  highlighted; `choroplethMap` shades regions in the five labeled steps of the sequential ramp,
+  prints each region's value where it fits and outlines a region with no data. Both take GeoJSON
+  in longitude and latitude (Enarratio ships no boundaries), name their basemap's streets along
+  them, give a summary, a data table and a keyboard walk from north to south, and never show a
+  value by color alone.
+- "Download tactile SVG" beside "Download SVG" and "Download PNG" (B55; `tactile`, on by
+  default): the drawing in black on white on an 11 by 11.5 inch page for a braille embosser or
+  swell paper, following BANA's tactile graphics guidelines where a drawing can: gridlines left
+  out, raised lines at least 0.7 mm, series told apart by texture and dash, labels level and
+  kept as text for braille software. `downloadTactile` is a new `EnhanceStrings` entry.
+
+### Changed
+
+- The SVG, PNG and tactile downloads are made by `dist/enhance/image.js` (1.8 kB gzipped), which
+  the layer imports on the first press, as it imports `sound.js` on Play. The layer's first load
+  drops from 9.5 to 9.0 kB. A page that serves `dist/enhance/index.js` as a file serves
+  `image.js` beside it; a page under Integrity-Policy preloads it with its integrity.
+- Legend swatches take their marks' form (B57): a short line on line, density, survival,
+  dose-response and slope charts, dashed in forced colors as the line is; and the series' symbol
+  on scatter plots, dot plots, trees and networks. In forced colors the legends were identical
+  black squares. The legend carries `data-enarratio-legend="line"` or `"symbol"`.
+- The network chart gives each group a symbol as well as a color, so groups stay apart in forced
+  colors (B57).
+
 ### Gallery
 
 - The gallery takes Capsomer v0.60.0's link system (`link.css`): links are semibold in the link color with no underline,
   and a link to another site carries ↗ (`rel="external"` on the hand-written ones). It serves its accessibility
   statement at `/accessibility` (Prelum v0.31.1's `accessibilityStatement`), linked from the footer and in the sitemap.
-  No library change.
+- New examples: "Dot map" and "Choropleth map", on sample data. The gallery preloads `image.js`
+  with its integrity, beside `sound.js`.
 
 ### Release
 

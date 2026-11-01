@@ -27,6 +27,7 @@ const ENTRIES = [
   "src/index.ts",
   "src/plot/index.ts",
   "src/science/index.ts",
+  "src/map/index.ts",
   "src/themes/index.ts",
   "src/enhance/index.ts",
   "src/lite/index.ts",
@@ -52,7 +53,7 @@ describe("documentation", () => {
     for (const name of publicNames.filter(
       (n) =>
         /^[a-z]/.test(n) &&
-        /Chart$|Plot$|^heatmap$|Track$|^sparkline$|^progressRing$|^uptimeStrip$/.test(n),
+        /Chart$|Plot$|Map$|^heatmap$|Track$|^sparkline$|^progressRing$|^uptimeStrip$/.test(n),
     )) {
       expect(readme).toContain(`\`${name}\``);
     }

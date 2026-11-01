@@ -82,6 +82,7 @@ it draws:
 | `enarratio` | Core, primitives and `tableChart` | Nothing |
 | `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` and the charts below | `@observablehq/plot linkedom` |
 | `enarratio/science` | `genomeTrack`, `titerPlot`, `doseResponse`, `survivalPlot`, `forestPlot`, `phylogeneticTree`, `networkChart`, and their statistics | `@observablehq/plot d3-force linkedom` |
+| `enarratio/map` | `dotMap` and `choroplethMap`, drawn from your own GeoJSON | Nothing |
 | `enarratio/lite` | `barChart`, `lineChart`, `areaChart` without Observable Plot, for the browser; also `enarratio/lite/bar`, `/line`, `/area` | Nothing |
 | `enarratio/enhance` | Browser interaction | Nothing |
 | `enarratio/redraw` | Redraws a server's chart to its frame's width; `enarratio/redraw/narrow` holds `narrowChart`, the swap to a server's narrow drawing alone | Nothing |
@@ -168,11 +169,12 @@ To have a chart drawn on the server for a wide page fit a phone, write its spec 
 changes, then enhanced.
 
 Without a bundler, serve `node_modules/enarratio/dist/enhance/index.js` as a
-file, with `sound.js` from the same folder beside it (index.js imports it only
-when a reader presses "Play as sound"), and load it with
+file, with `sound.js` and `image.js` from the same folder beside it (index.js
+imports the first only when a reader presses "Play as sound", the second on the
+first download), and load it with
 `<script type="module">import { enhance } from "/enhance.js"; enhance();</script>`,
 or from a CDN such as
-`https://cdn.jsdelivr.net/npm/enarratio@0.6.0/dist/enhance/index.js`.
+`https://cdn.jsdelivr.net/npm/enarratio@0.7.0/dist/enhance/index.js`.
 
 To redraw a chart in place, pass new server markup to `update()` on the chart
 `enhance()` returns. That markup should come from Enarratio: it is sanitized
@@ -207,6 +209,8 @@ all into `site/dist`.
 | `survivalPlot` | `enarratio/science` | Kaplan-Meier curves with censor marks, confidence bands and the number at risk |
 | `forestPlot` | `enarratio/science` | Study estimates with intervals, and a pooled estimate (fixed or random effects) |
 | `phylogeneticTree` | `enarratio/science` | A tree from Newick, rectangular, tips colored by group, support at the nodes |
+| `dotMap` | `enarratio/map` | Points sized by value over your streets or coastlines, landmarks as squares, one highlighted |
+| `choroplethMap` | `enarratio/map` | Regions in five labeled steps of the sequential ramp, values printed where they fit, no data outlined |
 | `sparkline` | `enarratio` | A word-sized trend line |
 | `progressRing` | `enarratio` | Progress toward a total |
 | `uptimeStrip` | `enarratio` | Up, degraded, down or unmeasured, one tick per period |
@@ -350,9 +354,14 @@ and edited.
 - A chart's drawing is one named image (`role="img"`), enhanced or not; the
   enhancement layer's points sit beside it, in their own `role="application"`
   layer ([record 0027](docs/design/0027-contrast-export-and-roles.md)).
-- Enhanced charts add "Download SVG", "Download PNG" and, for a figure with an
-  `id`, "Copy embed" (a link to the chart) beside "Download CSV", and "Play as
-  sound", which plays each series as rising and falling notes.
+- Enhanced charts add "Download SVG", "Download PNG", "Download tactile SVG"
+  (black on white on an 11 by 11.5 inch page, for a braille embosser or swell
+  paper) and, for a figure with an `id`, "Copy embed" (a link to the chart)
+  beside "Download CSV", and "Play as sound", which plays each series as rising
+  and falling notes.
+- Maps take no boundaries from Enarratio: you pass GeoJSON, and each map has a
+  summary, a data table and a keyboard walk from north to south, and never
+  shows a value by color alone.
 - Enhanced charts are keyboard operable with one tab stop, through native
   buttons over the marks and a described key hint; they announce each point's
   place, filters, ranges, sorts and updates through a live region, and respect

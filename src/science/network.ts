@@ -165,6 +165,8 @@ export function networkChart(options: NetworkChartOptions): string {
       y: (n: LaidOutNode) => n.y ?? 0,
       r: RADIUS,
       fill: "group",
+      // Groups are told apart by symbol as well as color, so they survive forced colors (B57).
+      ...(grouped ? { symbol: "group" } : {}),
       stroke: "var(--enarratio-background)",
       strokeWidth: 1.5,
       title: describe,
@@ -203,6 +205,7 @@ export function networkChart(options: NetworkChartOptions): string {
       x: { domain: span(xs), axis: null },
       y: { domain: span(ys), axis: null },
       color: { domain: groupNames, range: [...plan.range] },
+      ...(grouped ? { symbol: { domain: groupNames } } : {}),
       marks,
     },
     options.alt,

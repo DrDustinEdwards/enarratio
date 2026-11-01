@@ -30,7 +30,7 @@ function reach(entry: string, seen = new Set<string>()): Set<string> {
 }
 
 describe("package entries", () => {
-  it("has the twelve subpaths and no others", () => {
+  it("has the thirteen subpaths and no others", () => {
     expect(Object.keys(pkg.exports).sort()).toEqual(
       [
         ".",
@@ -40,6 +40,7 @@ describe("package entries", () => {
         "./lite/area",
         "./lite/bar",
         "./lite/line",
+        "./map",
         "./package.json",
         "./plot",
         "./redraw",
@@ -69,8 +70,13 @@ describe("package entries", () => {
     }
   });
 
-  it("keeps Plot, linkedom and d3-force out of core, themes and enhance", () => {
-    for (const entry of ["src/index.ts", "src/themes/index.ts", "src/enhance/index.ts"]) {
+  it("keeps Plot, linkedom and d3-force out of core, themes, enhance and maps", () => {
+    for (const entry of [
+      "src/index.ts",
+      "src/themes/index.ts",
+      "src/enhance/index.ts",
+      "src/map/index.ts",
+    ]) {
       for (const file of reach(resolve(root, entry))) {
         expect(readFileSync(file, "utf8"), file).not.toMatch(
           /@observablehq\/plot|linkedom|d3-force|#document/,

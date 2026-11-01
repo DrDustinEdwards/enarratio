@@ -1,5 +1,21 @@
 import { checkTheme } from "./check.js";
 import { labelColor } from "./color.js";
+import { LINE_DASHES } from "./dashes.js";
+
+/** A dash pattern ("8 3 2 3", in px) as a horizontal gradient in the forced text color. */
+const dashGradient = (dash: string): string => {
+  let at = 0;
+  const stops = dash
+    .split(" ")
+    .map(Number)
+    .map((length, i) => {
+      const stop = `${i % 2 === 0 ? "CanvasText" : "transparent"} ${at}px ${at + length}px`;
+      at += length;
+      return stop;
+    });
+  return `repeating-linear-gradient(90deg, ${stops.join(", ")})`;
+};
+
 import { assertCssText, defineTheme } from "./define.js";
 import { sequentialEdges, seriesLabels } from "./shades.js";
 import type { ColorScheme, Gridlines, Theme } from "./types.js";
@@ -76,8 +92,20 @@ const HIDDEN_GRIDS: Readonly<Record<Gridlines, readonly string[]>> = {
   both: [],
 };
 
-/** Dashes that tell lines 2 to 8 apart when forced colors make every line the same color. */
-const LINE_DASHES = ["6 3", "2 3", "8 3 2 3", "12 4", "2 6", "4 4", "10 3 2 3 2 3"];
+/**
+ * Observable Plot's filled symbols in order (circle, cross, diamond, square, star, triangle, wye),
+ * as clip paths for a legend swatch; the eighth series takes the circle again, as Plot does.
+ */
+const SYMBOL_CLIPS = [
+  "circle(50%)",
+  "polygon(35% 0, 65% 0, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0 65%, 0 35%, 35% 35%)",
+  "polygon(50% 0, 100% 50%, 50% 100%, 0 50%)",
+  "inset(8%)",
+  "polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
+  "polygon(50% 4%, 100% 92%, 0 92%)",
+  "polygon(38% 0, 62% 0, 62% 44%, 98% 72%, 86% 92%, 50% 64%, 14% 92%, 2% 72%, 38% 44%)",
+  "circle(50%)",
+];
 
 /** Rules that do not depend on the theme: layout, legend, data table and the enhancement layer. */
 const BASE_RULES = `
@@ -183,6 +211,19 @@ svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; 
   border-radius: var(--enarratio-radius-swatch, 0.15em);
   forced-color-adjust: none;
 }
+/* A legend matches its marks without color (B57): a line chart's swatch is a short line, and a
+   chart that tells series apart by symbol shows each series' symbol, in Plot's order. */
+.enarratio-legend[data-enarratio-legend="line"] .enarratio-swatch {
+  width: 1.4em;
+  height: 0.2em;
+  border: 0;
+  border-radius: 0;
+}
+.enarratio-legend[data-enarratio-legend="symbol"] .enarratio-swatch { border-radius: 0; }
+${SYMBOL_CLIPS.map(
+  (clip, i) =>
+    `.enarratio-legend[data-enarratio-legend="symbol"] [data-slot="${i + 1}"] .enarratio-swatch { clip-path: ${clip}; }`,
+).join("\n")}
 ${Array.from(
   { length: 8 },
   (_, i) =>
@@ -493,6 +534,10 @@ ${[10, 25, 40, 70, 100]
 ${LINE_DASHES.map(
   (dash, i) =>
     `  .enarratio [data-enarratio-mark="line"] [stroke="var(--enarratio-series-${i + 2})"] { stroke-dasharray: ${dash}; }`,
+).join("\n")}
+${LINE_DASHES.map(
+  (dash, i) =>
+    `  .enarratio-legend[data-enarratio-legend="line"] [data-slot="${i + 2}"] .enarratio-swatch { background: ${dashGradient(dash)}; }`,
 ).join("\n")}
 }
 /* Print: the light scheme, the whole drawing on one page, the data table open and no
