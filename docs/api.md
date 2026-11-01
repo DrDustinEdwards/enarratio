@@ -1617,3 +1617,11 @@ way.
 ### `RedrawnChart`
 
 `{ host, destroy() }`: `destroy` stops following the width and removes the enhancement.
+
+### `narrowChart`
+
+`narrowChart(host, narrow, options?)`, from `enarratio/redraw/narrow` (and re-exported by
+`enarratio/redraw`): starts one chart whose server gave a narrow drawing, the `.enarratio-frame`
+markup of the chart drawn about as wide as a phone's column. The frame shows it under 30rem and the
+original above, and each drawing is enhanced. It brings none of the light renderers, so a page
+whose charts all carry a narrow drawing (the gallery) loads only the enhancement layer and this.
