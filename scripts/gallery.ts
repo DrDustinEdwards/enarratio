@@ -32,11 +32,39 @@ import { rolldown } from "rolldown";
 import { exampleTheme } from "../examples/themes/example.ts";
 import { PAGE_PRELOADS } from "../worker/index.ts";
 
-// Capsomer's chart frame imports "enarratio", its peer; here that is this package itself.
-const self = import.meta.resolve("enarratio");
+// Capsomer's chart frame imports "enarratio" and "enarratio/redraw", its peer; here that is this
+// package itself.
+const selfExports = (
+  JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
+    exports: Record<string, string | { default: string }>;
+  }
+).exports;
+const self = (specifier: string): string => {
+  if (specifier !== "enarratio" && !specifier.startsWith("enarratio/")) return specifier;
+  const entry = selfExports[`.${specifier.slice("enarratio".length)}`];
+  const file = typeof entry === "string" ? entry : entry?.default;
+  return file ? new URL(`../${file}`, import.meta.url).href : specifier;
+};
+/**
+ * The width each example is drawn at again for a phone: the frame's on a 320 px screen (the page's
+ * gutter, the panel's padding and a scrollbar leave 231). Under 30rem the gallery swaps it in
+ * (enarratio/redraw's narrow spec), so the drawing fits its frame with 12 px text instead of
+ * scrolling (C12).
+ */
+const NARROW_WIDTH = 228;
 registerHooks({
-  resolve: (specifier, context, next) =>
-    next(specifier === "enarratio" ? self : specifier, context),
+  resolve: (specifier, context, next) => next(self(specifier), context),
+  // An example imported with ?narrow draws its chart at NARROW_WIDTH: the options it passes, with
+  // the width set. Its source, as the gallery shows it, is unchanged.
+  load: (url, context, next) => {
+    const loaded = next(url, context);
+    if (!url.endsWith("?narrow")) return loaded;
+    const source = String(loaded.source).replace(
+      /export default (\w+)\(/,
+      `export default ((draw) => (options) => draw({ ...options, width: ${NARROW_WIDTH} }))($1)(`,
+    );
+    return { ...loaded, source };
+  },
 });
 const { frameHtml } = await import("capsomer/behavior/chart-frame");
 
@@ -52,6 +80,8 @@ interface Example {
   readonly title: string;
   readonly source: string;
   readonly markup: string;
+  /** The chart's drawing at NARROW_WIDTH (its `.enarratio-frame`), when the example is wider. */
+  readonly narrow?: string | undefined;
 }
 
 const escapeText = (s: string): string =>
@@ -126,6 +156,13 @@ async function loadExamples(): Promise<Example[]> {
     const heading = /^\/\/ (.+)$/m.exec(source)?.[1] ?? file;
     const id = basename(file, ".ts");
     const from = /from "(enarratio[^"]*)"/.exec(source)?.[1] ?? "enarratio";
+    const drawnWidth = Number(/<svg[^>]* width="(\d+(?:\.\d+)?)"/.exec(module.default)?.[1] ?? 0);
+    const narrow =
+      /export default \w+\(/.test(source) && drawnWidth > NARROW_WIDTH
+        ? frameOf(
+            ((await import(`${pathToFileURL(path).href}?narrow`)) as { default: string }).default,
+          )
+        : undefined;
     examples.push({
       id,
       name: NAMES[id] ?? id,
@@ -133,9 +170,17 @@ async function loadExamples(): Promise<Example[]> {
       title: heading,
       source,
       markup: module.default,
+      narrow,
     });
   }
   return examples;
+}
+
+/** A chart's drawing, the `.enarratio-frame` that enarratio/redraw swaps. */
+function frameOf(markup: string): string | undefined {
+  const start = markup.indexOf('<div class="enarratio-frame');
+  const end = markup.indexOf("</svg></div>", start);
+  return start === -1 || end === -1 ? undefined : markup.slice(start, end + "</svg></div>".length);
 }
 
 const packageFile = createRequire(import.meta.url).resolve;
@@ -393,7 +438,7 @@ ${examples
     ) => `<section class="cap-panel example" id="${e.id}" data-example="${e.id}" aria-labelledby="${e.id}-title">
 <header class="cap-panel-head"><h2 id="${e.id}-title"><span class="cap-part-no">${i + 1}</span>${escapeText(e.name)}</h2><p>${escapeText(e.title)}</p></header>
 <div class="cap-panel-body example-chart">
-${frameHtml(e.markup)}
+${frameHtml(e.markup, e.narrow ? { redraw: { narrow: e.narrow } } : {})}
 <p class="events" aria-live="polite"></p>
 </div>
 <details class="cap-disclosure example-source" data-variant="accordion"><summary>Source: examples/${e.id}.ts</summary><div class="cap-disclosure-body"><pre tabindex="0"><code>${escapeText(e.source)}</code></pre></div></details>
@@ -416,6 +461,14 @@ async function bundle(file: string, format: "esm" | "iife"): Promise<string> {
     input: join(root, "site", file),
     platform: "browser",
     external: ["./enhance.js"],
+    // enarratio/redraw imports the enhancement layer, which the page loads as enhance.js.
+    plugins: [
+      {
+        name: "enhance-as-file",
+        resolveId: (id: string) =>
+          /(?:^|\/)enhance\/index\.js$/.test(id) ? { id: "./enhance.js", external: true } : null,
+      },
+    ],
     logLevel: "silent",
   });
   const { output } = await built.generate({ format, minify: true });
@@ -580,12 +633,15 @@ ${galleryScript("gallery.js")}
  * The scripts, bundled before any page is written so each tag carries its file's sha384
  * (site-runtime integrityHash) and crossorigin, which Integrity-Policy needs of every script, a
  * classic one included. gallery.js imports enhance.js, which a modulepreload with its own
- * integrity fetches, so the import finds it already checked.
+ * integrity fetches, so the import finds it already checked. enhance.js imports sound.js when a
+ * reader presses Play; an import() carries no integrity, so sound.js (under 1 kB) is preloaded
+ * the same way, fetched but not run until then.
  */
 const scriptFiles = {
   "gallery.js": await bundle("gallery.js", "esm"),
   "theme.js": await bundle("theme.js", "iife"),
   "enhance.js": readFileSync(join(root, "dist", "enhance", "index.js"), "utf8"),
+  "sound.js": readFileSync(join(root, "dist", "enhance", "sound.js"), "utf8"),
 };
 const scripts = Object.fromEntries(
   await Promise.all(
@@ -595,8 +651,9 @@ const scripts = Object.fromEntries(
 
 /** The enhancement layer's preload and gallery.js, at `src` (relative on the gallery pages). */
 function galleryScript(src: string): string {
-  const enhance = new URL("enhance.js", new URL(src, `${SITE}/`)).pathname;
-  return `<link rel="modulepreload" href="${enhance}" integrity="${scripts["enhance.js"]}" crossorigin="anonymous">
+  const at = (file: string): string => new URL(file, new URL(src, `${SITE}/`)).pathname;
+  return `<link rel="modulepreload" href="${at("enhance.js")}" integrity="${scripts["enhance.js"]}" crossorigin="anonymous">
+<link rel="modulepreload" href="${at("sound.js")}" integrity="${scripts["sound.js"]}" crossorigin="anonymous">
 <script type="module" src="${src}" integrity="${scripts["gallery.js"]}" crossorigin="anonymous"></script>`;
 }
 

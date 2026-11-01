@@ -256,7 +256,7 @@ describe("F18: enhancing again with other options re-applies them", () => {
 });
 
 describe("A13, B3: text stays readable on a narrow screen", () => {
-  it("keeps tick labels at least 12 pixels at 320 CSS pixels wide, scrolling the chart instead", async () => {
+  it("keeps tick labels at least 12 pixels at 320 CSS pixels wide, in the narrow drawing the gallery swaps in", async () => {
     const p = await harness.open("index.html", "light");
     await p.setViewport({ width: 320, height: 800, deviceScaleFactor: 1 });
     const measures = await p.evaluate(() => {
@@ -276,7 +276,8 @@ describe("A13, B3: text stays readable on a narrow screen", () => {
       };
     });
     expect(measures.fontSize).toBeGreaterThanOrEqual(12);
-    expect(measures.frameScrolls).toBe(true);
+    // The narrow drawing fits the column (record 0029), so neither the frame nor the page scrolls.
+    expect(measures.frameScrolls).toBe(false);
     expect(measures.pageScrolls).toBe(false);
     await p.close();
   });

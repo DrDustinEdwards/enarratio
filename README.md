@@ -84,7 +84,7 @@ it draws:
 | `enarratio/science` | `genomeTrack`, `titerPlot`, `doseResponse`, `survivalPlot`, `forestPlot`, `phylogeneticTree`, `networkChart`, and their statistics | `@observablehq/plot d3-force linkedom` |
 | `enarratio/lite` | `barChart`, `lineChart`, `areaChart` without Observable Plot, for the browser; also `enarratio/lite/bar`, `/line`, `/area` | Nothing |
 | `enarratio/enhance` | Browser interaction | Nothing |
-| `enarratio/redraw` | Redraws a server's chart to its frame's width | Nothing |
+| `enarratio/redraw` | Redraws a server's chart to its frame's width; `enarratio/redraw/narrow` holds `narrowChart`, the swap to a server's narrow drawing alone | Nothing |
 | `enarratio/themes` | `defaultTheme` | Nothing |
 | `enarratio/base.css` | The theme-free stylesheet | Nothing |
 
@@ -168,10 +168,11 @@ To have a chart drawn on the server for a wide page fit a phone, write its spec 
 changes, then enhanced.
 
 Without a bundler, serve `node_modules/enarratio/dist/enhance/index.js` as a
-file (it has no imports of its own) and load it with
+file, with `sound.js` from the same folder beside it (index.js imports it only
+when a reader presses "Play as sound"), and load it with
 `<script type="module">import { enhance } from "/enhance.js"; enhance();</script>`,
 or from a CDN such as
-`https://cdn.jsdelivr.net/npm/enarratio@0.5.0/dist/enhance/index.js`.
+`https://cdn.jsdelivr.net/npm/enarratio@0.6.0/dist/enhance/index.js`.
 
 To redraw a chart in place, pass new server markup to `update()` on the chart
 `enhance()` returns. That markup should come from Enarratio: it is sanitized
@@ -350,7 +351,8 @@ and edited.
   enhancement layer's points sit beside it, in their own `role="application"`
   layer ([record 0027](docs/design/0027-contrast-export-and-roles.md)).
 - Enhanced charts add "Download SVG", "Download PNG" and, for a figure with an
-  `id`, "Copy embed" (a link to the chart) beside "Download CSV".
+  `id`, "Copy embed" (a link to the chart) beside "Download CSV", and "Play as
+  sound", which plays each series as rising and falling notes.
 - Enhanced charts are keyboard operable with one tab stop, through native
   buttons over the marks and a described key hint; they announce each point's
   place, filters, ranges, sorts and updates through a live region, and respect

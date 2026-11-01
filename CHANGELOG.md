@@ -7,6 +7,27 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-01
+
+Phone drawings, wrapped bar labels and Play as sound ([0029](docs/design/0029-phone-drawings-and-sound.md)).
+
+### Added
+
+- "Play as sound" on every enhanced chart with two or more marks (B54): each series in turn, one note per mark, higher for a
+  higher value and panned with its place on the x axis; the live region names each series and the tooltip follows the
+  note. "Stop sound" or Escape stops it. The code is `dist/enhance/sound.js` (0.9 kB gzipped), imported only when pressed,
+  so the layer stays within its 9.5 kB. `sound: false` turns it off; `play`, `stop` and `playing` are new `EnhanceStrings`.
+- `enarratio/redraw/narrow`: `narrowChart(host, narrow, options)`, the narrow-drawing half of `enarratio/redraw` without the
+  light renderers.
+
+### Changed
+
+- Horizontal bar labels take at most two fifths of the drawing (72 to 220 px) and break onto two lines at a space, so a bar
+  chart drawn narrow keeps room for its bars. Both renderers.
+- Below vertical bars, every category keeps its label while its slot holds four characters: a long one breaks onto a second
+  line at a space and is cut there, instead of a neighbor's label being dropped (a three-bar chart in a 273 px column named
+  only two). Narrower slots thin as before. Both renderers.
+
 ### Release
 
 - Releases publish under npm's `latest` tag (`publishConfig.tag`), so `npm install enarratio` gets the newest version.
@@ -20,6 +41,7 @@ change the public API; every such change is listed here.
   tests, in place of gallery.yml. It deploys with `DEPLOY_SHA`, waits for `/health` (site-runtime 0.60.0's `staticSite`) to
   report the commit, checks the home page and rolls back on a refusal; IndexNow runs after it. No package change.
 - Headers come from the gallery's entry in site-runtime's site registry: the Worker is `staticSite({ site: enarratio })` and `npm run gallery` writes `_headers` with `site-runtime-headers` (with the TDMRep header), so `scripts/security-headers.ts` and its header test are gone. The registry adds COEP with `report-to`, `Integrity-Policy-Report-Only` and a Report-Only policy with `require-trusted-types-for 'script'`. site-runtime v0.62.1, whose Workers carry only the registry's values, keeps the gallery's Worker inside its 27/11 KiB budget (26.4/10.7).
+- Every chart is also drawn at 228 px and swapped in under 30rem, so a phone reads 12 px text (C12).
 - `theme.js` and `gallery.js` carry a sha384 `integrity` and `crossorigin`, and a `modulepreload` with its own integrity fetches `enhance.js`, the module gallery.js imports, so all three pass Integrity-Policy.
 
 ## [0.5.0] - 2026-10-31
