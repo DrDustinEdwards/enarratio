@@ -402,6 +402,14 @@ function checkFigure(options: FigureOptions, parts: FigureParts, title: string |
   }
 }
 
+/**
+ * Kinds whose series are lines, and kinds whose series are told apart by symbol: their legend
+ * swatches are drawn as a line (dashed as the line is in forced colors) or as the symbol, so the
+ * legend matches the marks without color (B57).
+ */
+const LINE_KINDS = new Set(["line", "density", "survival", "dose-response", "slope"]);
+const SYMBOL_KINDS = new Set(["scatter", "dot", "tree", "network"]);
+
 function legendMarkup(parts: FigureParts): string {
   const swatch = element("span", { class: "enarratio-swatch", "aria-hidden": "true" });
   if (parts.ramp && parts.ramp.length > 0) {
@@ -416,9 +424,14 @@ function legendMarkup(parts: FigureParts): string {
     );
   }
   if (!parts.legend || parts.legend.length === 0) return "";
+  const mark = LINE_KINDS.has(parts.kind)
+    ? "line"
+    : SYMBOL_KINDS.has(parts.kind)
+      ? "symbol"
+      : undefined;
   return element(
     "ul",
-    { class: "enarratio-legend" },
+    { class: "enarratio-legend", "data-enarratio-legend": mark },
     parts.legend
       .map((item) =>
         element(

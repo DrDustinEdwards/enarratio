@@ -79,7 +79,7 @@ const examplesDir = join(root, "examples");
 interface Example {
   readonly id: string;
   readonly name: string;
-  /** The module it imports: enarratio, enarratio/plot or enarratio/science. */
+  /** The module it imports: enarratio, enarratio/plot, enarratio/science or enarratio/map. */
   readonly module: string;
   readonly title: string;
   readonly source: string;
@@ -131,6 +131,8 @@ const NAMES: Record<string, string> = {
   survival: "Survival",
   forest: "Forest plot",
   tree: "Phylogenetic tree",
+  "dot-map": "Dot map",
+  choropleth: "Choropleth map",
   sparkline: "Sparklines",
   primitives: "Rings and uptime",
   "heat-strip": "Heat strip",
@@ -682,14 +684,15 @@ ${galleryScript("gallery.js")}
  * (site-runtime integrityHash) and crossorigin, which Integrity-Policy needs of every script, a
  * classic one included. gallery.js imports enhance.js, which a modulepreload with its own
  * integrity fetches, so the import finds it already checked. enhance.js imports sound.js when a
- * reader presses Play; an import() carries no integrity, so sound.js (under 1 kB) is preloaded
- * the same way, fetched but not run until then.
+ * reader presses Play, and image.js on the first download; an import() carries no integrity, so
+ * both (under 2 kB each) are preloaded the same way, fetched but not run until then.
  */
 const scriptFiles = {
   "gallery.js": await bundle("gallery.js", "esm"),
   "theme.js": await bundle("theme.js", "iife"),
   "enhance.js": readFileSync(join(root, "dist", "enhance", "index.js"), "utf8"),
   "sound.js": readFileSync(join(root, "dist", "enhance", "sound.js"), "utf8"),
+  "image.js": readFileSync(join(root, "dist", "enhance", "image.js"), "utf8"),
 };
 const scripts = Object.fromEntries(
   await Promise.all(
@@ -702,6 +705,7 @@ function galleryScript(src: string): string {
   const at = (file: string): string => new URL(file, new URL(src, `${SITE}/`)).pathname;
   return `<link rel="modulepreload" href="${at("enhance.js")}" integrity="${scripts["enhance.js"]}" crossorigin="anonymous">
 <link rel="modulepreload" href="${at("sound.js")}" integrity="${scripts["sound.js"]}" crossorigin="anonymous">
+<link rel="modulepreload" href="${at("image.js")}" integrity="${scripts["image.js"]}" crossorigin="anonymous">
 <script type="module" src="${src}" integrity="${scripts["gallery.js"]}" crossorigin="anonymous"></script>`;
 }
 

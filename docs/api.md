@@ -9,6 +9,7 @@ ships only what it uses.
 | `enarratio/base.css` | The theme-free base rules as a stylesheet file | Nothing |
 | `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` | Peers `@observablehq/plot`, and `linkedom` outside a browser |
 | `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | Peers `@observablehq/plot` and `d3-force`, and `linkedom` outside a browser |
+| `enarratio/map` | `dotMap`, `choroplethMap`, drawn from the caller's GeoJSON | Nothing |
 | `enarratio/lite` | `barChart`, `lineChart`, `areaChart` drawn without Observable Plot; also one entry per chart: `enarratio/lite/bar`, `enarratio/lite/line`, `enarratio/lite/area` | Nothing |
 | `enarratio/enhance` | Interaction for charts already on the page; runs in the browser | Nothing |
 | `enarratio/redraw` | Draws a server's chart again at its frame's width in the browser, then enhances it | Nothing |
@@ -745,6 +746,97 @@ network falls into.
 
 `{ source: string; target: string }`, by node id.
 
+## Maps: `enarratio/map`
+
+Maps drawn on the server from the caller's GeoJSON (RFC 7946, longitude and
+latitude in WGS 84). Enarratio ships no boundaries, streets or coastlines
+([record 0028](design/0028-maps.md)). No dependencies.
+
+### `dotMap`
+
+`dotMap(options: DotMapOptions<T>): string`. Points sized by value (by area,
+so a dot four times the value is twice as wide) over a quiet basemap, with
+landmarks drawn as squares and one of them highlighted, filled and named. A key
+under the map gives three reference sizes and the landmarks; the data table
+lists every point with its value, longitude and latitude, then the landmarks.
+A zero is a small ring. Street names are placed along their streets where they
+fit, clear of the dots and of each other. With `enarratio/enhance` the dots are
+walked by keyboard in reading order: north to south in eight bands, west to
+east within each.
+
+### `DotMapOptions`
+
+`FigureOptions` plus `data`, `longitude`, `latitude` and `value` (fields), and
+`label?` (a field naming each point), `labelHeader?`, `valueLabel?`,
+`formatValue?`, `maxRadius?` (default 9, less on a drawing under 630 wide, never
+under 5), `basemap?`, `landmarks?`, `landmarkLabel?` (default "Landmark"),
+`extent?` and `projection?`.
+
+### `MapLandmark`
+
+`{ name: string; longitude: number; latitude: number; highlight?: boolean }`.
+At most one landmark is highlighted.
+
+### `choroplethMap`
+
+`choroplethMap(options: ChoroplethMapOptions<T>): string`. Regions shaded in
+the theme's five sequential steps, with the steps labeled in a ramp legend.
+Each region prints its value where it fits, in the step's text color; a region
+with no data (a `null` value, or a region drawn but missing from the data) is
+outlined dashed, not shaded as zero, and the table says "no data". Neighbors in
+the same step are parted by a line in the background color. A row naming a
+region the geometry lacks throws, naming it.
+
+### `ChoroplethMapOptions`
+
+`FigureOptions` plus `regions` (GeoJSON polygons), `regionKey` (the feature
+property naming each region), `data`, `region` and `value` (fields), and
+`regionHeader?`, `valueLabel?`, `formatValue?`, `thresholds?` (four, as on
+`heatmap`), `valueLabels?` (default `true`), `basemap?`, `extent?` and
+`projection?`.
+
+### `BasemapLayer`
+
+`{ geometry: GeoJson; labels?: string }`. Lines and areas drawn under the data
+in the muted text color and the grid color; `labels` names the feature property
+printed along each line or in each area, once per name.
+
+### `GeoJson`
+
+A `FeatureCollection`, a `Feature` or a bare geometry. Point, MultiPoint,
+LineString, MultiLineString, Polygon, MultiPolygon and GeometryCollection are
+read; a position outside ±180 and ±90 degrees throws, naming the feature.
+
+### `GeoFeatureCollection`
+
+`{ type: "FeatureCollection"; features: GeoFeature[] }`.
+
+### `GeoFeature`
+
+`{ type: "Feature"; geometry: GeoGeometry | null; properties?: object | null }`.
+
+### `GeoGeometry`
+
+`{ type: string; coordinates?: unknown; geometries?: GeoGeometry[] }`. Typed
+loosely, so geometry read from a `.json` file is accepted; it is checked as it
+is read.
+
+### `GeoPosition`
+
+`[longitude, latitude]`, in degrees; a third value is ignored.
+
+### `GeoExtent`
+
+`[[west, south], [east, north]]`, in degrees: the box a map shows. By default
+the data's own, a little padded.
+
+### `Projection`
+
+`"equirectangular"` (default: longitude scaled by the cosine of the middle
+latitude, true to a fraction of a percent at city scale), `"mercator"`, or a
+function from longitude and latitude to planar x and y (y north), for any other
+projection.
+
 ## Scientific charts: `enarratio/science`
 
 These, and `networkChart` above, import from `enarratio/science`.
@@ -1466,7 +1558,7 @@ re-applies them.
 
 ### `EnhanceOptions`
 
-`{ tooltips?; filter?; brush?; entrance?; table?; expand?; url?; download?; embed?; sound?; strings? }`.
+`{ tooltips?; filter?; brush?; entrance?; table?; expand?; url?; download?; tactile?; embed?; sound?; strings? }`.
 
 | Option | Default | Does |
 |---|---|---|
@@ -1477,7 +1569,8 @@ re-applies them.
 | `table` | `true` | The data table sorts by any column (a button in each header, `aria-sort`), and a "Show table" button swaps the chart for the table and back |
 | `expand` | `false` | An "Expand" button fills the window with the chart; Escape, the button, or focus leaving the chart closes it |
 | `url` | `false` | Keeps the filter and range in the address as `?{id}={field}:{value}` and `?{id}-range={low}..{high}`, so a link reproduces the view. Needs the figure's `id`. A view read from the address fires `enarratio:select` or `enarratio:brush`, so the page can follow it |
-| `download` | `true` | "Download SVG" and "Download PNG" beside the CSV link (or in the control bar when the figure has none): the drawing as shown, its computed colors and fonts written onto each element and the background painted in; the PNG is that SVG on a canvas at twice its size. A PNG uses the fonts the browser has for a standalone image, so a web font may fall back |
+| `download` | `true` | "Download SVG" and "Download PNG" beside the CSV link (or in the control bar when the figure has none): the drawing as shown, its computed colors and fonts written onto each element and the background painted in; the PNG is that SVG on a canvas at twice its size. A PNG uses the fonts the browser has for a standalone image, so a web font may fall back. The files are made by `image.js` (1.8 kB), which loads on the first press |
+| `tactile` | `true` | With `download`, "Download tactile SVG": the drawing for a braille embosser or swell paper, on an 11 by 11.5 inch page (`width="11in"`), the title as a heading and a turned axis title under it, black on white (every series black, told apart by texture and dash; the sequential ramp as five grays), gridlines left out, raised lines at least 0.7 mm, labels level and kept as text on a white patch so braille software can write them ([record 0030](design/0030-tactile-export-and-forced-colors-record.md)) |
 | `embed` | `true` | "Copy embed" copies a link to the chart, `<a href="{page}#{id}">{title}</a>`, to paste into another page. Needs the figure's `id` and the Clipboard API; without either there is no button |
 | `sound` | `true` | "Play as sound" plays each series in turn, one note per mark from A3 (lowest) to A5 (highest), panned with the mark's place on the x axis; the live region names each series and the tooltip follows the note. "Stop sound" or Escape stops it. Its code (`sound.js`, 0.9 kB) loads on the first press. Needs Web Audio and two or more marks ([record 0029](design/0029-phone-drawings-and-sound.md)) |
 | `strings` | English | Translations of any of the [`EnhanceStrings`](#enhancestrings) |

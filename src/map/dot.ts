@@ -10,7 +10,7 @@ import { type BasemapLayer, clipped, drawBasemap, readingRanks } from "./draw.js
 import {
   aspect,
   extentOf,
-  fit,
+  fitExtent,
   type GeoExtent,
   type Projection,
   positionsOf,
@@ -40,7 +40,7 @@ export interface DotMapOptions<T extends object> extends FigureOptions {
   /** What the value measures, for the key, hover details and the table (default: the field). */
   readonly valueLabel?: string;
   readonly formatValue?: (value: number) => string;
-  /** The largest dot's radius, in the drawing's units (default 9). */
+  /** The largest dot's radius, in the drawing's units (default 9, less on a drawing under 630 wide). */
   readonly maxRadius?: number;
   /** Context drawn quietly under the dots: streets, rivers, areas. */
   readonly basemap?: readonly BasemapLayer[];
@@ -63,8 +63,11 @@ interface Point {
 
 const KIND = "dotMap";
 
-/** The default largest radius: a dot a reader can compare, that hides few streets. */
-const MAX_RADIUS = 9;
+/**
+ * The default largest radius: a dot a reader can compare, that hides few streets. 9 at the default
+ * width, smaller on a narrow drawing so the dots do not merge, and never under 5.
+ */
+const maxRadiusFor = (width: number): number => Math.max(5, Math.min(9, width / 70));
 
 function readCoordinate(row: object, key: string, i: number, limit: number): number {
   const v = readNumber(KIND, row, key, i);
@@ -135,7 +138,7 @@ export function dotMap<T extends object>(options: DotMapOptions<T>): string {
   const highlighted = landmarks.find((l) => l.highlight);
 
   const width = options.width ?? DEFAULT_WIDTH;
-  const maxRadius = options.maxRadius ?? MAX_RADIUS;
+  const maxRadius = options.maxRadius ?? maxRadiusFor(width);
   if (!(maxRadius > 0)) throw new Error(`${KIND}: maxRadius must be a positive number`);
   const top = maxOf(points.map((p) => p.value));
   const radius = (v: number): number => (top > 0 ? maxRadius * Math.sqrt(v / top) : 0);
@@ -143,10 +146,15 @@ export function dotMap<T extends object>(options: DotMapOptions<T>): string {
   // The key, under the map: reference dots, then the landmarks' squares.
   const ch = charWidth(width);
   const line = 12 * textGrowth(width);
-  const references = top > 0 ? ticks(0, top, 3).filter((v) => v > 0 && v <= top).slice(-3) : [];
+  const references =
+    top > 0
+      ? ticks(0, top, 3)
+          .filter((v) => v > 0 && v <= top)
+          .slice(-3)
+      : [];
   if (top > 0 && !references.includes(top) && references.length < 3) references.push(top);
   const keyItems: { width: number; height: number; draw: (x: number, y: number) => string }[] = [];
-  const heading = `${valueLabel}:`;
+  const heading = `${valueLabel.charAt(0).toUpperCase()}${valueLabel.slice(1)}:`;
   keyItems.push({
     width: heading.length * ch + 6,
     height: line,
@@ -167,7 +175,11 @@ export function dotMap<T extends object>(options: DotMapOptions<T>): string {
           "fill-opacity": 0.35,
           stroke: "var(--enarratio-series-1)",
         }) +
-        el("text", { x: num(x + 2 * r + 4), y: num(y), dy: "0.32em", "text-anchor": "start" }, text(label)),
+        el(
+          "text",
+          { x: num(x + 2 * r + 4), y: num(y), dy: "0.32em", "text-anchor": "start" },
+          text(label),
+        ),
     });
   }
   const square = (x: number, y: number, side: number, filled: boolean): string =>
@@ -186,7 +198,11 @@ export function dotMap<T extends object>(options: DotMapOptions<T>): string {
       height: line,
       draw: (x, y) =>
         square(x + 4, y, 7, false) +
-        el("text", { x: num(x + 14), y: num(y), dy: "0.32em", "text-anchor": "start" }, text(landmarkLabel)),
+        el(
+          "text",
+          { x: num(x + 14), y: num(y), dy: "0.32em", "text-anchor": "start" },
+          text(landmarkLabel),
+        ),
     });
   }
   if (highlighted) {
@@ -228,10 +244,12 @@ export function dotMap<T extends object>(options: DotMapOptions<T>): string {
   const mapWidth = width - 2 * pad;
   const mapHeight =
     options.height === undefined
-      ? Math.round(Math.min(1.5 * width, Math.max(160, mapWidth * aspect(options.projection, extent))))
+      ? Math.round(
+          Math.min(1.5 * width, Math.max(160, mapWidth * aspect(options.projection, extent))),
+        )
       : Math.max(40, options.height - keyHeight - 2 * pad);
   const height = options.height ?? mapHeight + 2 * pad + keyHeight;
-  const project = fit(options.projection, extent, {
+  const project = fitExtent(options.projection, extent, {
     left: pad,
     top: pad,
     width: mapWidth,
@@ -253,7 +271,12 @@ export function dotMap<T extends object>(options: DotMapOptions<T>): string {
     const w = highlighted.name.length * ch;
     const right = x + 10 + w <= width;
     const tx = right ? x + 10 : x - 10;
-    labelBoxes.push({ x0: right ? tx : tx - w, y0: y - line / 2, x1: right ? tx + w : tx, y1: y + line / 2 });
+    labelBoxes.push({
+      x0: right ? tx : tx - w,
+      y0: y - line / 2,
+      x1: right ? tx + w : tx,
+      y1: y + line / 2,
+    });
     highlightLabel = el(
       "text",
       {
@@ -270,9 +293,21 @@ export function dotMap<T extends object>(options: DotMapOptions<T>): string {
       text(highlighted.name),
     );
   }
+  // Street names keep clear of the dots and landmarks, so none hides a point.
+  points.forEach((p, i) => {
+    const [x, y] = at[i] as [number, number];
+    const r = Math.max(radius(p.value), 1.5);
+    labelBoxes.push({ x0: x - r, y0: y - r, x1: x + r, y1: y + r });
+  });
+  for (const l of landmarks) {
+    const [x, y] = project(l.longitude, l.latitude);
+    const half = l.highlight ? 5.5 : 3.5;
+    labelBoxes.push({ x0: x - half, y0: y - half, x1: x + half, y1: y + half });
+  }
   const basemap = drawBasemap(KIND, options.basemap ?? [], drawable, width, labelBoxes);
   // Positions on the basemap are read too, so a bad one fails here, not silently.
-  for (const layer of options.basemap ?? []) positionsOf(readGeoJson(KIND, "basemap", layer.geometry));
+  for (const layer of options.basemap ?? [])
+    positionsOf(readGeoJson(KIND, "basemap", layer.geometry));
 
   const describe = (p: Point): string => `${p.name}: ${format(p.value)} ${valueLabel}`;
   // Big dots first, so a small one is never hidden under a big one.
@@ -353,7 +388,11 @@ export function dotMap<T extends object>(options: DotMapOptions<T>): string {
       landmarkMarks
         ? el("g", { "data-enarratio-mark": "landmark" }, landmarkMarks + highlightLabel)
         : "",
-      el("g", { "data-enarratio-mark": "map key", "aria-hidden": "true", fill: "currentColor" }, key),
+      el(
+        "g",
+        { "data-enarratio-mark": "map key", "aria-hidden": "true", fill: "currentColor" },
+        key,
+      ),
     ].join(""),
   );
 

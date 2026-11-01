@@ -1,8 +1,8 @@
 /** What both maps draw alike: the basemap and its labels, the clip, and the reading order. */
 
 import { el, num, text } from "../lite/svg.js";
-import { hash } from "../render/texture.js";
 import { charWidth, textGrowth } from "../render/size.js";
+import { hash } from "../render/texture.js";
 import {
   along,
   chains,
@@ -42,19 +42,54 @@ interface Box {
 const overlaps = (a: Box, b: Box): boolean =>
   a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
 
-/** The parts of a line inside the frame, split where it leaves. */
+/**
+ * The part of the segment from a to b inside the frame (Liang-Barsky), or undefined when none is.
+ */
+function clipSegment(
+  a: readonly [number, number],
+  b: readonly [number, number],
+  f: Frame,
+): [[number, number], [number, number]] | undefined {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  let t0 = 0;
+  let t1 = 1;
+  for (const [p, q] of [
+    [-dx, a[0] - f.left],
+    [dx, f.left + f.width - a[0]],
+    [-dy, a[1] - f.top],
+    [dy, f.top + f.height - a[1]],
+  ] as const) {
+    if (p === 0) {
+      if (q < 0) return undefined;
+      continue;
+    }
+    const t = q / p;
+    if (p < 0) t0 = Math.max(t0, t);
+    else t1 = Math.min(t1, t);
+    if (t0 > t1) return undefined;
+  }
+  return [
+    [a[0] + t0 * dx, a[1] + t0 * dy],
+    [a[0] + t1 * dx, a[1] + t1 * dy],
+  ];
+}
+
+/** The stretches of a line inside the frame, cut where it leaves and joined where it stays in. */
 function inside(line: readonly (readonly [number, number])[], f: Frame): [number, number][][] {
   const parts: [number, number][][] = [];
   let part: [number, number][] = [];
-  for (const [x, y] of line) {
-    if (x >= f.left && x <= f.left + f.width && y >= f.top && y <= f.top + f.height) {
-      part.push([x, y]);
-    } else if (part.length > 0) {
-      parts.push(part);
-      part = [];
+  for (let i = 1; i < line.length; i += 1) {
+    const clip = clipSegment(line[i - 1] as [number, number], line[i] as [number, number], f);
+    if (!clip) continue;
+    const last = part.at(-1);
+    if (!last || last[0] !== clip[0][0] || last[1] !== clip[0][1]) {
+      if (part.length > 1) parts.push(part);
+      part = [clip[0]];
     }
+    part.push(clip[1]);
   }
-  if (part.length > 0) parts.push(part);
+  if (part.length > 1) parts.push(part);
   return parts;
 }
 
@@ -89,12 +124,16 @@ export function drawBasemap(
   const areas: string[] = [];
   const lines: string[] = [];
   const labels: string[] = [];
-  const place = (label: string, x: number, y: number, angle: number): void => {
+  const place = (label: string, x: number, y: number, angle: number, onLine: boolean): boolean => {
     const w = label.length * ch;
     const a = (angle * Math.PI) / 180;
     const hw = (Math.abs(Math.cos(a)) * w + Math.abs(Math.sin(a)) * line) / 2;
     const hh = (Math.abs(Math.sin(a)) * w + Math.abs(Math.cos(a)) * line) / 2;
-    const box = { x0: x - hw, y0: y - hh, x1: x + hw, y1: y + hh };
+    // A label beside a line has its middle about 0.65em off the line, on the side it reads above.
+    const off = onLine ? 0.65 * line : 0;
+    const cx = x + Math.sin(a) * off;
+    const cy = y - Math.cos(a) * off;
+    const box = { x0: cx - hw, y0: cy - hh, x1: cx + hw, y1: cy + hh };
     if (
       box.x0 < frame.left ||
       box.y0 < frame.top ||
@@ -102,7 +141,7 @@ export function drawBasemap(
       box.y1 > frame.top + frame.height ||
       taken.some((t) => overlaps(t, box))
     ) {
-      return;
+      return false;
     }
     taken.push(box);
     labels.push(
@@ -111,12 +150,14 @@ export function drawBasemap(
         {
           x: num(x),
           y: num(y),
-          dy: "0.32em",
+          // Along a line the label sits just beside it, so the line never runs through the words.
+          dy: onLine ? "-0.3em" : "0.32em",
           transform: angle === 0 ? undefined : `rotate(${num(angle)},${num(x)},${num(y)})`,
         },
         text(label),
       ),
     );
+    return true;
   };
 
   layers.forEach((layer, n) => {
@@ -124,7 +165,9 @@ export function drawBasemap(
     const projected = shapes.map((s) => ({
       shape: s,
       lines: s.lines.map((l) => l.map(([lon, lat]) => project(lon, lat))),
-      polygons: s.polygons.map((rings) => rings.map((r) => r.map(([lon, lat]) => project(lon, lat)))),
+      polygons: s.polygons.map((rings) =>
+        rings.map((r) => r.map(([lon, lat]) => project(lon, lat))),
+      ),
     }));
     const area = polygonPath(projected.flatMap((p) => p.polygons));
     if (area) areas.push(el("path", { d: area, "fill-rule": "evenodd" }));
@@ -152,17 +195,21 @@ export function drawBasemap(
       if (c.longest) {
         const w = c.name.length * ch;
         if (c.length < w + 8) continue;
-        const [x0, y0] = along(c.longest, (c.length - w) / 2);
-        const [x1, y1] = along(c.longest, (c.length + w) / 2);
-        const [x, y] = along(c.longest, c.length / 2);
-        let angle = (Math.atan2(y1 - y0, x1 - x0) * 180) / Math.PI;
-        // Text never reads upside down.
-        if (angle > 90) angle -= 180;
-        if (angle < -90) angle += 180;
-        place(c.name, x, y, Math.round(angle * 10) / 10);
+        // The middle of the stretch first, then places either side of it, until one is clear.
+        for (const t of [0.5, 0.35, 0.65, 0.2, 0.8]) {
+          const middle = Math.min(Math.max(c.length * t, w / 2 + 4), c.length - w / 2 - 4);
+          const [x0, y0] = along(c.longest, middle - w / 2);
+          const [x1, y1] = along(c.longest, middle + w / 2);
+          const [x, y] = along(c.longest, middle);
+          let angle = (Math.atan2(y1 - y0, x1 - x0) * 180) / Math.PI;
+          // Text never reads upside down.
+          if (angle > 90) angle -= 180;
+          if (angle < -90) angle += 180;
+          if (place(c.name, x, y, Math.round(angle * 10) / 10, true)) break;
+        }
       } else {
         const at = labelPoint(c.parts.flatMap((p) => p.polygons));
-        if (at) place(c.name, at[0], at[1], 0);
+        if (at) place(c.name, at[0], at[1], 0, false);
       }
     }
   });
@@ -240,7 +287,10 @@ const BANDS = 8;
  * The keyboard reading order of points on a map, as each point's rank: in bands from north to
  * south, and west to east within a band, as a page is read.
  */
-export function readingRanks(points: readonly (readonly [number, number])[], frame: Frame): number[] {
+export function readingRanks(
+  points: readonly (readonly [number, number])[],
+  frame: Frame,
+): number[] {
   const band = (y: number): number =>
     Math.min(BANDS - 1, Math.max(0, Math.floor(((y - frame.top) / frame.height) * BANDS)));
   const order = points

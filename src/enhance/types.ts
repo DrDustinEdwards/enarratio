@@ -69,6 +69,8 @@ export interface EnhanceStrings {
   /** The export buttons (C3) and the embed snippet's (C4). */
   readonly downloadSvg: string;
   readonly downloadPng: string;
+  /** The tactile export (B55): a black-on-white SVG sized for an embosser or swell paper. */
+  readonly downloadTactile: string;
   readonly copyEmbed: string;
   /** Announced when the snippet is on the clipboard. */
   readonly embedCopied: string;
@@ -104,6 +106,12 @@ export interface EnhanceOptions {
   readonly url?: boolean;
   /** Add "Download SVG" and "Download PNG" beside the CSV link (C3). */
   readonly download?: boolean;
+  /**
+   * Add "Download tactile SVG" beside them: the drawing in black on white, gridlines left out,
+   * lines thickened and labels horizontal, on an 11 by 11.5 inch page for a braille embosser or
+   * swell paper (B55). Needs `download`.
+   */
+  readonly tactile?: boolean;
   /**
    * Add "Copy embed", which copies a link to the chart (the page address with the figure's `id`)
    * as HTML to paste elsewhere (C4). Needs the figure's `id`.

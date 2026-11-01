@@ -1,3 +1,4 @@
+import { DOMParser } from "linkedom";
 import type { Page } from "puppeteer";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { type Harness, startHarness } from "./harness.ts";
@@ -197,6 +198,52 @@ describe("enhance: table, view switch, expand and address", () => {
     await p.waitForSelector(".enarratio-tooltip:not([hidden])");
     await p.keyboard.press("Escape");
     expect(await labels()).toBe("Show table|Expand|Play as sound");
+    await p.close();
+  });
+
+  it("downloads a tactile SVG: black on white, no gridlines, thick lines, labels level", async () => {
+    const p = await harness.open("index.html", "dark");
+    const LINE = '[data-example="line"]';
+    await p.$eval(LINE, (el) => el.scrollIntoView());
+    await p.waitForSelector(`${LINE} .enarratio-points`);
+    // The file the button saves, kept instead of saved.
+    await p.evaluate(() => {
+      const w = window as unknown as { saved?: Blob };
+      URL.createObjectURL = (blob) => {
+        w.saved = blob as Blob;
+        return "blob:kept";
+      };
+      HTMLAnchorElement.prototype.click = () => undefined;
+    });
+    await p.$$eval(`${LINE} button`, (els) =>
+      (els.find((el) => el.textContent === "Download tactile SVG") as HTMLElement).click(),
+    );
+    await p.waitForFunction(() => (window as unknown as { saved?: Blob }).saved);
+    const file = await p.evaluate(() =>
+      ((window as unknown as { saved: Blob }).saved as Blob).text(),
+    );
+    const doc = new DOMParser().parseFromString(file, "image/svg+xml");
+    const root = doc.documentElement;
+    expect([root.getAttribute("width"), root.getAttribute("height")]).toEqual(["11in", "11.5in"]);
+    expect(doc.querySelector('[data-enarratio-mark$="grid"]')).toBeNull();
+    const paints = new Set(
+      [...doc.querySelectorAll("[fill], [stroke]")].flatMap((el) =>
+        ["fill", "stroke"].map((a) => el.getAttribute(a)).filter((v) => v && !v.startsWith("url(")),
+      ),
+    );
+    for (const paint of paints)
+      expect(paint).toMatch(/^(none|#000|#fff|rgb\((0, 0, 0|255, 255, 255)\))$/);
+    const lines = [...doc.querySelectorAll('[data-enarratio-mark="line"] path')];
+    expect(new Set(lines.map((l) => l.getAttribute("stroke-dasharray"))).size).toBe(lines.length);
+    expect(
+      [...doc.querySelectorAll("text")].some((t) =>
+        /rotate/.test(t.getAttribute("transform") ?? ""),
+      ),
+    ).toBe(false);
+    expect([...doc.querySelectorAll("svg > text")].map((t) => t.textContent)).toEqual([
+      "Weekly positive tests by county",
+      "Positive tests",
+    ]);
     await p.close();
   });
 

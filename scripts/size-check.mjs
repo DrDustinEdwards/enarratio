@@ -87,7 +87,7 @@ for (const [name, target] of Object.entries(pkg.exports)) {
 
 /**
  * An entry bundled for the browser with all it imports statically, minified, then gzipped: its
- * bytes, and each chunk it loads only on demand (the enhancement layer's sound) by name.
+ * bytes, and each chunk it loads only on demand (the enhancement layer's sound and image files) by name.
  */
 async function bundled(path) {
   const bundle = await rolldown({ input: path, platform: "browser", logLevel: "silent" });
@@ -118,11 +118,14 @@ for (const [name, target] of Object.entries(pkg.exports)) {
 }
 
 const enhanceBytes = await bundled(resolve(root, pkg.exports["./enhance"].default));
-/** The most the sound module (B54), loaded when a reader presses Play, may weigh. */
-const SOUND_LIMIT = 2_000;
+/**
+ * The most a module the layer loads on demand may weigh: the sound (B54), loaded on Play, and the
+ * image files (C3, B55), loaded on the first download.
+ */
+const LAZY_LIMIT = 2_500;
 for (const [file, bytes] of enhanceBytes.lazy) {
-  if (bytes > SOUND_LIMIT)
-    failures.push(`./enhance's ${file} is ${bytes} bytes; the limit is ${SOUND_LIMIT}`);
+  if (bytes > LAZY_LIMIT)
+    failures.push(`./enhance's ${file} is ${bytes} bytes; the limit is ${LAZY_LIMIT}`);
 }
 if (enhanceBytes > ENHANCE_LIMIT) {
   failures.push(
@@ -148,7 +151,7 @@ console.log(
 );
 for (const [file, bytes] of enhanceBytes.lazy) {
   console.log(
-    `  ${file}, loaded on Play (limit ${SOUND_LIMIT / 1000} kB)  ${(bytes / 1000).toFixed(1)} kB`,
+    `  ${file}, loaded on demand (limit ${LAZY_LIMIT / 1000} kB)  ${(bytes / 1000).toFixed(1)} kB`,
   );
 }
 if (failures.length > 0) {

@@ -83,7 +83,8 @@ const position = (kind: string, where: string, value: unknown): [number, number]
 };
 
 const list = (kind: string, where: string, value: unknown): unknown[] => {
-  if (!Array.isArray(value)) throw new Error(`${kind}: ${where} has coordinates that are not a list`);
+  if (!Array.isArray(value))
+    throw new Error(`${kind}: ${where} has coordinates that are not a list`);
   return value;
 };
 
@@ -94,7 +95,11 @@ function readGeometry(
   kind: string,
   where: string,
   geometry: GeoGeometry,
-  out: { lines: [number, number][][]; polygons: [number, number][][][]; points: [number, number][] },
+  out: {
+    lines: [number, number][][];
+    polygons: [number, number][][][];
+    points: [number, number][];
+  },
 ): void {
   const c = geometry.coordinates;
   switch (geometry.type) {
@@ -147,8 +152,8 @@ export function readGeoJson(kind: string, name: string, geo: GeoJson): Shape[] {
 }
 
 /** Every position in some shapes. */
-export function positionsOf(shapes: readonly Shape[]): [number, number][] {
-  const out: [number, number][] = [];
+export function positionsOf(shapes: readonly Shape[]): (readonly [number, number])[] {
+  const out: (readonly [number, number])[] = [];
   for (const s of shapes) {
     for (const line of s.lines) out.push(...line);
     for (const polygon of s.polygons) for (const r of polygon) out.push(...r);
@@ -181,7 +186,7 @@ export function extentOf(positions: readonly (readonly [number, number])[], pad 
 const RAD = Math.PI / 180;
 
 /** The planar projection (y north) for a map of this extent. */
-export function planar(
+function planar(
   projection: Projection | undefined,
   extent: GeoExtent,
 ): (lon: number, lat: number) => readonly [number, number] {
@@ -249,7 +254,11 @@ export function aspect(projection: Projection | undefined, extent: GeoExtent): n
  * Fits the extent into the frame without stretching it (one scale for x and y), centered, with
  * north up.
  */
-export function fit(projection: Projection | undefined, extent: GeoExtent, frame: Frame): Fitted {
+export function fitExtent(
+  projection: Projection | undefined,
+  extent: GeoExtent,
+  frame: Frame,
+): Fitted {
   const project = planar(projection, extent);
   const b = planarBox(project, extent);
   const k = Math.min(frame.width / (b.x1 - b.x0 || 1), frame.height / (b.y1 - b.y0 || 1));
@@ -263,7 +272,7 @@ export function fit(projection: Projection | undefined, extent: GeoExtent, frame
 }
 
 /** Points along a line in the drawing, dropping any within half a unit of the last one kept. */
-export function thin(points: readonly (readonly [number, number])[]): [number, number][] {
+function thin(points: readonly (readonly [number, number])[]): [number, number][] {
   const out: [number, number][] = [];
   for (const [x, y] of points) {
     const last = out.at(-1);
@@ -273,7 +282,8 @@ export function thin(points: readonly (readonly [number, number])[]): [number, n
   // A line keeps its last point, so it ends where it should.
   const end = points.at(-1);
   const kept = out.at(-1);
-  if (end && kept && (end[0] !== kept[0] || end[1] !== kept[1])) out[out.length - 1] = [end[0], end[1]];
+  if (end && kept && (end[0] !== kept[0] || end[1] !== kept[1]))
+    out[out.length - 1] = [end[0], end[1]];
   return out;
 }
 
@@ -347,7 +357,9 @@ export function chains(
 ): [number, number][][] {
   const near = (a: readonly [number, number], b: readonly [number, number]): boolean =>
     Math.abs(a[0] - b[0]) < 0.5 && Math.abs(a[1] - b[1]) < 0.5;
-  const open = lines.filter((l) => l.length > 1).map((l) => l.map(([x, y]) => [x, y] as [number, number]));
+  const open = lines
+    .filter((l) => l.length > 1)
+    .map((l) => l.map(([x, y]) => [x, y] as [number, number]));
   const out: [number, number][][] = [];
   while (open.length > 0) {
     let chain = open.shift() as [number, number][];
