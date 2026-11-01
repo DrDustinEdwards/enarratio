@@ -396,7 +396,6 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   });
   const linkOf = options.href;
 
-  const longest = Math.max(maxOf(xNames.map((n) => n.length)), 1);
   const width = options.width ?? DEFAULT_WIDTH;
   const height =
     options.height ?? (horizontal ? Math.max(120, xNames.length * 28 + 60) : DEFAULT_HEIGHT);
@@ -413,12 +412,29 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   const thinned = fitted && fitted.length < xNames.length ? fitted : undefined;
 
   // Category labels longer than their room are cut with an ellipsis; the table, hover details
-  // and each bar's name keep the whole text. Time labels are already sized to fit.
+  // and each bar's name keep the whole text. Time labels are already sized to fit. Beside
+  // horizontal bars the labels take at most 220 px, and at most two fifths of a narrow drawing,
+  // so the bars keep the rest; a label longer than that wraps onto a second line at a space.
+  const labelMargin = Math.min(220, Math.max(72, Math.round(width * 0.4)));
   const room = horizontal
-    ? Math.floor((220 - 16) / 7)
+    ? Math.floor((labelMargin - 16) / 7)
     : Math.max(4, Math.floor((width - 80) / (thinned?.length ?? xNames.length) / 7));
+  const cut = (text: string): string =>
+    text.length <= room ? text : `${text.slice(0, room - 1).trimEnd()}…`;
   const tickLabel = (name: string): string =>
-    time || name.length <= room ? name : `${name.slice(0, room - 1).trimEnd()}…`;
+    time ? name : horizontal && labelMargin < 220 ? wrapLabel(name, room, cut) : cut(name);
+  const labelWidth = horizontal
+    ? Math.max(
+        ...xNames.map((n) =>
+          maxOf(
+            tickLabel(n)
+              .split("\n")
+              .map((l) => l.length),
+          ),
+        ),
+        1,
+      )
+    : 0;
 
   const rows = xNames.map((name) => [
     name,
@@ -486,7 +502,11 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     format,
     width,
     height,
-    marginLeft: horizontal ? Math.min(220, longest * 7 + 16) : valueLabel === null ? 44 : 60,
+    marginLeft: horizontal
+      ? Math.min(labelMargin, labelWidth * 7 + 16)
+      : valueLabel === null
+        ? 44
+        : 60,
     thinned,
     tickLabel,
     valueAxis: valueAxis(ends, options.locale),
@@ -542,4 +562,15 @@ const CHAR_WIDTH = 7.2;
  */
 export function labelFits(name: string, width: number, height: number): boolean {
   return height >= LABEL_HEIGHT && width >= name.length * CHAR_WIDTH + 8;
+}
+
+/**
+ * A category name in two lines of at most `room` characters, broken at the last space that fits;
+ * what is left past the second line is cut by `cut`. A name that fits stays on one line.
+ */
+function wrapLabel(name: string, room: number, cut: (text: string) => string): string {
+  if (name.length <= room) return name;
+  const space = name.lastIndexOf(" ", room);
+  if (space <= 0) return cut(name);
+  return `${name.slice(0, space)}\n${cut(name.slice(space + 1))}`;
 }
