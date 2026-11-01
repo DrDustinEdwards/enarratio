@@ -29,7 +29,7 @@ import { enarratio } from "@dustinedwards/site-runtime/sites";
 import { familyFooterHtml } from "capsomer/behavior/family-footer";
 import { letterheadHtml } from "capsomer/behavior/site-header";
 import { capsomerMoreTheme, capsomerTheme } from "capsomer/enarratio-theme";
-import { checkTheme, stylesheet, type Theme } from "enarratio";
+import { baseStylesheet, checkTheme, stylesheet, type Theme } from "enarratio";
 import { barChart } from "enarratio/lite";
 import { defaultTheme, highContrastTheme } from "enarratio/themes";
 import { rolldown } from "rolldown";
@@ -197,7 +197,12 @@ function inlineCss(file: string): string {
   return readFileSync(file, "utf8").replace(
     /@import\s+"([^"]+)"(?:\s+layer\(([\w.-]+)\))?\s*;/g,
     (_, path: string, layer?: string) => {
-      const inner = inlineCss(join(dirname(file), path));
+      // enarratio/base.css is this package's own, built into dist/ by `npm run build`; the gallery
+      // runs from source, so it takes the same rules from baseStylesheet(), which writes that file.
+      const inner =
+        path === "enarratio/base.css"
+          ? baseStylesheet()
+          : inlineCss(path.startsWith(".") ? join(dirname(file), path) : packageFile(path));
       return layer ? `@layer ${layer} {\n${inner}\n}` : inner;
     },
   );
@@ -563,8 +568,8 @@ const astroData = graph(
 );
 
 /**
- * The accessibility statement (devkit-a11y S6): Prelum's, with this site's facts and the open finding of devkit-a11y's
- * run of 2026-11-01.
+ * The accessibility statement (devkit-a11y S6): Prelum's, with this site's facts. devkit-a11y's run of 2026-11-01 found
+ * one limitation, the 404 page's sideways scroll at 320 px, which Capsomer 0.62.0 fixed.
  */
 const STATEMENT = accessibilityStatement({
   siteName: "The Enarratio gallery",
@@ -575,9 +580,6 @@ const STATEMENT = accessibilityStatement({
   date: "2026-11-01",
   capsomer: true,
   links: "marked",
-  limitations: [
-    "At 320 pixels wide, the page for an address that does not exist scrolls sideways a little, because its introduction is wider than the screen.",
-  ],
 });
 const STATEMENT_PAGE = "accessibility.html";
 
@@ -739,7 +741,14 @@ const links = (current: string): Link[] => [
   { label: "Code", href: "https://github.com/DrDustinEdwards/enarratio", current: false },
 ];
 for (const [theme, file, css, highContrast] of pages) {
-  writeFileSync(join(outDir, css), stylesheet(theme, { highContrast }));
+  // The Capsomer page loads what the family's sites load, capsomer/enarratio.css (Enarratio's base,
+  // Capsomer's tokens, and a figure's source and Download links in the link system), so it shows
+  // charts exactly as they appear on those sites. The other pages show Enarratio's own themes.
+  const themeCss =
+    theme === capsomerTheme
+      ? inlineCss(packageFile("capsomer/enarratio.css"))
+      : stylesheet(theme, { highContrast });
+  writeFileSync(join(outDir, css), themeCss);
   writeFileSync(join(outDir, file), page(theme, file, css, examples, links(file)));
 }
 writeFileSync(join(outDir, ASTRO_PAGE), astroPage());
