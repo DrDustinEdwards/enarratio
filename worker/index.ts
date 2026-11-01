@@ -37,6 +37,7 @@ export const PAGE_PRELOADS: Readonly<Record<string, ReturnType<typeof preloads>>
   "/example": own("/example.css"),
   "/capsomer": own("/capsomer-theme.css"),
   "/astro": own("/index.css"),
+  "/accessibility": own("/index.css"),
 };
 
 const site = staticSite({ site: enarratio, headers: TDM_RESERVATION_HEADERS });
