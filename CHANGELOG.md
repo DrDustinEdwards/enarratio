@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Fixed
+
+- Releases: the stage job makes the folder `npm pack` writes into (0.7.0's stage failed at Pack), and Run workflow on `main` stages a version that was tagged but never reached npm, from the tagged commit.
+
 ## [0.7.0] - 2026-11-01
 
 Maps, the tactile export and legends that match their marks ([0028](docs/design/0028-maps.md),
