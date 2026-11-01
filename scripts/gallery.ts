@@ -563,8 +563,8 @@ const astroData = graph(
 );
 
 /**
- * The accessibility statement (devkit-a11y S6): Prelum's, with this site's facts and the open finding of devkit-a11y's
- * run of 2026-11-01.
+ * The accessibility statement (devkit-a11y S6): Prelum's, with this site's facts. devkit-a11y's run of 2026-11-01 found
+ * one limitation, the 404 page's sideways scroll at 320 px, which Capsomer 0.62.0 fixed.
  */
 const STATEMENT = accessibilityStatement({
   siteName: "The Enarratio gallery",
@@ -575,9 +575,6 @@ const STATEMENT = accessibilityStatement({
   date: "2026-11-01",
   capsomer: true,
   links: "marked",
-  limitations: [
-    "At 320 pixels wide, the page for an address that does not exist scrolls sideways a little, because its introduction is wider than the screen.",
-  ],
 });
 const STATEMENT_PAGE = "accessibility.html";
 

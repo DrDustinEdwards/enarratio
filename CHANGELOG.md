@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Gallery
+
+- The gallery takes Capsomer v0.62.0: the 404 page and the Astro page no longer scroll sideways at 320 px (a written-out address wraps), so the accessibility statement drops its one limitation. The Capsomer theme page loads `capsomer/enarratio.css`, as the network's sites do, so a figure's source and Download links are in the link color there instead of Enarratio's own muted gray (the Default and Example pages keep Enarratio's look).
+
 ### Fixed
 
 - Releases: the stage job makes the folder `npm pack` writes into (0.7.0's stage failed at Pack), and Run workflow on `main` stages a version that was tagged but never reached npm, from the tagged commit.
