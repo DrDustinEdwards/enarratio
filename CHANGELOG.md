@@ -9,6 +9,7 @@ change the public API; every such change is listed here.
 
 ### Fixed
 
+- Gallery: on a phone every chart shows its narrow drawing as soon as the page loads, not when its turn to be enhanced comes, so a reader scrolling fast never meets a 480 px drawing in a 231 px frame (C12) and the page does not shift as charts swap. The Astro page's sample chart gets a narrow drawing too.
 - Releases: the stage job makes the folder `npm pack` writes into (0.7.0's stage failed at Pack), and Run workflow on `main` stages a version that was tagged but never reached npm, from the tagged commit.
 
 ## [0.7.0] - 2026-11-01

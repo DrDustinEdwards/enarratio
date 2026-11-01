@@ -8,7 +8,7 @@
 // nears the viewport, nearest first and one to a task. The
 // charts are complete and readable without it, as before; a shared link's filter or range, and
 // the chart a #hash names, are enhanced at once. A chart with a narrow drawing swaps it in when it
-// is enhanced, before it comes into view.
+// is shown at once on a phone, and enhanced in its turn.
 import { enhance as enhanceHeader } from "capsomer/behavior/site-header";
 import { enhance as enhanceTheme } from "capsomer/behavior/theme-switch";
 import { narrowChart, REDRAW_ATTRIBUTE } from "../dist/redraw/narrow.js";
@@ -29,7 +29,35 @@ function start(figure) {
   const host = figure.closest(`[${REDRAW_ATTRIBUTE}]`);
   if (!host) return enhance(figure, OPTIONS);
   const spec = JSON.parse(host.getAttribute(REDRAW_ATTRIBUTE) ?? "{}");
+  // narrowChart takes the drawing it finds as the wide one, so the server's drawing goes back first.
+  const original = swapped.get(host);
+  if (original) host.querySelector(".enarratio-frame")?.replaceWith(original);
   narrowChart(host, spec.narrow ?? "", OPTIONS);
+}
+
+/**
+ * On a phone every chart shows its narrow drawing at once, not when its turn to be enhanced
+ * comes: a chart that waits would scroll sideways, then shift the page as it swaps. All the
+ * widths are read before any drawing changes, so the swap costs one layout.
+ */
+const WIDE_REM = 30;
+/** @type {WeakMap<Element, Element>} each swapped host's server drawing */
+const swapped = new WeakMap();
+const rem = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+const narrowHosts = Array.from(document.querySelectorAll(`[${REDRAW_ATTRIBUTE}]`)).filter(
+  (host) =>
+    (host.querySelector(".enarratio-frame")?.parentElement?.clientWidth ?? Infinity) <
+    WIDE_REM * rem,
+);
+for (const host of narrowHosts) {
+  const frame = host.querySelector(".enarratio-frame");
+  const markup = JSON.parse(host.getAttribute(REDRAW_ATTRIBUTE) ?? "{}").narrow;
+  const next = markup
+    ? new DOMParser().parseFromString(markup, "text/html").body.querySelector(".enarratio-frame")
+    : null;
+  if (!frame || !next) continue;
+  frame.replaceWith(document.adoptNode(next));
+  swapped.set(host, frame);
 }
 
 const waiting = new Set(

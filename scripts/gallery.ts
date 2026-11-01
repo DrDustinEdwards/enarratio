@@ -519,23 +519,28 @@ Web,Closed,17
 \`\`\``;
 
 /** The chart MARKDOWN_SAMPLE draws: the same options, drawn here by Enarratio itself. */
-const sampleChart = barChart({
-  id: "tickets-by-team",
-  data: [
-    { team: "Support", status: "Open", tickets: 14 },
-    { team: "Support", status: "Closed", tickets: 22 },
-    { team: "Platform", status: "Open", tickets: 5 },
-    { team: "Platform", status: "Closed", tickets: 31 },
-    { team: "Web", status: "Open", tickets: 8 },
-    { team: "Web", status: "Closed", tickets: 17 },
-  ],
-  x: "team",
-  y: "tickets",
-  series: "status",
-  layout: "grouped",
-  title: "Tickets by team",
-  alt: "Support has the most open tickets; Platform has closed the most.",
-});
+const drawSample = (width?: number): string =>
+  barChart({
+    ...(width ? { width } : {}),
+    id: "tickets-by-team",
+    data: [
+      { team: "Support", status: "Open", tickets: 14 },
+      { team: "Support", status: "Closed", tickets: 22 },
+      { team: "Platform", status: "Open", tickets: 5 },
+      { team: "Platform", status: "Closed", tickets: 31 },
+      { team: "Web", status: "Open", tickets: 8 },
+      { team: "Web", status: "Closed", tickets: 17 },
+    ],
+    x: "team",
+    y: "tickets",
+    series: "status",
+    layout: "grouped",
+    title: "Tickets by team",
+    alt: "Support has the most open tickets; Platform has closed the most.",
+  });
+const sampleChart = drawSample();
+/** Its drawing for a phone, swapped in under 30rem as the gallery's examples are (C12). */
+const sampleNarrow = frameOf(drawSample(NARROW_WIDTH));
 
 /** Structured data naming the two packages, so search engines can describe them. */
 const astroData = graph(
@@ -646,7 +651,7 @@ ${code(MARKDOWN_SAMPLE)}
 <section class="cap-panel example" id="tickets" aria-labelledby="tickets-title">
 <header class="cap-panel-head"><h3 id="tickets-title">The chart the block draws</h3></header>
 <div class="cap-panel-body example-chart">
-${frameHtml(sampleChart)}
+${frameHtml(sampleChart, sampleNarrow ? { redraw: { narrow: sampleNarrow } } : {})}
 </div>
 </section>
 <p>Register the plugin with Astro's Markdown processor, Sätteri (Astro 7) or remark (Astro 6):</p>
