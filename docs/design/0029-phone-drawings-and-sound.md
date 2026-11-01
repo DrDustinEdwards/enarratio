@@ -9,7 +9,8 @@ Number 0028 is the maps record (A15), on its own branch.
 The area 10 live check at 320 px (C12) found chart text under 12 px on most gallery charts and
 on Foxhound's /product/intelligence: a 480 to 720 px drawing scaled into a 288 px column. Two
 causes. The gallery drew each chart once, wide. And a horizontal bar chart's label margin grew
-with its longest label (up to 220 px), so drawn narrow the margin was wider than the bars.
+with its longest label (up to 220 px), so drawn narrow the margin was wider than the bars;
+and below vertical bars a long category label made its neighbors' labels drop out.
 
 Separately, Dustin decided B54 on 2026-10-31 ("Add Play button"): Chartability's sonification
 heuristic, for readers who follow a trend better by ear than by a table, on every enhanced chart,
@@ -19,7 +20,10 @@ with the code loaded only when pressed so the layer keeps its size budget (D6, 9
 
 1. **Horizontal bar labels take at most two fifths of the drawing** (72 to 220 px). A label longer
    than its room breaks at its last space onto two lines; a word longer than a line is cut with
-   an ellipsis, and the full label stays in the mark's name and the data table. Both renderers.
+   an ellipsis, and the full label stays in the mark's name and the data table. Below vertical
+   bars, every category keeps its label while its slot holds four characters, wrapping the same
+   way, rather than thinning to every other label: a reader should not need the table to learn
+   what a bar is. Narrower slots (many categories) still thin. Both renderers.
 2. **`enarratio/redraw/narrow`** is the narrow half of `enarratio/redraw` on its own:
    `narrowChart(host, narrow, options)` swaps in a narrow server drawing under 30rem and enhances
    it, without the light renderers (about 28 kB of the gallery's script instead of 90 kB).

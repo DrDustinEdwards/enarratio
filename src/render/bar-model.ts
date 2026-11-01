@@ -405,8 +405,13 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   // keep every one.
   thinTicks(xNames, options.maxXTicks);
   const across = options.maxXTicks === undefined ? width - 80 : Number.POSITIVE_INFINITY;
+  // Below vertical bars, every category keeps its label while its slot holds four characters:
+  // a long one wraps onto a second line and is cut there, rather than a neighbor going unnamed
+  // ("Vega-Lite configuration" between two others in a 273 px column). Narrower slots thin.
+  const slotRoom = Math.floor(((width - 80) / Math.max(1, xNames.length) - 8) / 7);
+  const named = !horizontal && !time && options.maxXTicks === undefined && slotRoom >= 4;
   const fitted =
-    horizontal && options.maxXTicks === undefined
+    (horizontal && options.maxXTicks === undefined) || named
       ? undefined
       : fitTicks(xNames, (n) => n, width, across, options.maxXTicks);
   const thinned = fitted && fitted.length < xNames.length ? fitted : undefined;
@@ -418,11 +423,17 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   const labelMargin = Math.min(220, Math.max(72, Math.round(width * 0.4)));
   const room = horizontal
     ? Math.floor((labelMargin - 16) / 7)
-    : Math.max(4, Math.floor((width - 80) / (thinned?.length ?? xNames.length) / 7));
+    : named
+      ? slotRoom
+      : Math.max(4, Math.floor((width - 80) / (thinned?.length ?? xNames.length) / 7));
   const cut = (text: string): string =>
     text.length <= room ? text : `${text.slice(0, room - 1).trimEnd()}…`;
   const tickLabel = (name: string): string =>
-    time ? name : horizontal && labelMargin < 220 ? wrapLabel(name, room, cut) : cut(name);
+    time
+      ? name
+      : (horizontal && labelMargin < 220) || named
+        ? wrapLabel(name, room, cut)
+        : cut(name);
   const labelWidth = horizontal
     ? Math.max(
         ...xNames.map((n) =>

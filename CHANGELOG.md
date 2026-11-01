@@ -24,6 +24,9 @@ Phone drawings, wrapped bar labels and Play as sound ([0029](docs/design/0029-ph
 
 - Horizontal bar labels take at most two fifths of the drawing (72 to 220 px) and break onto two lines at a space, so a bar
   chart drawn narrow keeps room for its bars. Both renderers.
+- Below vertical bars, every category keeps its label while its slot holds four characters: a long one breaks onto a second
+  line at a space and is cut there, instead of a neighbor's label being dropped (a three-bar chart in a 273 px column named
+  only two). Narrower slots thin as before. Both renderers.
 
 ### Release
 
