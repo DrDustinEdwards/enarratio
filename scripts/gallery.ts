@@ -14,7 +14,8 @@ import { copyFileSync, cpSync, mkdirSync, readdirSync, readFileSync, writeFileSy
 import { createRequire, registerHooks } from "node:module";
 import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { headHtml, headTags } from "@drdustinedwards/site-helpers/head";
+import { defineHead, headHtml } from "@drdustinedwards/site-helpers/head";
+import { iconLinks, webManifest } from "@drdustinedwards/site-helpers/icons";
 import { llmsDocument } from "@drdustinedwards/site-helpers/llms";
 import { aiTxt, robotsDocument } from "@drdustinedwards/site-helpers/robots";
 import { graph, thing, website } from "@drdustinedwards/site-helpers/schema";
@@ -163,6 +164,7 @@ const COMPONENTS = [
   "theme-switch",
   "site-header",
   "page-head",
+  "breadcrumb",
   "panel",
   "disclosure",
   "chart-frame",
@@ -238,7 +240,7 @@ function siteHeader(links: readonly Link[]): string {
   return letterheadHtml({
     name: "Enarratio",
     home: "./",
-    mark: '<img src="/favicon.svg" alt="" width="32" height="32">',
+    mark: '<img src="/icon.svg" alt="" width="32" height="32">',
     links: links.map((l) => [l.href, l.label] as [string, string]),
     ...(current ? { current } : {}),
   });
@@ -264,6 +266,49 @@ const CARD = {
 /** The author, as the structured data names him. */
 const AUTHOR = { "@type": "Person", name: "Dustin Edwards", url: "https://dustinedwards.info" };
 
+/** Prelum's head builder with the gallery's facts: every indexed page gets its WebPage and breadcrumb graph from it. */
+const siteHead = defineHead({ origin: SITE, siteName: "Enarratio", image: CARD, locale: "en_US" });
+
+/** The family icon set's links (prelum-icons drew the files in site/icons from site/favicon.svg). */
+const ICON_LINKS = iconLinks()
+  .map(
+    (link) =>
+      `<link ${Object.entries(link)
+        .map(([name, value]) => `${name}="${value}"`)
+        .join(" ")}>`,
+  )
+  .join("\n");
+
+/** The short name each page below the home page has in its breadcrumb trail, by address. */
+const CRUMBS: Readonly<Record<string, string>> = {
+  "/example": "Example theme",
+  "/capsomer": "Capsomer theme",
+  "/astro": "Astro and EmDash",
+};
+
+/** The trail from the home page to a page, for its BreadcrumbList and the trail it shows; none on the home page. */
+function trail(address: string): { name: string; path: string }[] | undefined {
+  const name = CRUMBS[address];
+  return name
+    ? [
+        { name: "Enarratio", path: "/" },
+        { name, path: address },
+      ]
+    : undefined;
+}
+
+/** The trail a reader sees (Capsomer's breadcrumb), the same levels as the page's BreadcrumbList. */
+function breadcrumbHtml(address: string): string {
+  const crumbs = trail(address);
+  if (!crumbs) return "";
+  const items = crumbs.map((c, i) =>
+    i < crumbs.length - 1
+      ? `<li class="cap-breadcrumb-item"><a class="cap-breadcrumb-link" href="${c.path}">${escapeText(c.name)}</a></li>`
+      : `<li class="cap-breadcrumb-item"><span class="cap-breadcrumb-page" aria-current="page">${escapeText(c.name)}</span></li>`,
+  );
+  return `<nav class="cap-breadcrumb" aria-label="Breadcrumb"><ol class="cap-breadcrumb-list">${items.join("")}</ol></nav>\n`;
+}
+
 /**
  * The head every page shares: Prelum's tags (title, description, canonical, Open Graph and Twitter
  * with the card, and any JSON-LD), Capsomer, then the page's own chart theme, then the remembered
@@ -277,14 +322,14 @@ function head(
   address?: string,
   data: readonly Record<string, unknown>[] = [],
 ): string {
+  const crumbs = address ? trail(address) : undefined;
   const tags = address
-    ? headTags({
-        origin: SITE,
+    ? siteHead({
         path: address,
         title,
+        fullTitle: true,
         description,
-        image: CARD,
-        siteName: "Enarratio",
+        ...(crumbs ? { breadcrumbs: crumbs } : {}),
       })
     : [
         { title },
@@ -294,7 +339,7 @@ function head(
   return `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 ${headHtml([...tags, ...data.map((node) => ({ "script:ld+json": node }))])}
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+${ICON_LINKS}
 <link rel="stylesheet" href="/capsomer.css">
 ${themeCss ? `<link rel="stylesheet" href="${themeCss}">\n` : ""}<script src="/theme.js" integrity="${scripts["theme.js"]}" crossorigin="anonymous"></script>`;
 }
@@ -317,6 +362,14 @@ const libraryData = graph([
     author: AUTHOR,
   }),
 ]);
+
+/**
+ * When the pages last changed, for the sitemap's lastmod: the date of the latest release in CHANGELOG.md, since every page
+ * draws its charts with the released library.
+ */
+const RELEASED = /^## \[[\d.]+\] - (\d{4}-\d{2}-\d{2})/m.exec(
+  readFileSync(join(root, "CHANGELOG.md"), "utf8"),
+)?.[1];
 
 /** The library's version, shown on every page. */
 const VERSION = (
@@ -361,12 +414,12 @@ function page(
   return `<!doctype html>
 <html lang="en" data-family="${FAMILY}">
 <head>
-${head(`Enarratio gallery: ${theme.name} theme`, `Every Enarratio chart, server-rendered, in the ${theme.name} theme.`, css, pathOf(file), [libraryData])}
+${head(`Enarratio gallery: ${theme.name} theme`, `Every Enarratio chart in the ${theme.name} theme, drawn on the server with a written description and a data table, beside its source.`, css, pathOf(file), [libraryData])}
 </head>
 <body>
 ${siteHeader(links)}
 <main class="cap-page gallery" id="main" tabindex="-1">
-<header class="gallery-head">
+${breadcrumbHtml(pathOf(file))}<header class="gallery-head">
 <h1>Enarratio gallery</h1>
 <p class="gallery-intro">Every Enarratio chart in the ${escapeText(theme.name)} theme. Each was drawn on the server and reads without scripts; the enhancement layer adds hover details, keyboard navigation, filters and brushing.</p>
 <dl class="cap-form-boxes" data-variant="readings">
@@ -508,7 +561,7 @@ ${head(`${ASTRO_TITLE}: Enarratio`, ASTRO_DESCRIPTION, "index.css", pathOf(ASTRO
 <body>
 ${siteHeader(links(ASTRO_PAGE))}
 <main class="cap-page gallery guide" id="main" tabindex="-1">
-<header class="gallery-head">
+${breadcrumbHtml(pathOf(ASTRO_PAGE))}<header class="gallery-head">
 <h1>${ASTRO_TITLE}</h1>
 <p class="gallery-intro">Enarratio's charts in Astro pages, in Markdown, and as a block in the EmDash editor.</p>
 </header>
@@ -651,7 +704,7 @@ writeFileSync(
 writeFileSync(join(outDir, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY);
 writeFileSync(
   join(outDir, "sitemap.xml"),
-  sitemapDocument(addresses.map((a) => ({ loc: `${SITE}${a}` }))),
+  sitemapDocument(addresses.map((a) => ({ loc: `${SITE}${a}`, lastmod: RELEASED ?? null }))),
 );
 writeFileSync(
   join(outDir, "robots.txt"),
@@ -746,11 +799,24 @@ ${galleryScript("/gallery.js")}
 </html>
 `,
 );
-// Served as files beside the pages: the gallery's scripts (Capsomer's behavior bundled in) and the
-// icon. The security and caching headers are site-runtime-headers', from the gallery's registry
+// Served as files beside the pages: the gallery's scripts (Capsomer's behavior bundled in), the
+// icon set and its manifest. The security and caching headers are site-runtime-headers', from the gallery's registry
 // entry (record 0018), which `npm run gallery` writes into _headers after this.
 for (const [name, code] of Object.entries(scriptFiles)) writeFileSync(join(outDir, name), code);
 copyFileSync(join(root, "site", "favicon.svg"), join(outDir, "favicon.svg"));
+cpSync(join(root, "site", "icons"), outDir, { recursive: true });
+writeFileSync(
+  join(outDir, "site.webmanifest"),
+  JSON.stringify(
+    webManifest({
+      name: "Enarratio",
+      description: "Accessible, server-rendered charts and scientific figures for the web.",
+      themeColor: "#0f6cbd",
+      backgroundColor: "#0f6cbd",
+      lang: "en",
+    }),
+  ),
+);
 copyFileSync(join(root, "site", "og-card.png"), join(outDir, "og-card.png"));
 // Each page's preload header names files that exist and every stylesheet the page links, and
 // every page has one.

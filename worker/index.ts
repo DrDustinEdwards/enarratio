@@ -9,9 +9,11 @@
  * out. `npm run gallery` writes `_headers` from the same entry (site-runtime-headers). A path with
  * no file gets the 404 page, private and never stored, and so does a page asked for with a
  * cookie. wrangler.jsonc runs it first for every path but /fonts/*. Gallery tooling only: the npm
- * package never imports this or site-runtime.
+ * package never imports this or site-runtime. Prelum's serveMarkdownCopies wraps it: each page's
+ * Markdown copy.
  */
 
+import { serveMarkdownCopies } from "@drdustinedwards/site-helpers/llms";
 import { TDM_RESERVATION_HEADERS } from "@drdustinedwards/site-helpers/robots";
 import { preloads, withPreloadHeader } from "@dustinedwards/site-runtime/preload";
 import { enarratio } from "@dustinedwards/site-runtime/sites";
@@ -41,12 +43,13 @@ export const PAGE_PRELOADS: Readonly<Record<string, ReturnType<typeof preloads>>
 
 const site = staticSite({ site: enarratio, headers: TDM_RESERVATION_HEADERS });
 
-export default {
-  async fetch(request: Request, env: Parameters<typeof site.fetch>[1]): Promise<Response> {
-    const response = await site.fetch(request, env);
-    const preload = PAGE_PRELOADS[new URL(request.url).pathname];
-    return response.status === 200 && preload
-      ? withPreloadHeader(response, preload.header)
-      : response;
-  },
-};
+async function gallery(request: Request, env: Parameters<typeof site.fetch>[1]): Promise<Response> {
+  const response = await site.fetch(request, env);
+  const preload = PAGE_PRELOADS[new URL(request.url).pathname];
+  return response.status === 200 && preload
+    ? withPreloadHeader(response, preload.header)
+    : response;
+}
+
+/** Every page's Markdown copy (/example.md, or Accept: text/markdown), which `npm run gallery` writes with prelum-markdown. */
+export default { fetch: serveMarkdownCopies(gallery, { origin: enarratio.origin }) };
