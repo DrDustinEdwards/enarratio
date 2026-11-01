@@ -197,7 +197,7 @@ function inlineCss(file: string): string {
   return readFileSync(file, "utf8").replace(
     /@import\s+"([^"]+)"(?:\s+layer\(([\w.-]+)\))?\s*;/g,
     (_, path: string, layer?: string) => {
-      const inner = inlineCss(join(dirname(file), path));
+      const inner = inlineCss(path.startsWith(".") ? join(dirname(file), path) : packageFile(path));
       return layer ? `@layer ${layer} {\n${inner}\n}` : inner;
     },
   );
@@ -739,7 +739,14 @@ const links = (current: string): Link[] => [
   { label: "Code", href: "https://github.com/DrDustinEdwards/enarratio", current: false },
 ];
 for (const [theme, file, css, highContrast] of pages) {
-  writeFileSync(join(outDir, css), stylesheet(theme, { highContrast }));
+  // The Capsomer page loads what the family's sites load, capsomer/enarratio.css (Enarratio's base,
+  // Capsomer's tokens, and a figure's source and Download links in the link system), so it shows
+  // charts exactly as they appear on those sites. The other pages show Enarratio's own themes.
+  const themeCss =
+    theme === capsomerTheme
+      ? inlineCss(packageFile("capsomer/enarratio.css"))
+      : stylesheet(theme, { highContrast });
+  writeFileSync(join(outDir, css), themeCss);
   writeFileSync(join(outDir, file), page(theme, file, css, examples, links(file)));
 }
 writeFileSync(join(outDir, ASTRO_PAGE), astroPage());
