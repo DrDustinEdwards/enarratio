@@ -1466,7 +1466,7 @@ re-applies them.
 
 ### `EnhanceOptions`
 
-`{ tooltips?; filter?; brush?; entrance?; table?; expand?; url?; download?; embed?; strings? }`.
+`{ tooltips?; filter?; brush?; entrance?; table?; expand?; url?; download?; embed?; sound?; strings? }`.
 
 | Option | Default | Does |
 |---|---|---|
@@ -1479,6 +1479,7 @@ re-applies them.
 | `url` | `false` | Keeps the filter and range in the address as `?{id}={field}:{value}` and `?{id}-range={low}..{high}`, so a link reproduces the view. Needs the figure's `id`. A view read from the address fires `enarratio:select` or `enarratio:brush`, so the page can follow it |
 | `download` | `true` | "Download SVG" and "Download PNG" beside the CSV link (or in the control bar when the figure has none): the drawing as shown, its computed colors and fonts written onto each element and the background painted in; the PNG is that SVG on a canvas at twice its size. A PNG uses the fonts the browser has for a standalone image, so a web font may fall back |
 | `embed` | `true` | "Copy embed" copies a link to the chart, `<a href="{page}#{id}">{title}</a>`, to paste into another page. Needs the figure's `id` and the Clipboard API; without either there is no button |
+| `sound` | `true` | "Play as sound" plays each series in turn, one note per mark from A3 (lowest) to A5 (highest), panned with the mark's place on the x axis; the live region names each series and the tooltip follows the note. "Stop sound" or Escape stops it. Its code (`sound.js`, 0.9 kB) loads on the first press. Needs Web Audio and two or more marks ([record 0029](design/0029-phone-drawings-and-sound.md)) |
 | `strings` | English | Translations of any of the [`EnhanceStrings`](#enhancestrings) |
 
 ### `ResolvedOptions`
@@ -1617,3 +1618,11 @@ way.
 ### `RedrawnChart`
 
 `{ host, destroy() }`: `destroy` stops following the width and removes the enhancement.
+
+### `narrowChart`
+
+`narrowChart(host, narrow, options?)`, from `enarratio/redraw/narrow` (and re-exported by
+`enarratio/redraw`): starts one chart whose server gave a narrow drawing, the `.enarratio-frame`
+markup of the chart drawn about as wide as a phone's column. The frame shows it under 30rem and the
+original above, and each drawing is enhanced. It brings none of the light renderers, so a page
+whose charts all carry a narrow drawing (the gallery) loads only the enhancement layer and this.

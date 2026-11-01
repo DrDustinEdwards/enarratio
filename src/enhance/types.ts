@@ -74,6 +74,10 @@ export interface EnhanceStrings {
   readonly embedCopied: string;
   /** Announced when an image or the snippet could not be made. */
   readonly exportFailed: string;
+  /** The sound button (B54), and what it says as each series starts. */
+  readonly play: string;
+  readonly stop: string;
+  readonly playing: string;
 }
 
 /** Options for {@link enhance}. Every feature is on unless turned off, except `expand` and `url`. */
@@ -105,6 +109,11 @@ export interface EnhanceOptions {
    * as HTML to paste elsewhere (C4). Needs the figure's `id`.
    */
   readonly embed?: boolean;
+  /**
+   * Add "Play as sound", which plays each series in turn as notes that rise and fall with the
+   * values (B54). Its code loads only when pressed.
+   */
+  readonly sound?: boolean;
   /** Translations of the strings the layer writes. */
   readonly strings?: Partial<EnhanceStrings>;
 }

@@ -175,6 +175,31 @@ describe("enhance: table, view switch, expand and address", () => {
     await p.close();
   });
 
+  it("plays each series as sound, the tooltip following, and stops on Escape", async () => {
+    const p = await harness.open("index.html", "light");
+    const controls = `${STACKED} .enarratio-controls button`;
+    const labels = (): Promise<string> =>
+      p.$$eval(controls, (els) => els.map((el) => el.textContent).join("|"));
+    await p.$$eval(controls, (els) =>
+      (els.find((el) => el.textContent === "Play as sound") as HTMLElement).click(),
+    );
+    await p.waitForFunction(
+      (sel) => [...document.querySelectorAll(sel)].some((b) => b.textContent === "Stop sound"),
+      {},
+      controls,
+    );
+    // Each series is named as it starts; the first starts a moment after the press.
+    await p.waitForFunction(
+      (sel) => document.querySelector(sel)?.textContent?.trim() === "Playing Publications",
+      {},
+      `${STACKED} figure [aria-live]`,
+    );
+    await p.waitForSelector(".enarratio-tooltip:not([hidden])");
+    await p.keyboard.press("Escape");
+    expect(await labels()).toBe("Show table|Expand|Play as sound");
+    await p.close();
+  });
+
   it("sorts a table chart's one table, with no chart and table switch", async () => {
     const p = await harness.open("index.html", "light");
     const TABLE = '[data-example="table-chart"]';
@@ -504,5 +529,27 @@ describe("enhance: series filters on a year chart, and focus across update()", (
     })()`);
     expect(focused).toEqual(["Year 2012", "0"]);
     await p.close();
+  });
+});
+
+describe("gallery: a chart is enhanced as it nears the viewport", () => {
+  const CHART = "figure.enarratio:not([data-enarratio-static])";
+
+  it("leaves a far chart as the server drew it until it is scrolled near, and enhances at once the chart a #hash names", async () => {
+    const p = await harness.open("index.html", "light", { lazy: true });
+    // The last chart of the page, which is far below the first screen.
+    const id = await p.evaluate(
+      (selector) => [...document.querySelectorAll(selector)].at(-1)?.closest("section")?.id ?? "",
+      CHART,
+    );
+    const last = `#${id} ${CHART}`;
+    expect(await p.$eval(last, (el) => el.hasAttribute("data-enarratio-enhanced"))).toBe(false);
+    await p.$eval(last, (el) => el.scrollIntoView());
+    await p.waitForSelector(`${last}[data-enarratio-enhanced]`);
+    await p.close();
+
+    const linked = await harness.open(`index.html#${id}`, "light", { lazy: true });
+    await linked.waitForSelector(`${last}[data-enarratio-enhanced]`);
+    await linked.close();
   });
 });

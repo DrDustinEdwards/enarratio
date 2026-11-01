@@ -85,12 +85,24 @@ for (const [name, target] of Object.entries(pkg.exports)) {
   }
 }
 
-/** An entry bundled for the browser with all it imports, minified, then gzipped: its bytes. */
+/**
+ * An entry bundled for the browser with all it imports statically, minified, then gzipped: its
+ * bytes, and each chunk it loads only on demand (the enhancement layer's sound) by name.
+ */
 async function bundled(path) {
   const bundle = await rolldown({ input: path, platform: "browser", logLevel: "silent" });
-  const { output } = await bundle.generate({ format: "esm", minify: true });
+  const { output } = await bundle.generate({
+    format: "esm",
+    minify: true,
+    chunkFileNames: "[name].js",
+  });
   await bundle.close();
-  return gzipSync(output.map((chunk) => chunk.code ?? "").join(""), { level: 9 }).length;
+  const size = (chunks) =>
+    gzipSync(chunks.map((chunk) => chunk.code ?? "").join(""), { level: 9 }).length;
+  const lazy = output.filter((c) => c.type === "chunk" && !c.isEntry);
+  return Object.assign(size(output.filter((c) => !lazy.includes(c))), {
+    lazy: lazy.map((c) => [c.fileName, size([c])]),
+  });
 }
 
 const lite = [];
@@ -106,6 +118,12 @@ for (const [name, target] of Object.entries(pkg.exports)) {
 }
 
 const enhanceBytes = await bundled(resolve(root, pkg.exports["./enhance"].default));
+/** The most the sound module (B54), loaded when a reader presses Play, may weigh. */
+const SOUND_LIMIT = 2_000;
+for (const [file, bytes] of enhanceBytes.lazy) {
+  if (bytes > SOUND_LIMIT)
+    failures.push(`./enhance's ${file} is ${bytes} bytes; the limit is ${SOUND_LIMIT}`);
+}
 if (enhanceBytes > ENHANCE_LIMIT) {
   failures.push(
     `./enhance is ${enhanceBytes} bytes bundled, minified and gzipped; the limit is ${ENHANCE_LIMIT}`,
@@ -128,6 +146,11 @@ for (const [label, bytes] of lite) {
 console.log(
   `\nenhancement layer, the same way (limit ${ENHANCE_LIMIT / 1000} kB):\n${"./enhance".padEnd(width)}  ${`${(enhanceBytes / 1000).toFixed(1)} kB`.padStart(7)}`,
 );
+for (const [file, bytes] of enhanceBytes.lazy) {
+  console.log(
+    `  ${file}, loaded on Play (limit ${SOUND_LIMIT / 1000} kB)  ${(bytes / 1000).toFixed(1)} kB`,
+  );
+}
 if (failures.length > 0) {
   for (const failure of failures) console.error(`FAIL: ${failure}`);
   process.exit(1);

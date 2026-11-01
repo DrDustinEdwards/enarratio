@@ -1,6 +1,6 @@
 {
   "name": "enarratio",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Accessible, server-rendered charts and scientific figures for the web",
   "keywords": [
     "charts",
@@ -45,6 +45,10 @@
       "types": "./dist/redraw/index.d.ts",
       "default": "./dist/redraw/index.js"
     },
+    "./redraw/narrow": {
+      "types": "./dist/redraw/narrow.d.ts",
+      "default": "./dist/redraw/narrow.js"
+    },
     "./themes": {
       "types": "./dist/themes/index.d.ts",
       "default": "./dist/themes/index.js"
@@ -86,7 +90,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "next"
+    "tag": "latest"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node scripts/build-css.mjs && node scripts/bundle-enhance.mjs",
@@ -95,7 +99,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "test": "vitest run",
-    "gallery": "node scripts/gallery.ts",
+    "gallery": "node scripts/gallery.ts && site-runtime-headers --site enarratio --out site/dist/_headers --header \"tdm-reservation: 1\"",
     "deploy:gallery": "npm run build && npm run gallery && npx --yes wrangler@4.143.0 deploy",
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "prepare": "npm run build",
@@ -120,16 +124,16 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.3",
-    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.24.0",
-    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.20.18",
-    "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.52.0",
+    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.29.1",
+    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.20.22",
+    "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.62.1",
     "@observablehq/plot": "0.6.17",
     "@types/d3-force": "3.0.10",
     "@types/node": "22.20.5",
     "@types/pngjs": "6.0.5",
     "@vitest/coverage-v8": "4.1.12",
     "axe-core": "4.14.0",
-    "capsomer": "github:DrDustinEdwards/capsomer#v0.55.0",
+    "capsomer": "github:DrDustinEdwards/capsomer#v0.57.0",
     "d3-force": "3.0.0",
     "linkedom": "0.18.14",
     "pixelmatch": "7.2.0",

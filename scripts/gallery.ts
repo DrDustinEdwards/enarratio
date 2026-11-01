@@ -19,7 +19,9 @@ import { llmsDocument } from "@drdustinedwards/site-helpers/llms";
 import { aiTxt, robotsDocument } from "@drdustinedwards/site-helpers/robots";
 import { graph, thing, website } from "@drdustinedwards/site-helpers/schema";
 import { sitemapDocument } from "@drdustinedwards/site-helpers/sitemap";
+import { integrityHash } from "@dustinedwards/site-runtime/csp";
 import { securityTxt } from "@dustinedwards/site-runtime/security-txt";
+import { enarratio } from "@dustinedwards/site-runtime/sites";
 import { familyFooterHtml } from "capsomer/behavior/family-footer";
 import { letterheadHtml } from "capsomer/behavior/site-header";
 import { capsomerMoreTheme, capsomerTheme } from "capsomer/enarratio-theme";
@@ -28,13 +30,41 @@ import { barChart } from "enarratio/lite";
 import { defaultTheme, highContrastTheme } from "enarratio/themes";
 import { rolldown } from "rolldown";
 import { exampleTheme } from "../examples/themes/example.ts";
-import { galleryHeadersFile, HOST, PAGE_PRELOADS } from "./security-headers.ts";
+import { PAGE_PRELOADS } from "../worker/index.ts";
 
-// Capsomer's chart frame imports "enarratio", its peer; here that is this package itself.
-const self = import.meta.resolve("enarratio");
+// Capsomer's chart frame imports "enarratio" and "enarratio/redraw", its peer; here that is this
+// package itself.
+const selfExports = (
+  JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
+    exports: Record<string, string | { default: string }>;
+  }
+).exports;
+const self = (specifier: string): string => {
+  if (specifier !== "enarratio" && !specifier.startsWith("enarratio/")) return specifier;
+  const entry = selfExports[`.${specifier.slice("enarratio".length)}`];
+  const file = typeof entry === "string" ? entry : entry?.default;
+  return file ? new URL(`../${file}`, import.meta.url).href : specifier;
+};
+/**
+ * The width each example is drawn at again for a phone: the frame's on a 320 px screen (the page's
+ * gutter, the panel's padding and a scrollbar leave 231). Under 30rem the gallery swaps it in
+ * (enarratio/redraw's narrow spec), so the drawing fits its frame with 12 px text instead of
+ * scrolling (C12).
+ */
+const NARROW_WIDTH = 228;
 registerHooks({
-  resolve: (specifier, context, next) =>
-    next(specifier === "enarratio" ? self : specifier, context),
+  resolve: (specifier, context, next) => next(self(specifier), context),
+  // An example imported with ?narrow draws its chart at NARROW_WIDTH: the options it passes, with
+  // the width set. Its source, as the gallery shows it, is unchanged.
+  load: (url, context, next) => {
+    const loaded = next(url, context);
+    if (!url.endsWith("?narrow")) return loaded;
+    const source = String(loaded.source).replace(
+      /export default (\w+)\(/,
+      `export default ((draw) => (options) => draw({ ...options, width: ${NARROW_WIDTH} }))($1)(`,
+    );
+    return { ...loaded, source };
+  },
 });
 const { frameHtml } = await import("capsomer/behavior/chart-frame");
 
@@ -50,6 +80,8 @@ interface Example {
   readonly title: string;
   readonly source: string;
   readonly markup: string;
+  /** The chart's drawing at NARROW_WIDTH (its `.enarratio-frame`), when the example is wider. */
+  readonly narrow?: string | undefined;
 }
 
 const escapeText = (s: string): string =>
@@ -124,6 +156,13 @@ async function loadExamples(): Promise<Example[]> {
     const heading = /^\/\/ (.+)$/m.exec(source)?.[1] ?? file;
     const id = basename(file, ".ts");
     const from = /from "(enarratio[^"]*)"/.exec(source)?.[1] ?? "enarratio";
+    const drawnWidth = Number(/<svg[^>]* width="(\d+(?:\.\d+)?)"/.exec(module.default)?.[1] ?? 0);
+    const narrow =
+      /export default \w+\(/.test(source) && drawnWidth > NARROW_WIDTH
+        ? frameOf(
+            ((await import(`${pathToFileURL(path).href}?narrow`)) as { default: string }).default,
+          )
+        : undefined;
     examples.push({
       id,
       name: NAMES[id] ?? id,
@@ -131,9 +170,17 @@ async function loadExamples(): Promise<Example[]> {
       title: heading,
       source,
       markup: module.default,
+      narrow,
     });
   }
   return examples;
+}
+
+/** A chart's drawing, the `.enarratio-frame` that enarratio/redraw swaps. */
+function frameOf(markup: string): string | undefined {
+  const start = markup.indexOf('<div class="enarratio-frame');
+  const end = markup.indexOf("</svg></div>", start);
+  return start === -1 || end === -1 ? undefined : markup.slice(start, end + "</svg></div>".length);
 }
 
 const packageFile = createRequire(import.meta.url).resolve;
@@ -246,9 +293,9 @@ function siteHeader(links: readonly Link[]): string {
 }
 
 /** The site's address, for canonical links, the sitemap and llms.txt. */
-const SITE = `https://${HOST}`;
+const SITE = enarratio.origin;
 
-/** The IndexNow key, served as /<key>.txt; .github/workflows/gallery.yml reads it here to ping IndexNow. Public by design. */
+/** The IndexNow key, served as /<key>.txt; .github/workflows/ci.yml's indexnow job reads it here to ping IndexNow. Public by design. */
 const INDEXNOW_KEY = "af8c0a9cc5d66f499272f9cd7b95b024";
 
 /** When security.txt lapses (RFC 9116 asks for under a year); renew it before then. */
@@ -297,7 +344,7 @@ function head(
 ${headHtml([...tags, ...data.map((node) => ({ "script:ld+json": node }))])}
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/capsomer.css">
-${themeCss ? `<link rel="stylesheet" href="${themeCss}">\n` : ""}<script src="/theme.js"></script>`;
+${themeCss ? `<link rel="stylesheet" href="${themeCss}">\n` : ""}<script src="/theme.js" integrity="${scripts["theme.js"]}" crossorigin="anonymous"></script>`;
 }
 
 /** The library itself, on every gallery page: what it is, where its code is, who wrote it. */
@@ -394,7 +441,7 @@ ${examples
     ) => `<section class="cap-panel example" id="${e.id}" data-example="${e.id}" aria-labelledby="${e.id}-title">
 <header class="cap-panel-head"><h2 id="${e.id}-title"><span class="cap-part-no">${i + 1}</span>${escapeText(e.name)}</h2><p>${escapeText(e.title)}</p></header>
 <div class="cap-panel-body example-chart">
-${frameHtml(e.markup)}
+${frameHtml(e.markup, e.narrow ? { redraw: { narrow: e.narrow } } : {})}
 <p class="events" aria-live="polite"></p>
 </div>
 <details class="cap-disclosure example-source" data-variant="accordion"><summary>Source: examples/${e.id}.ts</summary><div class="cap-disclosure-body"><pre tabindex="0"><code>${escapeText(e.source)}</code></pre></div></details>
@@ -405,7 +452,7 @@ ${frameHtml(e.markup)}
 </div>
 </main>
 ${siteFooter()}
-<script type="module" src="gallery.js"></script>
+${galleryScript("gallery.js")}
 </body>
 </html>
 `;
@@ -417,6 +464,14 @@ async function bundle(file: string, format: "esm" | "iife"): Promise<string> {
     input: join(root, "site", file),
     platform: "browser",
     external: ["./enhance.js"],
+    // enarratio/redraw imports the enhancement layer, which the page loads as enhance.js.
+    plugins: [
+      {
+        name: "enhance-as-file",
+        resolveId: (id: string) =>
+          /(?:^|\/)enhance\/index\.js$/.test(id) ? { id: "./enhance.js", external: true } : null,
+      },
+    ],
     logLevel: "silent",
   });
   const { output } = await built.generate({ format, minify: true });
@@ -571,10 +626,38 @@ export default defineConfig({
 <p>Charts use Enarratio's default theme, in light and dark, unless a site picks <code>styles: "base"</code> (layout only, colors from the site's own design tokens) or <code>"none"</code>. The <a href="./">gallery</a> shows every chart Enarratio draws.</p>
 </main>
 ${siteFooter()}
-<script type="module" src="gallery.js"></script>
+${galleryScript("gallery.js")}
 </body>
 </html>
 `;
+}
+
+/**
+ * The scripts, bundled before any page is written so each tag carries its file's sha384
+ * (site-runtime integrityHash) and crossorigin, which Integrity-Policy needs of every script, a
+ * classic one included. gallery.js imports enhance.js, which a modulepreload with its own
+ * integrity fetches, so the import finds it already checked. enhance.js imports sound.js when a
+ * reader presses Play; an import() carries no integrity, so sound.js (under 1 kB) is preloaded
+ * the same way, fetched but not run until then.
+ */
+const scriptFiles = {
+  "gallery.js": await bundle("gallery.js", "esm"),
+  "theme.js": await bundle("theme.js", "iife"),
+  "enhance.js": readFileSync(join(root, "dist", "enhance", "index.js"), "utf8"),
+  "sound.js": readFileSync(join(root, "dist", "enhance", "sound.js"), "utf8"),
+};
+const scripts = Object.fromEntries(
+  await Promise.all(
+    Object.entries(scriptFiles).map(async ([name, code]) => [name, await integrityHash(code)]),
+  ),
+) as Record<keyof typeof scriptFiles, string>;
+
+/** The enhancement layer's preload and gallery.js, at `src` (relative on the gallery pages). */
+function galleryScript(src: string): string {
+  const at = (file: string): string => new URL(file, new URL(src, `${SITE}/`)).pathname;
+  return `<link rel="modulepreload" href="${at("enhance.js")}" integrity="${scripts["enhance.js"]}" crossorigin="anonymous">
+<link rel="modulepreload" href="${at("sound.js")}" integrity="${scripts["sound.js"]}" crossorigin="anonymous">
+<script type="module" src="${src}" integrity="${scripts["gallery.js"]}" crossorigin="anonymous"></script>`;
 }
 
 const examples = await loadExamples();
@@ -649,7 +732,7 @@ writeFileSync(
       "Accessible, server-rendered charts and scientific figures for the web. An open-source (MIT) JavaScript library by Dustin Edwards: charts are drawn on the server into the HTML as SVG, with a written description and a data table, and work without JavaScript.",
     intro: [
       [
-        "- Install: `npm install enarratio@next`. Code and documentation: https://github.com/DrDustinEdwards/enarratio",
+        "- Install: `npm install enarratio`. Code and documentation: https://github.com/DrDustinEdwards/enarratio",
         "- Charts: bar, line, area, scatter, heatmap, network, titer plots, genome tracks, sparklines, progress rings, uptime and heat strips, timelines.",
         "- Runs on Node.js and Cloudflare Workers; `enarratio/lite` draws bar, line and area charts in the browser with no dependencies.",
       ].join("\n"),
@@ -718,30 +801,36 @@ ${siteHeader(links(""))}
 <p class="gallery-intro">There is no page at this address. The gallery is at <a href="/">enarratio.dustinedwards.info</a>, and the code at <a href="https://github.com/DrDustinEdwards/enarratio">github.com/DrDustinEdwards/enarratio</a>.</p></header>
 </main>
 ${siteFooter()}
-<script type="module" src="/gallery.js"></script>
+${galleryScript("/gallery.js")}
 </body>
 </html>
 `,
 );
-copyFileSync(join(root, "dist", "enhance", "index.js"), join(outDir, "enhance.js"));
 // Served as files beside the pages: the gallery's scripts (Capsomer's behavior bundled in) and the
-// icon. The security and caching headers are written by scripts/security-headers.ts from the
-// shared set (record 0018).
-writeFileSync(join(outDir, "gallery.js"), await bundle("gallery.js", "esm"));
-writeFileSync(join(outDir, "theme.js"), await bundle("theme.js", "iife"));
-writeFileSync(join(outDir, "_headers"), galleryHeadersFile());
+// icon. The security and caching headers are site-runtime-headers', from the gallery's registry
+// entry (record 0018), which `npm run gallery` writes into _headers after this.
+for (const [name, code] of Object.entries(scriptFiles)) writeFileSync(join(outDir, name), code);
 copyFileSync(join(root, "site", "favicon.svg"), join(outDir, "favicon.svg"));
 copyFileSync(join(root, "site", "og-card.png"), join(outDir, "og-card.png"));
-// The preload header names files that exist, and every stylesheet the home page links.
-const preloaded = PAGE_PRELOADS.links.map((link) => link.href);
-for (const href of preloaded) readFileSync(join(outDir, href));
-const homeStyles = [
-  ...readFileSync(join(outDir, "index.html"), "utf8").matchAll(
-    /<link rel="stylesheet" href="([^"]+)"/g,
-  ),
-].map((m) => new URL(m[1] ?? "", `https://${HOST}/`).pathname);
-const unlisted = homeStyles.filter((href) => !preloaded.includes(href));
-if (unlisted.length) throw new Error(`gallery: PAGE_PRELOADS leaves out ${unlisted.join(", ")}`);
+// Each page's preload header names files that exist and every stylesheet the page links, and
+// every page has one.
+const fileOf = (path: string): string => (path === "/" ? "index.html" : `${path.slice(1)}.html`);
+for (const address of addresses) {
+  if (!PAGE_PRELOADS[address])
+    throw new Error(`gallery: PAGE_PRELOADS has no entry for ${address}`);
+}
+for (const [address, { links: preloadLinks }] of Object.entries(PAGE_PRELOADS)) {
+  const preloaded = preloadLinks.map((link) => link.href);
+  for (const href of preloaded) readFileSync(join(outDir, href));
+  const styles = [
+    ...readFileSync(join(outDir, fileOf(address)), "utf8").matchAll(
+      /<link rel="stylesheet" href="([^"]+)"/g,
+    ),
+  ].map((m) => new URL(m[1] ?? "", `${SITE}/`).pathname);
+  const unlisted = styles.filter((href) => !preloaded.includes(href));
+  if (unlisted.length)
+    throw new Error(`gallery: PAGE_PRELOADS for ${address} leaves out ${unlisted.join(", ")}`);
+}
 console.log(
   `gallery: ${examples.length} examples, ${pages.length} themes, the Astro page -> ${outDir}`,
 );

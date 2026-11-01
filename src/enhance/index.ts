@@ -52,6 +52,9 @@ export const ENHANCE_STRINGS: EnhanceStrings = {
   copyEmbed: "Copy embed",
   embedCopied: "Embed code copied",
   exportFailed: "Could not export",
+  play: "Play as sound",
+  stop: "Stop sound",
+  playing: "Playing {series}",
 };
 
 /**
@@ -78,6 +81,7 @@ export function enhance(
     url: options.url ?? false,
     download: options.download ?? true,
     embed: options.embed ?? true,
+    sound: options.sound ?? true,
     strings: { ...ENHANCE_STRINGS, ...options.strings },
   };
   // A primitive's figure (data-enarratio-static) has nothing to interact with.

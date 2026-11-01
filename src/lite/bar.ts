@@ -100,6 +100,8 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
       MARGIN_BOTTOM,
       (horizontal ? model.valueLabel : model.categoryLabel) !== null,
       width,
+      // A category label wrapped onto two lines takes a second line of room, as Plot's does.
+      horizontal ? 1 : labelLines(xNames.map((name) => ({ label: model.tickLabel(name) }))),
     ),
     marginLeft: model.marginLeft,
   };
