@@ -210,9 +210,7 @@ What a chart reports while it renders: `{ chart, code, message }`, where
 `chart` is its `data-enarratio` kind and `code` is one of `alt-missing`,
 `title-missing`, `axis-label-missing` (an axis with no label and no title),
 `too-many-series` (more than 6) or `too-many-points` (more than 1,000), both
-suggesting small multiples or a table (B21), `reading-level` (an `alt`,
-`subtitle` or `caption` of 15 words or more above grade 9, B19) and
-`csv-too-large`. Issues go to `onIssue`, else `console.warn`; with `strict`
+suggesting small multiples or a table (B21), and `csv-too-large`. Issues go to `onIssue`, else `console.warn`; with `strict`
 the first one throws an `Error` naming the chart, which fails a build.
 
 ### `IssueOptions`
@@ -306,8 +304,7 @@ dates this way in the table, hover details and summary; filter events and
 ### `readingGrade`
 
 `readingGrade(text: string): number`. The Flesch-Kincaid grade level of
-English text. Generated summaries stay at 9 or below; charts report author
-text above it (B19).
+English text, a measure a caller can use. No chart checks text against it.
 
 ### `toCsv`
 

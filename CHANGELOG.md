@@ -7,6 +7,14 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-02
+
+No reading-grade rule ([0031](docs/design/0031-no-reading-grade-rule.md)).
+
+### Removed
+
+- The `reading-level` issue: a chart no longer scores its `alt`, `subtitle` or `caption` for reading grade, so `strict: true` no longer fails a build on wording. `ChartIssue["code"]` loses `"reading-level"`. `readingGrade` stays exported as a measure; nothing checks text against it.
+
 ### Gallery
 
 - The gallery takes Capsomer v0.62.0: the 404 page and the Astro page no longer scroll sideways at 320 px (a written-out address wraps), so the accessibility statement drops its one limitation. The Capsomer theme page loads `capsomer/enarratio.css`, as the network's sites do, so a figure's source and Download links are in the link color there instead of Enarratio's own muted gray (the Default and Example pages keep Enarratio's look).

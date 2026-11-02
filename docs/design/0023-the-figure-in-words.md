@@ -2,7 +2,8 @@
 
 Status: accepted, 2026-10-30. Builds on [0002](0002-server-rendering.md) and
 [0015](0015-primitive-companions.md); ends the zero-domain difference noted in
-[0017](0017-light-charts.md).
+[0017](0017-light-charts.md). Its reading-grade check is replaced by
+[0031](0031-no-reading-grade-rule.md).
 
 ## Problem
 

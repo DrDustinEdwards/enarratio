@@ -1,13 +1,12 @@
 /**
- * The generated words and numbers: the summary computed from data, locale formats, CSV escaping
- * and the reading grade the summaries are held to. Tricky logic, tested where it lives.
+ * The generated words and numbers: the summary computed from data, locale formats, CSV escaping.
+ * Tricky logic, tested where it lives.
  */
 import { describe, expect, it } from "vitest";
 import {
   dateFormat,
   heatStrip,
   numberFormat,
-  readingGrade,
   sparkline,
   toCsv,
 } from "../src/index.js";
@@ -56,7 +55,7 @@ describe("summarize", () => {
     );
   });
 
-  it("states the interval drawn, and stays at grade 9 or below", () => {
+  it("states the interval drawn", () => {
     const text = summarize(
       {
         ordered: true,
@@ -74,13 +73,6 @@ describe("summarize", () => {
       ENGLISH,
     );
     expect(text).toContain("The 95% interval for March 2, 2026 is 21 to 42.");
-    expect(readingGrade(text)).toBeLessThanOrEqual(9);
-    expect(readingGrade("The cat sat on the mat.")).toBeLessThan(3);
-    expect(
-      readingGrade(
-        "Notwithstanding considerable methodological heterogeneity, the investigators characterized substantial longitudinal variability.",
-      ),
-    ).toBeGreaterThan(9);
   });
 });
 
