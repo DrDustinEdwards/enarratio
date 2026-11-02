@@ -11,13 +11,7 @@ import { element, escapeHtml } from "../html.js";
 import { requireSize, safeHref } from "./data.js";
 import { type ChartDescription, overview, summarize } from "./describe.js";
 import { DEFAULT_WIDTH, WIDE_WIDTH } from "./size.js";
-import {
-  numberFormat,
-  type StringOverrides,
-  type Strings,
-  stringsFor,
-  toCsv,
-} from "./text.js";
+import { numberFormat, type StringOverrides, type Strings, stringsFor, toCsv } from "./text.js";
 
 /** A color for one series: any CSS color, or a pair for light and dark. */
 export type SeriesColor = string | { readonly light: string; readonly dark: string };
