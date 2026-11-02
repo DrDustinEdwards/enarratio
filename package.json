@@ -127,7 +127,7 @@
     }
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.3",
+    "@biomejs/biome": "2.6.4",
     "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.32.1",
     "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.21.0",
     "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.62.1",
@@ -143,7 +143,7 @@
     "pixelmatch": "7.2.0",
     "pngjs": "7.0.0",
     "puppeteer": "25.16.0",
-    "rolldown": "1.2.15",
+    "rolldown": "1.2.16",
     "typescript": "5.9.3",
     "vitest": "4.1.12"
   }
