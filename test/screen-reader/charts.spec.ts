@@ -1,8 +1,8 @@
 /**
  * B29: what NVDA (Windows, Chrome) and VoiceOver (macOS, WebKit) say for a bar, a line and a map
  * chart in the gallery, scripts on. For each chart the reader moves from its heading into the
- * figure and must hear the drawing's name (its alt) and the overview sentence; Tab into the
- * points must announce the chart's name and the first point "1 of N", and the next key "2 of N";
+ * figure and must hear the drawing's name (its alt) and the overview sentence; from the first
+ * point the next key must announce "2 of N" and the previous key the first point, "1 of N";
  * the "Show data" table must be announced as a table. JAWS, TalkBack and iOS VoiceOver are not
  * covered: no runner has them (docs/design/0032).
  *
@@ -101,21 +101,26 @@ for (const { id, kind } of CHARTS) {
     await expectHeard(screenReader, f.alt, "the drawing's name");
     await expectHeard(screenReader, f.overview, "the overview");
 
-    // Into the points: the chart's name and "1 of N", then "2 of N".
-    await screenReader.clearSpokenPhraseLog();
+    // Into the points, by the reader's own keys (Guidepup logs what follows its commands): from
+    // the first point, the next key must say "2 of N" and the previous key the first point again.
     await section.locator('figure [tabindex="0"][aria-label]').first().focus();
-    await pause(1500);
-    await expectHeard(screenReader, f.first, "the first point");
+    await pause(1000);
     const total = f.first.match(/of (\d+)$/)?.[1];
-    await page.keyboard.press("ArrowRight");
-    await pause(1500);
+    await screenReader.clearSpokenPhraseLog();
+    await screenReader.press("ArrowRight");
+    await pause(1000);
     await expectHeard(screenReader, `2 of ${total}`, "the next point");
+    await screenReader.clearSpokenPhraseLog();
+    await screenReader.press("ArrowLeft");
+    await pause(1000);
+    await expectHeard(screenReader, f.first, "the first point");
 
     // The data table behind "Show data".
     await screenReader.clearSpokenPhraseLog();
     const summary = section.locator("details.enarratio-data summary").first();
     await summary.focus();
-    await page.keyboard.press("Enter");
+    await pause(500);
+    await screenReader.press("Enter");
     await pause(1000);
     await readUntil(screenReader, "table", 6);
     await expectHeard(screenReader, "table", "the data table");
