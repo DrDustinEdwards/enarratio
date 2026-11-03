@@ -17,7 +17,7 @@ change the public API; every such change is listed here.
 
 ### Repository
 
-- site-runtime 0.62.1 to 0.73.0 (the gallery's headers and Worker), which the shared pin check now asks for.
+- site-runtime 0.62.1 to 0.73.0 (the gallery's headers and Worker), which the shared pin check now asks for. The Worker grows from 26.4 to 29.1 KiB (11.7 KiB gzip), so its budget in `.worker-size.json` is reset to about 10% over that, 32 and 13 KiB.
 
 ### Documentation
 
