@@ -129,7 +129,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.6.4",
     "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.32.7",
-    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.21.0",
+    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.21.1",
     "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.73.0",
     "@guidepup/guidepup": "0.40.0",
     "@guidepup/playwright": "0.21.0",
