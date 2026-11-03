@@ -1,0 +1,97 @@
+name: Screen readers
+
+# B29 (docs/design/0032): NVDA with Chrome on Windows and VoiceOver with WebKit on macOS read a
+# bar, a line and a map chart in the built gallery, driven by Guidepup. Every night (so a release is
+# heard within a day: a release made by the Release workflow's token starts no other workflow, and
+# zizmor refuses workflow_run), by hand, and on a pull request that changes the run itself; not on
+# every pull request, since a run takes minutes and a reader's timing can fail it for reasons that
+# are not the change's.
+
+on:
+  schedule:
+    - cron: "23 7 * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - test/screen-reader/**
+      - .github/workflows/screen-readers.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: screen-readers-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gallery:
+    name: Build the gallery
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+      - run: npm run build
+      - run: npm run gallery
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: gallery
+          path: site/dist/
+          if-no-files-found: error
+
+  read:
+    name: ${{ matrix.project }}
+    needs: gallery
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2025
+            project: nvda-chrome
+          - os: macos-15
+            project: voiceover-webkit
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: gallery
+          path: site/dist
+      - run: npm ci --ignore-scripts
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+      # The one install script the run needs: ffmpeg-static's binary, which the setup's
+      # --macos-record uses.
+      - run: npm rebuild ffmpeg-static
+      # The operating system's part, once per runner: on macOS it lets VoiceOver be driven and
+      # records the setup to recordings/ (kept on failure).
+      - run: npx guidepup setup --ci --macos-record
+      # The screen reader assets for the installed @guidepup/guidepup (NVDA's portable build on Windows).
+      - run: npx guidepup install
+      - if: matrix.project == 'voiceover-webkit'
+        run: npx playwright install webkit
+      - run: npx playwright test --config test/screen-reader/playwright.config.ts --project ${{ matrix.project }}
+        env:
+          CI: "true"
+      - if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: screen-reader-${{ matrix.project }}
+          path: |
+            test-results/
+            recordings/
+          if-no-files-found: ignore

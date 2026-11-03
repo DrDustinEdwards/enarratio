@@ -1,6 +1,6 @@
 import { element, escapeHtml } from "../html.js";
 import { DAY, formatInstant, maxOf, minOf, requireSize, toDate } from "../render/data.js";
-import { DEFAULT_WIDTH } from "../render/size.js";
+import { charWidth, DEFAULT_WIDTH, markFontSize, textGrowth } from "../render/size.js";
 import type { Terms } from "../render/text.js";
 import {
   type PrimitiveFigureOptions,
@@ -229,7 +229,6 @@ const LANE_PAD = 10;
 const TOP = 6;
 const AXIS = 26;
 const RIGHT = 16;
-const CHAR_WIDTH = 6.6;
 const MARKER = 6;
 const SPAN_HEIGHT = 8;
 
@@ -336,7 +335,11 @@ function marker(status: TimelineStatus, cx: number, cy: number): string {
 export function timeline(options: TimelineOptions): string {
   const p = prepareTimeline(options);
   const longest = Math.max(maxOf(p.lanes.map((l) => l.length)), 1);
-  const left = Math.round(Math.min(180, Math.max(64, longest * CHAR_WIDTH + 20)));
+  // The text grows as the drawing shrinks toward 30rem, where the list takes its place, so it
+  // never renders under 12 px (B3); the lane labels and the axis make room for it.
+  const growth = textGrowth(p.width);
+  const ch = charWidth(p.width) * 0.94;
+  const left = Math.round(Math.min(180 * growth, Math.max(64, longest * ch + 20)));
   const plotWidth = Math.max(40, p.width - left - RIGHT);
   const xOf = (t: number): number =>
     round(
@@ -364,10 +367,10 @@ export function timeline(options: TimelineOptions): string {
     y += lane.rows * ROW + LANE_PAD;
   }
   const plotBottom = y;
-  const height = plotBottom + AXIS;
+  const height = plotBottom + Math.round(AXIS + 12 * (growth - 1));
   const axis = ticks(p.start, p.end);
 
-  const maxChars = Math.floor((left - 12) / CHAR_WIDTH);
+  const maxChars = Math.floor((left - 12) / ch);
   const parts: string[] = [element("title", {}, escapeHtml(p.alt))];
   // Gridlines first, then lane labels, so marks draw over them.
   for (const t of axis) {
@@ -385,7 +388,7 @@ export function timeline(options: TimelineOptions): string {
         "text",
         {
           x,
-          y: plotBottom + 16,
+          y: round(plotBottom + 4 + 12 * growth),
           "text-anchor": "middle",
           fill: "var(--enarratio-text-muted)",
           class: "enarratio-numeric",
@@ -457,6 +460,7 @@ export function timeline(options: TimelineOptions): string {
       viewBox: `0 0 ${p.width} ${height}`,
       width: p.width,
       height,
+      "font-size": markFontSize(p.width),
       role: "img",
       "aria-label": p.alt,
     },

@@ -7,6 +7,15 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-11-03
+
+### Fixed
+
+- The timeline's text no longer renders under 12 px as its drawing shrinks toward 30rem, where its list takes over
+  (B3). It drew at the mark size whatever its width, so a 640-unit drawing in a 565 px frame showed 10.6 px text
+  (the Portal's /demos/queue). Its SVG now carries the same `font-size` as every other chart, and the lane labels
+  and the time axis make room for the larger text.
+
 ## [0.7.1] - 2026-11-02
 
 No reading-grade rule ([0031](docs/design/0031-no-reading-grade-rule.md)).

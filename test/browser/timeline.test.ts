@@ -57,6 +57,29 @@ describe("timeline fallback", () => {
     await page.close();
   });
 
+  it("never draws its text under 12 px as the drawing shrinks toward 30rem", async () => {
+    const page = await harness.open("index.html", "light", { scripts: false });
+    await page.setViewport({ width: 1280, height: 900 });
+    for (const room of [640, 565, 490]) {
+      const smallest = await page.$eval(
+        "#timeline .enarratio-timeline",
+        (root, room) => {
+          (root as HTMLElement).style.width = `${room}px`;
+          const svg = root.querySelector("svg") as SVGSVGElement;
+          const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
+          return Math.min(
+            ...[...svg.querySelectorAll("text")].map(
+              (t) => Number.parseFloat(getComputedStyle(t).fontSize) * scale,
+            ),
+          );
+        },
+        room,
+      );
+      expect(smallest, `${room}px of room`).toBeGreaterThanOrEqual(11.95);
+    }
+    await page.close();
+  });
+
   it("keeps the list in the accessibility tree beside the drawing", async () => {
     const page = await harness.open("index.html", "light", { scripts: false });
     const hidden = await page.$eval("#timeline .enarratio-timeline-list", (el) => {

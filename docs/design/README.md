@@ -47,6 +47,7 @@ Each record says where a decision came from:
 | [0029](0029-phone-drawings-and-sound.md) | Phone drawings, wrapped bar labels and Play as sound |
 | [0030](0030-tactile-export-and-forced-colors-record.md) | Tactile export, and the forced-colors record |
 | [0031](0031-no-reading-grade-rule.md) | No reading-grade rule |
+| [0032](0032-screen-reader-run.md) | A screen reader run in CI (NVDA, VoiceOver) |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.
