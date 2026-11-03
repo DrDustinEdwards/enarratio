@@ -14,8 +14,8 @@ Charts no longer move the page when the enhancement layer loads (D5, [0033](docs
 ### Fixed
 
 - `enarratio/redraw` draws a chart again at the height the server's drawing showed in that frame, not at the drawing's
-  own height, so a phone no longer sees the chart grow as it is redrawn: a 640 by 220 chart in a 288 px column showed
-  165 px tall, then 215 (dustinedwards.info/cv; a 0.10 layout shift there, 0.094 on Foxhound's dashboard).
+  own height, so a phone no longer sees the chart grow as it is redrawn: on dustinedwards.info/cv at 320 px a chart
+  shown 165 px tall was redrawn 215 px tall (a 0.10 layout shift there, 0.094 on Foxhound's dashboard).
 - A legend entry has its button's padding, border and height before `enhance()` makes it a button, so the legend no
   longer grows (47 to 58 px on a phone) when the layer arrives.
 

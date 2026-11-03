@@ -12,8 +12,8 @@ verifier measured otherwise on 2026-11-03, with a layout-shift observer at 1280 
 page and 0.018 on the Desk. On /cv at 320 px the figure grew from 442 to 585 px after scripts ran:
 
 1. The redraw drew the chart at the frame's width and the spec's own height. The server's drawing
-   had shown at its own shape: a 640 by 220 drawing, kept at 30rem and scrolled, shows 165 px tall;
-   the redraw made it 215.
+   had shown at its own shape (a wide drawing keeps 30rem and scrolls), 165 px tall on /cv; the
+   redraw made it 215.
 2. `enhance()` wrapped each legend entry in a button with padding and a border (47 to 58 px).
 3. It added the control row (Show table, Play as sound) after the drawing, and the downloads after
    the CSV link, which wrapped the source line from one line to three (24 to 73 px).
