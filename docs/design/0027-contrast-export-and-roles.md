@@ -124,7 +124,7 @@ on 2026-10-31 and found, in Enarratio's own drawing:
 
 - **A screen reader run (B29)** needs NVDA, JAWS and VoiceOver on real machines, which the cloud
   sessions that build Enarratio do not have. It stays with Dustin; the modes in 0021 are still
-  reasoned, not observed.
+  reasoned, not observed. (Replaced by [0032](0032-screen-reader-run.md): NVDA and VoiceOver now run in CI.)
 - **Tactile export (B55)**, a swell-paper or embosser file, needs a format choice (braille labels,
   simplified marks, a fixed paper size) and testing with readers who use one. Skipped for now.
 

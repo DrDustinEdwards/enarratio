@@ -1,0 +1,118 @@
+/**
+ * B29: what NVDA (Windows, Chrome) and VoiceOver (macOS, WebKit) say for a bar, a line and a map
+ * chart in the gallery, scripts on. For each chart the reader moves from its heading into the
+ * figure and must hear the drawing's name (its alt) and the overview sentence; Tab into the
+ * points must announce the chart's name and the first point "1 of N", and the next key "2 of N";
+ * the "Show data" table must be announced as a table. JAWS, TalkBack and iOS VoiceOver are not
+ * covered: no runner has them (docs/design/0032).
+ *
+ * Phrases are compared without spaces, case or punctuation, since each reader writes them its
+ * own way ("1 of 6" against "1of6"); the spoken log is printed on failure.
+ */
+import { type ScreenReaderPlaywright, screenReaderTest as test } from "@guidepup/playwright";
+import { expect, type Locator, type Page } from "@playwright/test";
+
+const CHARTS = [
+  { id: "stacked-bar", kind: "bar" },
+  { id: "line", kind: "line" },
+  { id: "dot-map", kind: "map" },
+] as const;
+
+const squash = (text: string): string => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+const pause = (ms: number): Promise<void> => new Promise((done) => setTimeout(done, ms));
+
+async function heard(screenReader: ScreenReaderPlaywright): Promise<string[]> {
+  return (await screenReader.spokenPhraseLog()).map(String);
+}
+
+async function expectHeard(
+  screenReader: ScreenReaderPlaywright,
+  phrase: string,
+  what: string,
+): Promise<void> {
+  const log = await heard(screenReader);
+  expect(
+    log.some((line) => squash(line).includes(squash(phrase))),
+    `${what}: "${phrase}" in\n${log.join("\n")}`,
+  ).toBe(true);
+}
+
+/** Moves the reader on until it has said `phrase`, at most `max` moves. */
+async function readUntil(
+  screenReader: ScreenReaderPlaywright,
+  phrase: string,
+  max: number,
+): Promise<void> {
+  for (let i = 0; i < max; i++) {
+    if ((await heard(screenReader)).some((line) => squash(line).includes(squash(phrase)))) return;
+    await screenReader.next();
+    await pause(300);
+  }
+}
+
+/** The page's facts for one chart, read from the DOM the reader is reading. */
+async function facts(section: Locator) {
+  const figure = section.locator("figure.enarratio").first();
+  const point = figure.locator('[tabindex="0"][aria-label]').first();
+  return {
+    heading: (await section.locator("h2").first().getAttribute("id")) ?? "",
+    alt: ((await figure.locator('svg[role="img"]').first().getAttribute("aria-label")) ?? "").slice(
+      0,
+      40,
+    ),
+    overview: ((await figure.locator(".enarratio-overview").first().textContent()) ?? "").trim(),
+    first: (await point.getAttribute("aria-label")) ?? "",
+  };
+}
+
+async function openGallery(page: Page): Promise<void> {
+  await page.goto("/index.html", { waitUntil: "load" });
+  // The gallery enhances a chart as it nears the viewport: scroll each one in first.
+  for (const { id } of CHARTS) {
+    await page.locator(`#${id}`).scrollIntoViewIfNeeded();
+    await page.locator(`#${id} figure[data-enarratio-enhanced]`).first().waitFor();
+  }
+}
+
+for (const { id, kind } of CHARTS) {
+  test(`a ${kind} chart (#${id}) reads its name, overview, points and table`, async ({
+    page,
+    screenReader,
+  }) => {
+    await openGallery(page);
+    await screenReader.navigateToWebContent();
+    const section = page.locator(`#${id}`);
+    const f = await facts(section);
+    expect(f.first, "the chart has a focusable point").toMatch(/\d+ of \d+$/);
+
+    // From the heading into the figure: the drawing's name and the overview sentence.
+    await page.locator(`#${f.heading}`).evaluate((h) => {
+      h.setAttribute("tabindex", "-1");
+      (h as HTMLElement).focus();
+    });
+    await pause(1000);
+    await screenReader.clearSpokenPhraseLog();
+    await readUntil(screenReader, f.alt, 15);
+    await expectHeard(screenReader, f.alt, "the drawing's name");
+    await expectHeard(screenReader, f.overview, "the overview");
+
+    // Into the points: the chart's name and "1 of N", then "2 of N".
+    await screenReader.clearSpokenPhraseLog();
+    await section.locator('figure [tabindex="0"][aria-label]').first().focus();
+    await pause(1500);
+    await expectHeard(screenReader, f.first, "the first point");
+    const total = f.first.match(/of (\d+)$/)?.[1];
+    await page.keyboard.press("ArrowRight");
+    await pause(1500);
+    await expectHeard(screenReader, `2 of ${total}`, "the next point");
+
+    // The data table behind "Show data".
+    await screenReader.clearSpokenPhraseLog();
+    const summary = section.locator("details.enarratio-data summary").first();
+    await summary.focus();
+    await page.keyboard.press("Enter");
+    await pause(1000);
+    await readUntil(screenReader, "table", 6);
+    await expectHeard(screenReader, "table", "the data table");
+  });
+}
