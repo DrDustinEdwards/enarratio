@@ -21,7 +21,8 @@ none. A chart could pass every test and still read badly, or not at all, in NVDA
   drawing's name (its `alt`) and the overview sentence on its way from the heading into the figure;
   focusing the points must announce the first point with "1 of N" and the next key "2 of N"; and
   "Show data" must open a table the reader announces as one.
-- After each release, every night, by hand, and on a pull request that changes the run itself. Not
+- Every night (so a release is heard within a day), by hand, and on a pull request that changes the
+  run itself. Not
   on every pull request: a screen reader run takes minutes, and a timing failure there would block
   unrelated work. A red nightly run is the signal.
 

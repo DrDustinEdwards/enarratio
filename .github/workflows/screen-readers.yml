@@ -1,14 +1,13 @@
 name: Screen readers
 
 # B29 (docs/design/0032): NVDA with Chrome on Windows and VoiceOver with WebKit on macOS read a
-# bar, a line and a map chart in the built gallery, driven by Guidepup. After each release, every
-# night, by hand, and on a pull request that changes the run itself; not on every pull request,
-# since a run takes minutes and a reader's timing can fail it for reasons that are not the change's.
+# bar, a line and a map chart in the built gallery, driven by Guidepup. Every night (so a release is
+# heard within a day: a release made by the Release workflow's token starts no other workflow, and
+# zizmor refuses workflow_run), by hand, and on a pull request that changes the run itself; not on
+# every pull request, since a run takes minutes and a reader's timing can fail it for reasons that
+# are not the change's.
 
 on:
-  workflow_run:
-    workflows: [Release]
-    types: [completed]
   schedule:
     - cron: "23 7 * * *"
   workflow_dispatch:
@@ -27,7 +26,6 @@ concurrency:
 jobs:
   gallery:
     name: Build the gallery
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
