@@ -31,6 +31,8 @@ export function exportControls(
   announce: (message: string) => void,
 ): () => void {
   const csv = figure.querySelector<HTMLAnchorElement>(".enarratio-csv");
+  // The server's inert copies of these buttons (figure.ts), replaced by the working ones.
+  csv?.parentElement?.querySelector(":scope > [data-enarratio-pending]")?.remove();
   const base = (
     csv?.getAttribute("download") ??
     figure.getAttribute("data-enarratio") ??

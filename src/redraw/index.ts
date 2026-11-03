@@ -20,6 +20,7 @@ import {
   narrowChart,
   REDRAW_ATTRIBUTE,
   type RedrawnChart,
+  WIDE_REM,
 } from "./narrow.js";
 
 export { narrowChart, REDRAW_ATTRIBUTE, type RedrawnChart };
@@ -88,6 +89,21 @@ export function redrawChart(
   return followWidth(host, (width, original) => drawing(spec, width, original), options);
 }
 
+/**
+ * The height the server's drawing shows at in a frame `width` wide: its own shape, at the frame's
+ * width, or at 30rem for a wide drawing that scrolls under that (the stylesheet's min-width).
+ * The redraw draws at this height, so the page does not shift when it swaps in (D5, record 0033).
+ */
+function shownHeight(original: string, width: number): number | undefined {
+  const box = /<svg\b[^>]*?\sviewBox="[\d.]+ [\d.]+ ([\d.]+) ([\d.]+)"/.exec(original);
+  const w = Number(box?.[1]);
+  const h = Number(box?.[2]);
+  if (!(w > 0 && h > 0)) return undefined;
+  const rem = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const shown = original.includes("enarratio-frame-wide") ? Math.max(width, WIDE_REM * rem) : width;
+  return Math.round(((h * Math.min(shown, w)) / w) * 100) / 100;
+}
+
 /** The frame markup for a width, and a key that is the same when the drawing would be. */
 function drawing(
   spec: Extract<RedrawSpec, { chart: string }>,
@@ -100,9 +116,16 @@ function drawing(
   if (!draw || width >= full || width < MIN_WIDTH) return kept;
   const labels =
     spec.options["directLabels"] && width < LABELS_MIN_WIDTH ? { directLabels: false } : {};
+  const height = shownHeight(original, width);
   let html: string;
   try {
-    html = draw({ ...spec.options, ...labels, width, onIssue: () => {} });
+    html = draw({
+      ...spec.options,
+      ...labels,
+      width,
+      ...(height === undefined ? {} : { height }),
+      onIssue: () => {},
+    });
   } catch {
     return kept;
   }

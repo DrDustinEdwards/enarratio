@@ -76,7 +76,9 @@ describe("barChart", () => {
       "Publications rose from 1 (2022) to 2 (2024). Talks fell from 1 (2022) to 0 (2024). Grants rose from 0 (2022) to 1 (2024). The highest value is 2 (Publications, 2024). The lowest is 0 (Talks, 2023).",
     );
     expect(text("enarratio-note")).toBe("Notes: A grant counts once.");
-    expect(text("enarratio-source")).toBe("Source: CV · By Sample Lab · Download CSV");
+    expect(text("enarratio-source")).toBe(
+      "Source: CV · By Sample Lab · Download CSV · Download SVG · Download PNG · Download tactile SVG",
+    );
     expect(fig.querySelector(".enarratio-source a")?.getAttribute("href")).toBe(
       "https://example.com/cv",
     );

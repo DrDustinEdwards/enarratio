@@ -350,8 +350,17 @@ export class Chart implements EnhancedChart {
         exportControls(this.figure, svg, this.options, s, bar, (m) => this.announce(m)),
       );
     }
-    if (bar.childElementCount === 0) return;
-    (this.hint ?? after).after(bar);
+    // The server wrote the default controls ahead of the layer, inert (figure.ts); these take
+    // their place, so the page does not shift (D5, record 0033).
+    const pending = this.figure.querySelector(
+      ":scope > .enarratio-controls[data-enarratio-pending]",
+    );
+    if (bar.childElementCount === 0) {
+      pending?.remove();
+      return;
+    }
+    if (pending) pending.replaceWith(bar);
+    else (this.hint ?? after).after(bar);
     this.cleanup.push(() => bar.remove());
   }
 

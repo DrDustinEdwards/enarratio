@@ -1,5 +1,7 @@
 /** Reading marks and scales from Enarratio's server markup: labels, geometry and reading order. */
 
+import { BRUSH_SCALES } from "../controls.js";
+
 export interface XScale {
   readonly type: string;
   readonly domain: readonly (number | string)[];
@@ -58,7 +60,7 @@ export function parseScale(figure: HTMLElement): XScale | null {
   const raw = figure.getAttribute("data-enarratio-x-scale");
   if (!raw) return null;
   const scale = JSON.parse(raw) as XScale;
-  return ["linear", "utc", "time", "log", "sqrt", "pow"].includes(scale.type) ? scale : null;
+  return BRUSH_SCALES.includes(scale.type) ? scale : null;
 }
 
 /** Inverts a continuous scale for a position in SVG user units. */

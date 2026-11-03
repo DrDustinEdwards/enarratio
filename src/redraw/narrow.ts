@@ -21,7 +21,7 @@ export interface RedrawnChart {
 export type Drawing = (width: number, original: string) => { markup: string; key: string };
 
 /** Under this many rems a wide frame scrolls (A13), so a narrow drawing is used. */
-const WIDE_REM = 30;
+export const WIDE_REM = 30;
 
 const started = new WeakSet<Element>();
 
