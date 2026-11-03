@@ -7,6 +7,11 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Repository
+
+- Pull requests get an automatic advisory review: `.github/workflows/review.yml` calls devkit's shared reviewer,
+  which writes a `review verdict` check and never blocks a merge during its four-week trial.
+
 ## [0.7.2] - 2026-11-03
 
 ### Fixed
