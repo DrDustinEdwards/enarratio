@@ -12,7 +12,9 @@ change the public API; every such change is listed here.
 - The gallery no longer moves on a phone as its charts load (D5, [0034](docs/design/0034-gallery-swaps-without-shift.md)):
   the live check measured 0.040 at 320 px. Each narrow drawing is drawn at the height the wide drawing shows on a
   phone (240 px, not 320, for a 640 x 320 chart), and a chart whose rows set its height (horizontal bars, slope,
-  genome map, tree) keeps its own, which the stylesheet reserves under 30rem. The pending control row carries Expand,
+  genome map, tree) keeps its own, which the stylesheet reserves under 30rem. A map keeps its own shape and height at
+  228 wide, and under 30rem its wide drawing scales into the column at that height, so there is no blank space below
+  it and no sideways scroll. The pending control row carries Expand,
   which the gallery's `enhance({ expand: true })` adds, so it no longer wraps from one line to two.
 
 ### Repository

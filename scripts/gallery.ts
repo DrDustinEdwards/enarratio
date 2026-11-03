@@ -81,6 +81,13 @@ function shownHeight(markup: string): number | undefined {
  */
 const KEEP_HEIGHT = new Set(["horizontal-bar", "slope", "genome", "tree"]);
 /**
+ * The maps. A map keeps its shape, so drawn 228 wide it is far shorter than its wide drawing shows
+ * at 30rem (252 to 458 px): the narrow one keeps its own height, and under 30rem the wide one
+ * scales into the column at that height instead of keeping 30rem (reserveCss), so the swap does
+ * not move the page and leaves no blank space.
+ */
+const MAPS = new Set(["dot-map", "choropleth"]);
+/**
  * The options an example passes, drawn at NARROW_WIDTH and at the height its wide drawing shows,
  * so swapping one for the other does not move the page (D5, record 0034). A chart that adds to
  * the height it is given (the survival curve's at-risk rows) is drawn again with that much less.
@@ -90,7 +97,7 @@ const narrowDraw =
   (options: O): string => {
     const at = (height?: number) =>
       draw({ ...options, width: NARROW_WIDTH, ...(height === undefined ? {} : { height }) });
-    const target = KEEP_HEIGHT.has(id) ? undefined : shownHeight(draw(options));
+    const target = KEEP_HEIGHT.has(id) || MAPS.has(id) ? undefined : shownHeight(draw(options));
     const first = at(target);
     if (target === undefined) return first;
     const extra = (viewBox(first)?.height ?? target) - target;
@@ -129,6 +136,8 @@ interface Example {
   readonly narrow?: string | undefined;
   /** The narrow drawing's height, when it is taller than the wide one shows on a phone. */
   readonly reserve?: number | undefined;
+  /** A map's narrow drawing's height, which its wide drawing scales to under 30rem. */
+  readonly fit?: number | undefined;
 }
 
 const escapeText = (s: string): string =>
@@ -216,7 +225,9 @@ async function loadExamples(): Promise<Example[]> {
     const shown = shownHeight(module.default) ?? 0;
     examples.push({
       id,
-      reserve: narrowBox && narrowBox.height > shown + 0.5 ? narrowBox.height : undefined,
+      reserve:
+        narrowBox && !MAPS.has(id) && narrowBox.height > shown + 0.5 ? narrowBox.height : undefined,
+      fit: narrowBox && MAPS.has(id) ? narrowBox.height : undefined,
       name: NAMES[id] ?? id,
       module: from,
       title: heading,
@@ -246,18 +257,22 @@ function withExpand(markup: string): string {
 }
 
 /**
- * Under 30rem, the height each KEEP_HEIGHT example's narrow drawing takes, held by its wide one
- * before the swap (the frame is the container, so this is the width gallery.js swaps at). The
- * wide drawing keeps its scale, centered in the taller box, so the swap does not move the page.
+ * Under 30rem (the frame is the container, so this is the width gallery.js swaps at), each wide
+ * drawing takes the height its narrow drawing will, so the swap does not move the page. A
+ * KEEP_HEIGHT example's keeps its scale, centered in the taller box; a map's scales into the column
+ * at that height instead of keeping 30rem and scrolling. With scripts on only: without them the
+ * drawing is never swapped.
  */
 function reserveCss(examples: readonly Example[]): string {
-  const rules = examples
-    .filter((e) => e.reserve !== undefined)
-    .map(
-      (e) =>
-        `  [data-example="${e.id}"] .enarratio-frame-wide > svg { min-height: ${e.reserve}px; }`,
-    );
-  return rules.length > 0 ? `@container (width < 30rem) {\n${rules.join("\n")}\n}` : "";
+  const rules = examples.flatMap((e) => {
+    const svg = `[data-example="${e.id}"] .enarratio-frame-wide > svg`;
+    if (e.fit !== undefined) return [`  ${svg} { min-width: 0; width: 100%; height: ${e.fit}px; }`];
+    return e.reserve !== undefined ? [`  ${svg} { min-height: ${e.reserve}px; }`] : [];
+  });
+  // Without scripts nothing is swapped, so the wide drawings stay as they are (12 px text, A13).
+  return rules.length > 0
+    ? `@media (scripting: enabled) {\n@container (width < 30rem) {\n${rules.join("\n")}\n}\n}`
+    : "";
 }
 
 /** A chart's drawing, the `.enarratio-frame` that enarratio/redraw swaps. */

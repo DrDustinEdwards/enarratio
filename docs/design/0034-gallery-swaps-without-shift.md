@@ -32,14 +32,19 @@ lands after it.
   narrow drawings keep their own height. The gallery's stylesheet gives the wide drawing that
   height under 30rem, `@container (width < 30rem)` on the frame, which is where gallery.js swaps:
   the wide drawing keeps its scale, centered in the taller box, until the narrow one replaces it.
-  Without scripts a phone keeps that drawing, with a little space above and below.
+  The rule applies with scripts on (`@media (scripting: enabled)`): without them nothing is
+  swapped, and the wide drawings stay as they are.
 - **The gallery writes Expand into the pending row** after Show table, where `enhance()` puts it,
   with the layer's own label (`ENHANCE_STRINGS.expand`), so the row is the size it will be.
   `url: true` adds no control.
-
-The maps' narrow drawings are taller than the map they hold (a map keeps its shape, so a 228 px
-map is shorter than the 458 px the wide one shows); the space is left below the map rather than
-let the page move.
+- **A map's wide drawing scales into the column.** A map keeps its shape, so drawn 228 wide it is
+  far shorter than its wide drawing shows at 30rem (dot map 252 against 458 px, choropleth 225
+  against 473): drawn at the wide height it left about 200 px blank below the map, and left
+  without a narrow drawing it scrolled sideways (C12). So the narrow map keeps its own height,
+  and under 30rem the same stylesheet rule lets the wide map drop its 30rem and scale into the
+  column at that height (`min-width: 0; width: 100%; height`), which a map can do without
+  changing shape. Its text is small only until the swap; with scripts off the rule does not
+  apply, and the map keeps 30rem and scrolls with 12 px text, as before.
 
 ## Why not in the package
 
@@ -53,5 +58,5 @@ needs it.
 ## Measured
 
 `prelum-chart-audit` against the built gallery served locally with the live site's preload
-headers, at 1280 and 320 px: no findings on the four pages (before: D5 0.040, 0.040, 0.034 and
+headers, at 1280 and 320 px: no findings on the four pages, D5 or C12 (before: D5 0.040, 0.040, 0.034 and
 0.034). A layout-shift observer scrolling each page at 320 and 1280 px records no shift.
