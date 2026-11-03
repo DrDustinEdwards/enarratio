@@ -1,7 +1,7 @@
 /**
  * The words and numbers Enarratio writes for readers: the strings table every generated sentence
  * comes from (English by default, replaceable for another language), locale-aware number and date
- * formats, the reading-grade score the summaries are held to, and the CSV a figure links to.
+ * formats, a reading-grade measure, and the CSV a figure links to.
  */
 
 export type { DateFormatOptions, NumberFormatOptions } from "./format.js";
@@ -642,8 +642,7 @@ function syllables(word: string): number {
 
 /**
  * The Flesch-Kincaid grade level of English text: about the school year a reader needs. Numbers
- * count as one-syllable words. Enarratio's generated summaries stay at 9 or below (B19), and
- * charts report author text above it.
+ * count as one-syllable words. A measure a caller can use; no chart checks text against it.
  */
 export function readingGrade(text: string): number {
   const words = text.split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w));

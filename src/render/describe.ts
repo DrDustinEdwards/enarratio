@@ -2,7 +2,7 @@
  * Sentences computed from a chart's data (B39, B24, B53): the overview read before the chart
  * (its type, axes and ranges, series and points) and the visible summary under it (each series'
  * trend, the extremes, values far from the rest and the interval at the end). Short sentences in
- * common words, so the summary stays at grade 9 or below (B19).
+ * common words.
  */
 
 import { maxOf, minOf } from "./data.js";

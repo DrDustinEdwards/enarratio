@@ -330,15 +330,14 @@ and edited.
 
 - Every chart is a figure with a title, a visible one-sentence finding (its
   `alt`), a screen reader overview (type, axes and ranges, series and points),
-  a summary computed from the data (trend, extremes, outliers, intervals, at
-  grade 9 or below), notes, a source line, a "Download CSV" link and the data
+  a summary computed from the data (trend, extremes, outliers, intervals), notes, a source line, a "Download CSV" link and the data
   table, all in the HTML with scripts off. Primitives are figures too, unless
   `inline`.
 - `alt` names the chart's SVG (`role="img"`), and belongs to the SVG rather
   than the figure so that the caption and table stay readable. A chart without
   one names itself from its data and reports an issue; `strict: true` turns
   every issue (no alt or title, an unlabeled axis, too many series or points,
-  text above grade 9) into an error that fails the build.
+  a CSV too large to inline) into an error that fails the build.
 - Numbers, dates and every generated string follow `locale` and `strings`.
 - Every chart carries an equivalent data table, in a disclosure or visually
   hidden.

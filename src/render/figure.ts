@@ -11,14 +11,7 @@ import { element, escapeHtml } from "../html.js";
 import { requireSize, safeHref } from "./data.js";
 import { type ChartDescription, overview, summarize } from "./describe.js";
 import { DEFAULT_WIDTH, WIDE_WIDTH } from "./size.js";
-import {
-  numberFormat,
-  readingGrade,
-  type StringOverrides,
-  type Strings,
-  stringsFor,
-  toCsv,
-} from "./text.js";
+import { numberFormat, type StringOverrides, type Strings, stringsFor, toCsv } from "./text.js";
 
 /** A color for one series: any CSS color, or a pair for light and dark. */
 export type SeriesColor = string | { readonly light: string; readonly dark: string };
@@ -33,7 +26,6 @@ export interface ChartIssue {
     | "axis-label-missing"
     | "too-many-series"
     | "too-many-points"
-    | "reading-level"
     | "csv-too-large";
   readonly message: string;
 }
@@ -42,8 +34,8 @@ export interface ChartIssue {
 export interface IssueOptions {
   /**
    * Throw on the first issue instead of reporting it, so a build fails on a chart a reader would
-   * struggle with: no `alt`, no title, an unlabeled axis, too many series or points, author text
-   * above grade 9, or a CSV too large to inline. Set it once in a site's shared options.
+   * struggle with: no `alt`, no title, an unlabeled axis, too many series or points, or a CSV too
+   * large to inline. Set it once in a site's shared options.
    */
   readonly strict?: boolean;
   /** Receives each issue instead of `console.warn`, e.g. to collect them and fail a build. */
@@ -391,14 +383,6 @@ function checkFigure(options: FigureOptions, parts: FigureParts, title: string |
       "too-many-points",
       `${points} points is more than ${limits.points}; ${limits.advice ?? "summarize the data first, or use small multiples or a table"}`,
     );
-  }
-  for (const name of ["alt", "subtitle", "caption"] as const) {
-    const text = options[name];
-    // Grades of a few words swing on one long word, so only real sentences are scored, and the
-    // grade is judged as the message states it, a whole number.
-    const grade = text && text.split(/\s+/).length >= 15 ? Math.round(readingGrade(text)) : 0;
-    if (grade > 9)
-      issue("reading-level", `the ${name} reads at grade ${grade}; aim for 9 or below`);
   }
 }
 
