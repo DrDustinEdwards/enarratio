@@ -31,7 +31,7 @@ lands after it.
   chart, the genome map and the tree overlap their labels drawn three quarters as tall, so their
   narrow drawings keep their own height. The gallery's stylesheet gives the wide drawing that
   height under 30rem, `@container (width < 30rem)` on the frame, which is where gallery.js swaps:
-  the wide drawing keeps its scale, centred in the taller box, until the narrow one replaces it.
+  the wide drawing keeps its scale, centered in the taller box, until the narrow one replaces it.
   Without scripts a phone keeps that drawing, with a little space above and below.
 - **The gallery writes Expand into the pending row** after Show table, where `enhance()` puts it,
   with the layer's own label (`ENHANCE_STRINGS.expand`), so the row is the size it will be.

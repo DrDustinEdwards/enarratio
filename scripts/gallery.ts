@@ -248,7 +248,7 @@ function withExpand(markup: string): string {
 /**
  * Under 30rem, the height each KEEP_HEIGHT example's narrow drawing takes, held by its wide one
  * before the swap (the frame is the container, so this is the width gallery.js swaps at). The
- * wide drawing keeps its scale, centred in the taller box, so the swap does not move the page.
+ * wide drawing keeps its scale, centered in the taller box, so the swap does not move the page.
  */
 function reserveCss(examples: readonly Example[]): string {
   const rules = examples

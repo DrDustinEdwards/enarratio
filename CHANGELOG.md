@@ -15,6 +15,10 @@ change the public API; every such change is listed here.
   genome map, tree) keeps its own, which the stylesheet reserves under 30rem. The pending control row carries Expand,
   which the gallery's `enhance({ expand: true })` adds, so it no longer wraps from one line to two.
 
+### Repository
+
+- site-runtime 0.62.1 to 0.73.0 (the gallery's headers and Worker), which the shared pin check now asks for.
+
 ### Documentation
 
 - `narrowChart` says what height to draw a narrow drawing at so the swap does not move the page.
