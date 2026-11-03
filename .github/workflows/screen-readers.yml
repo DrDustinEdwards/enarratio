@@ -74,6 +74,9 @@ jobs:
       - run: npm ci --ignore-scripts
         env:
           PUPPETEER_SKIP_DOWNLOAD: "true"
+      # The one install script the run needs: ffmpeg-static's binary, which the setup's
+      # --macos-record uses.
+      - run: npm rebuild ffmpeg-static
       # The operating system's part, once per runner: on macOS it lets VoiceOver be driven and
       # records the setup to recordings/ (kept on failure).
       - run: npx guidepup setup --ci --macos-record
