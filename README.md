@@ -166,7 +166,9 @@ view and keeps the filter in the address; `strings` translates the layer.
 To have a chart drawn on the server for a wide page fit a phone, write its spec beside it with
 `redrawAttribute` and call `redrawCharts()` (or `redrawChart` for one host) from
 `enarratio/redraw` instead: each chart is drawn again at its frame's width as that width
-changes, then enhanced.
+changes, at the height the server's drawing showed at that width, then enhanced. The figure
+carries the layer's controls ahead of it, inert (the `controls` option), so neither step moves the
+page.
 
 Without a bundler, serve `node_modules/enarratio/dist/enhance/index.js` as a
 file, with `sound.js` and `image.js` from the same folder beside it (index.js

@@ -10,8 +10,9 @@
  * @packageDocumentation
  */
 
+import { ENHANCE_STRINGS } from "../controls.js";
 import { Chart, enhanced } from "./chart.js";
-import type { EnhancedChart, EnhanceOptions, EnhanceStrings, ResolvedOptions } from "./types.js";
+import type { EnhancedChart, EnhanceOptions, ResolvedOptions } from "./types.js";
 
 export type {
   BrushDetail,
@@ -21,42 +22,7 @@ export type {
   ResolvedOptions,
   SelectDetail,
 } from "./types.js";
-
-/** The layer's English strings, which `strings` overrides one by one. */
-export const ENHANCE_STRINGS: EnhanceStrings = {
-  hint: "Arrow keys move between points: left and right along a series, up and down between series. Home and End go to the ends, Page Up and Page Down jump ten, Backspace goes back to the last point.",
-  hintFilter: "Enter filters by the point, Escape clears.",
-  hintRange: "Shift with the arrows picks a range.",
-  chart: "Chart",
-  position: "{index} of {count}",
-  filtered: "Filtered to {value}",
-  filterCleared: "Filter cleared",
-  rangeStart: "Range start set; click again to set the end",
-  rangeSelected: "Range selected: {from} to {to}",
-  rangeCleared: "Range cleared",
-  updated: "Chart updated",
-  sorted: "Sorted by {column}, {order}",
-  ascending: "ascending",
-  descending: "descending",
-  showTable: "Show table",
-  showChart: "Show chart",
-  expand: "Expand",
-  collapse: "Close expanded view",
-  range: "Pick a range",
-  from: "From",
-  to: "To",
-  apply: "Apply",
-  clear: "Clear",
-  downloadSvg: "Download SVG",
-  downloadPng: "Download PNG",
-  downloadTactile: "Download tactile SVG",
-  copyEmbed: "Copy embed",
-  embedCopied: "Embed code copied",
-  exportFailed: "Could not export",
-  play: "Play as sound",
-  stop: "Stop sound",
-  playing: "Playing {series}",
-};
+export { ENHANCE_STRINGS };
 
 /**
  * Enhances every Enarratio figure under `root` (the whole document by default) and returns them.

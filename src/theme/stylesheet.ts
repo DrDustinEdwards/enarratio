@@ -190,6 +190,15 @@ svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; 
   align-items: center;
   gap: var(--enarratio-gap-inline, 0.4em);
 }
+/* An entry has its button's box before enhance() wraps it in one, so the legend keeps its size
+   when the layer arrives (D5, record 0033). */
+.enarratio-legend li {
+  box-sizing: border-box;
+  min-height: 24px;
+  padding: var(--enarratio-padding-button, 0.125em 0.25em);
+  border: var(--enarratio-border-width, 1px) solid transparent;
+}
+.enarratio-legend li:has(> button) { min-height: 0; padding: 0; border: 0; }
 .enarratio-legend button {
   margin: 0;
   padding: var(--enarratio-padding-button, 0.125em 0.25em);
@@ -400,6 +409,12 @@ ${Array.from({ length: 5 }, (_, i) => {
   margin-top: var(--enarratio-gap-row, 0.25em);
 }
 .enarratio-legend button { min-height: 24px; }
+.enarratio-legend button { box-sizing: border-box; }
+/* The controls the server writes ahead of enhance() (figure.ts): with scripts off, nothing
+   replaces them, so they are not shown. */
+@media (scripting: none) {
+  .enarratio [data-enarratio-pending] { display: none; }
+}
 .enarratio-data th button {
   min-height: 24px;
   margin: 0;

@@ -35,6 +35,7 @@ const EMITTED = new Set([
   "defs",
   "pattern",
   "div",
+  "button",
   "figure",
   "p",
   "ul",

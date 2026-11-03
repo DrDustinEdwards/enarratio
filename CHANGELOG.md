@@ -7,6 +7,26 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-11-03
+
+Charts no longer move the page when the enhancement layer loads (D5, [0033](docs/design/0033-no-shift-on-load.md)).
+
+### Fixed
+
+- `enarratio/redraw` draws a chart again at the height the server's drawing showed in that frame, not at the drawing's
+  own height, so a phone no longer sees the chart grow as it is redrawn: a 640 by 220 chart in a 288 px column showed
+  165 px tall, then 215 (dustinedwards.info/cv; a 0.10 layout shift there, 0.094 on Foxhound's dashboard).
+- A legend entry has its button's padding, border and height before `enhance()` makes it a button, so the legend no
+  longer grows (47 to 58 px on a phone) when the layer arrives.
+
+### Added
+
+- The figure writes the controls `enhance()` adds with its default options (Show table, Play as sound, Pick a range,
+  Download SVG, PNG and tactile SVG, and Copy embed for a figure with an `id`) into its markup, inert, and the layer
+  swaps in the working ones, so the control row and the downloads beside the CSV link no longer push the summary and
+  source down. With scripts off (`scripting: none`) they are hidden. The new `controls: false` figure option leaves them
+  out, for a page that never enhances or turns those controls off.
+
 ### Repository
 
 - Pull requests get an automatic advisory review: `.github/workflows/review.yml` calls devkit's shared reviewer,

@@ -1,7 +1,7 @@
 /**
  * `enarratio/redraw` in a real browser: a line chart drawn on the server 640 wide, in a 320 px
- * column, is drawn again at the column's width and enhanced, and drawn again when the column
- * widens.
+ * column, is drawn again at the column's width and enhanced without moving the page (D5), and
+ * drawn again when the column widens.
  */
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -54,10 +54,13 @@ afterAll(async () => {
 });
 
 describe("enarratio/redraw", () => {
-  it("draws a server chart again at its column's width, enhanced, and follows the column", async () => {
+  it("draws a server chart again at its column's width, enhanced, in place, and follows the column", async () => {
     const width = (): Promise<string | null> =>
       page.$eval("#host svg", (svg) => svg.getAttribute("width"));
+    const height = (): Promise<number> =>
+      page.$eval("#host", (host) => host.getBoundingClientRect().height);
     expect(await width()).toBe("640");
+    const before = await height();
     await page.evaluate(() =>
       (
         window as unknown as { EnarratioRedraw: { redrawCharts(): unknown[] } }
@@ -65,6 +68,10 @@ describe("enarratio/redraw", () => {
     );
     expect(Number(await width())).toBeLessThanOrEqual(320);
     expect(await page.$("#host [role='application']")).not.toBeNull();
+    // The redraw, the legend's buttons and the controls take the space the server's markup held.
+    expect(await page.$("#host .enarratio-legend button")).not.toBeNull();
+    expect(await page.$("#host [data-enarratio-pending]")).toBeNull();
+    expect(Math.abs((await height()) - before)).toBeLessThan(1);
     await page.evaluate(() => {
       (document.querySelector("#column") as HTMLElement).style.width = "460px";
     });

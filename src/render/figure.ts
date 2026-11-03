@@ -7,6 +7,7 @@
  * descendants: naming the figure would hide the caption and table from the readers they exist for.
  */
 
+import { BRUSH_SCALES, ENHANCE_STRINGS } from "../controls.js";
 import { element, escapeHtml } from "../html.js";
 import { requireSize, safeHref } from "./data.js";
 import { type ChartDescription, overview, summarize } from "./describe.js";
@@ -101,6 +102,13 @@ export interface FigureOptions extends IssueOptions {
    * data stay in the table.
    */
   readonly hoverTitles?: boolean;
+  /**
+   * The controls `enhance()` adds with its default options (Show table, Play as sound, Pick a
+   * range and the downloads), written into the markup ahead of it, inert, so the page does not
+   * shift when the layer arrives (D5, record 0033). With scripts off they stay hidden. On by
+   * default; `false` leaves them out, for a page that never enhances or turns those controls off.
+   */
+  readonly controls?: boolean;
 }
 
 /**
@@ -306,6 +314,41 @@ export function dataTableBlock(
     : element("details", { class: "enarratio-data" }, `${element("summary", {}, label)}${markup}`);
 }
 
+/** Markup the enhancement layer replaces when it runs: inert until then, hidden with scripts off. */
+function pending(tag: string, content: string, cls?: string): string {
+  return element(tag, { class: cls, "data-enarratio-pending": true, inert: true }, content);
+}
+
+/**
+ * The controls `enhance()` adds with its default options, in its order (chart.ts attachControls,
+ * export.ts): the table switch, Play as sound when there are two or more marks, Pick a range on
+ * a chart with a continuous x scale, then the downloads and, for a figure with an id, Copy embed.
+ * The downloads sit beside the CSV link when there is one, else in the bar.
+ */
+function controlsMarkup(
+  options: FigureOptions,
+  parts: FigureParts,
+  svg: string,
+): { bar: string[]; exports: string[] } {
+  const s = ENHANCE_STRINGS;
+  const button = (text: string, cls?: string): string =>
+    element("button", { type: "button", class: cls }, escapeHtml(text));
+  const bar = [button(s.showTable)];
+  if ((svg.match(/\sdata-enarratio-key=/g) ?? []).length > 1) bar.push(button(s.play));
+  if (parts.x && BRUSH_SCALES.includes(parts.x.type)) {
+    bar.push(
+      element("details", { class: "enarratio-range" }, element("summary", {}, escapeHtml(s.range))),
+    );
+  }
+  const exports = [
+    s.downloadSvg,
+    s.downloadPng,
+    s.downloadTactile,
+    ...(options.id ? [s.copyEmbed] : []),
+  ];
+  return { bar, exports };
+}
+
 /** The longest CSV, in characters of its `data:` URL, that a figure inlines. */
 const CSV_LIMIT = 100_000;
 
@@ -316,6 +359,7 @@ function sourceLine(
   table: DataTable,
   strings: Strings,
   name: string,
+  exports = "",
 ): string {
   const parts: string[] = [];
   const source = typeof options.source === "string" ? { name: options.source } : options.source;
@@ -349,7 +393,7 @@ function sourceLine(
           "a",
           { href, download: file, class: "enarratio-csv" },
           escapeHtml(strings.downloadCsv),
-        ),
+        ) + (exports ? pending("span", exports) : ""),
       );
     }
   }
@@ -466,6 +510,24 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
   const legend = legendMarkup(parts);
   const wide = !parts.fixed && (options.width ?? DEFAULT_WIDTH) >= WIDE_WIDTH;
   const name = title ?? alt;
+  // The controls enhance() will add, written ahead of it so the page does not shift (D5, 0033).
+  const controls: { bar: string[]; exports: string[] } =
+    parts.fixed || parts.tableMarkup || options.controls === false
+      ? { bar: [], exports: [] }
+      : controlsMarkup(options, parts, svg);
+  const exportButtons = controls.exports
+    .map(
+      (text) =>
+        ` · ${element("button", { type: "button", class: "enarratio-export" }, escapeHtml(text))}`,
+    )
+    .join("");
+  const source = sourceLine(parts.kind, options, parts.table, strings, name, exportButtons);
+  // Without a CSV link the downloads go in the bar, as enhance() puts them.
+  if (exportButtons && !source.includes('class="enarratio-csv"')) {
+    controls.bar.push(
+      ...controls.exports.map((text) => element("button", { type: "button" }, escapeHtml(text))),
+    );
+  }
   const tableBlock = parts.tableMarkup
     ? parts.tableMarkup(strings.dataFor(name))
     : dataTableBlock(parts.table, strings.dataFor(name), options.dataTable, strings);
@@ -525,12 +587,13 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
               : { class: "enarratio-frame" },
             svg,
           ),
+      controls.bar.length > 0 ? pending("div", controls.bar.join(""), "enarratio-controls") : "",
       summary && summary !== given ? muted("enarratio-summary", summary) : "",
       caption ? muted("enarratio-caption", caption) : "",
       ...notes
         .filter((n) => n.trim())
         .map((n) => muted("enarratio-note", `${strings.notes}: ${n.trim()}`)),
-      sourceLine(parts.kind, options, parts.table, strings, name),
+      source,
       tableBlock,
     ].join(""),
   );
