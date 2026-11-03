@@ -51,4 +51,5 @@ visually hidden until focused.
   English ones, which can change a row's width.
 - `narrowChart` (a server's narrow drawing) swaps a drawing of a different shape; the gallery does it
   before the first paint. A site that swaps later still shifts by the difference.
+- The gallery closes both for itself in [0034](0034-gallery-swaps-without-shift.md).
 - `prelum-chart-audit` measures layout shift on each page it checks, so a regression is found live.
