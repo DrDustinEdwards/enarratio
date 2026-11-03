@@ -6,8 +6,9 @@
  * the "Show data" table must be announced as a table. JAWS, TalkBack and iOS VoiceOver are not
  * covered: no runner has them (docs/design/0032).
  *
- * Phrases are compared without spaces, case or punctuation, since each reader writes them its
- * own way ("1 of 6" against "1of6"); the spoken log is printed on failure.
+ * Phrases are compared without spaces, case or punctuation, across the whole log, since each
+ * reader writes and splits them its own way (NVDA reads an overview as two phrases); the spoken
+ * log is printed on failure.
  */
 import { type ScreenReaderPlaywright, screenReaderTest as test } from "@guidepup/playwright";
 import { expect, type Locator, type Page } from "@playwright/test";
@@ -17,6 +18,10 @@ const CHARTS = [
   { id: "line", kind: "line" },
   { id: "dot-map", kind: "map" },
 ] as const;
+
+// Every phrase the reader speaks, not only what follows a Guidepup command: focusing the points
+// and the arrow keys are page events, and the reader's answer to them is what is checked.
+test.use({ screenReaderStartOptions: { capture: true } });
 
 const squash = (text: string): string => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
 const pause = (ms: number): Promise<void> => new Promise((done) => setTimeout(done, ms));
@@ -32,7 +37,7 @@ async function expectHeard(
 ): Promise<void> {
   const log = await heard(screenReader);
   expect(
-    log.some((line) => squash(line).includes(squash(phrase))),
+    squash(log.join(" ")).includes(squash(phrase)),
     `${what}: "${phrase}" in\n${log.join("\n")}`,
   ).toBe(true);
 }
@@ -44,7 +49,7 @@ async function readUntil(
   max: number,
 ): Promise<void> {
   for (let i = 0; i < max; i++) {
-    if ((await heard(screenReader)).some((line) => squash(line).includes(squash(phrase)))) return;
+    if (squash((await heard(screenReader)).join(" ")).includes(squash(phrase))) return;
     await screenReader.next();
     await pause(300);
   }
