@@ -2,8 +2,8 @@ name: Screen readers
 
 # B29 (docs/design/0032): NVDA with Chrome on Windows and VoiceOver with WebKit on macOS read a
 # bar, a line and a map chart in the built gallery, driven by Guidepup. After each release, every
-# night, and by hand; not on pull requests, since a run takes minutes and a reader's timing can fail
-# it for reasons that are not the change's.
+# night, by hand, and on a pull request that changes the run itself; not on every pull request,
+# since a run takes minutes and a reader's timing can fail it for reasons that are not the change's.
 
 on:
   workflow_run:
@@ -12,12 +12,16 @@ on:
   schedule:
     - cron: "23 7 * * *"
   workflow_dispatch:
+  pull_request:
+    paths:
+      - test/screen-reader/**
+      - .github/workflows/screen-readers.yml
 
 permissions:
   contents: read
 
 concurrency:
-  group: screen-readers
+  group: screen-readers-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
