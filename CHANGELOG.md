@@ -7,6 +7,18 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Gallery
+
+- The gallery no longer moves on a phone as its charts load (D5, [0034](docs/design/0034-gallery-swaps-without-shift.md)):
+  the live check measured 0.040 at 320 px. Each narrow drawing is drawn at the height the wide drawing shows on a
+  phone (240 px, not 320, for a 640 x 320 chart), and a chart whose rows set its height (horizontal bars, slope,
+  genome map, tree) keeps its own, which the stylesheet reserves under 30rem. The pending control row carries Expand,
+  which the gallery's `enhance({ expand: true })` adds, so it no longer wraps from one line to two.
+
+### Documentation
+
+- `narrowChart` says what height to draw a narrow drawing at so the swap does not move the page.
+
 ## [0.7.3] - 2026-11-03
 
 Charts no longer move the page when the enhancement layer loads (D5, [0033](docs/design/0033-no-shift-on-load.md)).

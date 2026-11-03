@@ -168,7 +168,9 @@ To have a chart drawn on the server for a wide page fit a phone, write its spec 
 `enarratio/redraw` instead: each chart is drawn again at its frame's width as that width
 changes, at the height the server's drawing showed at that width, then enhanced. The figure
 carries the layer's controls ahead of it, inert (the `controls` option), so neither step moves the
-page.
+page. A page that swaps in its own narrow drawings (`narrowChart`) draws them at the
+height the wide drawing shows on a phone (docs/api.md, `narrowChart`); one that enhances with
+`expand: true` writes Expand into the pending controls, as the gallery does.
 
 Without a bundler, serve `node_modules/enarratio/dist/enhance/index.js` as a
 file, with `sound.js` and `image.js` from the same folder beside it (index.js

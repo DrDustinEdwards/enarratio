@@ -1717,3 +1717,12 @@ way.
 markup of the chart drawn about as wide as a phone's column. The frame shows it under 30rem and the
 original above, and each drawing is enhanced. It brings none of the light renderers, so a page
 whose charts all carry a narrow drawing (the gallery) loads only the enhancement layer and this.
+
+So that the swap does not move the page (D5), draw the narrow drawing at the height the server's
+drawing shows in that column: for a wide drawing (480 or wider, which keeps 30rem and scrolls),
+`H * 480 / W` at the default 16 px rem, 240 for a 640 x 320 chart; for a narrower one, its height
+scaled to the column's width. A chart whose rows set its height (horizontal bars, dot plots, a
+tree) may not fit that height; keep its own and reserve it under 30rem in the page's stylesheet
+(`@container (width < 30rem)` on the frame, a `min-height` on the wide drawing's `svg`). Swapping
+before the first paint is not enough on a long page, which the browser paints before its module
+scripts run.

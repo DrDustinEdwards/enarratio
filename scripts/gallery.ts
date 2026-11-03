@@ -30,6 +30,7 @@ import { familyFooterHtml } from "capsomer/behavior/family-footer";
 import { letterheadHtml } from "capsomer/behavior/site-header";
 import { capsomerMoreTheme, capsomerTheme } from "capsomer/enarratio-theme";
 import { baseStylesheet, checkTheme, stylesheet, type Theme } from "enarratio";
+import { ENHANCE_STRINGS } from "enarratio/enhance";
 import { barChart } from "enarratio/lite";
 import { defaultTheme, highContrastTheme } from "enarratio/themes";
 import { rolldown } from "rolldown";
@@ -56,16 +57,56 @@ const self = (specifier: string): string => {
  * scrolling (C12).
  */
 const NARROW_WIDTH = 228;
+/** 30rem at the default 16 px rem: a wide drawing keeps this width in a narrower column (A13). */
+const WIDE_PX = 480;
+/** A drawing's viewBox size. */
+function viewBox(markup: string): { width: number; height: number } | undefined {
+  const box = /<svg[^>]*\sviewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(markup);
+  return box ? { width: Number(box[1]), height: Number(box[2]) } : undefined;
+}
+/**
+ * The height the server's drawing shows in a phone's column (NARROW_WIDTH): a wide drawing keeps
+ * 30rem and scrolls, so it shows H * 480 / W; a narrower one scales to the column.
+ */
+function shownHeight(markup: string): number | undefined {
+  const box = viewBox(markup);
+  if (!box) return undefined;
+  const shown = markup.includes("enarratio-frame-wide") ? WIDE_PX : NARROW_WIDTH;
+  return Math.round(((box.height * shown) / box.width) * 100) / 100;
+}
+/**
+ * The examples whose rows set their height (a label or track per row) and do not fit in the
+ * height their wide drawing shows on a phone: drawn shorter, their labels overlap. Their narrow
+ * drawing keeps its own height, and the page reserves it (reserveCss).
+ */
+const KEEP_HEIGHT = new Set(["horizontal-bar", "slope", "genome", "tree"]);
+/**
+ * The options an example passes, drawn at NARROW_WIDTH and at the height its wide drawing shows,
+ * so swapping one for the other does not move the page (D5, record 0034). A chart that adds to
+ * the height it is given (the survival curve's at-risk rows) is drawn again with that much less.
+ */
+const narrowDraw =
+  <O extends object>(draw: (options: O) => string, id: string) =>
+  (options: O): string => {
+    const at = (height?: number) =>
+      draw({ ...options, width: NARROW_WIDTH, ...(height === undefined ? {} : { height }) });
+    const target = KEEP_HEIGHT.has(id) ? undefined : shownHeight(draw(options));
+    const first = at(target);
+    if (target === undefined) return first;
+    const extra = (viewBox(first)?.height ?? target) - target;
+    return Math.abs(extra) < 0.5 ? first : at(target - extra);
+  };
+Object.assign(globalThis, { enarratioGalleryNarrow: narrowDraw });
 registerHooks({
   resolve: (specifier, context, next) => next(self(specifier), context),
-  // An example imported with ?narrow draws its chart at NARROW_WIDTH: the options it passes, with
-  // the width set. Its source, as the gallery shows it, is unchanged.
+  // An example imported with ?narrow draws its chart through narrowDraw: the options it passes,
+  // with the width and height set. Its source, as the gallery shows it, is unchanged.
   load: (url, context, next) => {
     const loaded = next(url, context);
     if (!url.endsWith("?narrow")) return loaded;
     const source = String(loaded.source).replace(
       /export default (\w+)\(/,
-      `export default ((draw) => (options) => draw({ ...options, width: ${NARROW_WIDTH} }))($1)(`,
+      `export default globalThis.enarratioGalleryNarrow($1, ${JSON.stringify(basename(url.slice(0, -"?narrow".length), ".ts"))})(`,
     );
     return { ...loaded, source };
   },
@@ -86,6 +127,8 @@ interface Example {
   readonly markup: string;
   /** The chart's drawing at NARROW_WIDTH (its `.enarratio-frame`), when the example is wider. */
   readonly narrow?: string | undefined;
+  /** The narrow drawing's height, when it is taller than the wide one shows on a phone. */
+  readonly reserve?: number | undefined;
 }
 
 const escapeText = (s: string): string =>
@@ -169,17 +212,52 @@ async function loadExamples(): Promise<Example[]> {
             ((await import(`${pathToFileURL(path).href}?narrow`)) as { default: string }).default,
           )
         : undefined;
+    const narrowBox = narrow ? viewBox(narrow) : undefined;
+    const shown = shownHeight(module.default) ?? 0;
     examples.push({
       id,
+      reserve: narrowBox && narrowBox.height > shown + 0.5 ? narrowBox.height : undefined,
       name: NAMES[id] ?? id,
       module: from,
       title: heading,
       source,
-      markup: module.default,
+      markup: withExpand(module.default),
       narrow,
     });
   }
   return examples;
+}
+
+/** The pending controls row the figure writes ahead of enhance(), up to its first button. */
+const PENDING_ROW = `<div class="enarratio-controls" data-enarratio-pending inert><button type="button">${ENHANCE_STRINGS.showTable}</button>`;
+
+/**
+ * A figure's markup with Expand in its pending controls. The figure writes the controls enhance()
+ * adds with its default options; the gallery enhances with `expand: true` (site/gallery.js), which
+ * puts Expand after Show table, so the row is written with it and does not change (D5, record 0034).
+ */
+function withExpand(markup: string): string {
+  if (!markup.includes('class="enarratio-controls" data-enarratio-pending')) return markup;
+  if (!markup.includes(PENDING_ROW)) throw new Error("the pending controls row changed its markup");
+  return markup.replace(
+    PENDING_ROW,
+    `${PENDING_ROW}<button type="button">${ENHANCE_STRINGS.expand}</button>`,
+  );
+}
+
+/**
+ * Under 30rem, the height each KEEP_HEIGHT example's narrow drawing takes, held by its wide one
+ * before the swap (the frame is the container, so this is the width gallery.js swaps at). The
+ * wide drawing keeps its scale, centred in the taller box, so the swap does not move the page.
+ */
+function reserveCss(examples: readonly Example[]): string {
+  const rules = examples
+    .filter((e) => e.reserve !== undefined)
+    .map(
+      (e) =>
+        `  [data-example="${e.id}"] .enarratio-frame-wide > svg { min-height: ${e.reserve}px; }`,
+    );
+  return rules.length > 0 ? `@container (width < 30rem) {\n${rules.join("\n")}\n}` : "";
 }
 
 /** A chart's drawing, the `.enarratio-frame` that enarratio/redraw swaps. */
@@ -272,7 +350,7 @@ const GALLERY_CSS = `
  * Capsomer for the whole gallery: the family's faces (capsomer/fonts.css, with its fonts/ copied
  * beside the stylesheet), the tokens and base, then each component's CSS.
  */
-function capsomerCss(fontDir: string): string {
+function capsomerCss(fontDir: string, examples: readonly Example[]): string {
   cpSync(join(capsomerDir, "fonts"), fontDir, { recursive: true });
   return [
     "/* Built by scripts/gallery.ts from Capsomer: its faces, tokens, base and the components the gallery uses. */",
@@ -282,6 +360,7 @@ function capsomerCss(fontDir: string): string {
     `@layer cap.tokens {\n${inlineCss(join(capsomerDir, "tokens", `family-${FAMILY}.css`))}\n}`,
     ...COMPONENTS.map((name) => inlineCss(join(capsomerDir, "components", name, `${name}.css`))),
     GALLERY_CSS,
+    reserveCss(examples),
   ].join("\n\n");
 }
 
@@ -524,9 +603,9 @@ Web,Closed,17
 \`\`\``;
 
 /** The chart MARKDOWN_SAMPLE draws: the same options, drawn here by Enarratio itself. */
-const drawSample = (width?: number): string =>
+const drawSample = (size: { width?: number; height?: number } = {}): string =>
   barChart({
-    ...(width ? { width } : {}),
+    ...size,
     id: "tickets-by-team",
     data: [
       { team: "Support", status: "Open", tickets: 14 },
@@ -543,9 +622,15 @@ const drawSample = (width?: number): string =>
     title: "Tickets by team",
     alt: "Support has the most open tickets; Platform has closed the most.",
   });
-const sampleChart = drawSample();
-/** Its drawing for a phone, swapped in under 30rem as the gallery's examples are (C12). */
-const sampleNarrow = frameOf(drawSample(NARROW_WIDTH));
+const sampleChart = withExpand(drawSample());
+/** Its drawing for a phone, swapped in under 30rem as the gallery's examples are (C12, D5). */
+const sampleShown = shownHeight(sampleChart);
+const sampleNarrow = frameOf(
+  drawSample({
+    width: NARROW_WIDTH,
+    ...(sampleShown === undefined ? {} : { height: sampleShown }),
+  }),
+);
 
 /** Structured data naming the two packages, so search engines can describe them. */
 const astroData = graph(
@@ -717,7 +802,7 @@ function galleryScript(src: string): string {
 }
 
 const examples = await loadExamples();
-writeFileSync(join(outDir, "capsomer.css"), capsomerCss(join(outDir, "fonts")));
+writeFileSync(join(outDir, "capsomer.css"), capsomerCss(join(outDir, "fonts"), examples));
 /**
  * Each page's theme, file and stylesheet, and the theme readers who ask for more contrast get.
  * Capsomer's is the one the family's sites draw with (capsomer/enarratio-theme).
