@@ -338,7 +338,7 @@ const GALLERY_CSS = `
 .gallery-body { display: grid; gap: var(--space-7); margin-block-start: var(--space-7); }
 .gallery-main { min-width: 0; max-width: 52rem; }
 @media (min-width: 64rem) { .gallery-contents .cap-leader-index { columns: 2; column-gap: var(--space-8); } .gallery-contents li { break-inside: avoid; } }
-.gallery-contents h2 { margin: 0 0 var(--space-3); font: 600 0.75rem / 1.5 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+.gallery-contents h2 { margin: 0 0 var(--space-3); font: var(--weight-heading) 0.75rem / 1.5 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
 .gallery .report { border-radius: 0; border-color: var(--text); }
 .gallery .cap-panel { margin-block-start: var(--space-6); border-color: var(--text); border-radius: 0; box-shadow: none; }
 .gallery .cap-panel-head { display: grid; gap: var(--space-1); background: transparent; border-block-end: 1px solid var(--line); }
