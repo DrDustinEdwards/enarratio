@@ -17,17 +17,17 @@ import { preloads, withPreloadHeader } from "@dustinedwards/site-runtime/preload
 import { enarratio } from "@dustinedwards/site-runtime/sites";
 import { staticSite } from "@dustinedwards/site-runtime/static-site";
 
-/** Capsomer's stylesheet and the headings' and text's Schibsted Grotesk: every page paints with them. */
+/** Capsomer's stylesheet and the headings' and text's Inter: every page paints with them. */
 const SHARED = [
   { href: "/capsomer.css", as: "style" },
-  { href: "/fonts/schibsted-grotesk-latin-wght-normal.woff2", as: "font", type: "font/woff2" },
+  { href: "/fonts/inter-latin-opsz-normal.woff2", as: "font", type: "font/woff2" },
 ] as const;
 
 /**
  * What each page blocks on or paints first, sent as a preload `Link` header, which Early Hints
  * answers with a 103 (site-runtime `./preload`): Capsomer's stylesheet, the page's own (each
  * theme page links its own, so a page that preloaded another's would fetch a file it never uses
- * and discover its own only after the HTML), and Schibsted Grotesk. The names are not hashed
+ * and discover its own only after the HTML), and Inter. The names are not hashed
  * (record 0008); `scripts/gallery.ts` refuses a build in which a listed file is missing or a page
  * links a stylesheet its entry leaves out.
  */
