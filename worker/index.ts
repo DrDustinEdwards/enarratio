@@ -20,7 +20,7 @@ import { staticSite } from "@dustinedwards/site-runtime/static-site";
 /** Capsomer's stylesheet and the headings' and text's Inter: every page paints with them. */
 const SHARED = [
   { href: "/capsomer.css", as: "style" },
-  { href: "/fonts/inter-latin-opsz-normal.woff2", as: "font", type: "font/woff2" },
+  { href: "/fonts/inter-latin-wght-normal.woff2", as: "font", type: "font/woff2" },
 ] as const;
 
 /**
