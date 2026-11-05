@@ -13,6 +13,8 @@ change the public API; every such change is listed here.
   links and Medium headings. The package is unchanged.
 - The gallery is on Capsomer 0.74.4 (titles Light, headings Medium, breadcrumb links Bold), and its contents label
   is Medium like the other headings, where it was 600. The package is unchanged.
+- The gallery is on Capsomer 0.75.0, its lighter Inter (the text cut, 46 KB) and Overpass (plain English characters,
+  15 KB) files; it preloads Inter by its new name. The package is unchanged.
 - The gallery no longer moves on a phone as its charts load (D5, [0034](docs/design/0034-gallery-swaps-without-shift.md)):
   the live check measured 0.040 at 320 px. Each narrow drawing is drawn at the height the wide drawing shows on a
   phone (240 px, not 320, for a 640 x 320 chart), and a chart whose rows set its height (horizontal bars, slope,
