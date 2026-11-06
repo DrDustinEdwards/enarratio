@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Repository
+
+- The Claude Code hooks (`no-em-dash.sh`, `scoped-git-add.sh`) run from devkit v0.23.0, which ships them once, instead of a copy in `.claude/hooks/`. Not in the package.
+
 ### Gallery
 
 - The gallery is on Capsomer 0.73.0, the network's type: Inter for the interface (preloaded), Overpass for the footer
