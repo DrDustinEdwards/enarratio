@@ -101,6 +101,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "check": "npm run typecheck && npm run lint && npm test",
     "lint": "oxlint --type-aware --deny-warnings --report-unused-disable-directives-severity=error",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "test": "vitest run",
     "gallery": "node scripts/gallery.ts && site-runtime-headers --site enarratio --out site/dist/_headers --header \"tdm-reservation: 1\"",
     "deploy:gallery": "npm run build && npm run gallery && npx --yes wrangler@4.143.0 deploy",
