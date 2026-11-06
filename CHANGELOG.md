@@ -10,6 +10,7 @@ change the public API; every such change is listed here.
 ### Repository
 
 - The Claude Code hooks (`no-em-dash.sh`, `scoped-git-add.sh`) run from devkit v0.23.0, which ships them once, instead of a copy in `.claude/hooks/`. Not in the package.
+- Every pull request check runs in one job, devkit's `pr.yml` (v0.26.1), in place of the separate checks, review, worker-size and workflow-audit callers; the dependency scan keeps only its daily run, and the code map and Scorecard run nightly instead of on every push. CI's push to main stays, since it deploys the gallery. Not in the package.
 
 ### Gallery
 
