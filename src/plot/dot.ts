@@ -278,7 +278,7 @@ export function dotPlot<T extends object>(given: DotPlotOptions<T>): string {
         name: s,
         points: names.flatMap((n) => {
           const d = cell.get(markKey(n, s));
-          return d ? [{ at: n, value: d.value, ...(d.bounds ?? {}) }] : [];
+          return d ? [{ at: n, value: d.value, ...d.bounds }] : [];
         }),
       })),
     },

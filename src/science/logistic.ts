@@ -191,7 +191,8 @@ export function fitLogistic(doses: readonly number[], responses: readonly number
     if (fit.rss < best.rss) best = fit;
   }
   // Report the curve with bottom below top: (b, t, e, h) and (t, b, e, -h) are the same curve.
-  let [bottom, top, logE, hill] = best.q;
+  const logE = best.q[2];
+  let [bottom, top, , hill] = best.q;
   if (bottom > top) [bottom, top, hill] = [top, bottom, -hill];
   const fit = { n, bottom, top, ec50: Math.exp(logE), hill, rss: best.rss };
   if (n <= 4) return fit;

@@ -296,7 +296,7 @@ export function readingRanks(
   const order = points
     .map((p, i) => ({ i, band: band(p[1]), x: p[0], y: p[1] }))
     .sort((a, b) => a.band - b.band || a.x - b.x || a.y - b.y);
-  const ranks = new Array<number>(points.length);
+  const ranks = Array.from<number>({ length: points.length });
   order.forEach((p, rank) => {
     ranks[p.i] = rank;
   });

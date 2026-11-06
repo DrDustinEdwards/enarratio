@@ -13,7 +13,8 @@ const types = {
   ".woff2": "font/woff2",
 };
 
-createServer(async (request, response) => {
+/** @param {import("node:http").IncomingMessage} request @param {import("node:http").ServerResponse} response */
+async function serve(request, response) {
   const path = decodeURIComponent(new URL(request.url ?? "/", "http://localhost").pathname);
   const file = normalize(join(root, path.endsWith("/") ? `${path}index.html` : path));
   if (!file.startsWith(root)) return response.writeHead(403).end();
@@ -25,4 +26,9 @@ createServer(async (request, response) => {
   } catch {
     response.writeHead(404).end("not found");
   }
-}).listen(Number(process.argv[2] ?? 4174), "127.0.0.1");
+}
+
+createServer((request, response) => void serve(request, response)).listen(
+  Number(process.argv[2] ?? 4174),
+  "127.0.0.1",
+);

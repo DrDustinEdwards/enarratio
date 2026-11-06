@@ -63,7 +63,7 @@ function spread(ys: readonly number[], top: number, bottom: number): number[] {
       for (let k = 0; k < placed.length; k += 1) placed[k] = (placed[k] as number) - high;
     if (!moved) break;
   }
-  const out = new Array<number>(ys.length);
+  const out = Array.from<number>({ length: ys.length });
   order.forEach((o, k) => {
     out[o.i] = placed[k] as number;
   });

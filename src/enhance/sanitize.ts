@@ -39,7 +39,7 @@ const LINK_ATTRIBUTES = new Set(["href", "xlink:href", "data-enarratio-href"]);
 
 /** Relative and http(s) links only, with no user or password before the host, as the server allows (A11). */
 function safeLink(value: string): boolean {
-  const compact = [...value].filter((ch) => ch.charCodeAt(0) > 0x20).join("");
+  const compact = Array.from(value).filter((ch) => ch.charCodeAt(0) > 0x20).join("");
   if (/^[/\\][/\\]/.test(compact)) return false;
   const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(compact)?.[1]?.toLowerCase();
   if (scheme === undefined) return true;

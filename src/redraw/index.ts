@@ -30,7 +30,7 @@ export type RedrawSpec =
   | { readonly chart: "bar" | "line" | "area"; readonly options: Record<string, unknown> }
   | { readonly narrow: string };
 
-// biome-ignore lint/suspicious/noExplicitAny: each light chart takes its own options.
+// oxlint-disable-next-line typescript/no-explicit-any -- each light chart takes its own options.
 const DRAW: Record<string, (options: any) => string> = {
   bar: barChart,
   line: lineChart,
