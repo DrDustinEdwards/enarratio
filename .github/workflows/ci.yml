@@ -1,7 +1,9 @@
 name: CI
 
 on:
+  # A branch's run comes from its pull request; a push runs only on main, so no commit runs twice.
   push:
+    branches: [main]
   pull_request:
 
 permissions:
