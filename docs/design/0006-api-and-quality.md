@@ -33,11 +33,11 @@ minimal."
 
 (Since 0.2.0 these are optional peer dependencies of the entries that use them: see [0012](0012-subpath-exports.md).)
 
-| Package | Why |
-|---|---|
-| `@observablehq/plot` | Scales, axes and marks, drawn as SVG (author's decision). |
-| `d3-force` | The network layout (author's decision). Already a transitive dependency of Plot. |
-| `linkedom` | A DOM for Plot outside the browser, which works in Workers. |
+| Package              | Why                                                                              |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `@observablehq/plot` | Scales, axes and marks, drawn as SVG (author's decision).                        |
+| `d3-force`           | The network layout (author's decision). Already a transitive dependency of Plot. |
+| `linkedom`           | A DOM for Plot outside the browser, which works in Workers.                      |
 
 All three are pinned to exact versions, as are the development tools, and the
 lockfile is committed. Development tools are kept to one of each kind:
@@ -47,14 +47,14 @@ pixelmatch with pngjs (image comparison).
 
 ## Tests
 
-| Suite | What it proves | Where |
-|---|---|---|
-| Unit | Each chart, primitive, statistic and color function behaves and fails as documented | `test/*.test.ts` |
-| Rendering | The server output of every gallery example is exactly the stored markup, well-formed, named, and free of scripts | `test/render.test.ts`, `test/__snapshots__/render/` |
-| Documentation | Every public export is documented | `test/docs.test.ts` |
-| Accessibility | axe-core finds no WCAG 2.2 A or AA or best-practice violations on the gallery, in both themes, light and dark, with and without script | `test/browser/a11y.test.ts` |
-| Interaction | Keyboard, pointer, legend, brush, update and destroy work in Chrome | `test/browser/enhance.test.ts` |
-| Visual | Every example in both themes, light and dark, matches a stored image | `test/browser/visual.test.ts` |
+| Suite         | What it proves                                                                                                                         | Where                                               |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Unit          | Each chart, primitive, statistic and color function behaves and fails as documented                                                    | `test/*.test.ts`                                    |
+| Rendering     | The server output of every gallery example is exactly the stored markup, well-formed, named, and free of scripts                       | `test/render.test.ts`, `test/__snapshots__/render/` |
+| Documentation | Every public export is documented                                                                                                      | `test/docs.test.ts`                                 |
+| Accessibility | axe-core finds no WCAG 2.2 A or AA or best-practice violations on the gallery, in both themes, light and dark, with and without script | `test/browser/a11y.test.ts`                         |
+| Interaction   | Keyboard, pointer, legend, brush, update and destroy work in Chrome                                                                    | `test/browser/enhance.test.ts`                      |
+| Visual        | Every example in both themes, light and dark, matches a stored image                                                                   | `test/browser/visual.test.ts`                       |
 
 Continuous integration runs all of them on every push and pull request.
 Visual images are stored per platform; CI's Linux images are produced by the

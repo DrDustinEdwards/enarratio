@@ -35,12 +35,12 @@ colorblind-safe differences and readable contrast in light and dark."
 
 `checkTheme` measures, in light and in dark:
 
-| Check | Standard | Severity |
-|---|---|---|
-| Text and muted text on the background | 4.5:1, WCAG 2.2 SC 1.4.3 | error |
-| Series, status, focus and the darkest ramp step on the background | 3:1, WCAG 2.2 SC 1.4.11 | error |
-| Sequential steps move away from the background in order | monotonic contrast | error |
-| Every pair of series colors, with typical vision and simulated protanopia, deuteranopia and tritanopia | CIEDE2000 difference of 10 or more | warning |
+| Check                                                                                                  | Standard                           | Severity |
+| ------------------------------------------------------------------------------------------------------ | ---------------------------------- | -------- |
+| Text and muted text on the background                                                                  | 4.5:1, WCAG 2.2 SC 1.4.3           | error    |
+| Series, status, focus and the darkest ramp step on the background                                      | 3:1, WCAG 2.2 SC 1.4.11            | error    |
+| Sequential steps move away from the background in order                                                | monotonic contrast                 | error    |
+| Every pair of series colors, with typical vision and simulated protanopia, deuteranopia and tritanopia | CIEDE2000 difference of 10 or more | warning  |
 
 Color vision deficiency is simulated with the Machado, Oliveira and Fernandes
 (2009) model at full severity, and differences are measured with CIEDE2000

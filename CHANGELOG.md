@@ -473,6 +473,7 @@ Design records 0011 to 0016 explain each decision.
   `lineChart`, `GenomeFeature` with `genomeTrack`, and so on). `sparkline`,
   `progressRing`, `uptimeStrip`, `stylesheet`, `defineTheme`, `checkTheme`, the
   color functions, the theme types and `enhance` stay where they were.
+
 - **`@observablehq/plot`, `d3-force` and `linkedom` are optional peer
   dependencies, not dependencies.** Install what the entries you import need:
   `enarratio/plot` needs `@observablehq/plot` and `linkedom`; `enarratio/science`
@@ -559,7 +560,7 @@ Design records 0011 to 0016 explain each decision.
   - every `--abscissa-*` custom property, now `--enarratio-*`;
   - the `abscissa:select` and `abscissa:brush` events, now `enarratio:select`
     and `enarratio:brush`.
-  No exported function or type changed its name.
+    No exported function or type changed its name.
 - The repository is `DrDustinEdwards/enarratio` and the gallery is at
   `https://enarratio.dustinedwards.info`; the old gallery address redirects to
   the new one with a 301. The code of conduct's contact is

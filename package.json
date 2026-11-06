@@ -3,26 +3,40 @@
   "version": "0.7.3",
   "description": "Accessible, server-rendered charts and scientific figures for the web",
   "keywords": [
-    "charts",
-    "svg",
-    "server-side-rendering",
     "accessibility",
+    "charts",
     "data-visualization",
+    "observable-plot",
     "scientific-figures",
-    "observable-plot"
+    "server-side-rendering",
+    "svg"
   ],
   "homepage": "https://enarratio.dustinedwards.info",
   "bugs": {
     "url": "https://github.com/DrDustinEdwards/enarratio/issues"
   },
+  "license": "MIT",
+  "author": "Dustin Edwards (https://dustinedwards.info)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DrDustinEdwards/enarratio.git"
   },
-  "license": "MIT",
-  "author": "Dustin Edwards (https://dustinedwards.info)",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "sideEffects": false,
+  "imports": {
+    "#document": {
+      "node": "./dist/render/document.js",
+      "workerd": "./dist/render/document.js",
+      "worker": "./dist/render/document.js",
+      "edge-light": "./dist/render/document.js",
+      "deno": "./dist/render/document.js",
+      "browser": "./dist/render/document.browser.js",
+      "default": "./dist/render/document.js"
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -75,23 +89,6 @@
     },
     "./package.json": "./package.json"
   },
-  "imports": {
-    "#document": {
-      "node": "./dist/render/document.js",
-      "workerd": "./dist/render/document.js",
-      "worker": "./dist/render/document.js",
-      "edge-light": "./dist/render/document.js",
-      "deno": "./dist/render/document.js",
-      "browser": "./dist/render/document.browser.js",
-      "default": "./dist/render/document.js"
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "engines": {
-    "node": ">=22"
-  },
   "publishConfig": {
     "access": "public",
     "tag": "latest"
@@ -110,22 +107,6 @@
     "prepare": "npm run build",
     "size": "node scripts/size-check.mjs",
     "bloat": "devkit-no-bloat --warn-only"
-  },
-  "peerDependencies": {
-    "@observablehq/plot": "0.6.17",
-    "d3-force": "3.0.0",
-    "linkedom": "0.18.14"
-  },
-  "peerDependenciesMeta": {
-    "@observablehq/plot": {
-      "optional": true
-    },
-    "d3-force": {
-      "optional": true
-    },
-    "linkedom": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.33.0",
@@ -153,5 +134,24 @@
     "rolldown": "1.2.16",
     "typescript": "5.9.3",
     "vitest": "4.1.12"
+  },
+  "peerDependencies": {
+    "@observablehq/plot": "0.6.17",
+    "d3-force": "3.0.0",
+    "linkedom": "0.18.14"
+  },
+  "peerDependenciesMeta": {
+    "@observablehq/plot": {
+      "optional": true
+    },
+    "d3-force": {
+      "optional": true
+    },
+    "linkedom": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

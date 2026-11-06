@@ -30,14 +30,14 @@ zone already is.
    origin only.
 3. **The headers** (`site/_headers`, copied into `site/dist`):
 
-   | Header | Value | Why |
-   |---|---|---|
-   | Content-Security-Policy | `default-src 'none'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self'; style-src-elem 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'` | Nothing loads unless listed; scripts only from the site itself and Cloudflare Web Analytics; style sheets only from the site, inline styles only as attributes. |
-   | X-Content-Type-Options | `nosniff` | Files are only what their type says. |
-   | Referrer-Policy | `strict-origin-when-cross-origin` | Other sites see only the origin. |
-   | Cache-Control | `public, max-age=300, must-revalidate` | Five minutes: file names are not hashed, so a longer cache would serve stale pages and scripts after a deploy. |
-   | Strict-Transport-Security | `max-age=31536000` | Browsers use HTTPS for a year after a visit. No `includeSubDomains`: not every dustinedwards.info subdomain is known to be HTTPS-only. |
-   | Permissions-Policy | `accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()` | Device features the gallery never uses are off. |
+   | Header                    | Value                                                                                                                                                                                                                                                                                                         | Why                                                                                                                                                             |
+   | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | Content-Security-Policy   | `default-src 'none'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self'; style-src-elem 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'` | Nothing loads unless listed; scripts only from the site itself and Cloudflare Web Analytics; style sheets only from the site, inline styles only as attributes. |
+   | X-Content-Type-Options    | `nosniff`                                                                                                                                                                                                                                                                                                     | Files are only what their type says.                                                                                                                            |
+   | Referrer-Policy           | `strict-origin-when-cross-origin`                                                                                                                                                                                                                                                                             | Other sites see only the origin.                                                                                                                                |
+   | Cache-Control             | `public, max-age=300, must-revalidate`                                                                                                                                                                                                                                                                        | Five minutes: file names are not hashed, so a longer cache would serve stale pages and scripts after a deploy.                                                  |
+   | Strict-Transport-Security | `max-age=31536000`                                                                                                                                                                                                                                                                                            | Browsers use HTTPS for a year after a visit. No `includeSubDomains`: not every dustinedwards.info subdomain is known to be HTTPS-only.                          |
+   | Permissions-Policy        | `accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()`                                                                                                                                                                                               | Device features the gallery never uses are off.                                                                                                                 |
 
    **Why `style-src-attr` allows `'unsafe-inline'`.** A chart given color
    overrides (`colors`, or `color` on a primitive) sets its palette slots in a
@@ -58,6 +58,7 @@ zone already is.
    this hostname in the zone's Web Analytics settings would let them be removed. Inline styles cannot run
    code, and scripts stay limited to `'self'`, so the risk this admits is
    small. Sites embedding Enarratio charts need the same allowance for styles.
+
 4. **Deploys.** `npm run deploy:gallery` builds the package and the gallery
    and runs a pinned wrangler (`npx --yes wrangler@4.143.0 deploy`, not a
    dependency). The "Deploy gallery" workflow runs it on pushes to `main`

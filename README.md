@@ -77,17 +77,17 @@ runtime dependencies. The charts are separate entry points, each with the
 packages it needs as optional peer dependencies, so a site installs only what
 it draws:
 
-| Import | Holds | Also install |
-|---|---|---|
-| `enarratio` | Core, primitives and `tableChart` | Nothing |
-| `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` and the charts below | `@observablehq/plot linkedom` |
-| `enarratio/science` | `genomeTrack`, `titerPlot`, `doseResponse`, `survivalPlot`, `forestPlot`, `phylogeneticTree`, `networkChart`, and their statistics | `@observablehq/plot d3-force linkedom` |
-| `enarratio/map` | `dotMap` and `choroplethMap`, drawn from your own GeoJSON | Nothing |
-| `enarratio/lite` | `barChart`, `lineChart`, `areaChart` without Observable Plot, for the browser; also `enarratio/lite/bar`, `/line`, `/area` | Nothing |
-| `enarratio/enhance` | Browser interaction | Nothing |
-| `enarratio/redraw` | Redraws a server's chart to its frame's width; `enarratio/redraw/narrow` holds `narrowChart`, the swap to a server's narrow drawing alone | Nothing |
-| `enarratio/themes` | `defaultTheme` | Nothing |
-| `enarratio/base.css` | The theme-free stylesheet | Nothing |
+| Import               | Holds                                                                                                                                     | Also install                           |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `enarratio`          | Core, primitives and `tableChart`                                                                                                         | Nothing                                |
+| `enarratio/plot`     | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` and the charts below                                                       | `@observablehq/plot linkedom`          |
+| `enarratio/science`  | `genomeTrack`, `titerPlot`, `doseResponse`, `survivalPlot`, `forestPlot`, `phylogeneticTree`, `networkChart`, and their statistics        | `@observablehq/plot d3-force linkedom` |
+| `enarratio/map`      | `dotMap` and `choroplethMap`, drawn from your own GeoJSON                                                                                 | Nothing                                |
+| `enarratio/lite`     | `barChart`, `lineChart`, `areaChart` without Observable Plot, for the browser; also `enarratio/lite/bar`, `/line`, `/area`                | Nothing                                |
+| `enarratio/enhance`  | Browser interaction                                                                                                                       | Nothing                                |
+| `enarratio/redraw`   | Redraws a server's chart to its frame's width; `enarratio/redraw/narrow` holds `narrowChart`, the swap to a server's narrow drawing alone | Nothing                                |
+| `enarratio/themes`   | `defaultTheme`                                                                                                                            | Nothing                                |
+| `enarratio/base.css` | The theme-free stylesheet                                                                                                                 | Nothing                                |
 
 (`linkedom` is dropped from browser bundles, which use the browser's own
 document.) To draw bar, line and area charts in the browser, import them from
@@ -190,36 +190,36 @@ all into `site/dist`.
 
 ## Charts
 
-| Function | Import | Draws |
-|---|---|---|
-| `barChart` | `enarratio/plot` | Bars, stacked or grouped, vertical or horizontal, on a category or a time axis; counts rows when no value is given; error bars |
-| `divergingBarChart` | `enarratio/plot` | Signed values about zero, each bar labeled with its sign |
-| `waterfallChart` | `enarratio/plot` | A bridge from one total to another through increases and decreases |
-| `lineChart` | `enarratio/plot` | Lines over time or any number, with gaps, reference lines, event markers, direct labels, log y, and a forecast band with the line dashed after a chosen x |
-| `areaChart` | `enarratio/plot` | Stacked areas over time, or stacked to 100% |
-| `smallMultiples` | `enarratio/plot` | One bar or line chart per group, on shared scales |
-| `scatterPlot` | `enarratio/plot` | Points on linear or log axes, symbols per series, optional regression with 95% band, bubbles with a size legend, error bars |
-| `histogram`, `densityPlot` | `enarratio/plot` | Distributions: binned counts, and kernel density curves |
-| `boxPlot`, `stripPlot` | `enarratio/plot` | Box plots, and every value as a beeswarm |
-| `dotPlot`, `rangePlot`, `dumbbellPlot` | `enarratio/plot` | One row per item: dots (with intervals), low-to-high ranges, and two values joined |
-| `slopeChart` | `enarratio/plot` | Each item's value at two times, labeled at both ends |
-| `pieChart` | `enarratio/plot` | A pie or donut, reported as an issue past six slices |
-| `heatmap` | `enarratio/plot` | A grid on the theme's sequential ramp, with printed values and labeled bins |
-| `tableChart` | `enarratio` | One sortable table with inline bars, heat cells and sparklines |
-| `networkChart` | `enarratio/science` | A force-directed network laid out on the server, deterministic |
-| `titerPlot` | `enarratio/science` | Titers on a dilution axis with geometric mean, 95% CI and limit of detection |
-| `genomeTrack` | `enarratio/science` | Features to scale on a nucleotide axis, arrows by strand, overlaps in lanes |
-| `doseResponse` | `enarratio/science` | A four-parameter logistic curve, fitted or given, with the EC50 marked |
-| `survivalPlot` | `enarratio/science` | Kaplan-Meier curves with censor marks, confidence bands and the number at risk |
-| `forestPlot` | `enarratio/science` | Study estimates with intervals, and a pooled estimate (fixed or random effects) |
-| `phylogeneticTree` | `enarratio/science` | A tree from Newick, rectangular, tips colored by group, support at the nodes |
-| `dotMap` | `enarratio/map` | Points sized by value over your streets or coastlines, landmarks as squares, one highlighted |
-| `choroplethMap` | `enarratio/map` | Regions in five labeled steps of the sequential ramp, values printed where they fit, no data outlined |
-| `sparkline` | `enarratio` | A word-sized trend line |
-| `progressRing` | `enarratio` | Progress toward a total |
-| `uptimeStrip` | `enarratio` | Up, degraded, down or unmeasured, one tick per period |
-| `heatStrip` | `enarratio` | A one-row strip on the sequential ramp, one cell per value |
-| `timeline` | `enarratio` | Lanes for sites or agents, spans and point events over a time window, status by color and shape |
+| Function                               | Import              | Draws                                                                                                                                                     |
+| -------------------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `barChart`                             | `enarratio/plot`    | Bars, stacked or grouped, vertical or horizontal, on a category or a time axis; counts rows when no value is given; error bars                            |
+| `divergingBarChart`                    | `enarratio/plot`    | Signed values about zero, each bar labeled with its sign                                                                                                  |
+| `waterfallChart`                       | `enarratio/plot`    | A bridge from one total to another through increases and decreases                                                                                        |
+| `lineChart`                            | `enarratio/plot`    | Lines over time or any number, with gaps, reference lines, event markers, direct labels, log y, and a forecast band with the line dashed after a chosen x |
+| `areaChart`                            | `enarratio/plot`    | Stacked areas over time, or stacked to 100%                                                                                                               |
+| `smallMultiples`                       | `enarratio/plot`    | One bar or line chart per group, on shared scales                                                                                                         |
+| `scatterPlot`                          | `enarratio/plot`    | Points on linear or log axes, symbols per series, optional regression with 95% band, bubbles with a size legend, error bars                               |
+| `histogram`, `densityPlot`             | `enarratio/plot`    | Distributions: binned counts, and kernel density curves                                                                                                   |
+| `boxPlot`, `stripPlot`                 | `enarratio/plot`    | Box plots, and every value as a beeswarm                                                                                                                  |
+| `dotPlot`, `rangePlot`, `dumbbellPlot` | `enarratio/plot`    | One row per item: dots (with intervals), low-to-high ranges, and two values joined                                                                        |
+| `slopeChart`                           | `enarratio/plot`    | Each item's value at two times, labeled at both ends                                                                                                      |
+| `pieChart`                             | `enarratio/plot`    | A pie or donut, reported as an issue past six slices                                                                                                      |
+| `heatmap`                              | `enarratio/plot`    | A grid on the theme's sequential ramp, with printed values and labeled bins                                                                               |
+| `tableChart`                           | `enarratio`         | One sortable table with inline bars, heat cells and sparklines                                                                                            |
+| `networkChart`                         | `enarratio/science` | A force-directed network laid out on the server, deterministic                                                                                            |
+| `titerPlot`                            | `enarratio/science` | Titers on a dilution axis with geometric mean, 95% CI and limit of detection                                                                              |
+| `genomeTrack`                          | `enarratio/science` | Features to scale on a nucleotide axis, arrows by strand, overlaps in lanes                                                                               |
+| `doseResponse`                         | `enarratio/science` | A four-parameter logistic curve, fitted or given, with the EC50 marked                                                                                    |
+| `survivalPlot`                         | `enarratio/science` | Kaplan-Meier curves with censor marks, confidence bands and the number at risk                                                                            |
+| `forestPlot`                           | `enarratio/science` | Study estimates with intervals, and a pooled estimate (fixed or random effects)                                                                           |
+| `phylogeneticTree`                     | `enarratio/science` | A tree from Newick, rectangular, tips colored by group, support at the nodes                                                                              |
+| `dotMap`                               | `enarratio/map`     | Points sized by value over your streets or coastlines, landmarks as squares, one highlighted                                                              |
+| `choroplethMap`                        | `enarratio/map`     | Regions in five labeled steps of the sequential ramp, values printed where they fit, no data outlined                                                     |
+| `sparkline`                            | `enarratio`         | A word-sized trend line                                                                                                                                   |
+| `progressRing`                         | `enarratio`         | Progress toward a total                                                                                                                                   |
+| `uptimeStrip`                          | `enarratio`         | Up, degraded, down or unmeasured, one tick per period                                                                                                     |
+| `heatStrip`                            | `enarratio`         | A one-row strip on the sequential ramp, one cell per value                                                                                                |
+| `timeline`                             | `enarratio`         | Lanes for sites or agents, spans and point events over a time window, status by color and shape                                                           |
 
 Forecasts are computed by you and only drawn by Enarratio: give `lineChart` the
 bounds as fields and a boundary, and it shades the band, dashes the line after

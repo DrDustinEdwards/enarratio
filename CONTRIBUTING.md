@@ -50,6 +50,7 @@ record in `docs/design/`.
    "Visual snapshots" workflow (which also pushes them to a
    `visual-snapshots/<branch>` branch, so they can be fetched with git), and a
    maintainer commits them after looking at each one.
+
 5. Open a pull request. The template lists what reviewers look for. CI must
    pass.
 

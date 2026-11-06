@@ -459,13 +459,11 @@ export function dumbbellPlot<T extends object>(given: DumbbellPlotOptions<T>): s
   const fromLabel = options.fromLabel ?? from;
   const toLabel = options.toLabel ?? to;
   const plan = planSeries(kind, [fromLabel, toLabel], options.colors);
-  const pairs = data.map(
-    (row, i): Pair => ({
-      item: r.raw[i] as string,
-      from: readNumber(kind, row, from, i),
-      to: readNumber(kind, row, to, i),
-    }),
-  );
+  const pairs = data.map((row, i): Pair => ({
+    item: r.raw[i] as string,
+    from: readNumber(kind, row, from, i),
+    to: readNumber(kind, row, to, i),
+  }));
   let names = r.names;
   if (options.sort === "change") {
     const change = new Map(pairs.map((p) => [p.item, p.to - p.from]));

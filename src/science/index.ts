@@ -10,17 +10,8 @@
 export { type DoseResponseOptions, doseResponse } from "./dose-response.js";
 export { type ForestPlotOptions, forestPlot } from "./forest.js";
 export { type GenomeFeature, type GenomeTrackOptions, genomeTrack } from "./genome.js";
-export {
-  kaplanMeier,
-  type SurvivalEstimate,
-  type SurvivalStep,
-} from "./kaplan-meier.js";
-export {
-  fitLogistic,
-  type LogisticFit,
-  type LogisticParameters,
-  logistic,
-} from "./logistic.js";
+export { kaplanMeier, type SurvivalEstimate, type SurvivalStep } from "./kaplan-meier.js";
+export { fitLogistic, type LogisticFit, type LogisticParameters, logistic } from "./logistic.js";
 export { type PooledEstimate, poolEstimates, type StudyEstimate } from "./meta.js";
 export {
   type NetworkChartOptions,

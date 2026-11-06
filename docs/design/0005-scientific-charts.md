@@ -46,14 +46,14 @@ algorithm. The data table gives every coordinate.
 
 Ordered by how many sites and papers need them, and by how much they reuse.
 
-| Stage | Chart | Built from | Notes |
-|---|---|---|---|
-| 0.2 | **Dose-response curves** | `scatterPlot` points, a four-parameter logistic fit, `lineChart`-style curve | Fit (Levenberg-Marquardt) in `src/science/`, returning EC50/IC50 with confidence intervals; log x axis; tested against published datasets. |
-| 0.2 | **Growth curves** | `lineChart` with log y | Replicate means with error bars; optional doubling time from the exponential phase. |
-| 0.3 | **Dilution plots** (endpoint titration, plaque counts across dilutions) | `titerPlot` axis and the heatmap's cells | Reed-Muench and Spearman-Karber TCID50 in `src/science/`, with the plate drawn as a grid. |
-| 0.3 | **Gel-style band plots** | Custom marks on a band scale | Lanes as columns, bands at log-scaled molecular weights against a ladder; for showing PCR and Western results as data, not photographs. |
-| 0.4 | **Phylogenetic trees** | d3-hierarchy layout, Plot links and dots | Newick parser; rectangular and radial layouts; tips colored by metadata; keyboard traversal of the tree. Adds d3-hierarchy as a dependency. |
-| 0.5 | **County-level surveillance maps** | Plot `geo` mark, the sequential ramp | Choropleths from caller-supplied TopoJSON (Enarratio will not bundle boundaries); the data table lists every county; a small-multiples form for weeks. |
+| Stage | Chart                                                                   | Built from                                                                   | Notes                                                                                                                                                  |
+| ----- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 0.2   | **Dose-response curves**                                                | `scatterPlot` points, a four-parameter logistic fit, `lineChart`-style curve | Fit (Levenberg-Marquardt) in `src/science/`, returning EC50/IC50 with confidence intervals; log x axis; tested against published datasets.             |
+| 0.2   | **Growth curves**                                                       | `lineChart` with log y                                                       | Replicate means with error bars; optional doubling time from the exponential phase.                                                                    |
+| 0.3   | **Dilution plots** (endpoint titration, plaque counts across dilutions) | `titerPlot` axis and the heatmap's cells                                     | Reed-Muench and Spearman-Karber TCID50 in `src/science/`, with the plate drawn as a grid.                                                              |
+| 0.3   | **Gel-style band plots**                                                | Custom marks on a band scale                                                 | Lanes as columns, bands at log-scaled molecular weights against a ladder; for showing PCR and Western results as data, not photographs.                |
+| 0.4   | **Phylogenetic trees**                                                  | d3-hierarchy layout, Plot links and dots                                     | Newick parser; rectangular and radial layouts; tips colored by metadata; keyboard traversal of the tree. Adds d3-hierarchy as a dependency.            |
+| 0.5   | **County-level surveillance maps**                                      | Plot `geo` mark, the sequential ramp                                         | Choropleths from caller-supplied TopoJSON (Enarratio will not bundle boundaries); the data table lists every county; a small-multiples form for weeks. |
 
 Each stage adds its tests (unit, stored output, accessibility, visual), a
 gallery example, an API section and a changelog entry before release.

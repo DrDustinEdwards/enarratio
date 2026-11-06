@@ -3,17 +3,17 @@
 Enarratio is one npm package with several entry points, so a site installs and
 ships only what it uses.
 
-| Import | Holds | Needs |
-|---|---|---|
-| `enarratio` | Core: HTML helpers, theme types, `defineTheme`, `stylesheet`, `baseStylesheet`, `checkTheme`, color math, figure and data-table assembly, the primitives | Nothing. No runtime dependencies. |
-| `enarratio/base.css` | The theme-free base rules as a stylesheet file | Nothing |
-| `enarratio/plot` | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` | Peers `@observablehq/plot`, and `linkedom` outside a browser |
-| `enarratio/science` | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart` | Peers `@observablehq/plot` and `d3-force`, and `linkedom` outside a browser |
-| `enarratio/map` | `dotMap`, `choroplethMap`, drawn from the caller's GeoJSON | Nothing |
-| `enarratio/lite` | `barChart`, `lineChart`, `areaChart` drawn without Observable Plot; also one entry per chart: `enarratio/lite/bar`, `enarratio/lite/line`, `enarratio/lite/area` | Nothing |
-| `enarratio/enhance` | Interaction for charts already on the page; runs in the browser | Nothing |
-| `enarratio/redraw` | Draws a server's chart again at its frame's width in the browser, then enhances it | Nothing |
-| `enarratio/themes` | The themes that ship with the package | Nothing |
+| Import               | Holds                                                                                                                                                            | Needs                                                                       |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `enarratio`          | Core: HTML helpers, theme types, `defineTheme`, `stylesheet`, `baseStylesheet`, `checkTheme`, color math, figure and data-table assembly, the primitives         | Nothing. No runtime dependencies.                                           |
+| `enarratio/base.css` | The theme-free base rules as a stylesheet file                                                                                                                   | Nothing                                                                     |
+| `enarratio/plot`     | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap`                                                                                                   | Peers `@observablehq/plot`, and `linkedom` outside a browser                |
+| `enarratio/science`  | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart`                                                                                                   | Peers `@observablehq/plot` and `d3-force`, and `linkedom` outside a browser |
+| `enarratio/map`      | `dotMap`, `choroplethMap`, drawn from the caller's GeoJSON                                                                                                       | Nothing                                                                     |
+| `enarratio/lite`     | `barChart`, `lineChart`, `areaChart` drawn without Observable Plot; also one entry per chart: `enarratio/lite/bar`, `enarratio/lite/line`, `enarratio/lite/area` | Nothing                                                                     |
+| `enarratio/enhance`  | Interaction for charts already on the page; runs in the browser                                                                                                  | Nothing                                                                     |
+| `enarratio/redraw`   | Draws a server's chart again at its frame's width in the browser, then enhances it                                                                               | Nothing                                                                     |
+| `enarratio/themes`   | The themes that ship with the package                                                                                                                            | Nothing                                                                     |
 
 `@observablehq/plot`, `d3-force` and `linkedom` are optional peer dependencies:
 npm 7 and later does not install them for a site that imports only the core.
@@ -143,27 +143,27 @@ through [`PrimitiveFigureOptions`](#primitivefigureoptions). A site sets the
 shared ones once (`const site = { locale: "de-DE", strict: true }`) and
 spreads them into each chart.
 
-| Option | Type | Meaning |
-|---|---|---|
-| `alt` | `string` | What the chart shows, including its finding. Names the SVG for assistive technology and is shown as the finding under the title. Without it the chart names itself from its overview and summary and reports `alt-missing` (B52). |
-| `title` | `string` | Visible title above the chart. Without it, a `title-missing` issue. |
-| `subtitle` | `string` | A line under the title: what the chart shows, or how to read it (B17). |
-| `caption` | `string` | Visible caption below: method, caveats. |
-| `notes` | `string` or `string[]` | Notes below: definitions, exclusions (B23). |
-| `source` | `string` or `{ name, href? }` | The source line, linked when `href` is given (relative or http(s)). |
-| `byline` | `string` | Who made the chart, in the source line. |
-| `summary` | `string` or `false` | The summary under the chart. Computed from the data by default: each series' trend (with a peak or low that stands out), the highest and lowest values, values far from the rest, and the last interval drawn (B39, B24). `false` leaves it out. |
-| `csv` | `boolean` | The "Download CSV" link, built from the data table as a `data:` URL with `download` (default `true`). Over 100,000 characters there is no link and a `csv-too-large` issue. |
-| `csvHref` | `string` | A CSV file the site serves, linked instead (build it with [`toCsv`](#tocsv)). |
-| `locale` | `string` | BCP 47 locale for generated numbers and dates (default `"en-US"`). |
-| `strings` | [`StringOverrides`](#stringoverrides) | Translations of the generated text; see [`Strings`](#strings). |
-| `strict` | `boolean` | Throw on the first [issue](#chartissue) instead of reporting it, so a build fails. |
-| `onIssue` | `(issue: ChartIssue) => void` | Receives issues instead of `console.warn`. |
-| `id` | `string` | The figure's `id`, reported as `chartId` in events. |
-| `width`, `height` | `number` | Drawing size in CSS pixels, positive and finite. Drawings 480 pixels or wider keep at least 30rem on narrow screens and scroll sideways inside the figure, so their text stays readable. That frame is in the tab order (`tabindex="0"`) and named "{title}, scrolls sideways" ("Chart" without a title), so a keyboard can scroll it; `enhance()` drops that tab stop once the marks take focus. |
-| `dataTable` | `"details"` or `"visually-hidden"` | How the always-present data table is shown. Default `"details"`, closed, labeled "Show data" (and "Hide data" when open). |
-| `hoverTitles` | `boolean` | The browser's hover title (a `<title>`) on each mark, on by default. `false` leaves them out, for a site that shows no hover tooltips; each mark's details move to `data-enarratio-label`, which `enhance()` still names its points with, and the data stay in the table. |
-| `controls` | `boolean` | The controls `enhance()` adds with its default options, written into the figure ahead of it, inert: Show table, Play as sound (two or more marks), Pick a range (a continuous x axis), the downloads (beside the CSV link, or in the control row) and Copy embed (with an `id`). The layer swaps in the working ones, so the page does not shift when it loads; with scripts off they are hidden. On by default; `false` leaves them out, for a page that never calls `enhance()` or turns those controls off. |
+| Option            | Type                                  | Meaning                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `alt`             | `string`                              | What the chart shows, including its finding. Names the SVG for assistive technology and is shown as the finding under the title. Without it the chart names itself from its overview and summary and reports `alt-missing` (B52).                                                                                                                                                                                                                                                                              |
+| `title`           | `string`                              | Visible title above the chart. Without it, a `title-missing` issue.                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `subtitle`        | `string`                              | A line under the title: what the chart shows, or how to read it (B17).                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `caption`         | `string`                              | Visible caption below: method, caveats.                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `notes`           | `string` or `string[]`                | Notes below: definitions, exclusions (B23).                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `source`          | `string` or `{ name, href? }`         | The source line, linked when `href` is given (relative or http(s)).                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `byline`          | `string`                              | Who made the chart, in the source line.                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `summary`         | `string` or `false`                   | The summary under the chart. Computed from the data by default: each series' trend (with a peak or low that stands out), the highest and lowest values, values far from the rest, and the last interval drawn (B39, B24). `false` leaves it out.                                                                                                                                                                                                                                                               |
+| `csv`             | `boolean`                             | The "Download CSV" link, built from the data table as a `data:` URL with `download` (default `true`). Over 100,000 characters there is no link and a `csv-too-large` issue.                                                                                                                                                                                                                                                                                                                                    |
+| `csvHref`         | `string`                              | A CSV file the site serves, linked instead (build it with [`toCsv`](#tocsv)).                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `locale`          | `string`                              | BCP 47 locale for generated numbers and dates (default `"en-US"`).                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `strings`         | [`StringOverrides`](#stringoverrides) | Translations of the generated text; see [`Strings`](#strings).                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `strict`          | `boolean`                             | Throw on the first [issue](#chartissue) instead of reporting it, so a build fails.                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `onIssue`         | `(issue: ChartIssue) => void`         | Receives issues instead of `console.warn`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `id`              | `string`                              | The figure's `id`, reported as `chartId` in events.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `width`, `height` | `number`                              | Drawing size in CSS pixels, positive and finite. Drawings 480 pixels or wider keep at least 30rem on narrow screens and scroll sideways inside the figure, so their text stays readable. That frame is in the tab order (`tabindex="0"`) and named "{title}, scrolls sideways" ("Chart" without a title), so a keyboard can scroll it; `enhance()` drops that tab stop once the marks take focus.                                                                                                              |
+| `dataTable`       | `"details"` or `"visually-hidden"`    | How the always-present data table is shown. Default `"details"`, closed, labeled "Show data" (and "Hide data" when open).                                                                                                                                                                                                                                                                                                                                                                                      |
+| `hoverTitles`     | `boolean`                             | The browser's hover title (a `<title>`) on each mark, on by default. `false` leaves them out, for a site that shows no hover tooltips; each mark's details move to `data-enarratio-label`, which `enhance()` still names its points with, and the data stay in the table.                                                                                                                                                                                                                                      |
+| `controls`        | `boolean`                             | The controls `enhance()` adds with its default options, written into the figure ahead of it, inert: Show table, Play as sound (two or more marks), Pick a range (a continuous x axis), the downloads (beside the CSV link, or in the control row) and Copy embed (with an `id`). The layer swaps in the working ones, so the page does not shift when it loads; with scripts off they are hidden. On by default; `false` leaves them out, for a page that never calls `enhance()` or turns those controls off. |
 
 Bar, line, area and scatter charts, and the diverging, waterfall, small
 multiples, histogram, density, box, strip, dot, range and dumbbell charts and
@@ -179,16 +179,33 @@ A chart returns:
     <p class="enarratio-subtitle">...</p>
     <p class="enarratio-finding" aria-hidden="true">{alt}</p>
   </figcaption>
-  <p class="enarratio-overview enarratio-visually-hidden">Bar chart with 18 points. X axis, Year: 2019 to 2024. ...</p>
-  <ul class="enarratio-legend">...</ul>
-  <div class="enarratio-frame enarratio-frame-wide" tabindex="0" role="group" aria-label="{title}, scrolls sideways">
+  <p class="enarratio-overview enarratio-visually-hidden">
+    Bar chart with 18 points. X axis, Year: 2019 to 2024. ...
+  </p>
+  <ul class="enarratio-legend">
+    ...
+  </ul>
+  <div
+    class="enarratio-frame enarratio-frame-wide"
+    tabindex="0"
+    role="group"
+    aria-label="{title}, scrolls sideways"
+  >
     <svg role="img" aria-label="{alt}">... one keyed element per datum ...</svg>
   </div>
   <p class="enarratio-summary">Publications rose from 3 (2019) to 7 (2024). ...</p>
   <p class="enarratio-caption">...</p>
   <p class="enarratio-note">Notes: ...</p>
-  <p class="enarratio-source">Source: <a href="...">...</a> · By ... · <a class="enarratio-csv" download="....csv" href="data:text/csv;...">Download CSV</a></p>
-  <details class="enarratio-data"><summary>Show data / Hide data</summary><table>...</table></details>
+  <p class="enarratio-source">
+    Source: <a href="...">...</a> · By ... ·
+    <a class="enarratio-csv" download="....csv" href="data:text/csv;...">Download CSV</a>
+  </p>
+  <details class="enarratio-data">
+    <summary>Show data / Hide data</summary>
+    <table>
+      ...
+    </table>
+  </details>
 </figure>
 ```
 
@@ -238,7 +255,15 @@ Median, Running total, no data, Forecast, the statuses and so on); see
 generates is translated, and every number in it follows the locale.
 
 ```ts
-barChart({ ...options, locale: "de-DE", strings: { showData: "Daten zeigen", hideData: "Daten verbergen", downloadCsv: "CSV herunterladen" } });
+barChart({
+  ...options,
+  locale: "de-DE",
+  strings: {
+    showData: "Daten zeigen",
+    hideData: "Daten verbergen",
+    downloadCsv: "CSV herunterladen",
+  },
+});
 ```
 
 ### `StringOverrides`
@@ -1167,13 +1192,13 @@ screen reader. The sentence, the columns and the words in them come from the
 options' `strings` (and numbers from `locale`), as on a chart; the column names
 below are the English ones.
 
-| Companion | Columns | One row per |
-|---|---|---|
-| `sparklineTable` | Position, the label (or "Value") | Value |
-| `uptimeStripTable` | Period, Status | Period |
-| `progressRingTable` | Measure, Value, Total, Percent | Ring (one row) |
-| `timelineTable` | Event, Lane, Status, Start, End | Event, in time order |
-| `heatStripTable` | Cell, Value, Ramp step | Cell |
+| Companion           | Columns                          | One row per          |
+| ------------------- | -------------------------------- | -------------------- |
+| `sparklineTable`    | Position, the label (or "Value") | Value                |
+| `uptimeStripTable`  | Period, Status                   | Period               |
+| `progressRingTable` | Measure, Value, Total, Percent   | Ring (one row)       |
+| `timelineTable`     | Event, Lane, Status, Start, End  | Event, in time order |
+| `heatStripTable`    | Cell, Value, Ramp step           | Cell                 |
 
 ### `PrimitiveFigureOptions`
 
@@ -1377,18 +1402,18 @@ so a theme can be as small as one property or as large as all of them.
 following the page's `color-scheme`. A site using `enarratio/base.css` defines
 them itself. They have no fallback: undefined, a rule using one is ignored.
 
-| Property | Meaning |
-|---|---|
-| `--enarratio-background`, `--enarratio-text`, `--enarratio-text-muted` | Page, text and muted text colors |
-| `--enarratio-grid`, `--enarratio-focus` | Gridlines and rules; the focus ring |
-| `--enarratio-series-1` to `--enarratio-series-8` | The eight series colors, in order |
-| `--enarratio-series-text-1` to `-8` | The label color that reads best on each series color |
-| `--enarratio-series-label-1` to `-8` | Each series' shade for its name written on the background, at 4.5:1. Undefined, the base rules mix the series color 55% with the text color |
-| `--enarratio-sequential-1` to `--enarratio-sequential-5` | The five-step ramp, least to most |
-| `--enarratio-sequential-text-1` to `-5` | The label color that reads best on each ramp step |
-| `--enarratio-sequential-edge-1` to `-5` | The edge round each ramp step's cells and legend swatch, at 3:1, or `transparent`. Undefined, the base rules draw steps 1 to 3 with an edge in the muted text color |
-| `--enarratio-status-good`, `-warning`, `-bad`, `-unknown` | Status colors |
-| `--enarratio-font`, `--enarratio-font-numeric` | Body and numeric font stacks |
+| Property                                                               | Meaning                                                                                                                                                             |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--enarratio-background`, `--enarratio-text`, `--enarratio-text-muted` | Page, text and muted text colors                                                                                                                                    |
+| `--enarratio-grid`, `--enarratio-focus`                                | Gridlines and rules; the focus ring                                                                                                                                 |
+| `--enarratio-series-1` to `--enarratio-series-8`                       | The eight series colors, in order                                                                                                                                   |
+| `--enarratio-series-text-1` to `-8`                                    | The label color that reads best on each series color                                                                                                                |
+| `--enarratio-series-label-1` to `-8`                                   | Each series' shade for its name written on the background, at 4.5:1. Undefined, the base rules mix the series color 55% with the text color                         |
+| `--enarratio-sequential-1` to `--enarratio-sequential-5`               | The five-step ramp, least to most                                                                                                                                   |
+| `--enarratio-sequential-text-1` to `-5`                                | The label color that reads best on each ramp step                                                                                                                   |
+| `--enarratio-sequential-edge-1` to `-5`                                | The edge round each ramp step's cells and legend swatch, at 3:1, or `transparent`. Undefined, the base rules draw steps 1 to 3 with an edge in the muted text color |
+| `--enarratio-status-good`, `-warning`, `-bad`, `-unknown`              | Status colors                                                                                                                                                       |
+| `--enarratio-font`, `--enarratio-font-numeric`                         | Body and numeric font stacks                                                                                                                                        |
 
 Gridlines are the one theme choice that is not a property: hide a direction
 with `.enarratio [data-enarratio-mark="x-grid"] { display: none; }` (or
@@ -1399,50 +1424,50 @@ with `.enarratio [data-enarratio-mark="x-grid"] { display: none; }` (or
 Each has the fallback shown, which is what Enarratio draws when it is unset.
 A test keeps this table and the stylesheet in step.
 
-| Property | Fallback | Controls |
-|---|---|---|
-| `--enarratio-font-size` | `1rem` | Text size of a figure; the other text sizes are relative to it |
-| `--enarratio-font-size-mark` | `0.75rem` | Text inside the drawing: tick labels, direct labels. Raised on narrow screens so it never renders under 12px |
-| `--enarratio-font-size-small` | `0.875em` | Caption, legend and data table |
-| `--enarratio-font-size-tooltip` | `0.8125rem` | Tooltip text |
-| `--enarratio-font-weight-title` | `600` | The visible title |
-| `--enarratio-font-weight-emphasis` | `600` | A pressed legend button |
-| `--enarratio-line-height-tooltip` | `1.35` | Tooltip lines |
-| `--enarratio-space` | `0.5em` | Gap between title, legend, chart, caption and data table |
-| `--enarratio-gap` | `1em` | Between legend entries |
-| `--enarratio-gap-row` | `0.25em` | Between wrapped legend rows |
-| `--enarratio-gap-inline` | `0.4em` | Between a swatch and its label |
-| `--enarratio-padding-button` | `0.125em 0.25em` | Legend toggle buttons |
-| `--enarratio-cell-padding` | `0.2em 0.75em 0.2em 0` | Data table cells |
-| `--enarratio-border-width` | `1px` | Table rules, legend buttons, tooltip |
-| `--enarratio-radius` | `0.25em` | Legend toggle buttons |
-| `--enarratio-radius-swatch` | `0.15em` | Legend swatches |
-| `--enarratio-radius-tooltip` | `0.3em` | The tooltip |
-| `--enarratio-swatch-size` | `0.8em` | Legend swatches |
-| `--enarratio-tooltip-max-width` | `18em` | The tooltip |
-| `--enarratio-tooltip-padding` | `0.35em 0.6em` | The tooltip |
-| `--enarratio-tooltip-shadow` | `0 2px 8px rgb(0 0 0 / 15%)` | The tooltip |
-| `--enarratio-z-tooltip` | `10` | Stacking of the tooltip |
-| `--enarratio-opacity-dimmed` | `0.25` | Marks outside the current filter |
-| `--enarratio-opacity-faded` | `0.5` | Other series while a point has the pointer or focus |
-| `--enarratio-z-expanded` | `20` | Stacking of an expanded chart |
-| `--enarratio-padding-expanded` | `1rem` | Padding of an expanded chart |
-| `--enarratio-opacity-brush` | `0.15` | Fill of a brushed range |
-| `--enarratio-opacity-texture` | `0.6` | Textures on filled series 2 to 8 and their legend swatches (1 under more contrast and forced colors) |
-| `--enarratio-cell-edge-width` | `1px` | The edge round a ramp step's cells (heatmap, heat strip) |
-| `--enarratio-bar-gap` | `1px` | The grid-colored edge between adjacent bars and stacked segments |
-| `--enarratio-halo-width` | `3px` | The halo of bar color behind a name printed on a textured bar |
-| `--enarratio-focus-width-inner` | `5px` | Inner (background) ring on a focused point, twice its width |
-| `--enarratio-focus-width-outer` | `2.5px` | Outer (focus color) ring on a focused point |
-| `--enarratio-focus-outline-width` | `3px` | Outline on a focused button, field or frame |
-| `--enarratio-focus-outline-offset` | `2px` | Distance of that outline |
-| `--enarratio-timeline-list-indent` | `2.25em` | Indent of the timeline's plain list on narrow screens |
-| `--enarratio-duration-hover` | `150ms` | Dimming and un-dimming |
-| `--enarratio-duration-grow` | `600ms` | Bars growing in |
-| `--enarratio-duration-fade` | `500ms` | Dots, areas and cells fading in |
-| `--enarratio-duration-draw` | `800ms` | Lines drawing in |
-| `--enarratio-ease-grow` | `cubic-bezier(0.2, 0.7, 0.3, 1)` | Easing of bars growing in |
-| `--enarratio-ease-out` | `ease-out` | Easing of the other timings |
+| Property                           | Fallback                         | Controls                                                                                                     |
+| ---------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `--enarratio-font-size`            | `1rem`                           | Text size of a figure; the other text sizes are relative to it                                               |
+| `--enarratio-font-size-mark`       | `0.75rem`                        | Text inside the drawing: tick labels, direct labels. Raised on narrow screens so it never renders under 12px |
+| `--enarratio-font-size-small`      | `0.875em`                        | Caption, legend and data table                                                                               |
+| `--enarratio-font-size-tooltip`    | `0.8125rem`                      | Tooltip text                                                                                                 |
+| `--enarratio-font-weight-title`    | `600`                            | The visible title                                                                                            |
+| `--enarratio-font-weight-emphasis` | `600`                            | A pressed legend button                                                                                      |
+| `--enarratio-line-height-tooltip`  | `1.35`                           | Tooltip lines                                                                                                |
+| `--enarratio-space`                | `0.5em`                          | Gap between title, legend, chart, caption and data table                                                     |
+| `--enarratio-gap`                  | `1em`                            | Between legend entries                                                                                       |
+| `--enarratio-gap-row`              | `0.25em`                         | Between wrapped legend rows                                                                                  |
+| `--enarratio-gap-inline`           | `0.4em`                          | Between a swatch and its label                                                                               |
+| `--enarratio-padding-button`       | `0.125em 0.25em`                 | Legend toggle buttons                                                                                        |
+| `--enarratio-cell-padding`         | `0.2em 0.75em 0.2em 0`           | Data table cells                                                                                             |
+| `--enarratio-border-width`         | `1px`                            | Table rules, legend buttons, tooltip                                                                         |
+| `--enarratio-radius`               | `0.25em`                         | Legend toggle buttons                                                                                        |
+| `--enarratio-radius-swatch`        | `0.15em`                         | Legend swatches                                                                                              |
+| `--enarratio-radius-tooltip`       | `0.3em`                          | The tooltip                                                                                                  |
+| `--enarratio-swatch-size`          | `0.8em`                          | Legend swatches                                                                                              |
+| `--enarratio-tooltip-max-width`    | `18em`                           | The tooltip                                                                                                  |
+| `--enarratio-tooltip-padding`      | `0.35em 0.6em`                   | The tooltip                                                                                                  |
+| `--enarratio-tooltip-shadow`       | `0 2px 8px rgb(0 0 0 / 15%)`     | The tooltip                                                                                                  |
+| `--enarratio-z-tooltip`            | `10`                             | Stacking of the tooltip                                                                                      |
+| `--enarratio-opacity-dimmed`       | `0.25`                           | Marks outside the current filter                                                                             |
+| `--enarratio-opacity-faded`        | `0.5`                            | Other series while a point has the pointer or focus                                                          |
+| `--enarratio-z-expanded`           | `20`                             | Stacking of an expanded chart                                                                                |
+| `--enarratio-padding-expanded`     | `1rem`                           | Padding of an expanded chart                                                                                 |
+| `--enarratio-opacity-brush`        | `0.15`                           | Fill of a brushed range                                                                                      |
+| `--enarratio-opacity-texture`      | `0.6`                            | Textures on filled series 2 to 8 and their legend swatches (1 under more contrast and forced colors)         |
+| `--enarratio-cell-edge-width`      | `1px`                            | The edge round a ramp step's cells (heatmap, heat strip)                                                     |
+| `--enarratio-bar-gap`              | `1px`                            | The grid-colored edge between adjacent bars and stacked segments                                             |
+| `--enarratio-halo-width`           | `3px`                            | The halo of bar color behind a name printed on a textured bar                                                |
+| `--enarratio-focus-width-inner`    | `5px`                            | Inner (background) ring on a focused point, twice its width                                                  |
+| `--enarratio-focus-width-outer`    | `2.5px`                          | Outer (focus color) ring on a focused point                                                                  |
+| `--enarratio-focus-outline-width`  | `3px`                            | Outline on a focused button, field or frame                                                                  |
+| `--enarratio-focus-outline-offset` | `2px`                            | Distance of that outline                                                                                     |
+| `--enarratio-timeline-list-indent` | `2.25em`                         | Indent of the timeline's plain list on narrow screens                                                        |
+| `--enarratio-duration-hover`       | `150ms`                          | Dimming and un-dimming                                                                                       |
+| `--enarratio-duration-grow`        | `600ms`                          | Bars growing in                                                                                              |
+| `--enarratio-duration-fade`        | `500ms`                          | Dots, areas and cells fading in                                                                              |
+| `--enarratio-duration-draw`        | `800ms`                          | Lines drawing in                                                                                             |
+| `--enarratio-ease-grow`            | `cubic-bezier(0.2, 0.7, 0.3, 1)` | Easing of bars growing in                                                                                    |
+| `--enarratio-ease-out`             | `ease-out`                       | Easing of the other timings                                                                                  |
 
 Not properties, on purpose: the 30rem minimum width of a wide drawing (the
 same threshold decides whether a figure scrolls, in code, from the drawing's
@@ -1558,20 +1583,20 @@ re-applies them.
 
 `{ tooltips?; filter?; brush?; entrance?; table?; expand?; url?; download?; tactile?; embed?; sound?; strings? }`.
 
-| Option | Default | Does |
-|---|---|---|
-| `tooltips` | `true` | Hover and focus details on every mark |
-| `filter` | `true` | A click, Enter or Space on a mark or legend entry filters by it |
-| `brush` | `true` | On a continuous x axis, a range by drag, two clicks, Shift with arrows, or a from-and-to form ("Pick a range") |
-| `entrance` | `true` | Marks animate in the first time the chart scrolls into view |
-| `table` | `true` | The data table sorts by any column (a button in each header, `aria-sort`), and a "Show table" button swaps the chart for the table and back |
-| `expand` | `false` | An "Expand" button fills the window with the chart; Escape, the button, or focus leaving the chart closes it |
-| `url` | `false` | Keeps the filter and range in the address as `?{id}={field}:{value}` and `?{id}-range={low}..{high}`, so a link reproduces the view. Needs the figure's `id`. A view read from the address fires `enarratio:select` or `enarratio:brush`, so the page can follow it |
-| `download` | `true` | "Download SVG" and "Download PNG" beside the CSV link (or in the control bar when the figure has none): the drawing as shown, its computed colors and fonts written onto each element and the background painted in; the PNG is that SVG on a canvas at twice its size. A PNG uses the fonts the browser has for a standalone image, so a web font may fall back. The files are made by `image.js` (1.8 kB), which loads on the first press |
-| `tactile` | `true` | With `download`, "Download tactile SVG": the drawing for a braille embosser or swell paper, on an 11 by 11.5 inch page (`width="11in"`), the title as a heading and a turned axis title under it, black on white (every series black, told apart by texture and dash; the sequential ramp as five grays), gridlines left out, raised lines at least 0.7 mm, labels level and kept as text on a white patch so braille software can write them ([record 0030](design/0030-tactile-export-and-forced-colors-record.md)) |
-| `embed` | `true` | "Copy embed" copies a link to the chart, `<a href="{page}#{id}">{title}</a>`, to paste into another page. Needs the figure's `id` and the Clipboard API; without either there is no button |
-| `sound` | `true` | "Play as sound" plays each series in turn, one note per mark from A3 (lowest) to A5 (highest), panned with the mark's place on the x axis; the live region names each series and the tooltip follows the note. "Stop sound" or Escape stops it. Its code (`sound.js`, 0.9 kB) loads on the first press. Needs Web Audio and two or more marks ([record 0029](design/0029-phone-drawings-and-sound.md)) |
-| `strings` | English | Translations of any of the [`EnhanceStrings`](#enhancestrings) |
+| Option     | Default | Does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tooltips` | `true`  | Hover and focus details on every mark                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `filter`   | `true`  | A click, Enter or Space on a mark or legend entry filters by it                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `brush`    | `true`  | On a continuous x axis, a range by drag, two clicks, Shift with arrows, or a from-and-to form ("Pick a range")                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `entrance` | `true`  | Marks animate in the first time the chart scrolls into view                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `table`    | `true`  | The data table sorts by any column (a button in each header, `aria-sort`), and a "Show table" button swaps the chart for the table and back                                                                                                                                                                                                                                                                                                                                                                           |
+| `expand`   | `false` | An "Expand" button fills the window with the chart; Escape, the button, or focus leaving the chart closes it                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `url`      | `false` | Keeps the filter and range in the address as `?{id}={field}:{value}` and `?{id}-range={low}..{high}`, so a link reproduces the view. Needs the figure's `id`. A view read from the address fires `enarratio:select` or `enarratio:brush`, so the page can follow it                                                                                                                                                                                                                                                   |
+| `download` | `true`  | "Download SVG" and "Download PNG" beside the CSV link (or in the control bar when the figure has none): the drawing as shown, its computed colors and fonts written onto each element and the background painted in; the PNG is that SVG on a canvas at twice its size. A PNG uses the fonts the browser has for a standalone image, so a web font may fall back. The files are made by `image.js` (1.8 kB), which loads on the first press                                                                           |
+| `tactile`  | `true`  | With `download`, "Download tactile SVG": the drawing for a braille embosser or swell paper, on an 11 by 11.5 inch page (`width="11in"`), the title as a heading and a turned axis title under it, black on white (every series black, told apart by texture and dash; the sequential ramp as five grays), gridlines left out, raised lines at least 0.7 mm, labels level and kept as text on a white patch so braille software can write them ([record 0030](design/0030-tactile-export-and-forced-colors-record.md)) |
+| `embed`    | `true`  | "Copy embed" copies a link to the chart, `<a href="{page}#{id}">{title}</a>`, to paste into another page. Needs the figure's `id` and the Clipboard API; without either there is no button                                                                                                                                                                                                                                                                                                                            |
+| `sound`    | `true`  | "Play as sound" plays each series in turn, one note per mark from A3 (lowest) to A5 (highest), panned with the mark's place on the x axis; the live region names each series and the tooltip follows the note. "Stop sound" or Escape stops it. Its code (`sound.js`, 0.9 kB) loads on the first press. Needs Web Audio and two or more marks ([record 0029](design/0029-phone-drawings-and-sound.md))                                                                                                                |
+| `strings`  | English | Translations of any of the [`EnhanceStrings`](#enhancestrings)                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
 ### `ResolvedOptions`
 
@@ -1637,17 +1662,17 @@ focus. So screen readers read the chart as its image, hint and table in browse
 mode, and switch to focus mode only once a point has focus. The same keys work
 on every chart type.
 
-| Key | Does |
-|---|---|
-| Tab | Moves into the chart (one tab stop, on the last point used) and on to the next control. |
-| Left, Right | Previous or next point along the series. |
-| Up, Down | Next or previous series: the mark above or below in a stack or group, or the nearest point of the next series. |
-| Home, End | First or last point of the series. |
-| Page Up, Page Down | Ten points back or forward along the series. |
-| Backspace | Back to the point before the last move. |
-| Enter, Space | Filter by the focused point; again to clear. |
-| Shift with the arrows, Home, End, Page Up or Page Down | Extend a range on a continuous axis. |
-| Escape | Hide the tooltip, and clear the filter and the range; with nothing to clear, close an expanded chart. |
+| Key                                                    | Does                                                                                                           |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Tab                                                    | Moves into the chart (one tab stop, on the last point used) and on to the next control.                        |
+| Left, Right                                            | Previous or next point along the series.                                                                       |
+| Up, Down                                               | Next or previous series: the mark above or below in a stack or group, or the nearest point of the next series. |
+| Home, End                                              | First or last point of the series.                                                                             |
+| Page Up, Page Down                                     | Ten points back or forward along the series.                                                                   |
+| Backspace                                              | Back to the point before the last move.                                                                        |
+| Enter, Space                                           | Filter by the focused point; again to clear.                                                                   |
+| Shift with the arrows, Home, End, Page Up or Page Down | Extend a range on a continuous axis.                                                                           |
+| Escape                                                 | Hide the tooltip, and clear the filter and the range; with nothing to clear, close an expanded chart.          |
 
 Keys with Alt, Control or Command, and every key the chart does not use, pass
 through to the browser and the screen reader. Escape hides a hovered tooltip

@@ -9,13 +9,13 @@ Dustin Edwards runs several websites: a personal and academic site
 Foxhound, Foxing and the Capsid agent control plane. In September 2026 an audit
 of their chart code found five approaches for one need:
 
-| Site | How charts were drawn |
-|---|---|
-| dustinedwards.info | Observable Plot on the server, inside a Worker |
-| Germomics | Recharts, in the browser only, behind a placeholder |
-| Foxhound | Hand-drawn SVG in React components |
-| Foxing | Hand-drawn SVG in a route |
-| Capsid dashboard | Hand-drawn SVG and HTML in a browser app |
+| Site               | How charts were drawn                               |
+| ------------------ | --------------------------------------------------- |
+| dustinedwards.info | Observable Plot on the server, inside a Worker      |
+| Germomics          | Recharts, in the browser only, behind a placeholder |
+| Foxhound           | Hand-drawn SVG in React components                  |
+| Foxing             | Hand-drawn SVG in a route                           |
+| Capsid dashboard   | Hand-drawn SVG and HTML in a browser app            |
 
 Each approach had its own gaps. Browser-drawn charts were absent until script
 ran and hidden from screen readers. Hand-drawn charts duplicated scales,
