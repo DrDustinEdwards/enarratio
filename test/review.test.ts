@@ -14,7 +14,14 @@ import {
   type Theme,
   uptimeStrip,
 } from "../src/index.js";
-import { areaChart, barChart, heatmap, lineChart, scatterPlot } from "../src/plot/index.js";
+import {
+  areaChart,
+  barChart,
+  densityPlot,
+  heatmap,
+  lineChart,
+  scatterPlot,
+} from "../src/plot/index.js";
 import { titerPlot } from "../src/science/index.js";
 import { labelColor } from "../src/theme/color.js";
 import { defaultTheme } from "../src/themes/index.js";
@@ -458,5 +465,26 @@ describe("F18: one name for text alternatives", () => {
       parse(progressRing({ inline: true, value: 0.5, label: "Done" })).getAttribute("aria-label"),
     ).toBe("Done: 50%");
     expect(() => uptimeStrip({ inline: true, slots: ["up"] })).toThrow(/label or alt is required/);
+  });
+});
+
+describe("screen reader text", () => {
+  it("writes lang on the figure and rejects a bad tag", () => {
+    const data = [
+      { x: "a", y: 1 },
+      { x: "b", y: 2 },
+    ];
+    const base = { data, x: "x", y: "y", alt: "Two bars", title: "T" } as const;
+    expect(barChart({ ...base, lang: "de" })).toContain('<figure class="enarratio" lang="de"');
+    expect(() => barChart({ ...base, lang: "not a tag" })).toThrow(/BCP 47/);
+  });
+
+  it("writes a density tail in scientific notation, not as a run of zeros", () => {
+    const data = Array.from({ length: 40 }, (_, i) => ({
+      v: i < 20 ? 10 + (i % 5) : 60 + (i % 5),
+    }));
+    const html = densityPlot({ data, x: "v", bandwidth: 0.5, alt: "Two clusters", title: "T" });
+    expect(/0\.0000000/.test(html)).toBe(false);
+    expect(/\dE-\d/.test(html)).toBe(true);
   });
 });

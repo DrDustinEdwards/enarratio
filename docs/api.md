@@ -151,6 +151,7 @@ spreads them into each chart.
 | `csv`             | `boolean`                             | The "Download CSV" link, built from the data table as a `data:` URL with `download` (default `true`). Over 100,000 characters there is no link and a `csv-too-large` issue.                                                                                                                                                                                                                                                                                                                                    |
 | `csvHref`         | `string`                              | A CSV file the site serves, linked instead (build it with [`toCsv`](#tocsv)).                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `locale`          | `string`                              | BCP 47 locale for generated numbers and dates (default `"en-US"`).                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `lang`            | `string`                              | The figure's language, a BCP 47 tag such as `"de"`, written as its `lang` attribute so a screen reader switches voice for the generated text, controls and table when it differs from the page's (WCAG 2.2 SC 3.1.2). Set it with `strings` and `locale` when they translate the figure; leave it out when the figure is in the page's language.                                                                                                                                                               |
 | `strings`         | [`StringOverrides`](#stringoverrides) | Translations of the generated text; see [`Strings`](#strings).                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `strict`          | `boolean`                             | Throw on the first [issue](#chartissue) instead of reporting it, so a build fails.                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `onIssue`         | `(issue: ChartIssue) => void`         | Receives issues instead of `console.warn`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
@@ -253,6 +254,7 @@ generates is translated, and every number in it follows the locale.
 barChart({
   ...options,
   locale: "de-DE",
+  lang: "de",
   strings: {
     showData: "Daten zeigen",
     hideData: "Daten verbergen",
@@ -1202,7 +1204,7 @@ Every primitive returns a whole figure by default (B30, B51): its title (the
 summary and table, and the CSV link, with the text and issue options of
 [`FigureOptions`](#figureoptions) (`title`, `subtitle`, `caption`, `notes`,
 `source`, `byline`, `summary`, `csv`, `csvHref`, `id`, `dataTable`, `locale`,
-`strings`, `strict`, `onIssue`). `inline: true` returns the bare drawing,
+`lang`, `strings`, `strict`, `onIssue`). `inline: true` returns the bare drawing,
 word-sized, for a sentence or a table cell. The figure carries
 `data-enarratio-static`, so `enhance()` leaves it alone.
 

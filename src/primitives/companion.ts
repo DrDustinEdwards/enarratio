@@ -71,6 +71,7 @@ export interface PrimitiveFigureOptions extends Pick<
   | "id"
   | "dataTable"
   | "locale"
+  | "lang"
   | "strings"
   | "strict"
   | "onIssue"

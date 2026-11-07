@@ -189,6 +189,21 @@ export function histogram<T extends object>(given: HistogramOptions<T>): string 
 const TABLE_POINTS = 15;
 
 /**
+ * Density values to three significant digits, in scientific notation below 0.001: a curve's tail
+ * can be 1e-22, which as plain digits is 21 zeros that a screen reader reads one by one in the
+ * table, the hover details and the summary (WCAG 2.2 SC 1.1.1, 1.3.1).
+ */
+function densityDigits(locale: string | undefined): (value: number) => string {
+  const plain = numberFormat({ ...(locale ? { locale } : {}), maximumSignificantDigits: 3 });
+  const scientific = new Intl.NumberFormat(locale ?? "en-US", {
+    notation: "scientific",
+    maximumSignificantDigits: 3,
+  });
+  return (value) =>
+    value !== 0 && Math.abs(value) < 0.001 ? scientific.format(value) : plain(value);
+}
+
+/**
  * Smoothed distributions of one measurement, one curve per series on shared axes: a Gaussian
  * kernel density estimate with Silverman's bandwidth unless one is given. Curves differ by color,
  * dash and a label at each curve's peak, and the data table gives each curve's density at evenly
@@ -205,7 +220,14 @@ export function densityPlot<T extends object>(given: DensityPlotOptions<T>): str
   if (options.bandwidth !== undefined && !(options.bandwidth > 0)) {
     throw new Error(`${DENSITY}: bandwidth must be a positive number, is ${options.bandwidth}`);
   }
-  const format = valueFormat(options);
+  // The table samples the curve on an even grid, so its x values are 23.128571, not 23.1: four
+  // significant digits, unless the page gave its own format.
+  const format =
+    options.formatValue ??
+    numberFormat({
+      ...(options.locale ? { locale: options.locale } : {}),
+      maximumSignificantDigits: 4,
+    });
   const strings = stringsFor(options.strings);
   const { terms } = strings;
   const xLabel = unitLabel(options.xLabel, x, options.xUnit);
@@ -229,10 +251,7 @@ export function densityPlot<T extends object>(given: DensityPlotOptions<T>): str
   const curves = groups.map((g, k) => kernelDensity(g, bandwidths[k] as number, xs));
   const at = grid(minOf(values), maxOf(values), TABLE_POINTS);
   const sampled = groups.map((g, k) => kernelDensity(g, bandwidths[k] as number, at));
-  const digits = numberFormat({
-    ...(options.locale ? { locale: options.locale } : {}),
-    maximumSignificantDigits: 3,
-  });
+  const digits = densityDigits(options.locale);
 
   const marks: Plot.Markish[] = names.map((name, k) =>
     Plot.line(

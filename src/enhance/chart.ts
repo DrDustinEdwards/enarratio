@@ -419,6 +419,9 @@ export class Chart implements EnhancedChart {
       const input = document.createElement("input");
       input.type = time ? "date" : "number";
       if (!time) input.step = "any";
+      // Both ends are needed: the browser names a blank field and focuses it, where a silent
+      // return left the reader with no sign the form did nothing (WCAG 2.2 SC 3.3.1).
+      input.required = true;
       input.min = this.format(Math.min(d0, d1));
       input.max = this.format(Math.max(d0, d1));
       field.append(`${text} `, input);

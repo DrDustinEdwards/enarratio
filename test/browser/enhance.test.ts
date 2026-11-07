@@ -390,6 +390,15 @@ describe("enhance: the range form", () => {
       (inputs[1] as HTMLInputElement).value = "2025-12-01";
     });
     await p.focus(`${LINE} .enarratio-range input`);
+    // A blank end is refused by the browser, not ignored (SC 3.3.1).
+    await p.$$eval(`${LINE} .enarratio-range input`, (inputs) => {
+      (inputs[1] as HTMLInputElement).value = "";
+    });
+    await p.keyboard.press("Enter");
+    expect(await eventLog(p, LINE)).toBe("");
+    await p.$$eval(`${LINE} .enarratio-range input`, (inputs) => {
+      (inputs[1] as HTMLInputElement).value = "2025-12-01";
+    });
     await p.keyboard.press("Enter");
     expect(await eventLog(p, LINE)).toBe(
       `enarratio:brush {"chartId":"weekly-cases","range":[${Date.UTC(2025, 10, 3)},${Date.UTC(2025, 11, 1)}],"time":true}`,
