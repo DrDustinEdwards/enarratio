@@ -16,7 +16,7 @@ change the public API; every such change is listed here.
 ### Fixed
 
 - The range form's "From" and "To" fields are required, so a blank or unreadable field gets the browser's own error and focus instead of Apply doing nothing without a word (WCAG 2.2 SC 3.3.1).
-- A density plot's tails are written in scientific notation below 0.001 (`3.81E-22`), not as 21 zeros, in its table, hover details and summary, where a screen reader read them digit by digit.
+- A density plot's tails are written in scientific notation below 0.001 (`3.81E-22`), not as 21 zeros, and its sampled x values to four significant digits (`23.13`, not `23.128571`), in its table, hover details and summary, where a screen reader read them digit by digit. A `formatValue` still wins.
 
 ## [0.9.2] - 2026-11-07
 

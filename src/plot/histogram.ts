@@ -220,7 +220,14 @@ export function densityPlot<T extends object>(given: DensityPlotOptions<T>): str
   if (options.bandwidth !== undefined && !(options.bandwidth > 0)) {
     throw new Error(`${DENSITY}: bandwidth must be a positive number, is ${options.bandwidth}`);
   }
-  const format = valueFormat(options);
+  // The table samples the curve on an even grid, so its x values are 23.128571, not 23.1: four
+  // significant digits, unless the page gave its own format.
+  const format =
+    options.formatValue ??
+    numberFormat({
+      ...(options.locale ? { locale: options.locale } : {}),
+      maximumSignificantDigits: 4,
+    });
   const strings = stringsFor(options.strings);
   const { terms } = strings;
   const xLabel = unitLabel(options.xLabel, x, options.xUnit);
