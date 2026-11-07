@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Changed
+
+- The gallery serves the family icon set (`/favicon.ico`, `/icon.svg`, the apple-touch icon and the manifest), a Markdown copy of each page, and `/llms-full.txt`. Every indexed page carries its WebPage in JSON-LD, and its title and description are cut to what a search result shows. The package is unchanged.
+
 ## [0.8.0] - 2026-11-07
 
 ### Added
