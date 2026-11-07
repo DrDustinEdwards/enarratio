@@ -419,6 +419,14 @@ const CARD = {
 /** The author, as the structured data names him. */
 const AUTHOR = { "@type": "Person", name: "Dustin Edwards", url: "https://dustinedwards.info" };
 
+/**
+ * When the pages last changed, for the sitemap's lastmod: the date of the latest release in CHANGELOG.md, since every page
+ * draws its charts with the released library.
+ */
+const RELEASED = /^## \[[\d.]+\] - (\d{4}-\d{2}-\d{2})/m.exec(
+  readFileSync(join(root, "CHANGELOG.md"), "utf8"),
+)?.[1];
+
 /** Prelum's head for an indexed page: the tags, the title and description cut to what a result shows, and the page's WebPage in JSON-LD. */
 const pageHead = defineHead({
   origin: SITE,
@@ -891,7 +899,7 @@ writeFileSync(
 writeFileSync(join(outDir, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY);
 writeFileSync(
   join(outDir, "sitemap.xml"),
-  sitemapDocument(addresses.map((a) => ({ loc: `${SITE}${a}` }))),
+  sitemapDocument(addresses.map((a) => ({ loc: `${SITE}${a}`, lastmod: RELEASED ?? null }))),
 );
 writeFileSync(
   join(outDir, "robots.txt"),
