@@ -7,6 +7,8 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-07
+
 ### Added
 
 - A `lang` option on every chart and primitive writes the figure's `lang` attribute, so a screen reader reads translated generated text, controls and table in the right voice on a page in another language (WCAG 2.2 SC 3.1.2). It is checked as a BCP 47 tag.
