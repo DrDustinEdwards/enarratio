@@ -18,7 +18,8 @@ import {
   ACCESSIBILITY_PATH,
   accessibilityStatement,
 } from "@drdustinedwards/site-helpers/accessibility";
-import { headHtml, headTags } from "@drdustinedwards/site-helpers/head";
+import { defineHead, headHtml } from "@drdustinedwards/site-helpers/head";
+import { iconLinks, webManifest } from "@drdustinedwards/site-helpers/icons";
 import { llmsDocument } from "@drdustinedwards/site-helpers/llms";
 import { aiTxt, robotsDocument } from "@drdustinedwards/site-helpers/robots";
 import { graph, thing, website } from "@drdustinedwards/site-helpers/schema";
@@ -392,7 +393,7 @@ function siteHeader(links: readonly Link[]): string {
   return letterheadHtml({
     name: "Enarratio",
     home: "./",
-    mark: '<img src="/favicon.svg" alt="" width="32" height="32">',
+    mark: '<img src="/icon.svg" alt="" width="32" height="32">',
     links: links.map((l) => [l.href, l.label] as [string, string]),
     ...(current ? { current } : {}),
   });
@@ -418,6 +419,14 @@ const CARD = {
 /** The author, as the structured data names him. */
 const AUTHOR = { "@type": "Person", name: "Dustin Edwards", url: "https://dustinedwards.info" };
 
+/** Prelum's head for an indexed page: the tags, the title and description cut to what a result shows, and the page's WebPage in JSON-LD. */
+const pageHead = defineHead({
+  origin: SITE,
+  siteName: "Enarratio",
+  image: CARD,
+  suffix: ": Enarratio",
+});
+
 /**
  * The head every page shares: Prelum's tags (title, description, canonical, Open Graph and Twitter
  * with the card, and any JSON-LD), Capsomer, then the page's own chart theme, then the remembered
@@ -432,14 +441,7 @@ function head(
   data: readonly Record<string, unknown>[] = [],
 ): string {
   const tags = address
-    ? headTags({
-        origin: SITE,
-        path: address,
-        title,
-        description,
-        image: CARD,
-        siteName: "Enarratio",
-      })
+    ? pageHead({ path: address, title, fullTitle: true, description })
     : [
         { title },
         { name: "description", content: description },
@@ -448,10 +450,20 @@ function head(
   return `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 ${headHtml([...tags, ...data.map((node) => ({ "script:ld+json": node }))])}
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+${ICON_TAGS}
 <link rel="stylesheet" href="/capsomer.css">
 ${themeCss ? `<link rel="stylesheet" href="${themeCss}">\n` : ""}<script src="/theme.js" integrity="${scripts["theme.js"]}" crossorigin="anonymous"></script>`;
 }
+
+/** The family icon set's links, on every page; the files are in site/icons. */
+const ICON_TAGS = iconLinks()
+  .map(
+    (link) =>
+      `<link ${Object.entries(link)
+        .map(([name, value]) => `${name}="${value}"`)
+        .join(" ")}>`,
+  )
+  .join("\n");
 
 /** The library itself, on every gallery page: what it is, where its code is, who wrote it. */
 const libraryData = graph([
@@ -978,7 +990,19 @@ ${galleryScript("/gallery.js")}
 // icon. The security and caching headers are site-runtime-headers', from the gallery's registry
 // entry (record 0018), which `npm run gallery` writes into _headers after this.
 for (const [name, code] of Object.entries(scriptFiles)) writeFileSync(join(outDir, name), code);
-copyFileSync(join(root, "site", "favicon.svg"), join(outDir, "favicon.svg"));
+// The family icon set (prelum-icons from the mark, in site/icons) at the root, where iconLinks() and the manifest point.
+cpSync(join(root, "site", "icons"), outDir, { recursive: true });
+writeFileSync(
+  join(outDir, "site.webmanifest"),
+  JSON.stringify(
+    webManifest({
+      name: "Enarratio",
+      themeColor: "#0f6cbd",
+      backgroundColor: "#0f6cbd",
+      lang: "en",
+    }),
+  ),
+);
 copyFileSync(join(root, "site", "og-card.png"), join(outDir, "og-card.png"));
 // Each page's preload header names files that exist and every stylesheet the page links, and
 // every page has one.
