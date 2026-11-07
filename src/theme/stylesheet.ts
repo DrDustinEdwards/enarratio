@@ -297,6 +297,10 @@ ${Array.from({ length: 5 }, (_, i) => {
   margin: var(--enarratio-space, 0.5em) 0 0;
   font-size: var(--enarratio-font-size-small, 0.875em);
 }
+/* A table chart's wrapper is the one scroller (focusable, named); a host's table rule that makes the
+   table scroll itself is overridden so there is one scroll region, not two. */
+.enarratio .enarratio-data.enarratio-table-chart { overflow-x: auto; }
+.enarratio .enarratio-data.enarratio-table-chart > table { display: table; overflow: visible; max-inline-size: none; margin-top: 0; }
 .enarratio-data summary { cursor: pointer; color: var(--enarratio-text-muted); }
 .enarratio-data table { border-collapse: collapse; margin-top: var(--enarratio-space, 0.5em); }
 .enarratio-data th, .enarratio-data td {
