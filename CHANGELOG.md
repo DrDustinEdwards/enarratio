@@ -7,6 +7,12 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-11-07
+
+### Fixed
+
+- A page that stages or enforces Trusted Types (`require-trusted-types-for 'script'`) no longer gets a Chrome DevTools CSP issue from `update()`, `enarratio/redraw` or `enarratio/redraw/narrow`: the chart markup they parse goes through one policy named `enarratio` (`src/parse.ts`) before `DOMParser`. The markup is still parsed into an inert document and `update()` still sanitizes it. A page whose `trusted-types` list omits the name gets plain strings, as before.
+
 ## [0.9.0] - 2026-11-07
 
 ### Added
