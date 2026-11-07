@@ -10,7 +10,7 @@
  * @packageDocumentation
  */
 
-export { type AttributeValue, element, escapeHtml } from "./html.js";
+export { type AttributeValue, element } from "./html.js";
 export type {
   PrimitiveFigureOptions,
   PrimitiveTable,

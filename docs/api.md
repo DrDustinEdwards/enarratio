@@ -49,16 +49,11 @@ from it.
 The pieces every chart is made from, exported so a site can build its own figure
 with the same markup, escaping and data table as the charts it imports.
 
-### `escapeHtml`
-
-`escapeHtml(value: string): string`. Escapes text for use as HTML element
-content or as a double-quoted attribute value.
-
 ### `element`
 
 `element(tag, attrs, children?): string`. One element as a string. Attribute
 values are escaped; `false` and `undefined` omit the attribute and `true` writes
-it bare. `children` is trusted markup: escape text with `escapeHtml` first.
+it bare. `children` is trusted markup: escape text first (Enarratio does not export an `escapeHtml`; use your platform's, such as `@dustinedwards/site-runtime/html`).
 
 ### `AttributeValue`
 

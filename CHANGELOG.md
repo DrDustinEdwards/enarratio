@@ -7,6 +7,16 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-07
+
+### Removed
+
+- `escapeHtml` is no longer exported from `enarratio`. Escaping is the platform's job and site-runtime owns the shared one (`@dustinedwards/site-runtime/html`); Enarratio keeps its own copy internally so it stays free of runtime dependencies. Escape text yourself before putting it in `element()` children. Breaking for a caller that imported it, as the pre-1.0 rule allows.
+
+### Changed
+
+- The internal `toDate` is now `chartDate`, so it no longer shares a name with Prelum's. Not in the public API. Its copy exception in `.shared.json` is gone, since the name no longer collides.
+
 ## [0.8.0] - 2026-11-07
 
 ### Added
