@@ -1,5 +1,5 @@
 import { element, escapeHtml } from "../html.js";
-import { DAY, formatInstant, maxOf, minOf, requireSize, toDate } from "../render/data.js";
+import { DAY, formatInstant, maxOf, minOf, requireSize, parseDateValue } from "../render/data.js";
 import { charWidth, DEFAULT_WIDTH, markFontSize, textGrowth } from "../render/size.js";
 import type { Terms } from "../render/text.js";
 import {
@@ -106,7 +106,7 @@ interface TimelineValues {
 }
 
 function readTime(what: string, value: unknown): number {
-  const date = toDate(value);
+  const date = parseDateValue(value);
   if (!date) {
     throw new Error(`${KIND}: ${what} is ${JSON.stringify(value)}, not a time`);
   }

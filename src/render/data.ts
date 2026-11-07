@@ -50,7 +50,7 @@ export function readLabel(kind: string, row: object, key: string, index: number)
 }
 
 /** A Date, an ISO 8601 string or a timestamp as a Date; undefined for anything else or an invalid date. */
-export function toDate(value: unknown): Date | undefined {
+export function parseDateValue(value: unknown): Date | undefined {
   const date =
     value instanceof Date
       ? value
@@ -63,7 +63,7 @@ export function toDate(value: unknown): Date | undefined {
 /** Reads a Date, an ISO 8601 string or a timestamp as a Date, or throws. */
 export function readDate(kind: string, row: object, key: string, index: number): Date {
   const value: unknown = (row as Record<string, unknown>)[key];
-  const date = toDate(value);
+  const date = parseDateValue(value);
   if (!date) {
     throw new Error(
       `${kind}: row ${index + 1} field "${key}" is ${JSON.stringify(value)}, not a date`,
