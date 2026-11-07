@@ -420,7 +420,7 @@ one row per item (a CV entry, a case) is enough.
 - `annotations`: see [`Annotation`](#annotation). Not on grouped bars.
 
 Links given by `href` must be relative or `http(s)`; a `//host` link, or any
-other scheme, throws. Count axes end at their last whole-number tick. `wholeNumbers: true` gives bars with `y` the same axis, for counts you already totalled; it throws on a value that is negative or not whole.
+other scheme, throws. Count axes end at their last whole-number tick. `wholeNumbers: true` gives bars with `y` the same axis, for counts you already totaled; it throws on a value that is negative or not whole.
 
 ### `lineChart`
 

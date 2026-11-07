@@ -11,7 +11,7 @@ change the public API; every such change is listed here.
 
 ### Added
 
-- `barChart` takes `wholeNumbers: true` for bars with `y`: the value axis keeps whole-number ticks, as counted bars do, for counts you already totalled. Sites no longer expand a total into one row per count to get whole ticks.
+- `barChart` takes `wholeNumbers: true` for bars with `y`: the value axis keeps whole-number ticks, as counted bars do, for counts you already totaled. Sites no longer expand a total into one row per count to get whole ticks.
 
 ### Fixed
 

@@ -69,7 +69,7 @@ export interface BarChartOptions<T extends object> extends FigureOptions, AxisUn
   readonly y?: KeysOfType<T, number>;
   /**
    * With `y`, keeps the value axis on whole numbers, as counted bars do, for values that are
-   * counts you already totalled (books per month, votes per option). Values must be whole numbers
+   * counts you already totaled (books per month, votes per option). Values must be whole numbers
    * of 0 or more. Counted bars (no `y`) always have whole-number ticks.
    */
   readonly wholeNumbers?: boolean;

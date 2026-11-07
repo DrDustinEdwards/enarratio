@@ -186,6 +186,9 @@ describe("barChart", () => {
     expect(() =>
       barChart({ data: [{ lab: "A", n: 1.5 }], x: "lab", y: "n", wholeNumbers: true, alt: "a" }),
     ).toThrow(/whole numbers/);
+    expect(() =>
+      barChart({ data: [{ lab: "A", n: -1 }], x: "lab", y: "n", wholeNumbers: true, alt: "a" }),
+    ).toThrow(/whole numbers/);
     expect(() => barChart({ data, x: "lab", wholeNumbers: true, alt: "a" })).toThrow(
       /needs|is for bars with y/,
     );
