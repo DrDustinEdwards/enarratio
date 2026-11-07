@@ -9,6 +9,10 @@ change the public API; every such change is listed here.
 
 ## [0.9.0] - 2026-11-07
 
+### Added
+
+- `enarratio/redraw` exports `enhanceCharts(root?, options?)` and `watchCharts(options?)`: enhance every chart on the page, drawing again those with a redraw spec, and watch for charts added later. The `frame` option names the element around each chart, so a design system's frame decides which charts are touched. Capsomer and Prelum each kept their own copy; both can now call this one.
+
 ### Removed
 
 - `escapeHtml` is no longer exported from `enarratio`. Escaping is the platform's job and site-runtime owns the shared one (`@dustinedwards/site-runtime/html`); Enarratio keeps its own copy internally so it stays free of runtime dependencies. Escape text yourself before putting it in `element()` children. Breaking for a caller that imported it, as the pre-1.0 rule allows.

@@ -1721,6 +1721,24 @@ with, or `{ narrow }`, the frame markup of a drawing about 240 wide.
 `redrawCharts(root?, options?)` starts every chart under `root` (the document) that carries a
 spec, once each, and returns them. `options` are `enhance`'s.
 
+### `enhanceCharts`
+
+`enhanceCharts(root?, options?)` makes every chart under `root` (the document) interactive and
+returns them: a chart with a redraw spec is enhanced and drawn again at its width, any other is
+enhanced. `options` are `enhance`'s, plus `frame`, a CSS selector for the element around each chart
+(`.cap-chart:not([data-enhance])`), so a design system's frame, and one that opts out, decide which
+charts are touched. Without `frame` it takes every Enarratio figure and every spec. A chart starts
+once, so calling it again is safe.
+
+### `watchCharts`
+
+`watchCharts(options?)` runs `enhanceCharts` now and on every chart added to the page later (a
+client-side navigation, a fragment swapped in). It returns a function that stops watching.
+
+### `PageOptions`
+
+`enhance`'s options and `frame`, the selector above.
+
 ### `redrawChart`
 
 `redrawChart(host, spec, options?)` starts one chart, for a host that carries its spec some other

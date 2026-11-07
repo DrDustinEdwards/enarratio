@@ -25,9 +25,10 @@ const options = {
 
 let harness: Harness;
 let page: Page;
+let lite: { barChart(options: object): string; lineChart(options: object): string };
 
 beforeAll(async () => {
-  const lite = await import(pathToFileURL(resolve(root, "dist", "lite", "index.js")).href);
+  lite = await import(pathToFileURL(resolve(root, "dist", "lite", "index.js")).href);
   const redraw = await import(pathToFileURL(resolve(root, "dist", "redraw", "index.js")).href);
   const bundle = await rolldown({
     input: resolve(root, "dist", "redraw", "index.js"),
@@ -79,5 +80,28 @@ describe("enarratio/redraw", () => {
       const w = Number(document.querySelector("#host svg")?.getAttribute("width"));
       return w > 320;
     });
+  });
+
+  it("enhances every frame the page names except one that opts out", async () => {
+    const bars = lite.barChart({
+      data: [{ lab: "A", n: 1 }],
+      x: "lab",
+      y: "n",
+      alt: "One bar.",
+      title: "Bars",
+    });
+    await page.evaluate((html) => {
+      (document.querySelector("main") as HTMLElement).innerHTML =
+        `<div id="on" class="frame">${html}</div><div id="off" class="frame" data-enhance="off">${html}</div>`;
+    }, bars);
+    await page.evaluate(() =>
+      (
+        window as unknown as {
+          EnarratioRedraw: { enhanceCharts(root: Document, options: object): unknown[] };
+        }
+      ).EnarratioRedraw.enhanceCharts(document, { frame: ".frame:not([data-enhance])" }),
+    );
+    expect(await page.$("#on [role='application']")).not.toBeNull();
+    expect(await page.$("#off [role='application']")).toBeNull();
   });
 });
