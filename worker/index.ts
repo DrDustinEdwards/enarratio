@@ -12,6 +12,7 @@
  * package never imports this or site-runtime.
  */
 
+import { serveMarkdownCopies } from "@drdustinedwards/site-helpers/llms";
 import { TDM_RESERVATION_HEADERS } from "@drdustinedwards/site-helpers/robots";
 import { preloads, withPreloadHeader } from "@dustinedwards/site-runtime/preload";
 import { enarratio } from "@dustinedwards/site-runtime/sites";
@@ -46,12 +47,14 @@ const site = staticSite({
   headers: TDM_RESERVATION_HEADERS,
 });
 
-export default {
-  async fetch(request: Request, env: Parameters<typeof site.fetch>[1]): Promise<Response> {
-    const response = await site.fetch(request, env);
-    const preload = PAGE_PRELOADS[new URL(request.url).pathname];
-    return response.status === 200 && preload
-      ? withPreloadHeader(response, preload.header)
-      : response;
-  },
+const pages = async (request: Request, env: Parameters<typeof site.fetch>[1]): Promise<Response> => {
+  const response = await site.fetch(request, env);
+  const preload = PAGE_PRELOADS[new URL(request.url).pathname];
+  return response.status === 200 && preload
+    ? withPreloadHeader(response, preload.header)
+    : response;
 };
+
+// Each page's Markdown copy (/astro.md, or Accept: text/markdown) and llms-full.txt are files `npm run gallery` writes with
+// prelum-markdown; serveMarkdownCopies answers them.
+export default { fetch: serveMarkdownCopies(pages, { origin: enarratio.origin }) };
