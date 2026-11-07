@@ -20,6 +20,7 @@ import { animateFrom, DURATION, geometry, reducedMotion } from "./motion.js";
 import { sanitize } from "./sanitize.js";
 import { drawHits, measureHits } from "./targets.js";
 import type { BrushDetail, EnhancedChart, ResolvedOptions, SelectDetail } from "./types.js";
+import { parseMarkup } from "../parse.js";
 
 /** How far a pointer moves, in SVG units, before a press becomes a drag (the brush). */
 const DRAG_THRESHOLD = 3;
@@ -882,7 +883,7 @@ export class Chart implements EnhancedChart {
 
   update(markup: string): void {
     // DOMParser builds an inert document: nothing in it loads or runs while it is checked.
-    const parsed = new DOMParser().parseFromString(markup.trim(), "text/html");
+    const parsed = parseMarkup(markup.trim());
     const candidate = parsed.body.firstElementChild;
     if (!candidate?.matches("figure.enarratio")) {
       throw new Error("update() needs the markup of one Enarratio figure");

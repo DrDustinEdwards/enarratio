@@ -11,6 +11,7 @@
 // is shown at once on a phone, and enhanced in its turn.
 import { enhance as enhanceHeader } from "capsomer/behavior/site-header";
 import { enhance as enhanceTheme } from "capsomer/behavior/theme-switch";
+import { parseMarkup } from "../dist/parse.js";
 import { narrowChart, REDRAW_ATTRIBUTE } from "../dist/redraw/narrow.js";
 import { enhance } from "./enhance.js";
 
@@ -52,9 +53,7 @@ const narrowHosts = Array.from(document.querySelectorAll(`[${REDRAW_ATTRIBUTE}]`
 for (const host of narrowHosts) {
   const frame = host.querySelector(".enarratio-frame");
   const markup = JSON.parse(host.getAttribute(REDRAW_ATTRIBUTE) ?? "{}").narrow;
-  const next = markup
-    ? new DOMParser().parseFromString(markup, "text/html").body.querySelector(".enarratio-frame")
-    : null;
+  const next = markup ? parseMarkup(markup).body.querySelector(".enarratio-frame") : null;
   if (!frame || !next) continue;
   frame.replaceWith(document.adoptNode(next));
   swapped.set(host, frame);

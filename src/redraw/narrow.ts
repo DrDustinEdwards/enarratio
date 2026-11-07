@@ -6,6 +6,7 @@
  */
 
 import { enhance } from "../enhance/index.js";
+import { parseMarkup } from "../parse.js";
 import type { EnhancedChart, EnhanceOptions } from "../enhance/types.js";
 
 /** The attribute that carries a chart's spec on the element around its figure. */
@@ -50,9 +51,7 @@ export function followWidth(
     if (!frame || !box || !original) return;
     const { markup, key } = drawing(Math.floor(box.clientWidth), original);
     if (key === drawn) return;
-    const next = new DOMParser()
-      .parseFromString(markup, "text/html")
-      .body.querySelector(".enarratio-frame");
+    const next = parseMarkup(markup).body.querySelector(".enarratio-frame");
     if (!next) return;
     for (const chart of charts) chart.destroy();
     frame.replaceWith(document.adoptNode(next));
