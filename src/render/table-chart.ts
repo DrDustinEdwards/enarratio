@@ -215,7 +215,14 @@ export function tableChart<T extends object>(options: TableChartOptions<T>): str
     tableMarkup: (caption) =>
       element(
         "div",
-        { class: "enarratio-data enarratio-table-chart" },
+        {
+          class: "enarratio-data enarratio-table-chart",
+          // The wrapper scrolls sideways when the table is wider than the column, so a keyboard
+          // reaches it (tabindex) and it carries a name (region).
+          tabindex: "0",
+          role: "region",
+          "aria-label": caption,
+        },
         element(
           "table",
           {},

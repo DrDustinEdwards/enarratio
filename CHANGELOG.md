@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Fixed
+
+- A table chart that is wider than its column scrolls in its own wrapper, which is now a named, keyboard-focusable region (axe `scrollable-region-focusable`). A host rule that made the table itself the scroller is overridden, so there is one scroll region.
+
 ## [0.9.1] - 2026-11-07
 
 ### Fixed
