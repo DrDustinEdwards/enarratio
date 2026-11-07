@@ -10,6 +10,7 @@ change the public API; every such change is listed here.
 ### Fixed
 
 - A table chart that is wider than its column scrolls in its own wrapper, which is now a named, keyboard-focusable region (axe `scrollable-region-focusable`). A host rule that made the table itself the scroller is overridden, so there is one scroll region.
+- The data table behind "Show data" does the same: it sits in a named, keyboard-focusable scroll region (`.enarratio-table`), so a table wider than a narrow screen scrolls inside the figure instead of widening the page (WCAG 2.2 SC 1.4.10) or trapping a keyboard reader outside it (SC 2.1.1). Found by axe at 320 CSS pixels with the table open, which the 1280-pixel audit did not reach. The focus ring now also covers the table regions and the "Show data" summary.
 
 ## [0.9.1] - 2026-11-07
 
