@@ -47,7 +47,10 @@ const site = staticSite({
   headers: TDM_RESERVATION_HEADERS,
 });
 
-const pages = async (request: Request, env: Parameters<typeof site.fetch>[1]): Promise<Response> => {
+const pages = async (
+  request: Request,
+  env: Parameters<typeof site.fetch>[1],
+): Promise<Response> => {
   const response = await site.fetch(request, env);
   const preload = PAGE_PRELOADS[new URL(request.url).pathname];
   return response.status === 200 && preload

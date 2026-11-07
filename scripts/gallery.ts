@@ -995,7 +995,12 @@ cpSync(join(root, "site", "icons"), outDir, { recursive: true });
 writeFileSync(
   join(outDir, "site.webmanifest"),
   JSON.stringify(
-    webManifest({ name: "Enarratio", themeColor: "#0f6cbd", backgroundColor: "#0f6cbd", lang: "en" }),
+    webManifest({
+      name: "Enarratio",
+      themeColor: "#0f6cbd",
+      backgroundColor: "#0f6cbd",
+      lang: "en",
+    }),
   ),
 );
 copyFileSync(join(root, "site", "og-card.png"), join(outDir, "og-card.png"));
