@@ -172,6 +172,28 @@ describe("barChart", () => {
     expect(ticks).toEqual(["0", "1", "2", "3"]);
   });
 
+  it("keeps whole-number ticks for given values with wholeNumbers", () => {
+    const data = [
+      { lab: "A", n: 1 },
+      { lab: "B", n: 2 },
+    ];
+    const ticks = [
+      ...parse(barChart({ data, x: "lab", y: "n", wholeNumbers: true, alt: "a" })).querySelectorAll(
+        '[data-enarratio-mark="y-axis tick label"] text',
+      ),
+    ].map((t) => t.textContent);
+    expect(ticks).toEqual(["0", "1", "2"]);
+    expect(() =>
+      barChart({ data: [{ lab: "A", n: 1.5 }], x: "lab", y: "n", wholeNumbers: true, alt: "a" }),
+    ).toThrow(/whole numbers/);
+    expect(() =>
+      barChart({ data: [{ lab: "A", n: -1 }], x: "lab", y: "n", wholeNumbers: true, alt: "a" }),
+    ).toThrow(/whole numbers/);
+    expect(() => barChart({ data, x: "lab", wholeNumbers: true, alt: "a" })).toThrow(
+      /needs|is for bars with y/,
+    );
+  });
+
   it("draws one series with given values, horizontal, and filters by category", () => {
     const fig = parse(
       barChart({

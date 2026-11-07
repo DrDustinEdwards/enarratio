@@ -4,6 +4,7 @@
  * files are made by ./image.js, which loads on the first press.
  */
 
+import { escapeHtml } from "../html.js";
 import { button } from "./controls.js";
 import type { EnhanceStrings } from "./types.js";
 
@@ -14,9 +15,6 @@ function save(blob: Blob, file: string): void {
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 0);
 }
-
-const escapeHtml = (text: string): string =>
-  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
 /**
  * The export and embed buttons for one figure, placed beside its CSV link or appended to `bar`.

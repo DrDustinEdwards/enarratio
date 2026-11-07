@@ -7,6 +7,16 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-07
+
+### Added
+
+- `barChart` takes `wholeNumbers: true` for bars with `y`: the value axis keeps whole-number ticks, as counted bars do, for counts you already totaled. Sites no longer expand a total into one row per count to get whole ticks.
+
+### Fixed
+
+- The embed snippet in the export controls escaped only `&`, `<` and `"`; it now uses the package's `escapeHtml` (which also escapes `>` and `'`) instead of a private copy.
+
 ### Repository
 
 - The gallery site's Worker (site-runtime 0.87.0) answers the shared 503 maintenance page while its `MAINTENANCE` var is on, and its `/404` answers 404, not 200. Not in the package.
