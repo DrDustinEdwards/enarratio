@@ -67,6 +67,12 @@ export interface BarChartOptions<T extends object> extends FigureOptions, AxisUn
    * are summed.
    */
   readonly y?: KeysOfType<T, number>;
+  /**
+   * With `y`, keeps the value axis on whole numbers, as counted bars do, for values that are
+   * counts you already totalled (books per month, votes per option). Values must be whole numbers
+   * of 0 or more. Counted bars (no `y`) always have whole-number ticks.
+   */
+  readonly wholeNumbers?: boolean;
   /** A field that splits each bar into series, stacked or grouped. */
   readonly series?: KeysOfType<T, string>;
   /** How series share a category: stacked (default) or side by side. */
@@ -308,6 +314,11 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   if (options.directLabels && options.layout === "grouped") {
     throw new Error(`${KIND}: directLabels needs the stacked layout; grouped bars have a legend`);
   }
+  if (options.wholeNumbers && y === undefined) {
+    throw new Error(
+      `${KIND}: wholeNumbers is for bars with y; counted bars always have whole ticks`,
+    );
+  }
   const horizontal = options.orientation === "horizontal";
   const grouped = options.layout === "grouped" && series !== undefined;
   if (options.annotations?.length && grouped) {
@@ -373,6 +384,9 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
       (columnOf.get(a.x) ?? 0) - (columnOf.get(b.x) ?? 0) ||
       (rowOf.get(a.series) ?? 0) - (rowOf.get(b.series) ?? 0),
   );
+  if (options.wholeNumbers && points.some((p) => !Number.isInteger(p.value) || p.value < 0)) {
+    throw new Error(`${KIND}: wholeNumbers needs values that are whole numbers of 0 or more`);
+  }
 
   const strings = stringsFor(options.strings);
   const intervalOf = (p: BarPoint): string => {
@@ -522,7 +536,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     thinned,
     tickLabel,
     valueAxis: valueAxis(ends, options.locale),
-    countTicks: y === undefined ? countTicks(points, grouped) : undefined,
+    countTicks: y === undefined || options.wholeNumbers ? countTicks(points, grouped) : undefined,
     describe,
     datum,
     link: linkOf ? (p) => safeHref(KIND, linkOf(p.x)) : undefined,
