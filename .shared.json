@@ -3,7 +3,8 @@
     ".": "static"
   },
   "copies": {
-    "src/render/dataset.ts": "datasetJsonLd builds the Dataset JSON-LD inside the published library, which cannot import Prelum's ./schema: Prelum depends on enarratio (its chart blocks render through it), so enarratio depending on Prelum would be a dependency cycle"
+    "src/render/dataset.ts": "datasetJsonLd builds the Dataset JSON-LD inside the published library, which cannot import Prelum's ./schema: Prelum depends on enarratio (its chart blocks render through it), so enarratio depending on Prelum would be a dependency cycle",
+    "src/html.ts": "escapeHtml escapes text inside the published library, which takes no runtime dependency on site-runtime (a GitHub-only package); it is not exported, so site-runtime stays the one shared escape for callers"
   },
   "spelling": {
     "skip": ["CHANGELOG.md"]

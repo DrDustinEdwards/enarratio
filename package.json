@@ -109,7 +109,7 @@
     "bloat": "devkit-no-bloat --warn-only"
   },
   "devDependencies": {
-    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.33.0",
+    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.35.1",
     "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.26.3",
     "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.87.0",
     "@guidepup/guidepup": "0.40.0",
@@ -122,7 +122,7 @@
     "@types/pngjs": "6.0.5",
     "@vitest/coverage-v8": "4.1.12",
     "axe-core": "4.14.0",
-    "capsomer": "github:DrDustinEdwards/capsomer#v0.77.0",
+    "capsomer": "github:DrDustinEdwards/capsomer#v0.79.0",
     "d3-force": "3.0.0",
     "linkedom": "0.18.14",
     "oxfmt": "0.77.0",
