@@ -51,6 +51,24 @@ async function audit(page: Page): Promise<Violation[]> {
   });
 }
 
+describe("narrow screens", () => {
+  // WCAG 1.4.10: at 320 CSS pixels a wide data table scrolls in its own region, which a keyboard
+  // reaches (2.1.1). Tables are only wide enough to scroll here, so the audit above never saw this.
+  it.each(schemes)(
+    "has no axe violations at 320 pixels with every table open, %s",
+    async (scheme) => {
+      const page = await harness.open("example.html", scheme);
+      await page.setViewport({ width: 320, height: 256 });
+      await page.$$eval("details", (all) => {
+        for (const d of all) d.open = true;
+      });
+      expect(await audit(page)).toEqual([]);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= 320)).toBe(true);
+      await page.close();
+    },
+  );
+});
+
 const pages = ["index.html", "example.html", "astro.html"];
 const schemes = ["light", "dark"] as const;
 

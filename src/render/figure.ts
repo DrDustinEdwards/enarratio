@@ -311,7 +311,17 @@ export function dataTableBlock(
   const label = `${element("span", { class: "enarratio-show" }, escapeHtml(strings.showData))}${element("span", { class: "enarratio-hide" }, escapeHtml(strings.hideData))}`;
   return display === "visually-hidden"
     ? element("div", { class: "enarratio-data enarratio-visually-hidden" }, markup)
-    : element("details", { class: "enarratio-data" }, `${element("summary", {}, label)}${markup}`);
+    : element(
+        "details",
+        { class: "enarratio-data" },
+        `${element("summary", {}, label)}${element(
+          "div",
+          // A table wider than its container scrolls inside this region, not the page (WCAG 2.2
+          // SC 1.4.10), and a keyboard reaches it (SC 2.1.1): focusable, named, a group like the frame (not a landmark).
+          { class: "enarratio-table", tabindex: "0", role: "group", "aria-label": caption },
+          markup,
+        )}`,
+      );
 }
 
 /** Markup the enhancement layer replaces when it runs: inert until then, hidden with scripts off. */

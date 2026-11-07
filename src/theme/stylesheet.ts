@@ -300,6 +300,10 @@ ${Array.from({ length: 5 }, (_, i) => {
 /* A table chart's wrapper is the one scroller (focusable, named); a host's table rule that makes the
    table scroll itself is overridden so there is one scroll region, not two. */
 .enarratio .enarratio-data.enarratio-table-chart { overflow-x: auto; }
+/* A data table behind "Show data" scrolls in its own focusable region (figure.ts), so a table wider
+   than the page never widens it; the host's rule that makes the table itself scroll is overridden. */
+.enarratio .enarratio-data > .enarratio-table { overflow-x: auto; }
+.enarratio .enarratio-data > .enarratio-table > table { display: table; overflow: visible; max-inline-size: none; }
 .enarratio .enarratio-data.enarratio-table-chart > table { display: table; overflow: visible; max-inline-size: none; margin-top: 0; }
 .enarratio-data summary { cursor: pointer; color: var(--enarratio-text-muted); }
 .enarratio-data table { border-collapse: collapse; margin-top: var(--enarratio-space, 0.5em); }
@@ -445,7 +449,8 @@ ${Array.from({ length: 5 }, (_, i) => {
 /* Invisible targets that make small marks at least 24 CSS pixels to point at. */
 .enarratio-hit { fill: transparent; stroke: none; }
 .enarratio svg:focus-visible, .enarratio button:focus-visible, .enarratio-range summary:focus-visible,
-.enarratio-controls input:focus-visible, .enarratio-frame:focus-visible {
+.enarratio-controls input:focus-visible, .enarratio-frame:focus-visible, .enarratio-table:focus-visible,
+.enarratio-table-chart:focus-visible, .enarratio-data summary:focus-visible {
   outline: var(--enarratio-focus-outline-width, 3px) solid var(--enarratio-focus);
   outline-offset: var(--enarratio-focus-outline-offset, 2px);
 }
