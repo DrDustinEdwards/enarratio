@@ -4,10 +4,10 @@
  * output), the result is parsed as HTML through a DOM, and the parse must contain no element or
  * attribute the caller's text could have created.
  */
+import { escapeHtml } from "@dustinedwards/site-runtime/html";
 import { parseHTML } from "linkedom";
 import { describe, expect, it } from "vitest";
 import {
-  escapeHtml,
   heatStrip,
   heatStripTable,
   progressRing,
