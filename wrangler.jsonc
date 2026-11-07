@@ -21,7 +21,7 @@
     // Every page runs the Worker; the fonts go straight to the asset server.
     "run_worker_first": ["/*", "!/fonts/*"],
     // Pages are served at clean addresses (/dustinedwards); /dustinedwards.html redirects there.
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
   },
   "routes": [{ "pattern": "enarratio.dustinedwards.info", "custom_domain": true }],
   // Workers Logs keep the Worker's own lines, which are the Content-Security-Policy violation
@@ -29,5 +29,5 @@
   // gallery records nothing about its readers.
   "observability": { "logs": { "enabled": true, "invocation_logs": false } },
   "workers_dev": false,
-  "preview_urls": false
+  "preview_urls": false,
 }

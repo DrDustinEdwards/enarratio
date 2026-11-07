@@ -14,42 +14,42 @@ Each record says where a decision came from:
   out an author's decision. These are the ones most open to change,
   and the ones the two reviews of 0.1.0-alpha.5 tested hardest.
 
-| Record | Subject |
-|---|---|
-| [0001](0001-problem-and-audiences.md) | The problem and the audiences |
-| [0002](0002-server-rendering.md) | Charts are drawn on the server, as HTML strings |
-| [0003](0003-theming-and-color.md) | Themes, CSS custom properties and color checks |
-| [0004](0004-enhancement-layer.md) | The optional enhancement layer |
-| [0005](0005-scientific-charts.md) | Scientific chart types and the plan for the rest |
-| [0006](0006-api-and-quality.md) | API shape, errors, dependencies and tests |
-| [0007](0007-site-migrations.md) | What moving each existing site onto Enarratio involves |
-| [0008](0008-gallery-hosting.md) | Hosting the gallery, and its Content-Security-Policy |
-| [0009](0009-review-fixes.md) | What the two reviews changed, and why |
-| [0010](0010-rename-to-enarratio.md) | The rename from Abscissa to Enarratio |
-| [0011](0011-theming-from-outside.md) | Theming from outside: the custom property contract and the base rules |
-| [0012](0012-subpath-exports.md) | One package, subpath exports, optional peers |
-| [0013](0013-forecasts-and-time-bars.md) | Forecast bands, the forecast boundary and time-axis bars |
-| [0014](0014-timeline-and-heat-strip.md) | The event timeline and the heat strip |
-| [0015](0015-primitive-companions.md) | Companion tables for the primitives |
-| [0016](0016-remove-the-site-theme.md) | The dustinedwards.info theme is removed |
-| [0017](0017-light-charts.md) | Light bar, line and area charts for the browser |
-| [0018](0018-shared-security-headers.md) | The gallery's security headers come from site-runtime |
-| [0019](0019-gallery-on-capsomer.md) | The gallery's page is Capsomer's |
-| [0020](0020-gallery-in-the-manual-theme.md) | The gallery in the family's manual theme, in rose |
-| [0021](0021-native-points-and-reader-controls.md) | Native points over the marks, the full keyboard and the reader controls |
-| [0022](0022-readable-for-every-reader.md) | Readable for every reader: text size, textures, reader settings and a strict CSP |
-| [0023](0023-the-figure-in-words.md) | The figure in words: finding, overview, summary, source and data |
-| [0024](0024-more-chart-types.md) | The chart types of 0.4.0, and how each stays accessible |
-| [0025](0025-new-charts-on-the-figure.md) | The new chart types on the figure, in both renderers |
-| [0026](0026-rollout-fixes.md) | Fixes from the 0.4.0 rollout: linked bars, bar edges and hover titles |
-| [0027](0027-contrast-export-and-roles.md) | Text-safe series shades, ramp edges, export and embed, and the drawing's role |
-| [0028](0028-maps.md) | Maps drawn from the caller's GeoJSON |
-| [0029](0029-phone-drawings-and-sound.md) | Phone drawings, wrapped bar labels and Play as sound |
-| [0030](0030-tactile-export-and-forced-colors-record.md) | Tactile export, and the forced-colors record |
-| [0031](0031-no-reading-grade-rule.md) | No reading-grade rule |
-| [0032](0032-screen-reader-run.md) | A screen reader run in CI (NVDA, VoiceOver) |
-| [0033](0033-no-shift-on-load.md) | No layout shift when the layer loads |
-| [0034](0034-gallery-swaps-without-shift.md) | The gallery's phone drawings and controls do not move the page |
+| Record                                                  | Subject                                                                          |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [0001](0001-problem-and-audiences.md)                   | The problem and the audiences                                                    |
+| [0002](0002-server-rendering.md)                        | Charts are drawn on the server, as HTML strings                                  |
+| [0003](0003-theming-and-color.md)                       | Themes, CSS custom properties and color checks                                   |
+| [0004](0004-enhancement-layer.md)                       | The optional enhancement layer                                                   |
+| [0005](0005-scientific-charts.md)                       | Scientific chart types and the plan for the rest                                 |
+| [0006](0006-api-and-quality.md)                         | API shape, errors, dependencies and tests                                        |
+| [0007](0007-site-migrations.md)                         | What moving each existing site onto Enarratio involves                           |
+| [0008](0008-gallery-hosting.md)                         | Hosting the gallery, and its Content-Security-Policy                             |
+| [0009](0009-review-fixes.md)                            | What the two reviews changed, and why                                            |
+| [0010](0010-rename-to-enarratio.md)                     | The rename from Abscissa to Enarratio                                            |
+| [0011](0011-theming-from-outside.md)                    | Theming from outside: the custom property contract and the base rules            |
+| [0012](0012-subpath-exports.md)                         | One package, subpath exports, optional peers                                     |
+| [0013](0013-forecasts-and-time-bars.md)                 | Forecast bands, the forecast boundary and time-axis bars                         |
+| [0014](0014-timeline-and-heat-strip.md)                 | The event timeline and the heat strip                                            |
+| [0015](0015-primitive-companions.md)                    | Companion tables for the primitives                                              |
+| [0016](0016-remove-the-site-theme.md)                   | The dustinedwards.info theme is removed                                          |
+| [0017](0017-light-charts.md)                            | Light bar, line and area charts for the browser                                  |
+| [0018](0018-shared-security-headers.md)                 | The gallery's security headers come from site-runtime                            |
+| [0019](0019-gallery-on-capsomer.md)                     | The gallery's page is Capsomer's                                                 |
+| [0020](0020-gallery-in-the-manual-theme.md)             | The gallery in the family's manual theme, in rose                                |
+| [0021](0021-native-points-and-reader-controls.md)       | Native points over the marks, the full keyboard and the reader controls          |
+| [0022](0022-readable-for-every-reader.md)               | Readable for every reader: text size, textures, reader settings and a strict CSP |
+| [0023](0023-the-figure-in-words.md)                     | The figure in words: finding, overview, summary, source and data                 |
+| [0024](0024-more-chart-types.md)                        | The chart types of 0.4.0, and how each stays accessible                          |
+| [0025](0025-new-charts-on-the-figure.md)                | The new chart types on the figure, in both renderers                             |
+| [0026](0026-rollout-fixes.md)                           | Fixes from the 0.4.0 rollout: linked bars, bar edges and hover titles            |
+| [0027](0027-contrast-export-and-roles.md)               | Text-safe series shades, ramp edges, export and embed, and the drawing's role    |
+| [0028](0028-maps.md)                                    | Maps drawn from the caller's GeoJSON                                             |
+| [0029](0029-phone-drawings-and-sound.md)                | Phone drawings, wrapped bar labels and Play as sound                             |
+| [0030](0030-tactile-export-and-forced-colors-record.md) | Tactile export, and the forced-colors record                                     |
+| [0031](0031-no-reading-grade-rule.md)                   | No reading-grade rule                                                            |
+| [0032](0032-screen-reader-run.md)                       | A screen reader run in CI (NVDA, VoiceOver)                                      |
+| [0033](0033-no-shift-on-load.md)                        | No layout shift when the layer loads                                             |
+| [0034](0034-gallery-swaps-without-shift.md)             | The gallery's phone drawings and controls do not move the page                   |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

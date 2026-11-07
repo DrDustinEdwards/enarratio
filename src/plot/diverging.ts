@@ -24,9 +24,7 @@ import { type Annotated, drawAnnotations, withNotes } from "./annotate.js";
 
 /** Options for {@link divergingBarChart}. */
 export interface DivergingBarChartOptions<T extends object>
-  extends FigureOptions,
-    AxisUnits,
-    Annotated {
+  extends FigureOptions, AxisUnits, Annotated {
   readonly data: readonly T[];
   /** The category field: one bar per category. */
   readonly x: KeysOfType<T, string | number>;

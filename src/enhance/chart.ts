@@ -376,7 +376,7 @@ export class Chart implements EnhancedChart {
       toggle.textContent = stop ? s.stop : s.play;
       if (!stop) this.hover(null);
     };
-    const toggle = button(s.play, async () => {
+    const onPlay = async (): Promise<void> => {
       if (this.stopSound) return set(null);
       const run = this.runs;
       const { play } = await import("./sound.js");
@@ -393,7 +393,8 @@ export class Chart implements EnhancedChart {
           },
         ),
       );
-    });
+    };
+    const toggle = button(s.play, () => void onPlay());
     // Anywhere on the page, so a reader can always stop the sound (WCAG 1.4.2).
     this.listen(document, "keydown", (e) => {
       if ((e as KeyboardEvent).key === "Escape" && this.stopSound) set(null);
@@ -904,6 +905,8 @@ export class Chart implements EnhancedChart {
       this.figure.setAttribute(name, incoming.getAttribute(name) ?? "");
     }
     // The live region stays in place, so what it says next is announced.
+    // A copy: childNodes is live, and removing from it while walking it would skip every other node.
+    // oxlint-disable-next-line unicorn/no-useless-spread
     for (const node of [...this.figure.childNodes]) if (node !== this.live) node.remove();
     this.figure.prepend(...incoming.childNodes);
     this.attach();

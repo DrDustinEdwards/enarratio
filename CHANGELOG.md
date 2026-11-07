@@ -10,6 +10,8 @@ change the public API; every such change is listed here.
 ### Repository
 
 - The Claude Code hooks (`no-em-dash.sh`, `scoped-git-add.sh`) run from devkit v0.23.0, which ships them once, instead of a copy in `.claude/hooks/`. Not in the package.
+- Every pull request check runs in one job, devkit's `pr.yml` (v0.26.1), in place of the separate checks, review, worker-size and workflow-audit callers; the dependency scan keeps only its daily run, and the code map and Scorecard run nightly instead of on every push. CI's push to main stays, since it deploys the gallery. Not in the package.
+- Lint moves from Biome to devkit's shared Oxlint config, type-aware (devkit v0.26.1), and formatting to its shared Oxfmt config, with a format check in CI. The lint fixes keep behavior: `Array.from` for `new Array(n)`, no spread or empty fallback where none was needed, and the export and play buttons mark the promise they start with `void`. Not in the package's API.
 
 ### Gallery
 
@@ -471,6 +473,7 @@ Design records 0011 to 0016 explain each decision.
   `lineChart`, `GenomeFeature` with `genomeTrack`, and so on). `sparkline`,
   `progressRing`, `uptimeStrip`, `stylesheet`, `defineTheme`, `checkTheme`, the
   color functions, the theme types and `enhance` stay where they were.
+
 - **`@observablehq/plot`, `d3-force` and `linkedom` are optional peer
   dependencies, not dependencies.** Install what the entries you import need:
   `enarratio/plot` needs `@observablehq/plot` and `linkedom`; `enarratio/science`
@@ -557,7 +560,7 @@ Design records 0011 to 0016 explain each decision.
   - every `--abscissa-*` custom property, now `--enarratio-*`;
   - the `abscissa:select` and `abscissa:brush` events, now `enarratio:select`
     and `enarratio:brush`.
-  No exported function or type changed its name.
+    No exported function or type changed its name.
 - The repository is `DrDustinEdwards/enarratio` and the gallery is at
   `https://enarratio.dustinedwards.info`; the old gallery address redirects to
   the new one with a 301. The code of conduct's contact is

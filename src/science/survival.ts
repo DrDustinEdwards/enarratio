@@ -26,8 +26,7 @@ import { atRiskAt, kaplanMeier, type SurvivalEstimate, type SurvivalStep } from 
 
 /** Options for {@link survivalPlot}. */
 export interface SurvivalPlotOptions<T extends object>
-  extends FigureOptions,
-    Pick<AxisUnits, "xUnit"> {
+  extends FigureOptions, Pick<AxisUnits, "xUnit"> {
   readonly data: readonly T[];
   /** Each subject's follow-up time: to the event, or to when it was censored. */
   readonly time: KeysOfType<T, number>;

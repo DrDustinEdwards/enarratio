@@ -65,7 +65,7 @@ function packLanes(
   const order = features
     .map((f, i) => ({ f, i }))
     .sort((a, b) => a.f.start - b.f.start || a.i - b.i);
-  const lanes = new Array<number>(features.length).fill(0);
+  const lanes = Array.from({ length: features.length }, () => 0);
   for (const { f, i } of order) {
     const ends = laneEnds.get(trackOf(f)) ?? [];
     let lane = ends.findIndex((end) => end < f.start);

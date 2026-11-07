@@ -57,25 +57,24 @@ export function primitiveText(options: Pick<FigureOptions, "locale" | "strings">
  * CSV link, locale and issue reporting, as on a chart. `inline: true` returns the bare SVG
  * instead, word-sized, for use inside a sentence or a table cell.
  */
-export interface PrimitiveFigureOptions
-  extends Pick<
-    FigureOptions,
-    | "title"
-    | "subtitle"
-    | "caption"
-    | "notes"
-    | "source"
-    | "byline"
-    | "summary"
-    | "csv"
-    | "csvHref"
-    | "id"
-    | "dataTable"
-    | "locale"
-    | "strings"
-    | "strict"
-    | "onIssue"
-  > {
+export interface PrimitiveFigureOptions extends Pick<
+  FigureOptions,
+  | "title"
+  | "subtitle"
+  | "caption"
+  | "notes"
+  | "source"
+  | "byline"
+  | "summary"
+  | "csv"
+  | "csvHref"
+  | "id"
+  | "dataTable"
+  | "locale"
+  | "strings"
+  | "strict"
+  | "onIssue"
+> {
   /** Return the bare drawing, without figure, summary or table (B30: default false). */
   readonly inline?: boolean;
 }

@@ -34,7 +34,7 @@ on 2026-10-31 and found, in Enarratio's own drawing:
    only `base.css` gets a 55% mix of the series and text colors; a chart's color override gets
    the same mix through `colorStyles()`. `checkTheme` reports a label under 4.5:1
    (`series-label-contrast`). The name is new because `--enarratio-series-text-N` already means
-   the ink printed *on* a series color, and sites set it.
+   the ink printed _on_ a series color, and sites set it.
 2. **Pale ramp steps get an edge.** Rather than start every ramp at 3:1, which would fail
    Capsomer's theme and every site theme overnight and halve the ramp's range, each step whose
    fill is under 3:1 gets a 1px edge (`--enarratio-cell-edge-width`) in its own color darkened or

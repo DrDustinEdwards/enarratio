@@ -111,7 +111,7 @@ export function histogramBins(
       }
     }
   }
-  const counts = new Array<number>(edges.length - 1).fill(0);
+  const counts = Array.from({ length: edges.length - 1 }, () => 0);
   for (const v of values) {
     // The last edge that is not above v, by bisection; the top edge belongs to the last bin.
     let lo = 0;

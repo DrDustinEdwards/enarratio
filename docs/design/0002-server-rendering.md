@@ -39,10 +39,17 @@ network chart."
 ```html
 <figure class="enarratio">
   <p class="enarratio-title">...</p>
-  <ul class="enarratio-legend">...</ul>
+  <ul class="enarratio-legend">
+    ...
+  </ul>
   <svg role="img" aria-label="{alt}">...</svg>
   <figcaption>...</figcaption>
-  <details class="enarratio-data"><summary>Data table</summary><table>...</table></details>
+  <details class="enarratio-data">
+    <summary>Data table</summary>
+    <table>
+      ...
+    </table>
+  </details>
 </figure>
 ```
 

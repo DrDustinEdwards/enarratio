@@ -17,8 +17,8 @@ Area 10's checklist has two items record 0027 left open:
 ## Decision
 
 1. **"Download tactile SVG"** joins "Download SVG" and "Download PNG" (`tactile`, on by default,
-   needs `download`). It follows the Braille Authority of North America's *Guidelines and
-   Standards for Tactile Graphics* (2022) where a drawing can be changed without a transcriber:
+   needs `download`). It follows the Braille Authority of North America's _Guidelines and
+   Standards for Tactile Graphics_ (2022) where a drawing can be changed without a transcriber:
    - an 11 by 11.5 inch page (`width="11in"`), the braille page size (3.4.2), with the title as
      a heading and the drawing scaled to fill the rest;
    - black on white: every series black, told apart by the textures, line dashes and symbols
@@ -32,7 +32,7 @@ Area 10's checklist has two items record 0027 left open:
    - every label kept as text, black on a white patch that leaves blank space round it on a
      raised area (3.4.3.13), so braille translation software (or the embosser's own, as with
      ViewPlus) can write it in braille.
-   The file is made in the browser from the drawing as shown, like the other downloads.
+     The file is made in the browser from the drawing as shown, like the other downloads.
 2. **The download code loads on demand.** The SVG, PNG and tactile files are made by
    `dist/enhance/image.js` (1.8 kB gzipped), imported on the first press, as `sound.js` is on
    Play. The layer's first load drops from 9.5 to 9.0 kB. A page that serves the layer as files
@@ -50,8 +50,8 @@ Area 10's checklist has two items record 0027 left open:
      In ordinary colors the swatches now match the marks too.
    - **The network's groups were told apart by color alone.** Nodes now take a symbol per
      group, as the tree's tips do.
-   The record is repeated for each release: the visual suite fails on any change to a stored
-   forced-colors screenshot, and new or changed screenshots are read before they are stored.
+     The record is repeated for each release: the visual suite fails on any change to a stored
+     forced-colors screenshot, and new or changed screenshots are read before they are stored.
 
 ## Not done here
 

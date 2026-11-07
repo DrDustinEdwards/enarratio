@@ -10,7 +10,7 @@ Enarratio draws accessible, server-rendered charts and scientific figures into t
 
 ## Commands
 
-- `npm run check`: typecheck, Biome lint and unit tests. The quick local check.
+- `npm run check`: typecheck, Oxlint and unit tests. The quick local check.
 - `npm run test:browser`: the browser suite. Runs in CI.
 - `npm run build`: the package (TypeScript and CSS). `npm run size`: the bundle size check.
 - `npm run gallery`: builds the gallery into `site/dist`.

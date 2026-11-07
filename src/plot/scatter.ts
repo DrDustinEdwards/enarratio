@@ -301,7 +301,7 @@ export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): str
         name,
         points: points
           .filter((p) => p.series === name)
-          .map((p) => ({ at: p.name, value: p.y, ...(p.bounds ?? {}) })),
+          .map((p) => ({ at: p.name, value: p.y, ...p.bounds })),
       })),
       format,
       ...(errorBars ? { interval: intervalName.toLowerCase() } : {}),

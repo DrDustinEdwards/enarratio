@@ -38,7 +38,7 @@ export function svgElement(
  */
 export function capErrorBars(svg: SVGSVGElement): void {
   for (const group of svg.querySelectorAll('[data-enarratio-mark="error bar"]')) {
-    for (const line of [...group.querySelectorAll("line")]) {
+    for (const line of group.querySelectorAll("line")) {
       const [x1, y1, x2, y2] = ["x1", "y1", "x2", "y2"].map((a) =>
         Number(line.getAttribute(a) ?? 0),
       ) as [number, number, number, number];

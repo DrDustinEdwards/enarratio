@@ -194,7 +194,9 @@ export function formatInstant(date: Date): string {
  * the trusted name.
  */
 export function safeHref(kind: string, href: string): string {
-  const compact = [...href].filter((ch) => ch.charCodeAt(0) > 0x20).join("");
+  const compact = Array.from(href)
+    .filter((ch) => ch.charCodeAt(0) > 0x20)
+    .join("");
   const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(compact)?.[1]?.toLowerCase();
   const otherHost = /^[/\\][/\\]/.test(compact);
   if (

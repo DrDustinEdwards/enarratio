@@ -46,12 +46,12 @@ export function exportControls(
       file: string,
       make: (image: typeof import("./image.js")) => Blob | Promise<Blob>,
     ) =>
-      button(label, () =>
-        import("./image.js").then(make).then(
+      button(label, () => {
+        void import("./image.js").then(make).then(
           (blob) => save(blob, file),
           () => announce(strings.exportFailed),
-        ),
-      );
+        );
+      });
     buttons.push(
       download(strings.downloadSvg, `${base}.svg`, (i) => i.svgFile(svg)),
       download(strings.downloadPng, `${base}.png`, (i) => i.pngFile(svg)),

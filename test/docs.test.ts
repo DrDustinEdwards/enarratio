@@ -36,7 +36,7 @@ const ENTRIES = [
 
 describe("documentation", () => {
   const api = read("docs/api.md");
-  const publicNames = [...ENTRIES.flatMap((entry) => exportedNames(read(entry)))];
+  const publicNames = ENTRIES.flatMap((entry) => exportedNames(read(entry)));
 
   it("finds the public API", () => {
     expect(publicNames).toContain("barChart");

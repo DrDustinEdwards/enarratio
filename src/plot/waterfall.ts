@@ -18,9 +18,7 @@ import { named } from "./marks.js";
 
 /** Options for {@link waterfallChart}. */
 export interface WaterfallChartOptions<T extends object>
-  extends FigureOptions,
-    AxisUnits,
-    Annotated {
+  extends FigureOptions, AxisUnits, Annotated {
   readonly data: readonly T[];
   /** The field naming each step, in order. */
   readonly x: KeysOfType<T, string | number>;

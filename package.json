@@ -3,26 +3,40 @@
   "version": "0.7.3",
   "description": "Accessible, server-rendered charts and scientific figures for the web",
   "keywords": [
-    "charts",
-    "svg",
-    "server-side-rendering",
     "accessibility",
+    "charts",
     "data-visualization",
+    "observable-plot",
     "scientific-figures",
-    "observable-plot"
+    "server-side-rendering",
+    "svg"
   ],
   "homepage": "https://enarratio.dustinedwards.info",
   "bugs": {
     "url": "https://github.com/DrDustinEdwards/enarratio/issues"
   },
+  "license": "MIT",
+  "author": "Dustin Edwards (https://dustinedwards.info)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DrDustinEdwards/enarratio.git"
   },
-  "license": "MIT",
-  "author": "Dustin Edwards (https://dustinedwards.info)",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "sideEffects": false,
+  "imports": {
+    "#document": {
+      "node": "./dist/render/document.js",
+      "workerd": "./dist/render/document.js",
+      "worker": "./dist/render/document.js",
+      "edge-light": "./dist/render/document.js",
+      "deno": "./dist/render/document.js",
+      "browser": "./dist/render/document.browser.js",
+      "default": "./dist/render/document.js"
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -75,23 +89,6 @@
     },
     "./package.json": "./package.json"
   },
-  "imports": {
-    "#document": {
-      "node": "./dist/render/document.js",
-      "workerd": "./dist/render/document.js",
-      "worker": "./dist/render/document.js",
-      "edge-light": "./dist/render/document.js",
-      "deno": "./dist/render/document.js",
-      "browser": "./dist/render/document.browser.js",
-      "default": "./dist/render/document.js"
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "engines": {
-    "node": ">=22"
-  },
   "publishConfig": {
     "access": "public",
     "tag": "latest"
@@ -100,8 +97,9 @@
     "build": "tsc -p tsconfig.build.json && node scripts/build-css.mjs && node scripts/bundle-enhance.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "check": "npm run typecheck && npm run lint && npm test",
-    "lint": "biome check .",
-    "format": "biome format --write .",
+    "lint": "oxlint --type-aware --deny-warnings --report-unused-disable-directives-severity=error",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "test": "vitest run",
     "gallery": "node scripts/gallery.ts && site-runtime-headers --site enarratio --out site/dist/_headers --header \"tdm-reservation: 1\"",
     "deploy:gallery": "npm run build && npm run gallery && npx --yes wrangler@4.143.0 deploy",
@@ -109,6 +107,33 @@
     "prepare": "npm run build",
     "size": "node scripts/size-check.mjs",
     "bloat": "devkit-no-bloat --warn-only"
+  },
+  "devDependencies": {
+    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.33.0",
+    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.26.1",
+    "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.82.0",
+    "@guidepup/guidepup": "0.40.0",
+    "@guidepup/playwright": "0.21.0",
+    "@guidepup/setup": "0.29.3",
+    "@observablehq/plot": "0.6.17",
+    "@playwright/test": "1.64.1",
+    "@types/d3-force": "3.0.10",
+    "@types/node": "22.20.5",
+    "@types/pngjs": "6.0.5",
+    "@vitest/coverage-v8": "4.1.12",
+    "axe-core": "4.14.0",
+    "capsomer": "github:DrDustinEdwards/capsomer#v0.77.0",
+    "d3-force": "3.0.0",
+    "linkedom": "0.18.14",
+    "oxfmt": "0.77.0",
+    "oxlint": "1.92.0",
+    "oxlint-tsgolint": "7.0.2006",
+    "pixelmatch": "7.2.0",
+    "pngjs": "7.0.0",
+    "puppeteer": "25.16.0",
+    "rolldown": "1.2.16",
+    "typescript": "5.9.3",
+    "vitest": "4.1.12"
   },
   "peerDependencies": {
     "@observablehq/plot": "0.6.17",
@@ -126,29 +151,7 @@
       "optional": true
     }
   },
-  "devDependencies": {
-    "@biomejs/biome": "2.6.4",
-    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.33.0",
-    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.23.0",
-    "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.82.0",
-    "@guidepup/guidepup": "0.40.0",
-    "@guidepup/playwright": "0.21.0",
-    "@guidepup/setup": "0.29.3",
-    "@observablehq/plot": "0.6.17",
-    "@playwright/test": "1.64.1",
-    "@types/d3-force": "3.0.10",
-    "@types/node": "22.20.5",
-    "@types/pngjs": "6.0.5",
-    "@vitest/coverage-v8": "4.1.12",
-    "axe-core": "4.14.0",
-    "capsomer": "github:DrDustinEdwards/capsomer#v0.77.0",
-    "d3-force": "3.0.0",
-    "linkedom": "0.18.14",
-    "pixelmatch": "7.2.0",
-    "pngjs": "7.0.0",
-    "puppeteer": "25.16.0",
-    "rolldown": "1.2.16",
-    "typescript": "5.9.3",
-    "vitest": "4.1.12"
+  "engines": {
+    "node": ">=22"
   }
 }

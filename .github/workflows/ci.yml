@@ -37,7 +37,10 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: "true"
       - run: npm audit --audit-level=high
       - run: npm run typecheck
-      - run: npm run lint
+      - name: Lint
+        run: npm run lint
+      - name: Format check
+        run: npm run format:check
       - run: npm test
       - run: npm run build
       # Fails if core gains a runtime dependency; reports each entry's gzipped size.

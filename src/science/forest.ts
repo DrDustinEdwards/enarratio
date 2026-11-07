@@ -23,8 +23,7 @@ import { type PooledEstimate, poolEstimates, type StudyEstimate } from "./meta.j
 
 /** Options for {@link forestPlot}. */
 export interface ForestPlotOptions<T extends object>
-  extends FigureOptions,
-    Pick<AxisUnits, "xUnit"> {
+  extends FigureOptions, Pick<AxisUnits, "xUnit"> {
   readonly data: readonly T[];
   /** The field naming each study or subgroup, one row each, top to bottom. */
   readonly label: KeysOfType<T, string | number>;
