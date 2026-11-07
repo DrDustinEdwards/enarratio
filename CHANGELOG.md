@@ -7,6 +7,15 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Added
+
+- A `lang` option on every chart and primitive writes the figure's `lang` attribute, so a screen reader reads translated generated text, controls and table in the right voice on a page in another language (WCAG 2.2 SC 3.1.2). It is checked as a BCP 47 tag.
+
+### Fixed
+
+- The range form's "From" and "To" fields are required, so a blank or unreadable field gets the browser's own error and focus instead of Apply doing nothing without a word (WCAG 2.2 SC 3.3.1).
+- A density plot's tails are written in scientific notation below 0.001 (`3.81E-22`), not as 21 zeros, in its table, hover details and summary, where a screen reader read them digit by digit.
+
 ## [0.9.2] - 2026-11-07
 
 ### Fixed

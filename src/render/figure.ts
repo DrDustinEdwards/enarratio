@@ -84,6 +84,13 @@ export interface FigureOptions extends IssueOptions {
   readonly locale?: string;
   /** Translations of the generated strings, kinds and terms; the rest stay English. */
   readonly strings?: StringOverrides;
+  /**
+   * The language of the figure, a BCP 47 tag such as `"de"`, written as its `lang` attribute so a
+   * screen reader switches voice for the generated text, controls and table when it differs from
+   * the page's (WCAG 2.2 SC 3.1.2). Set it with `strings` and `locale` when they translate the
+   * figure; leave it out when the figure is in the page's language.
+   */
+  readonly lang?: string;
   /** An `id` for the figure, which enhancement events carry as `chartId`. */
   readonly id?: string;
   /** The drawing's width in CSS pixels; the SVG scales down to fit narrower containers. */
@@ -235,6 +242,13 @@ export function report(options: IssueOptions, issue: ChartIssue): void {
 export function validateFigure(kind: string, options: FigureOptions): void {
   requireSize(kind, "width", options.width);
   requireSize(kind, "height", options.height);
+  if (options.lang !== undefined) {
+    try {
+      Intl.getCanonicalLocales(options.lang);
+    } catch {
+      throw new Error(`${kind}: lang "${options.lang}" is not a BCP 47 language tag, such as "de"`);
+    }
+  }
 }
 
 /** What a caller-supplied color may contain: enough for hex, color functions and var(), not url(). */
@@ -564,6 +578,7 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
     {
       class: "enarratio",
       id: options.id,
+      lang: options.lang?.trim() || undefined,
       "data-enarratio": parts.kind,
       "data-enarratio-orientation": parts.orientation,
       "data-enarratio-x-scale": parts.x ? JSON.stringify(parts.x) : undefined,
