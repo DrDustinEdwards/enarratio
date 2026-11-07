@@ -7,9 +7,20 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-07
+
+### Added
+
+- `enarratio/redraw` exports `enhanceCharts(root?, options?)` and `watchCharts(options?)`: enhance every chart on the page, drawing again those with a redraw spec, and watch for charts added later. The `frame` option names the element around each chart, so a design system's frame decides which charts are touched. Capsomer and Prelum each kept their own copy; both can now call this one.
+
+### Removed
+
+- `escapeHtml` is no longer exported from `enarratio`. Escaping is the platform's job and site-runtime owns the shared one (`@dustinedwards/site-runtime/html`); Enarratio keeps its own copy internally so it stays free of runtime dependencies. Escape text yourself before putting it in `element()` children. Breaking for a caller that imported it, as the pre-1.0 rule allows.
+
 ### Changed
 
 - The internal date reader `toDate` (`render/data`) is `parseDateValue`, so devkit's overlap check no longer finds the name in Prelum too. It is not exported from the package. No behavior change.
+- The gallery's sitemap carries a lastmod on every page (the date of the latest release). The package is unchanged. The pages show no breadcrumb trail: Prelum draws one only for a page inside a section, and every gallery page is one level below the home page.
 - The gallery serves the family icon set (`/favicon.ico`, `/icon.svg`, the apple-touch icon and the manifest), a Markdown copy of each page, and `/llms-full.txt`. Every indexed page carries its WebPage in JSON-LD, and its title and description are cut to what a search result shows. The package is unchanged.
 
 ## [0.8.0] - 2026-11-07

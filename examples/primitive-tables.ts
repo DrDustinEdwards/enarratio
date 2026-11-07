@@ -1,7 +1,8 @@
 // A primitive's numbers as a table and a sentence, beside its inline drawing: the same values, so they cannot disagree.
 // Each sits in a figure whose caption gives a visible title and the finding, worked out from the same values.
 // The summary is plain text, so it is escaped before it goes into HTML.
-import { escapeHtml, heatStrip, heatStripTable, sparkline, sparklineTable } from "enarratio";
+import { escapeHtml } from "@dustinedwards/site-runtime/html";
+import { heatStrip, heatStripTable, sparkline, sparklineTable } from "enarratio";
 
 const entries = { values: [3, 5, 4, 8, 11, 9], label: "Entries per year" };
 const load = {

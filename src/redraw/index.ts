@@ -10,7 +10,8 @@
  * stands, with its table.
  */
 
-import type { EnhanceOptions } from "../enhance/types.js";
+import { enhance } from "../enhance/index.js";
+import type { EnhancedChart, EnhanceOptions } from "../enhance/types.js";
 import { areaChart } from "../lite/area.js";
 import { barChart } from "../lite/bar.js";
 import { lineChart } from "../lite/line.js";
@@ -133,4 +134,62 @@ function drawing(
   const end = html.indexOf("</svg></div>", start);
   if (start === -1 || end === -1) return kept;
   return { markup: html.slice(start, end + "</svg></div>".length), key: String(width) };
+}
+
+/** What {@link enhanceCharts} takes: the enhancement options, and which elements are charts. */
+export interface PageOptions extends EnhanceOptions {
+  /**
+   * A CSS selector for the element around each chart, such as a design system's frame
+   * (`.cap-chart:not([data-enhance])`). A frame with a redraw spec is drawn again at its width;
+   * any other frame is enhanced as it is. Default: every Enarratio figure, and every element
+   * with a redraw spec.
+   */
+  readonly frame?: string;
+}
+
+const FIGURE = "figure.enarratio";
+const SPEC = `[${REDRAW_ATTRIBUTE}]`;
+
+const within = (root: ParentNode, selector: string): HTMLElement[] => [
+  ...(root instanceof HTMLElement && root.matches(selector) ? [root] : []),
+  ...root.querySelectorAll<HTMLElement>(selector),
+];
+
+/**
+ * Makes every chart under `root` (the document by default) interactive: a chart with a redraw
+ * spec is enhanced and drawn again at its frame's width, any other is enhanced. Calling it again
+ * is safe: a chart starts once. Without the script every chart reads, with its table, as the
+ * server drew it.
+ */
+export function enhanceCharts(
+  root: ParentNode = document,
+  options: PageOptions = {},
+): Array<EnhancedChart | RedrawnChart> {
+  const { frame, ...enhanceOptions } = options;
+  const frames = frame ? within(root, frame) : within(root, `${FIGURE}, ${SPEC}`);
+  const out: Array<EnhancedChart | RedrawnChart> = [];
+  for (const el of frames) {
+    if (el.hasAttribute(REDRAW_ATTRIBUTE)) out.push(...redrawCharts(el, enhanceOptions));
+    else if (frame || !el.closest(SPEC)) out.push(...enhance(el, enhanceOptions));
+  }
+  return out;
+}
+
+/**
+ * Enhances the page's charts now and any added later (a client-side navigation, a fragment
+ * swapped in), once each. Returns a function that stops watching.
+ */
+export function watchCharts(options: PageOptions = {}): () => void {
+  const selector = options.frame ?? `${FIGURE}, ${SPEC}`;
+  enhanceCharts(document, options);
+  const observer = new MutationObserver((records) => {
+    for (const record of records) {
+      for (const node of record.addedNodes) {
+        if (node instanceof Element && (node.matches(selector) || node.querySelector(selector)))
+          enhanceCharts(node, options);
+      }
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  return () => observer.disconnect();
 }
