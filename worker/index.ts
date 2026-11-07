@@ -40,7 +40,11 @@ export const PAGE_PRELOADS: Readonly<Record<string, ReturnType<typeof preloads>>
   "/accessibility": own("/index.css"),
 };
 
-const site = staticSite({ site: enarratio, headers: TDM_RESERVATION_HEADERS });
+const site = staticSite({
+  site: enarratio,
+  siteName: "Enarratio",
+  headers: TDM_RESERVATION_HEADERS,
+});
 
 export default {
   async fetch(request: Request, env: Parameters<typeof site.fetch>[1]): Promise<Response> {
