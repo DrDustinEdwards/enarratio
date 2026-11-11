@@ -837,6 +837,74 @@ or a heatmap. The data table is the matrix of flows with each group's total.
 `data`, `from`, `to`, `value`, `directed` (default true), `valueLabel`,
 `colors`, `formatValue`.
 
+### `radarChart`
+
+`radarChart(options: RadarChartOptions<T>): string`. A few series' profiles over
+three to twelve measures on one scale, one spoke per measure from a zero
+center, clockwise from 12 o'clock. Each series is an outline with a light fill,
+and every series after the first is dashed. Every value is a point that hover,
+focus and the keys reach, and the rings are labeled. More than four series are
+a `too-many-series` issue. A grouped bar chart compares values more precisely,
+so use a radar for shape. A negative value, or one past `max`, throws.
+
+### `RadarChartOptions`
+
+`data` (one row per series), `label`, `axes`, `axisLabels`, `max` (the rim;
+default the largest value rounded up), `colors`, `formatValue`.
+
+### `gaugeChart`
+
+`gaugeChart(options: GaugeChartOptions): string`. One value against its scale,
+drawn as a filled 240° arc with the number printed large in its middle. It can
+have two to five qualitative `bands` along the edge, in one hue from dark
+(worst) to light (best), and a `target` tick. Few (2013) built the bullet
+graph to replace gauges, so prefer `bulletChart` for more than one measure.
+
+### `GaugeChartOptions`
+
+`value`, `label`, `min` (default 0), `max`, `target`, `bands`, `lowerIsBetter`,
+`formatValue`.
+
+### `QualitativeBand`
+
+`{ to, label }`: a band up to `to`. A chart's bands ascend from its scale's
+start, and the last one ends at its end.
+
+### `bulletChart`
+
+`bulletChart(options: BulletChartOptions<T>): string`. Few's bullet graph. Each
+measure gets one row with:
+
+- a bar for its value;
+- a line across the bar for its target;
+- two to five qualitative bands behind it, darkest for the worst.
+
+Each row has its own scale from zero unless `sharedScale` is set, marked by three
+tick labels, and prints its value at its end. On a narrow drawing the names move
+above the rows. The data table gives the value, target, band and scale end.
+
+### `BulletChartOptions`
+
+`data`, `label`, `value`, `target`, `bands` (one list for every row, or a
+function giving each row's), `lowerIsBetter`, `max` (a field), `sharedScale`,
+`valueLabel`, `formatValue`.
+
+### `parallelCoordinates`
+
+`parallelCoordinates(options: ParallelCoordinatesOptions<T>): string`. Many
+items over three to twelve measures, with one vertical axis per measure running
+from its lowest value to its highest, and each item a line across them. Axis
+order is the author's argument: neighbors compare most easily. `series` colors
+groups. `highlight` draws the named items on top in color and fades the rest,
+since a static drawing cannot brush. Up to ten lines, or the highlighted ones,
+are named at the right. The summary names each measure's highest and lowest
+item. More than 200 items are a `too-many-points` issue.
+
+### `ParallelCoordinatesOptions`
+
+`data`, `label`, `axes`, `axisLabels`, `series`, `highlight`, `colors`,
+`formatValue`.
+
 ### `heatmap`
 
 `heatmap(options: HeatmapOptions<T>): string`. A grid colored on the theme's

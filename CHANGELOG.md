@@ -7,6 +7,22 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-11
+
+### Added
+
+- Four chart types for comparing measures, in `enarratio/plot` ([record 0038](docs/design/0038-more-chart-types.md)). Each is a full figure: toolbar, hidden data table, generated overview and summary, keyboard reading, the one-card tooltip and the quiet look.
+  - `radarChart`: a few series' profiles over three to twelve measures on one scale, each an outline with a light fill, the second on dashed. More than four series is reported as an issue.
+  - `gaugeChart`: one reading against its scale as a 240° arc, with up to five qualitative bands in one hue (darkest is worst, `lowerIsBetter` reverses them) and a target tick.
+  - `bulletChart`: Few's bullet graph, one row per measure: a bar for the value, a line for the target, and qualitative bands behind it, the same for every row or set per row. Each row has its own scale unless `sharedScale`.
+  - `parallelCoordinates`: many items over three to twelve measures, one axis each, with groups in colors and `highlight` to bring items forward and fade the rest. Up to ten lines, or the highlighted ones, are named.
+- The `QualitativeBand` type, the terms `targetValue` and `band` in `strings.terms`, and `strings.spread` for the parallel coordinates summary.
+
+### Changed
+
+- The plot-wide pointer measures distance to an unfilled line along its length, not to its bounding box, so the nearest line answers on parallel coordinates and radar outlines.
+- Names at the rim of a radial chart (radar, chord) go centered over their points when that leaves the circle much larger, as on a phone, lifted clear of the circle and of each other. The chord diagram's default height shrinks to fit a small circle.
+
 ## [0.13.0] - 2026-11-11
 
 ### Added

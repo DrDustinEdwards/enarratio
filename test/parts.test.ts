@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readLinks, sankeyLayout } from "../src/render/flow.js";
+import { checkBands, shade } from "../src/plot/gauge.js";
+import { niceCeil } from "../src/plot/radar.js";
 import { buildHierarchy, hierarchyTable, squarify } from "../src/render/hierarchy.js";
 
 describe("squarify", () => {
@@ -81,5 +83,35 @@ describe("sankeyLayout", () => {
   it("refuses a cycle", () => {
     const { links, names } = readLinks("test", [...rows, { s: "d", t: "a", v: 1 }], "s", "t", "v");
     expect(() => sankeyLayout("test", names, links, 100, 10)).toThrow(/cycle/);
+  });
+});
+
+describe("niceCeil and qualitative bands", () => {
+  it("rounds a scale's end up to 1, 2, 2.5 or 5 times a power of ten", () => {
+    expect([0.7, 3, 22, 99, 100, 101, 240].map(niceCeil)).toEqual([1, 5, 25, 100, 100, 200, 250]);
+  });
+
+  it("shades the worst band darkest, either way round", () => {
+    expect([0, 1, 2].map((i) => shade(i, 3))).toEqual([3, 2, 1]);
+    expect([0, 1, 2].map((i) => shade(i, 3, true))).toEqual([1, 2, 3]);
+  });
+
+  it("refuses bands that do not ascend to the scale's end", () => {
+    const bands = [
+      { to: 50, label: "low" },
+      { to: 40, label: "high" },
+    ];
+    expect(() => checkBands("test", bands, 0, 100)).toThrow(/ascend/);
+    expect(() =>
+      checkBands(
+        "test",
+        [
+          { to: 50, label: "a" },
+          { to: 90, label: "b" },
+        ],
+        0,
+        100,
+      ),
+    ).toThrow(/scale's end/);
   });
 });

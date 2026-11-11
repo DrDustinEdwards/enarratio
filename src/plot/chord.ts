@@ -1,5 +1,5 @@
 import { el, svgRoot, text } from "../lite/svg.js";
-import { arcPath, n2, polar } from "../render/arc.js";
+import { arcPath, n2, polar, type RimLabel, rimLabels } from "../render/arc.js";
 import { type KeysOfType, markKey } from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
 import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
@@ -88,11 +88,8 @@ export function chordDiagram<T extends object>(options: ChordDiagramOptions<T>):
   if (!(total > 0)) throw new Error(`${KIND}: every flow is zero`);
 
   const width = options.width ?? DEFAULT_WIDTH;
-  const height = options.height ?? 400;
   const growth = textGrowth(width);
   const char = charWidth(width);
-  const cx = width / 2;
-  const cy = height / 2;
   const span = 2 * Math.PI - PAD * n;
 
   // Each group's arc, and within it each subgroup (what it sends each other group), in group order.
@@ -111,20 +108,20 @@ export function chordDiagram<T extends object>(options: ChordDiagramOptions<T>):
     angle += PAD;
   }
 
-  // The largest radius at which every group's name, set outside its arc's middle, stays inside
-  // the drawing.
   const lineHeight = 14 * growth;
-  const fits = names.map((name, i) => {
-    const g = groups[i] as { a0: number; a1: number };
-    const mid = (g.a0 + g.a1) / 2;
-    const sx = Math.abs(Math.sin(mid));
-    const cy0 = Math.abs(Math.cos(mid));
-    const w = name.length * char * (sx < 0.2 ? 0.5 : 1);
-    const across = sx > 0.01 ? (width / 2 - 2 - w) / sx - 8 : Infinity;
-    const down = cy0 > 0.01 ? (height / 2 - 2 - lineHeight) / cy0 - 8 : Infinity;
-    return Math.min(across, down);
-  });
-  const outer = Math.max(30, Math.min(Math.min(width, height) / 2 - 4, ...fits));
+  const place = (h: number) =>
+    rimLabels(
+      names,
+      groups.map((g) => (g.a0 + g.a1) / 2),
+      { width, height: h, char, line: lineHeight, cap: Math.min(width, h) / 2 - 4 },
+    );
+  // Where the names at the rim keep the circle small (a phone), the default height shrinks to fit it.
+  const fit = place(400);
+  const height = options.height ?? Math.min(400, Math.ceil(2 * fit.radius + 2 * lineHeight + 32));
+  const rim = options.height === undefined && height === 400 ? fit : place(height);
+  const cx = width / 2;
+  const cy = height / 2;
+  const outer = Math.max(30, rim.radius);
   const inner = outer * (1 - BAND);
 
   const describeGroup = (i: number): string =>
@@ -213,20 +210,8 @@ export function chordDiagram<T extends object>(options: ChordDiagramOptions<T>):
 
   const labels = names
     .map((name, i) => {
-      const g = groups[i] as { a0: number; a1: number };
-      const mid = (g.a0 + g.a1) / 2;
-      const [x, y] = polar(cx, cy, outer + 8, mid);
-      const side = Math.sin(mid);
-      return el(
-        "text",
-        {
-          x: n2(x),
-          y: n2(y),
-          dy: Math.cos(mid) > 0.7 ? "0" : Math.cos(mid) < -0.7 ? "0.71em" : "0.32em",
-          "text-anchor": Math.abs(side) < 0.2 ? "middle" : side > 0 ? "start" : "end",
-        },
-        text(name),
-      );
+      const p = rim.labels[i] as RimLabel;
+      return el("text", { x: n2(p.x), y: n2(p.y), dy: p.dy, "text-anchor": p.anchor }, text(name));
     })
     .join("");
 

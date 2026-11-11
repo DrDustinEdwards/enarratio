@@ -482,7 +482,15 @@ function checkFigure(options: FigureOptions, parts: FigureParts, title: string |
  * swatches are drawn as a line (dashed as the line is in forced colors) or as the symbol, so the
  * legend matches the marks without color (B57).
  */
-const LINE_KINDS = new Set(["line", "density", "survival", "dose-response", "slope"]);
+const LINE_KINDS = new Set([
+  "line",
+  "density",
+  "survival",
+  "dose-response",
+  "slope",
+  "radar",
+  "parallel",
+]);
 const SYMBOL_KINDS = new Set(["scatter", "dot", "tree", "network"]);
 
 function legendMarkup(parts: FigureParts): string {
