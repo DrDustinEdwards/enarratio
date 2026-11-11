@@ -484,6 +484,7 @@ function seriesModel<T extends object>(
   options: Forecastable<T>,
   prepared: Prepared,
   check?: () => void,
+  finish?: (svg: string, plan: SeriesPlan) => { svg: string; labeled: boolean },
 ): SeriesModel {
   const plan = planSeries(kind, prepared.seriesNames, options.colors);
   check?.();
@@ -544,8 +545,9 @@ function seriesModel<T extends object>(
     figure: (svg, x) => {
       // Area bands are filled, so they take textures where they are not all named on the
       // drawing (record 0036); lines are told apart by labels and dashes (B5).
-      const area =
-        figureKind === "area"
+      const area = finish
+        ? finish(svg, plan)
+        : figureKind === "area"
           ? finishAreas(texture(svg, slotStyle(plan.slotColors)), prepared, plan, directLabels)
           : undefined;
       return figure(noted, {
@@ -681,6 +683,43 @@ function asShares(prepared: Prepared): Prepared {
   };
 }
 
+/** Every value is zero or more, as stacked areas need. */
+function checkStackable(kind: string, prepared: Prepared): void {
+  for (const p of prepared.points) {
+    if (p.value !== null && p.value < 0) {
+      throw new Error(
+        `${kind}: stacked areas need values of zero or more; ${p.series} at ${p.xText} is ${p.value}`,
+      );
+    }
+  }
+}
+
+const STREAM = "streamgraph";
+
+/**
+ * Reads and checks a streamgraph's options, which are a series chart's with a `series` field.
+ * `finish` names the layers on the drawing and says whether every one is named.
+ */
+export function streamModel<T extends object>(
+  options: SeriesChartOptions<T>,
+  finish: (svg: string, plan: SeriesPlan) => { svg: string; labeled: boolean },
+): SeriesModel {
+  if (options.series === undefined) {
+    throw new Error(
+      `${STREAM}: a streamgraph needs a series field; for one series draw an area chart`,
+    );
+  }
+  const prepared = prepare(STREAM, options);
+  return seriesModel(
+    STREAM,
+    "streamgraph",
+    options,
+    prepared,
+    () => checkStackable(STREAM, prepared),
+    finish,
+  );
+}
+
 /** Reads and checks an area chart's options. Throws on anything it cannot draw. */
 export function areaModel<T extends object>(given: AreaChartOptions<T>): SeriesModel {
   const percent = numberFormat({
@@ -697,13 +736,5 @@ export function areaModel<T extends object>(given: AreaChartOptions<T>): SeriesM
     : given;
   const read = prepare(AREA, options);
   const prepared = options.percent ? asShares(read) : read;
-  return seriesModel(AREA, "area", options, prepared, () => {
-    for (const p of prepared.points) {
-      if (p.value !== null && p.value < 0) {
-        throw new Error(
-          `${AREA}: stacked areas need values of zero or more; ${p.series} at ${p.xText} is ${p.value}`,
-        );
-      }
-    }
-  });
+  return seriesModel(AREA, "area", options, prepared, () => checkStackable(AREA, prepared));
 }

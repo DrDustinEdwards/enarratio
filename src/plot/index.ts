@@ -11,6 +11,8 @@ export type { Annotation, AnnotationValue } from "./annotate.js";
 export { type BarChartOptions, barChart } from "./bar.js";
 export { type BulletChartOptions, bulletChart } from "./bullet.js";
 export { type BoxPlotOptions, boxPlot, type StripPlotOptions, stripPlot } from "./box.js";
+export { type CandlestickChartOptions, candlestickChart } from "./candlestick.js";
+export { type CalendarHeatmapOptions, calendarHeatmap } from "./calendar.js";
 export { type ChordDiagramOptions, chordDiagram } from "./chord.js";
 export { type DivergingBarChartOptions, divergingBarChart } from "./diverging.js";
 export {
@@ -23,6 +25,7 @@ export {
 } from "./dot.js";
 export { type SmallMultiplesOptions, smallMultiples } from "./facets.js";
 export { type FunnelChartOptions, funnelChart } from "./funnel.js";
+export { type GanttChartOptions, ganttChart } from "./gantt.js";
 export { type GaugeChartOptions, gaugeChart, type QualitativeBand } from "./gauge.js";
 export { type HeatmapOptions, heatmap } from "./heatmap.js";
 export {
@@ -40,13 +43,17 @@ export {
   lineChart,
   type ReferenceLine,
   type SeriesChartOptions,
+  type StreamgraphOptions,
+  streamgraph,
 } from "./line.js";
 export { type ParallelCoordinatesOptions, parallelCoordinates } from "./parallel.js";
 export { type PieChartOptions, pieChart } from "./pie.js";
 export { type RadarChartOptions, radarChart } from "./radar.js";
+export { type RidgelinePlotOptions, ridgelinePlot } from "./ridgeline.js";
 export { type SankeyDiagramOptions, sankeyDiagram } from "./sankey.js";
 export { type ScatterPlotOptions, scatterPlot } from "./scatter.js";
 export { type SlopeChartOptions, slopeChart } from "./slope.js";
 export { type SunburstOptions, sunburst } from "./sunburst.js";
 export { type TreemapOptions, treemap } from "./treemap.js";
+export { type ViolinPlotOptions, violinPlot } from "./violin.js";
 export { type WaterfallChartOptions, waterfallChart } from "./waterfall.js";
