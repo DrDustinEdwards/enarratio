@@ -54,6 +54,16 @@ function safeLink(value: string): boolean {
   }
 }
 
+/** The figure's own "Download CSV" link: a CSV as a `data:` URL, which only downloads, never runs. */
+function csvData(el: Element, name: string, value: string): boolean {
+  return (
+    name === "href" &&
+    el.localName === "a" &&
+    el.hasAttribute("download") &&
+    /^data:text\/csv[;,]/i.test(value)
+  );
+}
+
 /** Removes everything the server never emits: other elements, handlers, link pings, form attributes, unsafe links and styles. */
 export function sanitize(root: Element): void {
   for (const el of [root, ...root.querySelectorAll("*")]) {
@@ -66,7 +76,7 @@ export function sanitize(root: Element): void {
       const lower = name.toLowerCase();
       if (
         lower.startsWith("on") ||
-        (LINK_ATTRIBUTES.has(lower) && !safeLink(value)) ||
+        (LINK_ATTRIBUTES.has(lower) && !safeLink(value) && !csvData(el, lower, value)) ||
         lower === "style" ||
         lower === "srcdoc" ||
         lower === "ping" ||

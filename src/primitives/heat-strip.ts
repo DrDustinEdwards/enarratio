@@ -4,7 +4,6 @@ import { valueFormat } from "../render/text.js";
 import {
   type PrimitiveFigureOptions,
   type PrimitiveTable,
-  type PrimitiveTableOptions,
   primitiveFigure,
   primitiveTable,
   primitiveText,
@@ -203,10 +202,7 @@ export function heatStrip(options: HeatStripOptions): string {
  * @example
  * const { markup } = heatStripTable({ values: [3, 5, 9], label: "Requests per hour" });
  */
-export function heatStripTable(
-  options: HeatStripOptions,
-  display?: PrimitiveTableOptions,
-): PrimitiveTable {
+export function heatStripTable(options: HeatStripOptions): PrimitiveTable {
   const p = prepareHeatStrip(options);
   const { strings } = primitiveText(options);
   const { terms } = strings;
@@ -221,7 +217,6 @@ export function heatStripTable(
       ]),
     },
     p.subject || p.alt,
-    display,
     strings,
   );
 }

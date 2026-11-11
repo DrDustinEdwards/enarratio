@@ -76,9 +76,24 @@ describe("barChart", () => {
       "Publications rose from 1 (2022) to 2 (2024). Talks fell from 1 (2022) to 0 (2024). Grants rose from 0 (2022) to 1 (2024). The highest value is 2 (Publications, 2024). The lowest is 0 (Talks, 2023).",
     );
     expect(text("enarratio-note")).toBe("Notes: A grant counts once.");
-    expect(text("enarratio-source")).toBe(
-      "Source: CV · By Sample Lab · Download CSV · Download SVG · Download PNG · Download tactile SVG",
+    expect(text("enarratio-source")).toBe("Source: CV · By Sample Lab");
+    // Record 0035: one toolbar above the drawing, Sound then the Download menu (no Range on a
+    // band scale); "Download CSV" works without script, the rest wait for enhance().
+    const bar = fig.querySelector(".enarratio-controls");
+    expect(bar?.getAttribute("role")).toBe("toolbar");
+    expect(bar?.nextElementSibling?.className).toBe("enarratio-legend");
+    expect([...(bar?.children ?? [])].map((c) => c.textContent)).toEqual([
+      "Sound",
+      "DownloadDownload CSVDownload SVGDownload PNGDownload tactile SVG",
+    ]);
+    expect(bar?.querySelector(".enarratio-csv")?.hasAttribute("data-enarratio-pending")).toBe(
+      false,
     );
+    expect(bar?.querySelectorAll("[data-enarratio-pending]")).toHaveLength(4);
+    // The data table is visually hidden, right after the drawing it repeats.
+    const data = fig.querySelector(".enarratio-frame")?.nextElementSibling;
+    expect(data?.className).toBe("enarratio-data enarratio-visually-hidden");
+    expect(fig.querySelector("details.enarratio-data")).toBeNull();
     expect(fig.querySelector(".enarratio-source a")?.getAttribute("href")).toBe(
       "https://example.com/cv",
     );

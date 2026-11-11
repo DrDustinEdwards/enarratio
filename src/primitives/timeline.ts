@@ -5,7 +5,6 @@ import type { Terms } from "../render/text.js";
 import {
   type PrimitiveFigureOptions,
   type PrimitiveTable,
-  type PrimitiveTableOptions,
   primitiveFigure,
   primitiveTable,
   primitiveText,
@@ -498,10 +497,7 @@ export function timeline(options: TimelineOptions): string {
  * @example
  * const { table } = timelineTable({ label: "Agent runs", events });
  */
-export function timelineTable(
-  options: TimelineOptions,
-  display?: PrimitiveTableOptions,
-): PrimitiveTable {
+export function timelineTable(options: TimelineOptions): PrimitiveTable {
   const p = prepareTimeline(options);
   const { strings } = primitiveText(options);
   const { terms } = strings;
@@ -518,7 +514,6 @@ export function timelineTable(
       ]),
     },
     p.subject || p.alt,
-    display,
     strings,
   );
 }

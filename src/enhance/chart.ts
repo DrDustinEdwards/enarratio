@@ -1,8 +1,17 @@
 /** One enhanced chart: tooltips, keyboard navigation, filters, the range brush and updates. */
 
 import { measure, onResize } from "./batch.js";
-import { button, expander, fill, sortTable, viewSwitch } from "./controls.js";
-import { exportControls } from "./export.js";
+import {
+  button,
+  downloadMenu,
+  expander,
+  fill,
+  popover,
+  sortTable,
+  toolbar,
+  toolButton,
+} from "./controls.js";
+import { exportButtons } from "./export.js";
 import {
   center,
   invert,
@@ -69,8 +78,6 @@ export class Chart implements EnhancedChart {
   private range: [number, number] | null = null;
   private brushRect: SVGRectElement | null = null;
   private rangeInputs: HTMLInputElement[] = [];
-  private hint: HTMLElement | null = null;
-  private viewButton: HTMLButtonElement | null = null;
   private expandButton: HTMLButtonElement | null = null;
   /** Stops the sound playing, when it is (B54). */
   private stopSound: (() => void) | null = null;
@@ -182,7 +189,7 @@ export class Chart implements EnhancedChart {
 
     if (this.options.filter) this.attachLegend();
     if (this.options.brush && parseScale(this.figure)) this.attachBrush(svg);
-    this.attachControls(frame ?? svg);
+    this.attachControls();
     if (this.options.entrance) this.attachEntrance();
   }
 
@@ -226,7 +233,6 @@ export class Chart implements EnhancedChart {
       .join(" ");
     layer.setAttribute("aria-describedby", hint.id);
     (frame ?? svg).after(hint);
-    this.hint = hint;
 
     this.marks.forEach((mark, i) => {
       const text = label(mark);
@@ -326,43 +332,61 @@ export class Chart implements EnhancedChart {
     return mark ? place(mark).row : 0;
   }
 
-  /** The chart and table switch, the expand button and the range form, after the drawing. */
-  private attachControls(after: Element): void {
+  /**
+   * The toolbar above the drawing (record 0035): Sound, Range, Expand when asked for, and the
+   * Download menu, each an icon and a word on one row. It takes the place of the one the server
+   * wrote (figure.ts), so the page does not shift (D5, record 0033), and takes the figure's
+   * "Download CSV" link into its menu; destroy() puts both back.
+   */
+  private attachControls(): void {
     const s = this.strings;
+    const listen = (t: EventTarget, type: string, h: (event: Event) => void): void =>
+      this.listen(t, type, h);
+    if (this.options.table) this.cleanup.push(sortTable(this.figure, s, (m) => this.announce(m)));
     const bar = document.createElement("div");
     bar.className = "enarratio-controls";
-    if (this.options.table) {
-      this.cleanup.push(sortTable(this.figure, s, (m) => this.announce(m)));
-      this.viewButton = viewSwitch(this.figure, s);
-      if (this.viewButton) bar.append(this.viewButton);
-    }
-    if (this.options.expand) {
-      this.expandButton = expander(this.figure, s, (t, type, h) => this.listen(t, type, h));
-      bar.append(this.expandButton);
-    }
     if (this.options.sound && this.marks.length > 1 && "AudioContext" in window) {
       bar.append(this.playButton());
     }
     const scale = parseScale(this.figure);
     if (this.brushRect && scale) bar.append(this.rangeForm(scale));
-    const svg = this.svg;
-    if (svg) {
-      this.cleanup.push(
-        exportControls(this.figure, svg, this.options, s, bar, (m) => this.announce(m)),
-      );
+    if (this.options.expand) {
+      this.expandButton = expander(this.figure, s, listen);
+      bar.append(this.expandButton);
     }
-    // The server wrote the default controls ahead of the layer, inert (figure.ts); these take
-    // their place, so the page does not shift (D5, record 0033).
-    const pending = this.figure.querySelector(
-      ":scope > .enarratio-controls[data-enarratio-pending]",
-    );
+    const csv = this.figure.querySelector<HTMLAnchorElement>(".enarratio-csv");
+    const svg = this.svg;
+    const files = svg
+      ? exportButtons(this.figure, svg, this.options, s, (m) => this.announce(m))
+      : [];
+    const home = csv?.parentNode ? ([csv.parentNode, csv.nextSibling] as const) : null;
+    if (csv || files.length > 0)
+      bar.append(downloadMenu([...(csv ? [csv] : []), ...files], s, listen));
+    const server = this.figure.querySelector<HTMLElement>(":scope > .enarratio-controls");
     if (bar.childElementCount === 0) {
-      pending?.remove();
+      server?.remove();
+      if (server)
+        this.cleanup.push(() =>
+          this.figure
+            .querySelector(":scope > .enarratio-legend, :scope > .enarratio-frame")
+            ?.before(server),
+        );
       return;
     }
-    if (pending) pending.replaceWith(bar);
-    else (this.hint ?? after).after(bar);
-    this.cleanup.push(() => bar.remove());
+    toolbar(bar, s, listen);
+    if (server) server.replaceWith(bar);
+    else {
+      const next = this.figure.querySelector(
+        ":scope > .enarratio-legend, :scope > .enarratio-frame",
+      );
+      if (next) next.before(bar);
+      else this.figure.append(bar);
+    }
+    this.cleanup.push(() => {
+      if (server) bar.replaceWith(server);
+      else bar.remove();
+      if (csv && home) home[0].insertBefore(csv, home[1]);
+    });
   }
 
   /**
@@ -371,10 +395,11 @@ export class Chart implements EnhancedChart {
    */
   private playButton(): HTMLButtonElement {
     const s = this.strings;
+    // The name stays "Sound"; aria-pressed says it is playing (WAI-ARIA APG, toggle button).
     const set = (stop: (() => void) | null): void => {
       this.stopSound?.();
       this.stopSound = stop;
-      toggle.textContent = stop ? s.stop : s.play;
+      toggle.setAttribute("aria-pressed", String(stop !== null));
       if (!stop) this.hover(null);
     };
     const onPlay = async (): Promise<void> => {
@@ -395,7 +420,8 @@ export class Chart implements EnhancedChart {
         ),
       );
     };
-    const toggle = button(s.play, () => void onPlay());
+    const toggle = toolButton("sound", s.sound, () => void onPlay());
+    toggle.setAttribute("aria-pressed", "false");
     // Anywhere on the page, so a reader can always stop the sound (WCAG 1.4.2).
     this.listen(document, "keydown", (e) => {
       if ((e as KeyboardEvent).key === "Escape" && this.stopSound) set(null);
@@ -404,14 +430,13 @@ export class Chart implements EnhancedChart {
     return toggle;
   }
 
-  /** The range as a form (B15): from and to, in data units, for readers who cannot drag. */
+  /**
+   * The range as a form (B15): from and to, in data units, for readers who cannot drag. The Range
+   * button opens it in a panel under the toolbar.
+   */
   private rangeForm(scale: XScale): HTMLElement {
     const s = this.strings;
     const time = isTime(scale);
-    const details = document.createElement("details");
-    details.className = "enarratio-range";
-    const summary = document.createElement("summary");
-    summary.textContent = s.range;
     const form = document.createElement("form");
     const [d0, d1] = scale.domain as [number, number];
     this.rangeInputs = [s.from, s.to].map((text) => {
@@ -449,8 +474,9 @@ export class Chart implements EnhancedChart {
       this.drawBrush(project(scale, a), project(scale, b));
       this.emitBrush([Math.min(a, b), Math.max(a, b)]);
     });
-    details.append(summary, form);
-    return details;
+    return popover("enarratio-range", "range", s.range, form, (t, type, h) =>
+      this.listen(t, type, h),
+    );
   }
 
   private format(n: number): string {
@@ -895,7 +921,6 @@ export class Chart implements EnhancedChart {
     const incoming = document.importNode(candidate, true);
     const before = geometry(this.figure);
     const { selected, range } = this;
-    const table = this.figure.hasAttribute("data-enarratio-view-table");
     const expanded = this.figure.hasAttribute("data-enarratio-expanded");
     // The tab stop (and focus, if a reader is in the chart) moves to the same mark after the swap.
     const stop = this.marks[this.focusIndex];
@@ -921,7 +946,6 @@ export class Chart implements EnhancedChart {
       this.drawBrush(project(scale, range[0]), project(scale, range[1]));
       this.setRange(range);
     }
-    if (table) this.viewButton?.click();
     if (expanded) this.expandButton?.click();
     if (stopKey !== null && this.marks.length > 0) {
       this.moveFocus(this.successor(stopKey, stopX, stopIndex), hadFocus);
@@ -935,7 +959,6 @@ export class Chart implements EnhancedChart {
   }
 
   private teardown(): void {
-    if (this.figure.hasAttribute("data-enarratio-view-table")) this.viewButton?.click();
     this.runs++;
     for (const undo of this.cleanup.splice(0)) undo();
     clearTimeout(this.hideTimer);
@@ -944,8 +967,6 @@ export class Chart implements EnhancedChart {
     this.tooltip = null;
     this.brushRect = null;
     this.rangeInputs = [];
-    this.hint = null;
-    this.viewButton = null;
     this.expandButton = null;
     this.layout = () => {};
     this.marks = [];

@@ -1,13 +1,14 @@
 /**
  * The figure every chart is delivered in (design record 0023): a head (title, subtitle and the
  * finding in text), an overview for screen readers, a legend, the SVG named by its text
- * alternative, a summary computed from the data, the caption, notes and source line with a CSV
- * download, and the data table. All of it is in the HTML with scripts off. The accessible name
+ * alternative, a summary computed from the data, the caption, notes and source line, and the
+ * data table, visually hidden for screen readers and AI agents. A toolbar above the drawing holds
+ * the CSV download (record 0035). All of it is in the HTML with scripts off. The accessible name
  * lives on the SVG and the figcaption, never on the figure, because `role="img"` hides its
  * descendants: naming the figure would hide the caption and table from the readers they exist for.
  */
 
-import { BRUSH_SCALES, ENHANCE_STRINGS } from "../controls.js";
+import { BRUSH_SCALES, ENHANCE_STRINGS, type ICONS } from "../controls.js";
 import { element, escapeHtml } from "../html.js";
 import { requireSize, safeHref } from "./data.js";
 import { type ChartDescription, overview, summarize } from "./describe.js";
@@ -98,11 +99,6 @@ export interface FigureOptions extends IssueOptions {
   /** The drawing's height in CSS pixels. */
   readonly height?: number;
   /**
-   * How the equivalent data table is shown: in a closed disclosure (default), or only to
-   * assistive technology. It is always present.
-   */
-  readonly dataTable?: "details" | "visually-hidden";
-  /**
    * The browser's hover title on each mark (a `<title>` inside it), on by default. `false`
    * leaves them out, for a site that shows no hover tooltips: each mark's details move to a
    * `data-enarratio-label` attribute, which `enhance()` still names its points with, and the
@@ -110,10 +106,11 @@ export interface FigureOptions extends IssueOptions {
    */
   readonly hoverTitles?: boolean;
   /**
-   * The controls `enhance()` adds with its default options (Show table, Play as sound, Pick a
-   * range and the downloads), written into the markup ahead of it, inert, so the page does not
-   * shift when the layer arrives (D5, record 0033). With scripts off they stay hidden. On by
-   * default; `false` leaves them out, for a page that never enhances or turns those controls off.
+   * The toolbar controls `enhance()` adds with its default options (Sound, Range and the Download
+   * menu's SVG, PNG, tactile SVG and Copy embed), written into the markup ahead of it, inert, so
+   * the page does not shift when the layer arrives (D5, records 0033, 0035). With scripts off they
+   * stay hidden. On by default; `false` leaves them out, for a page that never enhances or turns
+   * those controls off. "Download CSV" is a link and works without script, so it stays either way.
    */
   readonly controls?: boolean;
 }
@@ -311,80 +308,92 @@ function tableMarkup(table: DataTable, caption: string): string {
 }
 
 /**
- * A data table as the markup a figure carries: in a closed disclosure (default), or visible only
- * to assistive technology. `caption` names the table for screen readers.
+ * A data table as the markup a figure carries: visually hidden, in the HTML right after the
+ * drawing, for screen readers and AI agents (record 0035). Sighted readers get the values from
+ * the hover and focus details, the summary and "Download CSV". `caption` names the table.
  */
-export function dataTableBlock(
-  table: DataTable,
-  caption: string,
-  display: "details" | "visually-hidden" = "details",
-  strings: Strings = stringsFor(undefined),
-): string {
-  const markup = tableMarkup(table, caption);
-  // Two labels, one shown at a time by the stylesheet: "Show data" closed, "Hide data" open.
-  const label = `${element("span", { class: "enarratio-show" }, escapeHtml(strings.showData))}${element("span", { class: "enarratio-hide" }, escapeHtml(strings.hideData))}`;
-  return display === "visually-hidden"
-    ? element("div", { class: "enarratio-data enarratio-visually-hidden" }, markup)
-    : element(
-        "details",
-        { class: "enarratio-data" },
-        `${element("summary", {}, label)}${element(
-          "div",
-          // A table wider than its container scrolls inside this region, not the page (WCAG 2.2
-          // SC 1.4.10), and a keyboard reaches it (SC 2.1.1): focusable, named, a group like the frame (not a landmark).
-          { class: "enarratio-table", tabindex: "0", role: "group", "aria-label": caption },
-          markup,
-        )}`,
-      );
+export function dataTableBlock(table: DataTable, caption: string): string {
+  return element(
+    "div",
+    { class: "enarratio-data enarratio-visually-hidden" },
+    tableMarkup(table, caption),
+  );
 }
 
 /** Markup the enhancement layer replaces when it runs: inert until then, hidden with scripts off. */
-function pending(tag: string, content: string, cls?: string): string {
-  return element(tag, { class: cls, "data-enarratio-pending": true, inert: true }, content);
+function pending(tag: string, attrs: Record<string, string | undefined>, content: string): string {
+  return element(tag, { ...attrs, "data-enarratio-pending": true, inert: true }, content);
+}
+
+/** A toolbar icon: an empty span the stylesheet draws, hidden from assistive technology. */
+function iconMarkup(name: keyof typeof ICONS): string {
+  return element("span", { class: "enarratio-icon", "data-icon": name, "aria-hidden": "true" });
+}
+
+/** A toolbar control's face: its icon and its word, which is also its name. */
+function face(name: keyof typeof ICONS, text: string): string {
+  return iconMarkup(name) + element("span", { class: "enarratio-label" }, escapeHtml(text));
 }
 
 /**
- * The controls `enhance()` adds with its default options, in its order (chart.ts attachControls,
- * export.ts): the table switch, Play as sound when there are two or more marks, Pick a range on
- * a chart with a continuous x scale, then the downloads and, for a figure with an id, Copy embed.
- * The downloads sit beside the CSV link when there is one, else in the bar.
+ * The toolbar above the drawing (record 0035), as `enhance()` builds it with its default options
+ * (chart.ts attachControls, export.ts): Sound when there are two or more marks, Range on a chart
+ * with a continuous x scale, then the Download menu: "Download CSV", then the drawing's files and,
+ * for a figure with an id, Copy embed. What only the layer can do is written inert and hidden
+ * with scripts off; "Download CSV" is a link in a native disclosure, so it works without script.
+ * Returns "" when there is nothing to put in it.
  */
-function controlsMarkup(
+function toolbarMarkup(
   options: FigureOptions,
   parts: FigureParts,
   svg: string,
-): { bar: string[]; exports: string[] } {
+  csv: string,
+): string {
   const s = ENHANCE_STRINGS;
-  const button = (text: string, cls?: string): string =>
-    element("button", { type: "button", class: cls }, escapeHtml(text));
-  const bar = [button(s.showTable)];
-  if ((svg.match(/\sdata-enarratio-key=/g) ?? []).length > 1) bar.push(button(s.play));
-  if (parts.x && BRUSH_SCALES.includes(parts.x.type)) {
+  const layer = !parts.fixed && !parts.tableMarkup && options.controls !== false;
+  const bar: string[] = [];
+  if (layer && (svg.match(/\sdata-enarratio-key=/g) ?? []).length > 1) {
     bar.push(
-      element("details", { class: "enarratio-range" }, element("summary", {}, escapeHtml(s.range))),
+      pending("button", { type: "button", "aria-pressed": "false" }, face("sound", s.sound)),
     );
   }
-  const exports = [
-    s.downloadSvg,
-    s.downloadPng,
-    s.downloadTactile,
-    ...(options.id ? [s.copyEmbed] : []),
-  ];
-  return { bar, exports };
+  if (layer && parts.x && BRUSH_SCALES.includes(parts.x.type)) {
+    bar.push(
+      pending(
+        "details",
+        { class: "enarratio-range" },
+        element("summary", {}, face("range", s.range)),
+      ),
+    );
+  }
+  const exports = layer
+    ? [s.downloadSvg, s.downloadPng, s.downloadTactile, ...(options.id ? [s.copyEmbed] : [])]
+    : [];
+  if (csv || exports.length > 0) {
+    const items =
+      csv + exports.map((text) => pending("button", { type: "button" }, escapeHtml(text))).join("");
+    const menu = `${element("summary", {}, face("download", s.download) + iconMarkup("chevron"))}${element("div", { class: "enarratio-panel enarratio-menu" }, items)}`;
+    // With no CSV link, nothing in the menu works without script, so the whole menu waits for it.
+    bar.push(
+      csv
+        ? element("details", { class: "enarratio-download" }, menu)
+        : pending("details", { class: "enarratio-download" }, menu),
+    );
+  }
+  return bar.length > 0
+    ? element(
+        "div",
+        { class: "enarratio-controls", role: "toolbar", "aria-label": s.controls },
+        bar.join(""),
+      )
+    : "";
 }
 
 /** The longest CSV, in characters of its `data:` URL, that a figure inlines. */
 const CSV_LIMIT = 100_000;
 
-/** The source line: source (linked), byline and the CSV link, or "" when there is none. */
-function sourceLine(
-  kind: string,
-  options: FigureOptions,
-  table: DataTable,
-  strings: Strings,
-  name: string,
-  exports = "",
-): string {
+/** The source line: source (linked) and byline, or "" when there is none. */
+function sourceLine(kind: string, options: FigureOptions, strings: Strings): string {
   const parts: string[] = [];
   const source = typeof options.source === "string" ? { name: options.source } : options.source;
   if (source?.name.trim()) {
@@ -393,35 +402,42 @@ function sourceLine(
     parts.push(`${escapeHtml(strings.source)}: ${linked}`);
   }
   if (options.byline?.trim()) parts.push(escapeHtml(strings.by(options.byline.trim())));
-  if (options.csv !== false) {
-    const file = `${
-      name
-        .toLowerCase()
-        .replace(/[^\p{L}\p{N}]+/gu, "-")
-        .replace(/^-|-$/g, "")
-        .slice(0, 60) || kind
-    }.csv`;
-    // The byte order mark lets spreadsheets read the file as UTF-8.
-    const href = options.csvHref
-      ? safeHref(kind, options.csvHref)
-      : `data:text/csv;charset=utf-8,%EF%BB%BF${encodeURIComponent(toCsv([table.columns, ...table.rows]))}`;
-    if (href.length > CSV_LIMIT) {
-      report(options, {
-        chart: kind,
-        code: "csv-too-large",
-        message: `the data table is too large to inline as a CSV link (${href.length} characters); serve the file and pass csvHref, or csv: false`,
-      });
-    } else {
-      parts.push(
-        element(
-          "a",
-          { href, download: file, class: "enarratio-csv" },
-          escapeHtml(strings.downloadCsv),
-        ) + (exports ? pending("span", exports) : ""),
-      );
-    }
-  }
   return parts.length > 0 ? element("p", { class: "enarratio-source" }, parts.join(" · ")) : "";
+}
+
+/** The "Download CSV" link, for the toolbar's Download menu, or "" when there is none. */
+function csvLink(
+  kind: string,
+  options: FigureOptions,
+  table: DataTable,
+  strings: Strings,
+  name: string,
+): string {
+  if (options.csv === false) return "";
+  const file = `${
+    name
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 60) || kind
+  }.csv`;
+  // The byte order mark lets spreadsheets read the file as UTF-8.
+  const href = options.csvHref
+    ? safeHref(kind, options.csvHref)
+    : `data:text/csv;charset=utf-8,%EF%BB%BF${encodeURIComponent(toCsv([table.columns, ...table.rows]))}`;
+  if (href.length > CSV_LIMIT) {
+    report(options, {
+      chart: kind,
+      code: "csv-too-large",
+      message: `the data table is too large to inline as a CSV link (${href.length} characters); serve the file and pass csvHref, or csv: false`,
+    });
+    return "";
+  }
+  return element(
+    "a",
+    { href, download: file, class: "enarratio-csv" },
+    escapeHtml(strings.downloadCsv),
+  );
 }
 
 /** The checks a figure makes as it renders, each reported as an issue (B18, B19, B21, B25). */
@@ -534,27 +550,18 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
   const legend = legendMarkup(parts);
   const wide = !parts.fixed && (options.width ?? DEFAULT_WIDTH) >= WIDE_WIDTH;
   const name = title ?? alt;
-  // The controls enhance() will add, written ahead of it so the page does not shift (D5, 0033).
-  const controls: { bar: string[]; exports: string[] } =
-    parts.fixed || parts.tableMarkup || options.controls === false
-      ? { bar: [], exports: [] }
-      : controlsMarkup(options, parts, svg);
-  const exportButtons = controls.exports
-    .map(
-      (text) =>
-        ` · ${element("button", { type: "button", class: "enarratio-export" }, escapeHtml(text))}`,
-    )
-    .join("");
-  const source = sourceLine(parts.kind, options, parts.table, strings, name, exportButtons);
-  // Without a CSV link the downloads go in the bar, as enhance() puts them.
-  if (exportButtons && !source.includes('class="enarratio-csv"')) {
-    controls.bar.push(
-      ...controls.exports.map((text) => element("button", { type: "button" }, escapeHtml(text))),
-    );
-  }
+  // The toolbar, with the controls enhance() will add written ahead of it so the page does not
+  // shift (D5, records 0033, 0035).
+  const controls = toolbarMarkup(
+    options,
+    parts,
+    svg,
+    csvLink(parts.kind, options, parts.table, strings, name),
+  );
+  const source = sourceLine(parts.kind, options, strings);
   const tableBlock = parts.tableMarkup
     ? parts.tableMarkup(strings.dataFor(name))
-    : dataTableBlock(parts.table, strings.dataFor(name), options.dataTable, strings);
+    : dataTableBlock(parts.table, strings.dataFor(name));
   const notes = typeof options.notes === "string" ? [options.notes] : (options.notes ?? []);
   const muted = (cls: string, text: string): string =>
     element("p", { class: cls }, escapeHtml(text));
@@ -591,6 +598,8 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
       head ? element("figcaption", { class: "enarratio-head" }, head) : "",
       // B53: what the chart is, before it: type, series and points, axes and ranges.
       muted("enarratio-overview enarratio-visually-hidden", intro),
+      // Record 0035: the toolbar above the drawing, under the head.
+      controls,
       legend,
       // A frame that scrolls sideways on narrow screens instead of shrinking the text (A13).
       // Drawings 30rem or wider keep that width and scroll; narrower ones scale as usual. A wide
@@ -612,14 +621,16 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
               : { class: "enarratio-frame" },
             svg,
           ),
-      controls.bar.length > 0 ? pending("div", controls.bar.join(""), "enarratio-controls") : "",
+      // The data table, visually hidden, straight after the drawing it repeats (record 0035); a
+      // table chart's table is the chart, visible, after the source as before.
+      parts.tableMarkup ? "" : tableBlock,
       summary && summary !== given ? muted("enarratio-summary", summary) : "",
       caption ? muted("enarratio-caption", caption) : "",
       ...notes
         .filter((n) => n.trim())
         .map((n) => muted("enarratio-note", `${strings.notes}: ${n.trim()}`)),
       source,
-      tableBlock,
+      parts.tableMarkup ? tableBlock : "",
     ].join(""),
   );
 }

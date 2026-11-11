@@ -240,21 +240,26 @@ async function loadExamples(): Promise<Example[]> {
   return examples;
 }
 
-/** The pending controls row the figure writes ahead of enhance(), up to its first button. */
-const PENDING_ROW = `<div class="enarratio-controls" data-enarratio-pending inert><button type="button">${ENHANCE_STRINGS.showTable}</button>`;
+/** Where the Download menu starts in the toolbar the figure writes ahead of enhance(). */
+const DOWNLOAD_MENU = '<details class="enarratio-download"';
+
+/** Expand as enhance() writes it (controls.ts expander), inert until the layer replaces it. */
+const PENDING_EXPAND = `<button type="button" aria-pressed="false" data-enarratio-pending inert><span class="enarratio-icon" data-icon="expand" aria-hidden="true"></span><span class="enarratio-label">${ENHANCE_STRINGS.expand}</span></button>`;
 
 /**
- * A figure's markup with Expand in its pending controls. The figure writes the controls enhance()
- * adds with its default options; the gallery enhances with `expand: true` (site/gallery.js), which
- * puts Expand after Show table, so the row is written with it and does not change (D5, record 0034).
+ * A figure's markup with Expand in its toolbar. The figure writes the controls enhance() adds with
+ * its default options; the gallery enhances with `expand: true` (site/gallery.js), which puts
+ * Expand before the Download menu, so the toolbar is written with it and does not change (D5,
+ * records 0034, 0035).
  */
 function withExpand(markup: string): string {
-  if (!markup.includes('class="enarratio-controls" data-enarratio-pending')) return markup;
-  if (!markup.includes(PENDING_ROW)) throw new Error("the pending controls row changed its markup");
-  return markup.replace(
-    PENDING_ROW,
-    `${PENDING_ROW}<button type="button">${ENHANCE_STRINGS.expand}</button>`,
-  );
+  // A primitive's figure is never enhanced, so it gets no Expand.
+  if (!markup.includes('class="enarratio-controls"') || markup.includes("data-enarratio-static")) {
+    return markup;
+  }
+  if (!markup.includes(DOWNLOAD_MENU))
+    throw new Error("the toolbar's Download menu changed its markup");
+  return markup.replace(DOWNLOAD_MENU, `${PENDING_EXPAND}${DOWNLOAD_MENU}`);
 }
 
 /**

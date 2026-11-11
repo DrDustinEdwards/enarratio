@@ -11,11 +11,7 @@
  */
 
 export { type AttributeValue, element } from "./html.js";
-export type {
-  PrimitiveFigureOptions,
-  PrimitiveTable,
-  PrimitiveTableOptions,
-} from "./primitives/companion.js";
+export type { PrimitiveFigureOptions, PrimitiveTable } from "./primitives/companion.js";
 export { type HeatStripOptions, heatStrip, heatStripTable } from "./primitives/heat-strip.js";
 export {
   type ProgressRingOptions,

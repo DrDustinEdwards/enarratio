@@ -27,10 +27,7 @@ export interface TableColumn<T extends object> {
 }
 
 /** Options for {@link tableChart}. */
-export interface TableChartOptions<T extends object> extends Omit<
-  FigureOptions,
-  "height" | "dataTable"
-> {
+export interface TableChartOptions<T extends object> extends Omit<FigureOptions, "height"> {
   readonly data: readonly T[];
   /** The columns, in order. The first column's cells are row headers. */
   readonly columns: readonly TableColumn<T>[];

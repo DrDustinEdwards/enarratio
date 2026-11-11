@@ -56,17 +56,18 @@ export interface EnhanceStrings {
   readonly sorted: string;
   readonly ascending: string;
   readonly descending: string;
-  readonly showTable: string;
-  readonly showChart: string;
+  /** The toolbar's name (record 0035). */
+  readonly controls: string;
+  /** The expand toggle; its name stays the same, open or closed (`aria-pressed` says which). */
   readonly expand: string;
-  readonly collapse: string;
-  /** The range form's summary, and its fields and buttons (B15). */
+  /** The range button, and its form's fields and buttons (B15). */
   readonly range: string;
   readonly from: string;
   readonly to: string;
   readonly apply: string;
   readonly clear: string;
-  /** The export buttons (C3) and the embed snippet's (C4). */
+  /** The Download menu's button, and its items: the export buttons (C3) and the embed snippet's (C4). */
+  readonly download: string;
   readonly downloadSvg: string;
   readonly downloadPng: string;
   /** The tactile export (B55): a black-on-white SVG sized for an embosser or swell paper. */
@@ -76,9 +77,11 @@ export interface EnhanceStrings {
   readonly embedCopied: string;
   /** Announced when an image or the snippet could not be made. */
   readonly exportFailed: string;
-  /** The sound button (B54), and what it says as each series starts. */
-  readonly play: string;
-  readonly stop: string;
+  /**
+   * The sound toggle (B54): its name stays the same while it plays (`aria-pressed` says so), and
+   * what the live region says as each series starts.
+   */
+  readonly sound: string;
   readonly playing: string;
 }
 
@@ -95,19 +98,22 @@ export interface EnhanceOptions {
   readonly brush?: boolean;
   /** Animate charts in the first time they scroll into view. */
   readonly entrance?: boolean;
-  /** Make the data table sortable and add a button that switches between chart and table. */
+  /**
+   * Make a table chart's table sortable. A chart's own data table is visually hidden, for screen
+   * readers and AI agents, so it is not given sort buttons nobody could see (record 0035).
+   */
   readonly table?: boolean;
-  /** Add a button that expands the chart to fill the window. Off by default. */
+  /** Add an Expand toggle to the toolbar that expands the chart to fill the window. Off by default. */
   readonly expand?: boolean;
   /**
    * Keep each chart's filter and range in the address, so a link reproduces the view. Needs the
    * figure's `id`. Off by default. A filter or range read from the address fires its event.
    */
   readonly url?: boolean;
-  /** Add "Download SVG" and "Download PNG" beside the CSV link (C3). */
+  /** Add "Download SVG" and "Download PNG" to the toolbar's Download menu, after "Download CSV" (C3). */
   readonly download?: boolean;
   /**
-   * Add "Download tactile SVG" beside them: the drawing in black on white, gridlines left out,
+   * Add "Download tactile SVG" after them: the drawing in black on white, gridlines left out,
    * lines thickened and labels horizontal, on an 11 by 11.5 inch page for a braille embosser or
    * swell paper (B55). Needs `download`.
    */
@@ -118,8 +124,8 @@ export interface EnhanceOptions {
    */
   readonly embed?: boolean;
   /**
-   * Add "Play as sound", which plays each series in turn as notes that rise and fall with the
-   * values (B54). Its code loads only when pressed.
+   * Add the Sound toggle to the toolbar, which plays each series in turn as notes that rise and
+   * fall with the values (B54). Its code loads only when pressed.
    */
   readonly sound?: boolean;
   /** Translations of the strings the layer writes. */

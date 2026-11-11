@@ -138,28 +138,27 @@ through [`PrimitiveFigureOptions`](#primitivefigureoptions). A site sets the
 shared ones once (`const site = { locale: "de-DE", strict: true }`) and
 spreads them into each chart.
 
-| Option            | Type                                  | Meaning                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `alt`             | `string`                              | What the chart shows, including its finding. Names the SVG for assistive technology and is shown as the finding under the title. Without it the chart names itself from its overview and summary and reports `alt-missing` (B52).                                                                                                                                                                                                                                                                              |
-| `title`           | `string`                              | Visible title above the chart. Without it, a `title-missing` issue.                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `subtitle`        | `string`                              | A line under the title: what the chart shows, or how to read it (B17).                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `caption`         | `string`                              | Visible caption below: method, caveats.                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `notes`           | `string` or `string[]`                | Notes below: definitions, exclusions (B23).                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `source`          | `string` or `{ name, href? }`         | The source line, linked when `href` is given (relative or http(s)).                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `byline`          | `string`                              | Who made the chart, in the source line.                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `summary`         | `string` or `false`                   | The summary under the chart. Computed from the data by default: each series' trend (with a peak or low that stands out), the highest and lowest values, values far from the rest, and the last interval drawn (B39, B24). `false` leaves it out.                                                                                                                                                                                                                                                               |
-| `csv`             | `boolean`                             | The "Download CSV" link, built from the data table as a `data:` URL with `download` (default `true`). Over 100,000 characters there is no link and a `csv-too-large` issue.                                                                                                                                                                                                                                                                                                                                    |
-| `csvHref`         | `string`                              | A CSV file the site serves, linked instead (build it with [`toCsv`](#tocsv)).                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `locale`          | `string`                              | BCP 47 locale for generated numbers and dates (default `"en-US"`).                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `lang`            | `string`                              | The figure's language, a BCP 47 tag such as `"de"`, written as its `lang` attribute so a screen reader switches voice for the generated text, controls and table when it differs from the page's (WCAG 2.2 SC 3.1.2). Set it with `strings` and `locale` when they translate the figure; leave it out when the figure is in the page's language.                                                                                                                                                               |
-| `strings`         | [`StringOverrides`](#stringoverrides) | Translations of the generated text; see [`Strings`](#strings).                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `strict`          | `boolean`                             | Throw on the first [issue](#chartissue) instead of reporting it, so a build fails.                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `onIssue`         | `(issue: ChartIssue) => void`         | Receives issues instead of `console.warn`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `id`              | `string`                              | The figure's `id`, reported as `chartId` in events.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `width`, `height` | `number`                              | Drawing size in CSS pixels, positive and finite. Drawings 480 pixels or wider keep at least 30rem on narrow screens and scroll sideways inside the figure, so their text stays readable. That frame is in the tab order (`tabindex="0"`) and named "{title}, scrolls sideways" ("Chart" without a title), so a keyboard can scroll it; `enhance()` drops that tab stop once the marks take focus.                                                                                                              |
-| `dataTable`       | `"details"` or `"visually-hidden"`    | How the always-present data table is shown. Default `"details"`, closed, labeled "Show data" (and "Hide data" when open).                                                                                                                                                                                                                                                                                                                                                                                      |
-| `hoverTitles`     | `boolean`                             | The browser's hover title (a `<title>`) on each mark, on by default. `false` leaves them out, for a site that shows no hover tooltips; each mark's details move to `data-enarratio-label`, which `enhance()` still names its points with, and the data stay in the table.                                                                                                                                                                                                                                      |
-| `controls`        | `boolean`                             | The controls `enhance()` adds with its default options, written into the figure ahead of it, inert: Show table, Play as sound (two or more marks), Pick a range (a continuous x axis), the downloads (beside the CSV link, or in the control row) and Copy embed (with an `id`). The layer swaps in the working ones, so the page does not shift when it loads; with scripts off they are hidden. On by default; `false` leaves them out, for a page that never calls `enhance()` or turns those controls off. |
+| Option            | Type                                  | Meaning                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `alt`             | `string`                              | What the chart shows, including its finding. Names the SVG for assistive technology and is shown as the finding under the title. Without it the chart names itself from its overview and summary and reports `alt-missing` (B52).                                                                                                                                                                                                                                                                                                                                                         |
+| `title`           | `string`                              | Visible title above the chart. Without it, a `title-missing` issue.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `subtitle`        | `string`                              | A line under the title: what the chart shows, or how to read it (B17).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `caption`         | `string`                              | Visible caption below: method, caveats.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `notes`           | `string` or `string[]`                | Notes below: definitions, exclusions (B23).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `source`          | `string` or `{ name, href? }`         | The source line, linked when `href` is given (relative or http(s)).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `byline`          | `string`                              | Who made the chart, in the source line.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `summary`         | `string` or `false`                   | The summary under the chart. Computed from the data by default: each series' trend (with a peak or low that stands out), the highest and lowest values, values far from the rest, and the last interval drawn (B39, B24). `false` leaves it out.                                                                                                                                                                                                                                                                                                                                          |
+| `csv`             | `boolean`                             | The "Download CSV" link, built from the data table as a `data:` URL with `download` (default `true`). Over 100,000 characters there is no link and a `csv-too-large` issue.                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `csvHref`         | `string`                              | A CSV file the site serves, linked instead (build it with [`toCsv`](#tocsv)).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `locale`          | `string`                              | BCP 47 locale for generated numbers and dates (default `"en-US"`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `lang`            | `string`                              | The figure's language, a BCP 47 tag such as `"de"`, written as its `lang` attribute so a screen reader switches voice for the generated text, controls and table when it differs from the page's (WCAG 2.2 SC 3.1.2). Set it with `strings` and `locale` when they translate the figure; leave it out when the figure is in the page's language.                                                                                                                                                                                                                                          |
+| `strings`         | [`StringOverrides`](#stringoverrides) | Translations of the generated text; see [`Strings`](#strings).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `strict`          | `boolean`                             | Throw on the first [issue](#chartissue) instead of reporting it, so a build fails.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `onIssue`         | `(issue: ChartIssue) => void`         | Receives issues instead of `console.warn`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `id`              | `string`                              | The figure's `id`, reported as `chartId` in events.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `width`, `height` | `number`                              | Drawing size in CSS pixels, positive and finite. Drawings 480 pixels or wider keep at least 30rem on narrow screens and scroll sideways inside the figure, so their text stays readable. That frame is in the tab order (`tabindex="0"`) and named "{title}, scrolls sideways" ("Chart" without a title), so a keyboard can scroll it; `enhance()` drops that tab stop once the marks take focus.                                                                                                                                                                                         |
+| `hoverTitles`     | `boolean`                             | The browser's hover title (a `<title>`) on each mark, on by default. `false` leaves them out, for a site that shows no hover tooltips; each mark's details move to `data-enarratio-label`, which `enhance()` still names its points with, and the data stay in the table.                                                                                                                                                                                                                                                                                                                 |
+| `controls`        | `boolean`                             | The toolbar controls `enhance()` adds with its default options, written into the figure's toolbar ahead of it, inert: Sound (two or more marks), Range (a continuous x axis), and in the Download menu after "Download CSV", Download SVG, Download PNG, Download tactile SVG and Copy embed (with an `id`). The layer swaps in the working ones, so the page does not shift when it loads; with scripts off they are hidden. On by default; `false` leaves them out, for a page that never calls `enhance()` or turns those controls off. "Download CSV" is a link and stays either way. |
 
 Bar, line, area and scatter charts, and the diverging, waterfall, small
 multiples, histogram, density, box, strip, dot, range and dumbbell charts and
@@ -178,6 +177,23 @@ A chart returns:
   <p class="enarratio-overview enarratio-visually-hidden">
     Bar chart with 18 points. X axis, Year: 2019 to 2024. ...
   </p>
+  <div class="enarratio-controls" role="toolbar" aria-label="Chart controls">
+    <button type="button" aria-pressed="false" data-enarratio-pending inert>
+      <span class="enarratio-icon" data-icon="sound" aria-hidden="true"></span>
+      <span class="enarratio-label">Sound</span>
+    </button>
+    <details class="enarratio-range" data-enarratio-pending inert>
+      <summary>... Range</summary>
+    </details>
+    <details class="enarratio-download">
+      <summary>... Download ...</summary>
+      <div class="enarratio-panel enarratio-menu">
+        <a class="enarratio-csv" download="....csv" href="data:text/csv;...">Download CSV</a>
+        <button type="button" data-enarratio-pending inert>Download SVG</button>
+        ...
+      </div>
+    </details>
+  </div>
   <ul class="enarratio-legend">
     ...
   </ul>
@@ -189,21 +205,27 @@ A chart returns:
   >
     <svg role="img" aria-label="{alt}">... one keyed element per datum ...</svg>
   </div>
-  <p class="enarratio-summary">Publications rose from 3 (2019) to 7 (2024). ...</p>
-  <p class="enarratio-caption">...</p>
-  <p class="enarratio-note">Notes: ...</p>
-  <p class="enarratio-source">
-    Source: <a href="...">...</a> · By ... ·
-    <a class="enarratio-csv" download="....csv" href="data:text/csv;...">Download CSV</a>
-  </p>
-  <details class="enarratio-data">
-    <summary>Show data / Hide data</summary>
+  <div class="enarratio-data enarratio-visually-hidden">
     <table>
       ...
     </table>
-  </details>
+  </div>
+  <p class="enarratio-summary">Publications rose from 3 (2019) to 7 (2024). ...</p>
+  <p class="enarratio-caption">...</p>
+  <p class="enarratio-note">Notes: ...</p>
+  <p class="enarratio-source">Source: <a href="...">...</a> · By ...</p>
 </figure>
 ```
+
+The toolbar (record 0035) sits above the drawing, under the head: Sound,
+Range and Download, each an icon and a word, on one row that never wraps (on
+a narrower phone the buttons tighten and Download drops its word; at 200%
+text every control shows its icon alone, and a hidden word stays as
+screen-reader text). Its panels open under it, over the drawing, so nothing
+moves. The data table is visually hidden, right after the drawing, for screen
+readers and AI agents; sighted readers get the values from the hover and focus
+details, the summary and "Download CSV". If a row header is a link, the table
+shows while keyboard focus is in it.
 
 The finding repeats the SVG's name for sighted readers, so it is hidden from
 assistive technology, which reads it once on the SVG. The overview (B53) is
@@ -256,8 +278,6 @@ barChart({
   locale: "de-DE",
   lang: "de",
   strings: {
-    showData: "Daten zeigen",
-    hideData: "Daten verbergen",
     downloadCsv: "CSV herunterladen",
   },
 });
@@ -1178,7 +1198,7 @@ const options = { values: [3, 5, 4, 8], label: "Entries per year" };
 const strip = sparkline(options);
 const { summary, table, markup } = sparklineTable(options);
 // summary: "Entries per year: 4 values, from 3 to 8; lowest 3, highest 8."
-// markup: a <details> holding the table, in the figure's own markup
+// markup: the table, visually hidden, in the figure's own markup
 ```
 
 The summary is the generated sentence, the same one that is the primitive's
@@ -1203,7 +1223,7 @@ Every primitive returns a whole figure by default (B30, B51): its title (the
 `label` unless `title` is given), the finding, the drawing, the companion's
 summary and table, and the CSV link, with the text and issue options of
 [`FigureOptions`](#figureoptions) (`title`, `subtitle`, `caption`, `notes`,
-`source`, `byline`, `summary`, `csv`, `csvHref`, `id`, `dataTable`, `locale`,
+`source`, `byline`, `summary`, `csv`, `csvHref`, `id`, `locale`,
 `lang`, `strings`, `strict`, `onIssue`). `inline: true` returns the bare drawing,
 word-sized, for a sentence or a table cell. The figure carries
 `data-enarratio-static`, so `enhance()` leaves it alone.
@@ -1211,47 +1231,41 @@ word-sized, for a sentence or a table cell. The figure carries
 ### `PrimitiveTable`
 
 What a companion returns: `{ summary: string; table: DataTable; markup: string }`.
-`markup` is the table in a closed disclosure (or visually hidden, per
-`PrimitiveTableOptions`), ready to put beside the primitive.
-
-### `PrimitiveTableOptions`
-
-`{ dataTable?: "details" | "visually-hidden" }`, the second argument of every
-companion: how `markup` shows the table, as on a figure.
+`markup` is the table, visually hidden for screen readers and AI agents, ready
+to put beside the primitive.
 
 ### `sparklineTable`
 
-`sparklineTable(options: SparklineOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+`sparklineTable(options: SparklineOptions: PrimitiveTable`.
 Positions and values.
 
 ### `uptimeStripTable`
 
-`uptimeStripTable(options: UptimeStripOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+`uptimeStripTable(options: UptimeStripOptions: PrimitiveTable`.
 Each period, named as in its hover text, and its status; the summary has the
 counts and availability.
 
 ### `progressRingTable`
 
-`progressRingTable(options: ProgressRingOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+`progressRingTable(options: ProgressRingOptions: PrimitiveTable`.
 Value, total and the real percentage.
 
 ### `timelineTable`
 
-`timelineTable(options: TimelineOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+`timelineTable(options: TimelineOptions: PrimitiveTable`.
 Every event with lane, status, start and end (blank for a point event), in the
 order of the timeline's plain list.
 
 ### `heatStripTable`
 
-`heatStripTable(options: HeatStripOptions, display?: PrimitiveTableOptions): PrimitiveTable`.
+`heatStripTable(options: HeatStripOptions: PrimitiveTable`.
 Each cell's value and its ramp step.
 
 ### `dataTableBlock`
 
-`dataTableBlock(table: DataTable, caption: string, display?, strings?): string`.
-A data table as the markup a figure carries: a closed `<details>` labeled "Show
-data" and "Hide data" (default) or visually hidden. `caption` names the table
-for assistive technology; `strings` translates the labels.
+`dataTableBlock(table: DataTable, caption: string): string`.
+A data table as the markup a figure carries: visually hidden, for screen
+readers and AI agents. `caption` names the table for assistive technology.
 
 ### `tableChart`
 
@@ -1264,7 +1278,7 @@ readers read it as a table, and `enhance()` sorts it by any column.
 
 ### `TableChartOptions`
 
-`data`, `columns`, and the `FigureOptions` except `height` and `dataTable`.
+`data`, `columns`, and the `FigureOptions` except `height`.
 
 ### `TableColumn`
 
@@ -1445,6 +1459,14 @@ A test keeps this table and the stylesheet in step.
 | `--enarratio-tooltip-padding`      | `0.35em 0.6em`                   | The tooltip                                                                                                  |
 | `--enarratio-tooltip-shadow`       | `0 2px 8px rgb(0 0 0 / 15%)`     | The tooltip                                                                                                  |
 | `--enarratio-z-tooltip`            | `10`                             | Stacking of the tooltip                                                                                      |
+| `--enarratio-z-controls`           | `2`                              | Stacking of the toolbar, so its panels open over the chart                                                   |
+| `--enarratio-gap-controls`         | `0.375em`                        | Between toolbar buttons, and between the toolbar and its panels                                              |
+| `--enarratio-gap-icon`             | `0.375em`                        | Between a toolbar icon and its word                                                                          |
+| `--enarratio-control-height`       | `2.25em`                         | Least height of toolbar buttons, menu items and range fields                                                 |
+| `--enarratio-padding-control`      | `0.25em 0.75em`                  | Toolbar buttons, menu items and range fields                                                                 |
+| `--enarratio-radius-control`       | `0.5em`                          | Toolbar buttons and their panels                                                                             |
+| `--enarratio-padding-panel`        | `0.5em`                          | The range form and the Download menu                                                                         |
+| `--enarratio-panel-shadow`         | `0 4px 16px rgb(0 0 0 / 15%)`    | The range form and the Download menu                                                                         |
 | `--enarratio-opacity-dimmed`       | `0.25`                           | Marks outside the current filter                                                                             |
 | `--enarratio-opacity-faded`        | `0.5`                            | Other series while a point has the pointer or focus                                                          |
 | `--enarratio-z-expanded`           | `20`                             | Stacking of an expanded chart                                                                                |
@@ -1491,8 +1513,7 @@ The base rules follow what the reader has asked for (record
   focus in `Highlight`.
 - **`prefers-reduced-motion: reduce`.** No animation or transition.
 - **Print.** The light scheme, no scrolling frame, a figure kept on one page,
-  the data table printed open (where `::details-content` is supported), and no
-  tooltip, focus ring or brush. Anything carrying `data-enarratio-control` is
+  and no toolbar, tooltip, focus ring or brush. Anything carrying `data-enarratio-control` is
   hidden too.
 
 ## Color checks
@@ -1584,15 +1605,15 @@ re-applies them.
 | ---------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `tooltips` | `true`  | Hover and focus details on every mark                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `filter`   | `true`  | A click, Enter or Space on a mark or legend entry filters by it                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `brush`    | `true`  | On a continuous x axis, a range by drag, two clicks, Shift with arrows, or a from-and-to form ("Pick a range")                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `brush`    | `true`  | On a continuous x axis, a range by drag, two clicks, Shift with arrows, or a from-and-to form behind the toolbar's Range button                                                                                                                                                                                                                                                                                                                                                                                       |
 | `entrance` | `true`  | Marks animate in the first time the chart scrolls into view                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `table`    | `true`  | The data table sorts by any column (a button in each header, `aria-sort`), and a "Show table" button swaps the chart for the table and back                                                                                                                                                                                                                                                                                                                                                                           |
-| `expand`   | `false` | An "Expand" button fills the window with the chart; Escape, the button, or focus leaving the chart closes it                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `table`    | `true`  | A table chart's table sorts by any column (a button in each header, `aria-sort`). A chart's own data table is visually hidden, so it gets no sort buttons                                                                                                                                                                                                                                                                                                                                                             |
+| `expand`   | `false` | An Expand toggle in the toolbar (`aria-pressed`) fills the window with the chart; Escape, the toggle, or focus leaving the chart closes it                                                                                                                                                                                                                                                                                                                                                                            |
 | `url`      | `false` | Keeps the filter and range in the address as `?{id}={field}:{value}` and `?{id}-range={low}..{high}`, so a link reproduces the view. Needs the figure's `id`. A view read from the address fires `enarratio:select` or `enarratio:brush`, so the page can follow it                                                                                                                                                                                                                                                   |
-| `download` | `true`  | "Download SVG" and "Download PNG" beside the CSV link (or in the control bar when the figure has none): the drawing as shown, its computed colors and fonts written onto each element and the background painted in; the PNG is that SVG on a canvas at twice its size. A PNG uses the fonts the browser has for a standalone image, so a web font may fall back. The files are made by `image.js` (1.8 kB), which loads on the first press                                                                           |
+| `download` | `true`  | "Download SVG" and "Download PNG" in the toolbar's Download menu, after "Download CSV": the drawing as shown, its computed colors and fonts written onto each element and the background painted in; the PNG is that SVG on a canvas at twice its size. A PNG uses the fonts the browser has for a standalone image, so a web font may fall back. The files are made by `image.js` (1.8 kB), which loads on the first press                                                                                           |
 | `tactile`  | `true`  | With `download`, "Download tactile SVG": the drawing for a braille embosser or swell paper, on an 11 by 11.5 inch page (`width="11in"`), the title as a heading and a turned axis title under it, black on white (every series black, told apart by texture and dash; the sequential ramp as five grays), gridlines left out, raised lines at least 0.7 mm, labels level and kept as text on a white patch so braille software can write them ([record 0030](design/0030-tactile-export-and-forced-colors-record.md)) |
 | `embed`    | `true`  | "Copy embed" copies a link to the chart, `<a href="{page}#{id}">{title}</a>`, to paste into another page. Needs the figure's `id` and the Clipboard API; without either there is no button                                                                                                                                                                                                                                                                                                                            |
-| `sound`    | `true`  | "Play as sound" plays each series in turn, one note per mark from A3 (lowest) to A5 (highest), panned with the mark's place on the x axis; the live region names each series and the tooltip follows the note. "Stop sound" or Escape stops it. Its code (`sound.js`, 0.9 kB) loads on the first press. Needs Web Audio and two or more marks ([record 0029](design/0029-phone-drawings-and-sound.md))                                                                                                                |
+| `sound`    | `true`  | The Sound toggle in the toolbar (`aria-pressed` while it plays) plays each series in turn, one note per mark from A3 (lowest) to A5 (highest), panned with the mark's place on the x axis; the live region names each series and the tooltip follows the note. The toggle again, or Escape, stops it. Its code (`sound.js`, 0.9 kB) loads on the first press. Needs Web Audio and two or more marks ([record 0029](design/0029-phone-drawings-and-sound.md))                                                          |
 | `strings`  | English | Translations of any of the [`EnhanceStrings`](#enhancestrings)                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
 ### `ResolvedOptions`
@@ -1609,7 +1630,7 @@ labels of its buttons and form. `{name}` is filled in.
 ### `ENHANCE_STRINGS`
 
 The English `EnhanceStrings`. A page passes only those it translates:
-`enhance(document, { strings: { showTable: "Tabelle zeigen" } })`.
+`enhance(document, { strings: { sound: "Ton" } })`.
 
 ### `EnhancedChart`
 

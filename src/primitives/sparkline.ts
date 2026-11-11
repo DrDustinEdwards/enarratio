@@ -5,7 +5,6 @@ import { valueFormat } from "../render/text.js";
 import {
   type PrimitiveFigureOptions,
   type PrimitiveTable,
-  type PrimitiveTableOptions,
   primitiveFigure,
   primitiveTable,
   primitiveText,
@@ -195,10 +194,7 @@ export function sparkline(options: SparklineOptions): string {
  * @example
  * const { summary, markup } = sparklineTable({ values: [3, 5, 4], label: "Entries per year" });
  */
-export function sparklineTable(
-  options: SparklineOptions,
-  display?: PrimitiveTableOptions,
-): PrimitiveTable {
+export function sparklineTable(options: SparklineOptions): PrimitiveTable {
   const p = prepareSparkline(options);
   const { strings, count } = primitiveText(options);
   const { terms } = strings;
@@ -210,7 +206,6 @@ export function sparklineTable(
       rows: p.values.map((v, i) => [count(i + 1), v === null ? terms.noData : p.format(v)]),
     },
     options.label?.trim() || p.alt,
-    display,
     strings,
   );
 }
