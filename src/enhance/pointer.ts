@@ -34,6 +34,7 @@ interface Box {
 export class Picker {
   private boxes: Box[] | null = null;
   private columns: { at: number; indexes: number[] }[] | null = null;
+  private traces: (readonly { x: number; y: number }[] | null)[] | null = null;
   readonly byColumn: boolean;
   private readonly horizontal: boolean;
 
@@ -52,6 +53,7 @@ export class Picker {
   reset(): void {
     this.boxes = null;
     this.columns = null;
+    this.traces = null;
   }
 
   box(index: number): Box | undefined {
@@ -64,6 +66,17 @@ export class Picker {
       return { ...rect(b), cx: b.x + b.width / 2, cy: b.y + b.height / 2 };
     });
     return this.boxes;
+  }
+
+  /** Points along each unfilled line mark, or null for a filled mark; read once. */
+  private traced(): (readonly { x: number; y: number }[] | null)[] {
+    this.traces ??= this.marks.map((mark) => {
+      const s = shape(mark) as SVGGeometryElement;
+      if (!s.getTotalLength || getComputedStyle(s).fill != "none") return null;
+      const length = s.getTotalLength();
+      return Array.from({ length: 65 }, (_, k) => s.getPointAtLength((length * k) / 64));
+    });
+    return this.traces;
   }
 
   /** The columns in order, each at its middle along the category axis. */
@@ -107,13 +120,28 @@ export class Picker {
       return best ? { indexes: best.indexes, column: true } : null;
     }
     const reach = REACH / (scale || 1);
+    // A mark whose shape holds the pointer wins: rings, ribbons and flows overlap each other's
+    // boxes (record 0038).
+    const boxes = this.read();
+    const inside = this.marks.findIndex((mark, i) => {
+      const b = boxes[i];
+      if (!b || x < b.x || x > b.x + b.width || y < b.y || y > b.y + b.height) return false;
+      const s = shape(mark) as SVGGeometryElement;
+      return !!s.isPointInFill && s.isPointInFill(new DOMPoint(x, y));
+    });
+    if (inside >= 0) return { indexes: [inside], column: false };
     let found = -1;
     let least = Infinity;
-    this.read().forEach((b, i) => {
-      // Distance to the box, so a large mark is picked anywhere over it.
+    const traces = this.traced();
+    boxes.forEach((b, i) => {
+      // Distance to a drawn line along its length (a parallel coordinates line crosses the whole
+      // plot, so its box says nothing), else to the box, so a large mark is picked anywhere over it.
+      const trace = traces[i];
       const dx = Math.max(b.x - x, 0, x - (b.x + b.width));
       const dy = Math.max(b.y - y, 0, y - (b.y + b.height));
-      const d = Math.hypot(dx, dy);
+      const d = trace
+        ? trace.reduce((m, p) => Math.min(m, Math.hypot(p.x - x, p.y - y)), Infinity)
+        : Math.hypot(dx, dy);
       if (d < least) {
         least = d;
         found = i;

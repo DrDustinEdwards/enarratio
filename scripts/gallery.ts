@@ -80,7 +80,15 @@ function shownHeight(markup: string): number | undefined {
  * height their wide drawing shows on a phone: drawn shorter, their labels overlap. Their narrow
  * drawing keeps its own height, and the page reserves it (reserveCss).
  */
-const KEEP_HEIGHT = new Set(["horizontal-bar", "slope", "genome", "tree"]);
+const KEEP_HEIGHT = new Set([
+  "horizontal-bar",
+  "slope",
+  "genome",
+  "tree",
+  "funnel",
+  "bullet",
+  "radar",
+]);
 /**
  * The maps. A map keeps its shape, so drawn 228 wide it is far shorter than its wide drawing shows
  * at 30rem (252 to 458 px): the narrow one keeps its own height, and under 30rem the wide one
@@ -175,6 +183,15 @@ const NAMES: Record<string, string> = {
   dumbbell: "Dumbbell",
   slope: "Slope chart",
   donut: "Donut",
+  treemap: "Treemap",
+  sunburst: "Sunburst",
+  funnel: "Funnel",
+  sankey: "Sankey",
+  chord: "Chord",
+  radar: "Radar",
+  gauge: "Gauge",
+  bullet: "Bullet chart",
+  parallel: "Parallel coordinates",
   heatmap: "Heatmap",
   "table-chart": "Table with graphics",
   network: "Network",
