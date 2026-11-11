@@ -86,3 +86,7 @@ terminal with your passkey keeps working too.
 
 The dist-tag comes from `publishConfig.tag` in `package.json` (`latest`; up to 0.5.0 it was `next`) and is fixed
 once a version is staged.
+
+- **Two versions are staged at once.** Approve only the newest and reject the older one. Each approval
+  moves `latest` to the version approved, so approving an older one after a newer one moves `latest`
+  back (0.11.0 after 0.12.0, fixed by 0.12.1).
