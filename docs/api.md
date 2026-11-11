@@ -768,6 +768,147 @@ of zero, throws. The data table gives each value, its share and the total.
 `data`, `label`, `value`, `donut`, `centerLabel` (text in the donut's hole),
 `colors`, `formatValue`.
 
+### `treemap`
+
+`treemap(options: TreemapOptions<T>): string`. Parts of a whole as nested
+rectangles whose areas are their values, for a whole with many parts or parts
+in levels. Each row is one tile, placed by `path`, the fields from the
+outermost level in (one to four). Tiles are squarified (Bruls, Huizing and van
+Wijk 2000) and sorted largest first. Each one shows its name, and its value
+below when there is room. On two or more levels each top-level group takes a
+color and a header line with its name and total; on one level every tile is
+one color. A negative value, a repeated path or a total of zero throws. The
+data table lists every part with its value and share, each group's subtotal,
+and the whole (record 0038).
+
+### `TreemapOptions`
+
+`data`, `path`, `value`, `valueLabel`, `colors` (by top-level group),
+`formatValue`.
+
+### `sunburst`
+
+`sunburst(options: SunburstOptions<T>): string`. Parts of a whole in levels as
+rings, the top level innermost, each arc spanning its share of its parent's.
+Each top-level group takes a color its parts keep. An arc is named where its
+name fits inside it, level or along the arc. The hole holds the whole. Angles
+compare worse than areas, so prefer `treemap` when exact comparison matters.
+Same data, `path` and table as `treemap`.
+
+### `SunburstOptions`
+
+`data`, `path`, `value`, `valueLabel`, `centerLabel` (text in the hole; default
+the total), `colors`, `formatValue`.
+
+### `funnelChart`
+
+`funnelChart(options: FunnelChartOptions<T>): string`. How many reached each
+stage of a process, as bars centered on one axis, in data order. Each bar
+prints its count and its share of the first stage, and each gap the share of
+the previous stage that carried on. A negative value, or a first stage of zero,
+throws. The data table holds both shares.
+
+### `FunnelChartOptions`
+
+`data`, `stage`, `value`, `valueLabel`, `formatValue`.
+
+### `sankeyDiagram`
+
+`sankeyDiagram(options: SankeyDiagramOptions<T>): string`. Flows from stage to
+stage, one row per flow, each band as thick as what it carries. Nodes sit in
+columns by their longest path from a source, with sinks in the last column,
+and are moved so bands cross less. Each first-column node takes a color the
+flows it feeds keep, and every node is named with its total. A cycle, a loop
+or a repeated pair throws. The data table lists every flow.
+
+### `SankeyDiagramOptions`
+
+`data`, `from`, `to`, `value`, `valueLabel`, `colors` (by first-column node),
+`formatValue`. The fields are named `from` and `to` because `source` is the
+figure's source line.
+
+### `chordDiagram`
+
+`chordDiagram(options: ChordDiagramOptions<T>): string`. Flows among up to
+eight groups. Each group is an arc as long as what it sends, and each pair is a
+ribbon whose ends are as wide as what flows each way, in the color of the group
+that sends more. With `directed: false` a row is shared by both groups and
+counted on both arcs. More than eight groups throws, advising a Sankey diagram
+or a heatmap. The data table is the matrix of flows with each group's total.
+
+### `ChordDiagramOptions`
+
+`data`, `from`, `to`, `value`, `directed` (default true), `valueLabel`,
+`colors`, `formatValue`.
+
+### `radarChart`
+
+`radarChart(options: RadarChartOptions<T>): string`. A few series' profiles over
+three to twelve measures on one scale, one spoke per measure from a zero
+center, clockwise from 12 o'clock. Each series is an outline with a light fill,
+and every series after the first is dashed. Every value is a point that hover,
+focus and the keys reach, and the rings are labeled. More than four series are
+a `too-many-series` issue. A grouped bar chart compares values more precisely,
+so use a radar for shape. A negative value, or one past `max`, throws.
+
+### `RadarChartOptions`
+
+`data` (one row per series), `label`, `axes`, `axisLabels`, `max` (the rim;
+default the largest value rounded up), `colors`, `formatValue`.
+
+### `gaugeChart`
+
+`gaugeChart(options: GaugeChartOptions): string`. One value against its scale,
+drawn as a filled 240° arc with the number printed large in its middle. It can
+have two to five qualitative `bands` along the edge, in one hue from dark
+(worst) to light (best), and a `target` tick. Few (2013) built the bullet
+graph to replace gauges, so prefer `bulletChart` for more than one measure.
+
+### `GaugeChartOptions`
+
+`value`, `label`, `min` (default 0), `max`, `target`, `bands`, `lowerIsBetter`,
+`formatValue`.
+
+### `QualitativeBand`
+
+`{ to, label }`: a band up to `to`. A chart's bands ascend from its scale's
+start, and the last one ends at its end.
+
+### `bulletChart`
+
+`bulletChart(options: BulletChartOptions<T>): string`. Few's bullet graph. Each
+measure gets one row with:
+
+- a bar for its value;
+- a line across the bar for its target;
+- two to five qualitative bands behind it, darkest for the worst.
+
+Each row has its own scale from zero unless `sharedScale` is set, marked by three
+tick labels, and prints its value at its end. On a narrow drawing the names move
+above the rows. The data table gives the value, target, band and scale end.
+
+### `BulletChartOptions`
+
+`data`, `label`, `value`, `target`, `bands` (one list for every row, or a
+function giving each row's), `lowerIsBetter`, `max` (a field), `sharedScale`,
+`valueLabel`, `formatValue`.
+
+### `parallelCoordinates`
+
+`parallelCoordinates(options: ParallelCoordinatesOptions<T>): string`. Many
+items over three to twelve measures, with one vertical axis per measure running
+from its lowest value to its highest, and each item a line across them. Axis
+order is the author's argument: neighbors compare most easily. `series` colors
+groups. `highlight` draws the named items on top in color and fades the rest,
+since a static drawing cannot brush. Up to ten lines, or the highlighted ones,
+are named at the right. The summary names each measure's highest and lowest
+item. More than 200 items are a `too-many-points` issue.
+
+### `ParallelCoordinatesOptions`
+
+`data`, `label`, `axes`, `axisLabels`, `series`, `highlight`, `colors`,
+`formatValue`.
+
 ### `heatmap`
 
 `heatmap(options: HeatmapOptions<T>): string`. A grid colored on the theme's
