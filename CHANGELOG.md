@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Fixed
+
+- Bar charts drawn narrow (a phone's 228-unit drawing) keep room for their bars. Stacked bars name their series beside the last stack only while those names take at most a quarter of the width; otherwise the legend names them and the textures come back. Labels under vertical bars are fitted to the plot's real width, and `maxXTicks` is now the most labels to print, as on line charts, so a phone never prints more than fit. Before, "Entries per year, 2005 to 2026" drew 2-unit bars under eight overlapping years ([record 0040](docs/design/0040-narrow-bars-keep-their-plot.md)).
+
 ## [0.13.0] - 2026-11-11
 
 ### Added
