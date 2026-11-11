@@ -2,11 +2,18 @@ import * as Plot from "@observablehq/plot";
 import { type BarChartOptions, type BarPoint, barModel } from "../render/bar-model.js";
 import { domainOf, type KeysOfType, markKey, readCategory, readLabel } from "../render/data.js";
 import { type ChartDescription, categoryRange, valueRange } from "../render/describe.js";
-import { type AxisUnits, type FigureOptions, figure, validateFigure } from "../render/figure.js";
+import {
+  type AxisUnits,
+  type FigureOptions,
+  figure,
+  slotStyle,
+  validateFigure,
+} from "../render/figure.js";
 import { type LineChartOptions, lineModel, type Point } from "../render/line-model.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
 import { DEFAULT_WIDTH } from "../render/size.js";
+import { texture } from "../render/texture.js";
 
 /** What every small multiple shares: the facet field and the grid. */
 interface FacetOptions<T extends object> extends FigureOptions, AxisUnits {
@@ -207,9 +214,12 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
         })),
       ),
     };
+    // Panels have no room to name their series, so several series keep the textures (record 0036).
+    const several = series !== undefined && allSeries.length > 1;
     return figure(options, {
       kind: "bar",
-      svg,
+      svg: several ? texture(svg, slotStyle(plan.slotColors)) : svg,
+      ...(several ? { textured: true } : {}),
       description,
       limits,
       legend: series === undefined ? [] : plan.legend,
