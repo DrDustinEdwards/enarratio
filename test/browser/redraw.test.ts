@@ -57,7 +57,7 @@ afterAll(async () => {
 describe("enarratio/redraw", () => {
   it("draws a server chart again at its column's width, enhanced, in place, and follows the column", async () => {
     const width = (): Promise<string | null> =>
-      page.$eval("#host svg", (svg) => svg.getAttribute("width"));
+      page.$eval("#host svg:not(.enarratio-icon)", (svg) => svg.getAttribute("width"));
     const height = (): Promise<number> =>
       page.$eval("#host", (host) => host.getBoundingClientRect().height);
     expect(await width()).toBe("640");
@@ -77,7 +77,9 @@ describe("enarratio/redraw", () => {
       (document.querySelector("#column") as HTMLElement).style.width = "460px";
     });
     await page.waitForFunction(() => {
-      const w = Number(document.querySelector("#host svg")?.getAttribute("width"));
+      const w = Number(
+        document.querySelector("#host svg:not(.enarratio-icon)")?.getAttribute("width"),
+      );
       return w > 320;
     });
   });
