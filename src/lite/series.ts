@@ -9,7 +9,7 @@ import {
   type SeriesChartOptions,
   type SeriesModel,
 } from "../render/line-model.js";
-import { bottomMargin, leftMargin, topMargin } from "../render/size.js";
+import { bottomMargin, leftMargin, titleLines, topMargin } from "../render/size.js";
 import { axisLabel, axisTickLabels, type Frame, grid, labelLines, type Tick } from "./axis.js";
 import {
   type Continuous,
@@ -84,7 +84,13 @@ export function seriesFrame(
     ...given,
     // Room above for the y axis title, as renderPlot makes for Plot's (record 0036).
     marginTop: topMargin(given.marginTop, prepared.yLabel !== null, given.width),
-    marginBottom: bottomMargin(given.marginBottom, prepared.xTitle !== null, given.width, lines),
+    marginBottom: bottomMargin(
+      given.marginBottom,
+      prepared.xTitle !== null,
+      given.width,
+      lines,
+      titleLines(prepared.xTitle, given.width),
+    ),
   };
   const { width, height, marginTop, marginRight, marginBottom } = asked;
 

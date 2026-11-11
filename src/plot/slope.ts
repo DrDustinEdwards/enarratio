@@ -4,7 +4,7 @@ import { type KeysOfType, markKey, maxOf, minOf, readLabel, readNumber } from ".
 import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
-import { DEFAULT_WIDTH } from "../render/size.js";
+import { charWidth, cutText, DEFAULT_WIDTH } from "../render/size.js";
 import { signed, stringsFor, valueFormat } from "../render/text.js";
 import { named } from "./marks.js";
 
@@ -110,6 +110,15 @@ export function slopeChart<T extends object>(options: SlopeChartOptions<T>): str
     ),
   );
   const side = Math.min(240, longest * 7 + 16);
+  // Names at both ends need two of these sides. Where they would leave the lines under 80 units
+  // (a phone's drawing), each name is written once, at the right end after its value, and the
+  // left end has only its value (record 0041); a name that still does not fit is cut.
+  const char = charWidth(width);
+  const compact = 2 * side > width - 80;
+  const valueWidth = Math.max(...values.map((v) => format(v).length));
+  const leftSide = compact ? Math.ceil(valueWidth * char + 16) : side;
+  const rightRoom = Math.max(4, Math.floor((width - leftSide - 48 - 16) / char));
+  const rightSide = compact ? Math.ceil(Math.min(longest, rightRoom) * char + 16) : side;
   const pixel = (v: number): number =>
     height -
     MARGIN_BOTTOM -
@@ -159,14 +168,14 @@ export function slopeChart<T extends object>(options: SlopeChartOptions<T>): str
       x: fromLabel,
       y: s.from,
       at: value(left[i] as number),
-      text: `${s.name} ${format(s.from)}`,
+      text: compact ? format(s.from) : `${s.name} ${format(s.from)}`,
       k: directions.indexOf(s.direction),
     },
     {
       x: toLabel,
       y: s.to,
       at: value(right[i] as number),
-      text: `${format(s.to)} ${s.name}`,
+      text: compact ? cutText(`${format(s.to)} ${s.name}`, rightRoom) : `${format(s.to)} ${s.name}`,
       k: directions.indexOf(s.direction),
     },
   ]);
@@ -194,8 +203,8 @@ export function slopeChart<T extends object>(options: SlopeChartOptions<T>): str
       height,
       marginTop: MARGIN_TOP,
       marginBottom: MARGIN_BOTTOM,
-      marginLeft: side,
-      marginRight: side,
+      marginLeft: leftSide,
+      marginRight: rightSide,
       x: {
         type: "point",
         domain: [fromLabel, toLabel],

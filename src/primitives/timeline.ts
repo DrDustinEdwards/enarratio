@@ -374,6 +374,10 @@ export function timeline(options: TimelineOptions): string {
   // Gridlines first, then lane labels, so marks draw over them.
   for (const t of axis) {
     const x = xOf(t.at);
+    // A label centered on a tick near the drawing's edge would run past it, so it ends (or starts)
+    // at its tick instead (record 0041).
+    const half = (t.label.length * ch) / 2;
+    const anchor = x + half > p.width - 2 ? "end" : x - half < 2 ? "start" : "middle";
     parts.push(
       element("line", {
         x1: x,
@@ -388,7 +392,7 @@ export function timeline(options: TimelineOptions): string {
         {
           x,
           y: round(plotBottom + 4 + 12 * growth),
-          "text-anchor": "middle",
+          "text-anchor": anchor,
           fill: "var(--enarratio-text-muted)",
           class: "enarratio-numeric",
         },

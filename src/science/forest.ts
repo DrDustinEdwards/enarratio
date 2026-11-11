@@ -17,7 +17,7 @@ import {
   validateFigure,
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
-import { DEFAULT_WIDTH } from "../render/size.js";
+import { bottomMargin, charWidth, DEFAULT_WIDTH, TITLE_LINES, titleLines } from "../render/size.js";
 import { numberFormat, stringsFor } from "../render/text.js";
 import { type PooledEstimate, poolEstimates, type StudyEstimate } from "./meta.js";
 
@@ -130,12 +130,80 @@ export function forestPlot<T extends object>(options: ForestPlotOptions<T>): str
     ...(pooled ? [pooled.lower, pooled.upper] : []),
   ];
 
+  const names = [...rows.map((r) => r.name), ...(pooledName ? [pooledName] : [])];
+  const longest = Math.max(1, maxOf(names.map((n) => n.length)));
+  const estimateLabel = unitLabel(options.estimateLabel, options.estimate, options.xUnit);
+  const width = options.width ?? DEFAULT_WIDTH;
+  const char = charWidth(width);
+  const favors = options.favors;
+  // Names on the left, intervals in the middle and estimates on the right need about 120 units of
+  // plot between them. A narrower drawing (a phone's) stacks each row instead: its name and
+  // estimate on a line above its interval, which then spans the drawing (record 0041).
+  const marginLeft = Math.min(240, longest * 7 + 20);
+  const stacked = width - marginLeft - 150 < 120;
+  const estimates = [
+    ...rows.map((r) => ci(r.estimate, r.lower, r.upper)),
+    ...(pooled ? [ci(pooled.estimate, pooled.lower, pooled.upper)] : []),
+  ];
+  // Stacked, the name and estimate share a line while both fit with a gap between them; else the
+  // estimate takes a second line under the name.
+  const textLines = names.every(
+    (n, i) => (n.length + (estimates[i]?.length ?? 0) + 2) * char <= width - 32,
+  )
+    ? 1
+    : 2;
+  const pitch = 15 * textLines + 24;
+  // Where a row's interval sits, in pixels from its center: below its text when stacked.
+  const intervalDy = stacked ? -pitch / 2 + 15 * textLines + 12 : 0;
+  const pooledY = stacked ? rows.length : rows.length + 0.2;
+  const size = (i: number): number =>
+    shown
+      ? (stacked ? 2 : 3) + (stacked ? 4 : 6) * Math.sqrt((shown[i] as number) / heaviest)
+      : stacked
+        ? 4
+        : 5;
+  // A stacked row's text: its name at the left, and its estimate at the right or on a second line.
+  const rowText = (
+    items: readonly { readonly y: number; readonly name: string; readonly estimate: string }[],
+    bold: boolean,
+  ): Plot.Markish[] => {
+    type Item = (typeof items)[number];
+    const line = (n: number) => ({
+      y: (d: Item) => d.y,
+      dy: -pitch / 2 + 4 + 15 * n,
+      lineAnchor: "top" as const,
+      // A halo, so the no-effect line under the text does not cut through it (with a stroke,
+      // Plot leaves the fill unset unless given).
+      fill: "var(--enarratio-text)",
+      stroke: "var(--enarratio-background)",
+      strokeWidth: 3,
+      paintOrder: "stroke",
+      ...(bold ? { fontWeight: 600 } : {}),
+    });
+    return [
+      Plot.text(items, {
+        ...line(0),
+        text: (d: Item) => d.name,
+        frameAnchor: "left",
+        textAnchor: "start",
+      }),
+      Plot.text(items, {
+        ...line(textLines - 1),
+        text: (d: Item) => d.estimate,
+        frameAnchor: textLines === 1 ? "right" : "left",
+        textAnchor: textLines === 1 ? "end" : "start",
+        ...(textLines === 1 ? {} : { fill: "var(--enarratio-text-muted)" }),
+      }),
+    ];
+  };
+
   const marks: Plot.Markish[] = [
     Plot.ruleX([nullValue], { stroke: "var(--enarratio-text-muted)", render: named("no effect") }),
     Plot.ruleY(rows, {
       y: "index",
       x1: "lower",
       x2: "upper",
+      dy: intervalDy,
       stroke: "var(--enarratio-text)",
       strokeWidth: 1.5,
       render: named("interval"),
@@ -143,8 +211,9 @@ export function forestPlot<T extends object>(options: ForestPlotOptions<T>): str
     Plot.dot(rows, {
       x: "estimate",
       y: "index",
+      dy: intervalDy,
       symbol: "square",
-      r: (r: Row) => (shown ? 3 + 6 * Math.sqrt((shown[r.index] as number) / heaviest) : 5),
+      r: (r: Row) => size(r.index),
       fill: "var(--enarratio-series-1)",
       stroke: "var(--enarratio-series-1)",
       title: describe,
@@ -156,26 +225,35 @@ export function forestPlot<T extends object>(options: ForestPlotOptions<T>): str
         row: 0,
       })),
     }),
-    Plot.text(rows, {
-      y: "index",
-      text: (r: Row) => ci(r.estimate, r.lower, r.upper),
-      frameAnchor: "right",
-      textAnchor: "start",
-      dx: 12,
-    }),
+    ...(stacked
+      ? rowText(
+          rows.map((r) => ({ y: r.index, name: r.name, estimate: estimates[r.index] ?? "" })),
+          false,
+        )
+      : [
+          Plot.text(rows, {
+            y: "index",
+            text: (r: Row) => ci(r.estimate, r.lower, r.upper),
+            frameAnchor: "right",
+            textAnchor: "start",
+            dx: 12,
+          }),
+        ]),
   ];
   if (pooled) {
-    const y = rows.length + 0.2;
+    const y = pooledY;
+    const half = stacked ? 6 / pitch : 0.32;
+    const mid = stacked ? y + intervalDy / pitch : y;
     marks.push(
-      Plot.ruleY([rows.length - 0.4], {
+      Plot.ruleY([rows.length - (stacked ? 0.5 : 0.4)], {
         stroke: "var(--enarratio-grid)",
         render: named("separator"),
       }),
       Plot.areaX(
         [
-          { y: y - 0.32, x1: pooled.estimate, x2: pooled.estimate },
-          { y, x1: pooled.lower, x2: pooled.upper },
-          { y: y + 0.32, x1: pooled.estimate, x2: pooled.estimate },
+          { y: mid - half, x1: pooled.estimate, x2: pooled.estimate },
+          { y: mid, x1: pooled.lower, x2: pooled.upper },
+          { y: mid + half, x1: pooled.estimate, x2: pooled.estimate },
         ],
         {
           y: "y",
@@ -186,67 +264,91 @@ export function forestPlot<T extends object>(options: ForestPlotOptions<T>): str
           render: named("pooled"),
         },
       ),
-      Plot.text([pooled], {
-        y: () => y,
-        text: () => ci(pooled.estimate, pooled.lower, pooled.upper),
-        frameAnchor: "right",
-        textAnchor: "start",
-        dx: 12,
-        fontWeight: 600,
-      }),
+      ...(stacked
+        ? rowText(
+            [
+              {
+                y,
+                name: pooledName ?? "",
+                estimate: ci(pooled.estimate, pooled.lower, pooled.upper),
+              },
+            ],
+            true,
+          )
+        : [
+            Plot.text([pooled], {
+              y: () => y,
+              text: () => ci(pooled.estimate, pooled.lower, pooled.upper),
+              frameAnchor: "right",
+              textAnchor: "start",
+              dx: 12,
+              fontWeight: 600,
+            }),
+          ]),
     );
   }
-  const favors = options.favors;
   if (favors) {
+    // Each side's words start at the no-effect line; on a stacked drawing, at the plot's edges,
+    // where the null line may leave no room for one of them.
     marks.push(
       Plot.text([favors[0]], {
-        x: nullValue,
-        frameAnchor: "bottom",
-        textAnchor: "end",
-        dx: -8,
+        ...(stacked
+          ? { frameAnchor: "bottom-left", textAnchor: "start" }
+          : { x: nullValue, frameAnchor: "bottom", textAnchor: "end", dx: -8 }),
         dy: 34,
         fill: "var(--enarratio-text-muted)",
       }),
       Plot.text([favors[1]], {
-        x: nullValue,
-        frameAnchor: "bottom",
-        textAnchor: "start",
-        dx: 8,
+        ...(stacked
+          ? { frameAnchor: "bottom-right", textAnchor: "end" }
+          : { x: nullValue, frameAnchor: "bottom", textAnchor: "start", dx: 8 }),
         dy: 34,
         fill: "var(--enarratio-text-muted)",
       }),
     );
   }
-  const names = [...rows.map((r) => r.name), ...(pooledName ? [pooledName] : [])];
-  const longest = Math.max(1, maxOf(names.map((n) => n.length)));
-  const estimateLabel = unitLabel(options.estimateLabel, options.estimate, options.xUnit);
+  const domain = [count - 0.5, -0.5];
   const { svg } = renderPlot(
     {
-      width: options.width ?? DEFAULT_WIDTH,
-      height: options.height ?? count * 28 + 72 + (favors ? 16 : 0),
+      width,
+      height:
+        options.height ??
+        (stacked ? count * pitch : count * 28) +
+          72 +
+          (favors ? 16 : 0) +
+          16 * (titleLines(estimateLabel, width) - 1),
       marginTop: 16,
-      marginLeft: Math.min(240, longest * 7 + 20),
-      marginRight: 150,
-      marginBottom: 44 + (favors ? 16 : 0),
+      marginLeft: stacked ? 16 : marginLeft,
+      marginRight: stacked ? 16 : 150,
+      marginBottom:
+        bottomMargin(44, estimateLabel !== null, width, 1, titleLines(estimateLabel, width)) +
+        (favors ? 16 : 0),
       x: {
         type: log ? "log" : "linear",
         domain: [Math.min(...allX), Math.max(...allX)],
         nice: true,
         label: estimateLabel,
-        labelOffset: favors ? 50 : 34,
-        ...(log ? { ticks: 5, tickFormat: plain } : {}),
+        ...(log ? { ticks: stacked ? 3 : 5, tickFormat: plain } : {}),
+        ...(stacked && !log ? { ticks: 3 } : {}),
         grid: true,
       },
       y: {
-        domain: [count - 0.5, -0.5],
-        ticks: names.map((_, i) => (i === rows.length ? rows.length + 0.2 : i)),
-        tickFormat: (v: number) =>
-          v === rows.length + 0.2 ? (pooledName ?? "") : (rows[v]?.name ?? ""),
+        domain,
+        ticks: stacked ? [] : names.map((_, i) => (i === rows.length ? pooledY : i)),
+        tickFormat: (v: number) => (v === pooledY ? (pooledName ?? "") : (rows[v]?.name ?? "")),
         label: null,
       },
       marks,
     },
     options.alt,
+    "img",
+    // The axis title goes under the favors line (renderPlot sets it under the tick labels).
+    favors
+      ? (svg) => {
+          const title = svg.querySelector('[data-enarratio-mark="x-axis label"] text');
+          title?.setAttribute("y", `${1 + TITLE_LINES + 1.2}em`);
+        }
+      : undefined,
   );
   const method = computed
     ? strings.poolingMethod(

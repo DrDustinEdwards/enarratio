@@ -431,8 +431,6 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   const linkOf = options.href;
 
   const width = options.width ?? DEFAULT_WIDTH;
-  const height =
-    options.height ?? (horizontal ? Math.max(120, xNames.length * 28 + 60) : DEFAULT_HEIGHT);
   const char = charWidth(width);
   const longest = (names: Iterable<string>): number =>
     Math.max(0, ...[...names].map((n) => n.length));
@@ -447,7 +445,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     !grouped &&
     !horizontal &&
     stackNames <= width / 4;
-  const marginRight = Math.ceil(
+  const baseRight = Math.ceil(
     Math.max(
       20,
       stackNamed ? stackNames : 0,
@@ -468,7 +466,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   thinTicks(xNames, options.maxXTicks);
   // The room the labels share is the plot's: 80 px less than the drawing, or less where the
   // right margin holds series names or values.
-  const plot = horizontal ? width - 80 : Math.min(width - 80, width - 44 - marginRight);
+  const plot = horizontal ? width - 80 : Math.min(width - 80, width - 44 - baseRight);
   const across = horizontal ? Number.POSITIVE_INFINITY : plot;
   // Below vertical bars, every category keeps its label while its slot holds four characters:
   // a long one wraps onto a second line and is cut there, rather than a neighbor going unnamed
@@ -512,6 +510,31 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
         1,
       )
     : 0;
+
+  // A row of horizontal bars is 28 tall, or 34 where a label wraps onto a second line, so two
+  // wrapped labels do not touch (record 0041).
+  const wraps = horizontal && xNames.some((n) => tickLabel(n).includes("\n"));
+  const height =
+    options.height ??
+    (horizontal ? Math.max(120, xNames.length * (wraps ? 34 : 28) + 60) : DEFAULT_HEIGHT);
+  // The last category's label is centered under its bar, half a step from the plot's edge; one
+  // wider than that step ("2026-06-28" under a phone's narrow bar) runs into the right margin,
+  // which grows to hold it (record 0041).
+  const lastName = xNames[xNames.length - 1];
+  const lastShown =
+    !horizontal && lastName !== undefined && (thinned ?? xNames).at(-1) === lastName;
+  const overhang = lastShown
+    ? (maxOf(
+        tickLabel(lastName)
+          .split("\n")
+          .map((l) => l.length),
+      ) *
+        char) /
+        2 -
+      (width - 44 - baseRight) / Math.max(1, xNames.length) / 2 +
+      3
+    : 0;
+  const marginRight = Math.ceil(Math.max(baseRight, overhang));
 
   // No bar wider than BAR_MAX (record 0036). The band's length is taken at the margins given;
   // a margin widened later for the tick labels only narrows the bars further.

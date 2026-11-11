@@ -37,6 +37,7 @@ export function drawAnnotations(
       annotations,
       (axis) => plot.scale(axis) as unknown as AnnotationScale | undefined,
       swap,
+      Number(svg.getAttribute("width")) || undefined,
     );
     const doc = svg.ownerDocument;
     const group = (attrs: Readonly<Record<string, string>>, list: readonly Shape[]) => {

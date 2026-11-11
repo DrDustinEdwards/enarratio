@@ -20,7 +20,7 @@ import {
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
-import { DEFAULT_WIDTH } from "../render/size.js";
+import { charWidth, DEFAULT_WIDTH, TITLE_LINES, textGrowth } from "../render/size.js";
 import { numberFormat, stringsFor } from "../render/text.js";
 import { atRiskAt, kaplanMeier, type SurvivalEstimate, type SurvivalStep } from "./kaplan-meier.js";
 
@@ -118,7 +118,30 @@ export function survivalPlot<T extends object>(options: SurvivalPlotOptions<T>):
   const showBand = options.confidence ?? !multi;
   const showAtRisk = options.atRisk ?? true;
   const end = maxOf(curves.map((c) => c.estimate.end));
-  const xTicks = ticks(0, end, 6);
+  const width = options.width ?? DEFAULT_WIDTH;
+  const longest = Math.max(...names.map((n) => n.length));
+  const marginLeft = Math.max(64, multi && showAtRisk ? longest * 7 + 20 : 0);
+  const marginRight = multi ? Math.min(160, longest * 7 + 16) : 24;
+  // About six time ticks, fewer where their labels, and the numbers at risk printed under each,
+  // would come closer than 10 units apart (a phone's drawing, record 0041).
+  const char = charWidth(width);
+  const widest = Math.max(
+    ...curves.map((c) => String(c.estimate.n).length),
+    String(Math.ceil(end)).length + 2,
+  );
+  const plotWidth = width - marginLeft - marginRight;
+  // The ticks run on to the first one at or past the end of follow-up, which ends the axis.
+  const covering = (count: number): number[] => {
+    const t = ticks(0, end, count);
+    const step = (t[1] ?? end) - (t[0] ?? 0);
+    const last = t[t.length - 1] ?? 0;
+    return last < end && step > 0 ? [...t, last + step] : t;
+  };
+  let xTicks = covering(6);
+  for (let count = 5; count >= 1; count--) {
+    if (plotWidth / Math.max(1, xTicks.length - 1) >= widest * char + 10) break;
+    xTicks = covering(count);
+  }
 
   // Each curve as a step line from (0, 1) through every step to the end of follow-up.
   const path = curves.flatMap((c) => {
@@ -231,13 +254,16 @@ export function survivalPlot<T extends object>(options: SurvivalPlotOptions<T>):
     );
   }
   const atRiskRows = showAtRisk ? curves.length + 1 : 0;
+  // The table of numbers at risk starts a line below the time axis title, in text that grows as
+  // the drawing shrinks (record 0041).
+  const head = Math.max(52, Math.ceil(9 + 13 * (2 + TITLE_LINES) * textGrowth(width)) + 4);
   if (showAtRisk) {
     const counts = curves.flatMap((c) => xTicks.map((t) => ({ c, t, n: atRiskAt(c.times, t) })));
     marks.push(
       Plot.text([terms.numberAtRisk], {
         frameAnchor: "bottom-left",
         textAnchor: "start",
-        dy: 52,
+        dy: head,
         dx: -56,
         fontWeight: 600,
       }),
@@ -248,7 +274,7 @@ export function survivalPlot<T extends object>(options: SurvivalPlotOptions<T>):
             x: "t",
             text: (n: (typeof counts)[number]) => String(n.n),
             frameAnchor: "bottom",
-            dy: 52 + ROW * (c.k + 1),
+            dy: head + ROW * (c.k + 1),
             fill: plan.range[c.k] as string,
           },
         ),
@@ -259,21 +285,20 @@ export function survivalPlot<T extends object>(options: SurvivalPlotOptions<T>):
               frameAnchor: "bottom-left",
               textAnchor: "end",
               dx: -12,
-              dy: 52 + ROW * (c.k + 1),
+              dy: head + ROW * (c.k + 1),
             }),
           )
         : []),
     );
   }
-  const longest = Math.max(...names.map((n) => n.length));
   const { svg } = renderPlot(
     {
-      width: options.width ?? DEFAULT_WIDTH,
+      width,
       height: (options.height ?? 320) + atRiskRows * ROW,
       marginTop: 20,
-      marginLeft: Math.max(64, multi && showAtRisk ? longest * 7 + 20 : 0),
-      marginRight: multi ? Math.min(160, longest * 7 + 16) : 24,
-      marginBottom: 44 + atRiskRows * ROW,
+      marginLeft,
+      marginRight,
+      marginBottom: (showAtRisk ? head - 8 : 44) + atRiskRows * ROW,
       x: {
         domain: [0, xTicks[xTicks.length - 1] ?? end],
         ticks: xTicks,

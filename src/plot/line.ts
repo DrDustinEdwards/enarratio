@@ -15,7 +15,7 @@ import {
 } from "../render/line-model.js";
 import { spreadLabels } from "../render/direct-labels.js";
 import { keyed, renderPlot } from "../render/plot.js";
-import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
+import { charWidth, DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
 import { drawAnnotations } from "./annotate.js";
 
 export type {
@@ -74,8 +74,46 @@ function xScale(model: SeriesModel, width: number, plotWidth: number) {
     const fitted = fitTicks(days, () => "Jun 07", width, plotWidth, maxXTicks);
     return { ...base, ticks: fitted.map((t) => new Date(t)) };
   }
-  // Plot's own ticks come about one per 80 pixels; a limit lowers the count.
+  // Plot's own ticks come about one per 80 pixels; a limit lowers the count. A plot under 240
+  // across (a phone's) asks for three, which Plot's one per 80 would cut to one or two labels
+  // (record 0041).
+  const months = prepared.time && plotWidth < 240 ? monthTicks(prepared, width, plotWidth) : null;
+  if (months) return { ...base, ticks: months };
   return maxXTicks === undefined ? base : { ...base, ticks: Math.min(maxXTicks, plotWidth / 80) };
+}
+
+/**
+ * Month ticks for a time axis on a plot under 240 across (a phone's), where Plot's one tick per
+ * 80 pixels prints one or two (record 0041): every month, or every 2, 3, 4, 6 or 12, the fewest
+ * that leave each label (a month over its year, "Jan" over "2026") room. Null for a span under
+ * two months, which Plot's own ticks label by day.
+ */
+function monthTicks(
+  prepared: SeriesModel["prepared"],
+  width: number,
+  plotWidth: number,
+): Date[] | null {
+  const ats = prepared.points.map((p) => p.at);
+  if (ats.length === 0) return null;
+  const lo = new Date(Math.min(...ats));
+  const hi = new Date(Math.max(...ats));
+  const span =
+    (hi.getUTCFullYear() - lo.getUTCFullYear()) * 12 + hi.getUTCMonth() - lo.getUTCMonth();
+  if (span < 2) return null;
+  const fit = Math.max(2, Math.floor(plotWidth / (4 * charWidth(width) + 12)) + 1);
+  const step = [1, 2, 3, 4, 6, 12].find((k) => Math.floor(span / k) + 1 <= fit) ?? 12;
+  const ticks: Date[] = [];
+  // From the first month start on or after the first point, on months the step divides.
+  let year = lo.getUTCFullYear();
+  let month = lo.getUTCMonth() + (lo.getUTCDate() > 1 || lo.getUTCHours() > 0 ? 1 : 0);
+  month = Math.ceil(month / step) * step;
+  for (;;) {
+    const at = new Date(Date.UTC(year + Math.floor(month / 12), month % 12, 1));
+    if (at > hi) break;
+    ticks.push(at);
+    month += step;
+  }
+  return ticks.length >= 2 ? ticks : null;
 }
 
 /** The y scale's domain when every value is zero, and its tick format for huge values (B41). */
