@@ -120,7 +120,7 @@
     "@types/d3-force": "3.0.10",
     "@types/node": "26.6.6",
     "@types/pngjs": "6.0.5",
-    "@vitest/coverage-v8": "4.1.12",
+    "@vitest/coverage-v8": "5.1.0",
     "axe-core": "4.14.0",
     "capsomer": "github:DrDustinEdwards/capsomer#v0.89.0",
     "d3-force": "3.0.0",
