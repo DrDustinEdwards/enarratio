@@ -13,6 +13,7 @@ change the public API; every such change is listed here.
 
 - Quiet charts ([record 0036](docs/design/0036-quiet-charts.md), replacing item 4 of record 0022). Bars and areas are solid: series are named on the chart instead of told apart by texture. Stacked bars name each series beside the last column, grouped bars with two series name them over the last group, stacked areas name each band at its right end, and lines keep their end labels. Textures stay under `prefers-contrast: more`, forced colors and print, and on a chart whose series cannot all be named, which carries `data-enarratio-textured`.
 - `directLabels` is on by default whenever there are `series`, for bar, line and area charts, and now means names on the chart as above. `directLabels: true` on grouped bars no longer throws.
+- Small multiples of bars with several series keep the textures, since their panels have no room to name the series.
 - Every bar prints its value (a stack its total) at its tip when all of them fit and there are no error bars.
 - Bars are at most 40 units wide, with a 2px background-colored gap between bars and segments (`--enarratio-bar-gap`, was 1px and grid-colored) and the outer end rounded at 4 units, the base square.
 - Axes have no tick marks and no y-axis line. The y title sits above the y labels, unrotated, and no x title is drawn under a date or year axis; the data table and the description still use it.
