@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Fixed
+
+- A primitive's figure (sparkline, uptime strip, heat strip, progress ring, timeline) has the same Download menu as every chart: "Download CSV", "Download SVG", "Download PNG", "Download tactile SVG" and, with an id, "Copy embed". `enhance()` now picks up these figures and builds only their toolbar; they still get no points, Sound, Range or Expand (record 0037).
+
 ## [0.12.1] - 2026-11-11
 
 ### Fixed
