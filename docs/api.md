@@ -413,8 +413,12 @@ one row per item (a CV entry, a case) is enough.
   nth label is printed from the first. Without it, labels under vertical bars
   are thinned the same way when they would come within 12 units of each other
   at the width drawn (seven day names at 254), as line charts' x ticks are.
-- `directLabels`: print each series' name inside the stacked segments it fits
-  in, so series are told apart by text as well as color. Stacked layout only.
+- `directLabels`: name the series on the chart, on by default with `series`.
+  Stacked bars name each series beside the last column, grouped bars with two
+  series name them over the last group, and every bar prints its value at its
+  tip when all the values fit. A chart whose series cannot all be named this
+  way, or with `directLabels: false`, shows the legend textures instead
+  (record 0036).
 - `xType: "time"`, with `interval`, `formatX`: a time axis. `x` is a Date, an
   ISO 8601 string or epoch milliseconds; each row falls in the `interval`
   (`"hour"`, `"day"` the default, `"week"` starting Monday, `"month"` or
@@ -461,7 +465,14 @@ as percentages. `enarratio/lite` draws `percent` too, identically.
 
 Options shared by line and area charts: `data`, `x`, `y`, `series`, `xType`
 (`"time"` or `"linear"`), `seriesDomain`, `colors`, `xLabel`, `yLabel`,
-`formatValue`, `formatX`, `references`, `markers`, `maxXTicks`.
+`formatValue`, `formatX`, `references`, `markers`, `maxXTicks`, `directLabels`.
+
+- `directLabels`, on by default with `series`: lines are named at their right
+  end and stacked areas at the middle of each band there, spread so no two
+  names overlap. An area chart with a band that has no thickness at the last x,
+  or with `directLabels: false`, shows the legend textures instead.
+- `xLabel` is not drawn under a date or year axis, whose ticks already say what
+  it is; the data table and the description still use it.
 
 - x tick labels are thinned to what fits the drawing's width (every nth from
   the first, about 7 units a character), so they never overlap on a narrow
@@ -1453,10 +1464,11 @@ A test keeps this table and the stylesheet in step.
 | `--enarratio-border-width`         | `1px`                            | Table rules, legend buttons, tooltip                                                                         |
 | `--enarratio-radius`               | `0.25em`                         | Legend toggle buttons                                                                                        |
 | `--enarratio-radius-swatch`        | `0.15em`                         | Legend swatches                                                                                              |
-| `--enarratio-radius-tooltip`       | `0.3em`                          | The tooltip                                                                                                  |
+| `--enarratio-radius-tooltip`       | `0.5em`                          | The tooltip card                                                                                             |
 | `--enarratio-swatch-size`          | `0.8em`                          | Legend swatches                                                                                              |
+| `--enarratio-tooltip-min-width`    | `8em`                            | The tooltip card                                                                                             |
 | `--enarratio-tooltip-max-width`    | `18em`                           | The tooltip                                                                                                  |
-| `--enarratio-tooltip-padding`      | `0.35em 0.6em`                   | The tooltip                                                                                                  |
+| `--enarratio-tooltip-padding`      | `0.5em 0.65em`                   | The tooltip card                                                                                             |
 | `--enarratio-tooltip-shadow`       | `0 2px 8px rgb(0 0 0 / 15%)`     | The tooltip                                                                                                  |
 | `--enarratio-z-tooltip`            | `10`                             | Stacking of the tooltip                                                                                      |
 | `--enarratio-z-controls`           | `2`                              | Stacking of the toolbar, so its panels open over the chart                                                   |
@@ -1468,14 +1480,13 @@ A test keeps this table and the stylesheet in step.
 | `--enarratio-padding-panel`        | `0.5em`                          | The range form and the Download menu                                                                         |
 | `--enarratio-panel-shadow`         | `0 4px 16px rgb(0 0 0 / 15%)`    | The range form and the Download menu                                                                         |
 | `--enarratio-opacity-dimmed`       | `0.25`                           | Marks outside the current filter                                                                             |
-| `--enarratio-opacity-faded`        | `0.5`                            | Other series while a point has the pointer or focus                                                          |
+| `--enarratio-opacity-faded`        | `0.35`                           | Other columns or series while one has the pointer, focus or a legend entry                                   |
 | `--enarratio-z-expanded`           | `20`                             | Stacking of an expanded chart                                                                                |
 | `--enarratio-padding-expanded`     | `1rem`                           | Padding of an expanded chart                                                                                 |
 | `--enarratio-opacity-brush`        | `0.15`                           | Fill of a brushed range                                                                                      |
 | `--enarratio-opacity-texture`      | `0.6`                            | Textures on filled series 2 to 8 and their legend swatches (1 under more contrast and forced colors)         |
 | `--enarratio-cell-edge-width`      | `1px`                            | The edge round a ramp step's cells (heatmap, heat strip)                                                     |
-| `--enarratio-bar-gap`              | `1px`                            | The grid-colored edge between adjacent bars and stacked segments                                             |
-| `--enarratio-halo-width`           | `3px`                            | The halo of bar color behind a name printed on a textured bar                                                |
+| `--enarratio-bar-gap`              | `2px`                            | The background-colored gap between adjacent bars and stacked segments                                        |
 | `--enarratio-focus-width-inner`    | `5px`                            | Inner (background) ring on a focused point, twice its width                                                  |
 | `--enarratio-focus-width-outer`    | `2.5px`                          | Outer (focus color) ring on a focused point                                                                  |
 | `--enarratio-focus-outline-width`  | `3px`                            | Outline on a focused button, field or frame                                                                  |

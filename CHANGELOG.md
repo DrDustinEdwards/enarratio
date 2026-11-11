@@ -7,6 +7,28 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-11-11
+
+### Changed
+
+- Quiet charts ([record 0036](docs/design/0036-quiet-charts.md), replacing item 4 of record 0022). Bars and areas are solid: series are named on the chart instead of told apart by texture. Stacked bars name each series beside the last column, grouped bars with two series name them over the last group, stacked areas name each band at its right end, and lines keep their end labels. Textures stay under `prefers-contrast: more`, forced colors and print, and on a chart whose series cannot all be named, which carries `data-enarratio-textured`.
+- `directLabels` is on by default whenever there are `series`, for bar, line and area charts, and now means names on the chart as above. `directLabels: true` on grouped bars no longer throws.
+- Every bar prints its value (a stack its total) at its tip when all of them fit and there are no error bars.
+- Bars are at most 40 units wide, with a 2px background-colored gap between bars and segments (`--enarratio-bar-gap`, was 1px and grid-colored) and the outer end rounded at 4 units, the base square.
+- Axes have no tick marks and no y-axis line. The y title sits above the y labels, unrotated, and no x title is drawn under a date or year axis; the data table and the description still use it.
+- Area fills are lighter, with a 2px line along each band's top.
+- The whole plot answers the pointer. On bars, lines and areas the nearest column is picked: bars fade the other columns, lines and areas draw a crosshair with a dot on each series. Other charts pick the nearest mark within 40 px.
+- The tooltip is one card: the column's heading, then a row per series with its color, its value first and its name (`--enarratio-tooltip-min-width` 8em, padding 0.5em 0.65em, radius 0.5em). A column's card sits past the pointer and hides while a mouse drags a range.
+- Hovering or focusing a legend entry dims the other series (`data-enarratio-spotlight` on the figure) while no filter is on. Other series fade to `--enarratio-opacity-faded` 0.35 (was 0.5).
+- On touch, a drag across the drawing moves the card (`touch-action: pan-y`, so vertical swipes still scroll). The mouse brush still picks a range.
+- `npm run size` holds the enhancement layer to 12 kB (was 10 kB): the plot-wide pointer and the bar tween bring it to 11.5 kB (record 0036).
+- `update()` tweens the rounded bars, which are paths, from their old shape to the new one.
+- Marks write `data-enarratio-at` (their column's heading) and `data-enarratio-shown` (their value as printed), which the card reads.
+
+### Removed
+
+- Series names printed inside stacked bars, their halo and `--enarratio-halo-width`.
+
 ## [0.11.0] - 2026-11-11
 
 ### Changed

@@ -30,10 +30,13 @@ export function hash(text: string): string {
  */
 export function texture(svg: string, colors = ""): string {
   const slots = new Set<number>();
-  const filled = svg.replace(/fill="var\(--enarratio-series-([2-8])\)"/g, (_, slot: string) => {
-    slots.add(Number(slot));
-    return `fill="url(#enarratio-pattern-${slot})"`;
-  });
+  // Shapes only: text in a series color (a series named on the drawing) stays that color.
+  const filled = svg.replace(/<(?!text\b)[a-z][^>]*>/g, (tag) =>
+    tag.replace(/fill="var\(--enarratio-series-([2-8])\)"/, (_, slot: string) => {
+      slots.add(Number(slot));
+      return `fill="url(#enarratio-pattern-${slot})"`;
+    }),
+  );
   if (slots.size === 0) return svg;
   const id = `enarratio-${hash(svg.replace(/<[^>]*>/g, " ") + colors)}-`;
   const defs = [...slots]

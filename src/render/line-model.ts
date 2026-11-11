@@ -7,6 +7,7 @@
 import { type Annotated, withNotes } from "./annotation.js";
 import {
   calendarDates,
+  isYears,
   DAY,
   domainOf,
   formatInstant,
@@ -31,7 +32,7 @@ import {
   validateFigure,
 } from "./figure.js";
 import { planSeries, type SeriesPlan } from "./series.js";
-import { charWidth, textGrowth } from "./size.js";
+import { charWidth } from "./size.js";
 import {
   dateFormat,
   defaultFormat,
@@ -40,6 +41,7 @@ import {
   stringsFor,
   valueAxis,
 } from "./text.js";
+import { finishAreas } from "./area-marks.js";
 import { texture } from "./texture.js";
 
 export { fitTicks } from "./size.js";
@@ -103,6 +105,13 @@ export interface SeriesChartOptions<T extends object> extends FigureOptions, Axi
    * labels never overlap on a narrow chart; with it, to the fewer of the two.
    */
   readonly maxXTicks?: number;
+  /**
+   * Name each series at the end of its line or band as well as in the legend (default true when
+   * there are series), so series are told apart by text as well as color (A1, record 0036). An
+   * area chart whose bands are not all named this way (a band empty at the last x, or `false`
+   * here) fills series 2 to 8 with textures instead.
+   */
+  readonly directLabels?: boolean;
 }
 
 /**
@@ -140,8 +149,6 @@ export interface LineChartOptions<T extends object> extends SeriesChartOptions<T
   readonly forecastLabel?: string;
   /** Show a dot at every value (default: only when there are 30 or fewer per series). */
   readonly points?: boolean;
-  /** Label each series at the end of its line as well as in the legend. */
-  readonly directLabels?: boolean;
   /**
    * Use a logarithmic y axis, for values spanning orders of magnitude. Every value must then be
    * above zero; a zero or negative value throws rather than vanishing from the line (F2).
@@ -172,10 +179,6 @@ export interface Point {
 }
 
 const isoDate = (d: Date): string => d.toISOString().slice(0, 10);
-
-/** Whether numbers look like years, which print without a thousands separator (F4). */
-const isYears = (values: readonly number[]): boolean =>
-  values.length > 0 && values.every((v) => Number.isInteger(v) && v >= 1000 && v <= 2999);
 
 /** About six whole-year ticks between two years. */
 function yearTicks(from: number, to: number): number[] {
@@ -213,6 +216,8 @@ export interface Prepared {
   readonly format: (value: number) => string;
   readonly strings: Strings;
   readonly xLabel: string | null;
+  /** The x axis title drawn: none on a time or year axis, whose ticks say what they are (record 0036). */
+  readonly xTitle: string | null;
   readonly yLabel: string | null;
   /** `forecastFrom` as a number (epoch milliseconds for time), when given. */
   readonly forecastAt?: number;
@@ -339,6 +344,7 @@ function prepare<T extends object>(kind: string, options: Forecastable<T>): Prep
     format,
     strings,
     xLabel,
+    xTitle: time || years ? null : xLabel,
     yLabel,
     ...(forecastBoundary !== undefined ? { forecastAt: forecastBoundary } : {}),
     ...(band ? { band } : {}),
@@ -430,7 +436,12 @@ function describePoint(prepared: Prepared, multi: boolean, xColumn: string) {
   };
 }
 
-function datum(p: Point, x: string, series: string | undefined): MarkDatum {
+function datum(
+  p: Point,
+  x: string,
+  series: string | undefined,
+  format: (value: number) => string,
+): MarkDatum {
   const multi = series !== undefined;
   return {
     key: markKey(p.at, p.series),
@@ -439,6 +450,8 @@ function datum(p: Point, x: string, series: string | undefined): MarkDatum {
     ...(multi ? { series: p.series } : {}),
     column: p.column,
     row: p.row,
+    at: p.xText,
+    ...(p.value === null ? {} : { shown: format(p.value) }),
   };
 }
 
@@ -461,6 +474,8 @@ export interface SeriesModel {
   figure(svg: string, x: ScaleDescription | undefined): string;
   /** The text alternative, with the annotations' notes added. */
   readonly alt: string | undefined;
+  /** Whether each series is named at its end (record 0036). */
+  readonly directLabels: boolean;
 }
 
 function seriesModel<T extends object>(
@@ -478,6 +493,7 @@ function seriesModel<T extends object>(
   }
   const noted = withNotes(options);
   const multi = options.series !== undefined;
+  const directLabels = options.directLabels !== false && multi;
   const xColumn = prepared.xLabel ?? options.x;
   const ats = prepared.points.map((p) => p.at);
   const { points, format } = prepared;
@@ -522,20 +538,28 @@ function seriesModel<T extends object>(
       options.locale,
     ),
     describe: describePoint(prepared, multi, xColumn),
-    datum: (p) => datum(p, options.x, options.series),
+    datum: (p) => datum(p, options.x, options.series, format),
     alt: noted.alt,
-    figure: (svg, x) =>
-      figure(noted, {
+    directLabels,
+    figure: (svg, x) => {
+      // Area bands are filled, so they take textures where they are not all named on the
+      // drawing (record 0036); lines are told apart by labels and dashes (B5).
+      const area =
+        figureKind === "area"
+          ? finishAreas(texture(svg, slotStyle(plan.slotColors)), prepared, plan, directLabels)
+          : undefined;
+      return figure(noted, {
         kind: figureKind,
-        // Area bands are filled, so they take textures; lines are told apart by labels (B5).
-        svg: figureKind === "area" ? texture(svg, slotStyle(plan.slotColors)) : svg,
+        svg: area ? area.svg : svg,
+        ...(area && !area.labeled ? { textured: true } : {}),
         ...(x ? { x } : {}),
         legend: multi ? plan.legend : [],
         ...(multi && options.series ? { seriesField: options.series } : {}),
         slotColors: plan.slotColors,
         description,
         table: table(prepared, xColumn, multi),
-      }),
+      });
+    },
   };
 }
 
@@ -554,7 +578,6 @@ export interface LineModel extends SeriesModel {
   readonly dashed: readonly Point[];
   /** The forecast boundary as the axis reads it, with its label. */
   readonly forecast: { readonly x: number | Date; readonly label: string } | undefined;
-  readonly directLabels: boolean;
 }
 
 /** Reads and checks a line chart's options. Throws on anything it cannot draw. */
@@ -611,7 +634,6 @@ export function lineModel<T extends object>(options: LineChartOptions<T>): LineM
             x: time ? new Date(boundary) : boundary,
             label: options.forecastLabel ?? prepared.strings.terms.forecast,
           },
-    directLabels: options.directLabels === true && base.multi,
   };
 }
 
@@ -621,42 +643,11 @@ export function lineModel<T extends object>(options: LineChartOptions<T>): LineM
  * keeps at least 96, so desktop charts share one gutter; a narrower one takes only what its
  * labels need, and the plot keeps the rest.
  */
-export function rightMargin(model: LineModel, width: number): number {
+export function rightMargin(model: SeriesModel, width: number): number {
   if (!model.directLabels) return 24;
   const longest = Math.max(...model.prepared.seriesNames.map((n) => n.length));
   const need = Math.ceil(6 + longest * charWidth(width) + 4);
   return Math.max(width >= 480 ? 96 : 24, need);
-}
-
-/** The least distance between two direct labels' baselines, in user units. */
-const LABEL_GAP = 16;
-
-/**
- * Moves direct labels apart so none overlaps the next (B8): labels closer than the gap form a
- * cluster, centered on where its labels would sit, and clusters that then touch merge. Order is
- * kept. Both renderers place their labels with it.
- */
-export function spreadLabels(ys: readonly number[], width: number): number[] {
-  // The gap grows with the text, which grows as the drawing shrinks (record 0022).
-  const gap = LABEL_GAP * textGrowth(width);
-  const at = (i: number): number => ys[i] as number;
-  const clusters: { members: number[]; top: number }[] = [];
-  for (const i of ys.map((_, i) => i).sort((a, b) => at(a) - at(b))) {
-    clusters.push({ members: [i], top: at(i) });
-    for (let n = clusters.length; n > 1; n -= 1) {
-      const [a, b] = clusters.slice(-2) as [(typeof clusters)[0], (typeof clusters)[0]];
-      if (a.top + a.members.length * gap <= b.top) break;
-      const members = [...a.members, ...b.members];
-      const mean = members.reduce((sum, m) => sum + at(m), 0) / members.length;
-      clusters.splice(-2, 2, { members, top: mean - ((members.length - 1) * gap) / 2 });
-    }
-  }
-  const out = [...ys];
-  for (const c of clusters)
-    c.members.forEach((m, k) => {
-      out[m] = c.top + k * gap;
-    });
-  return out;
 }
 
 const AREA = "areaChart";

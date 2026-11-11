@@ -3,8 +3,8 @@ import { type KeysOfType, markKey, maxOf, readLabel, readNumberOrNull } from "..
 import { categoryRange, valueRange } from "../render/describe.js";
 import {
   type AxisUnits,
-  type FigureOptions,
   figure,
+  type FigureOptions,
   type SeriesColor,
   unitLabel,
   validateFigure,
@@ -120,7 +120,7 @@ export function waterfallChart<T extends object>(given: WaterfallChartOptions<T>
       width: options.width ?? DEFAULT_WIDTH,
       height: options.height ?? DEFAULT_HEIGHT,
       marginTop: 24,
-      marginLeft: valueLabel === null ? 52 : 64,
+      marginLeft: 52,
       marginBottom: longest > 10 ? 64 : 44,
       x: {
         type: "band",
@@ -131,8 +131,6 @@ export function waterfallChart<T extends object>(given: WaterfallChartOptions<T>
       },
       y: {
         label: valueLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
         grid: true,
         nice: true,
         zero: true,

@@ -33,28 +33,22 @@ const tickLabels = (fig: Element, axis: "x" | "y"): string[] =>
   );
 
 describe("A1: the default palette and direct labels", () => {
-  it("prints series names inside stacked bars that fit, and refuses them on grouped bars", () => {
+  it("names stacked series beside the last column, and textures a chart it cannot name", () => {
     const data = Array.from({ length: 12 }, (_, i) => ({
       year: 2020 + (i % 2),
       type: i < 8 ? "Papers" : "Talks",
     }));
-    const fig = parse(barChart({ data, x: "year", series: "type", directLabels: true, alt: "a" }));
+    const fig = parse(barChart({ data, x: "year", series: "type", alt: "a" }));
     const labels = [...fig.querySelectorAll('[data-enarratio-mark="bar label"] text')];
-    expect(labels.map((t) => t.textContent)).toContain("Papers");
-    expect(labels[0]?.getAttribute("fill")).toMatch(/^var\(--enarratio-series-text-\d\)$/);
+    expect(labels.map((t) => t.textContent)).toEqual(expect.arrayContaining(["Papers", "Talks"]));
     expect(
       fig.querySelector('[data-enarratio-mark="bar label"]')?.getAttribute("aria-hidden"),
     ).toBe("true");
-    expect(() =>
-      barChart({
-        data,
-        x: "year",
-        series: "type",
-        layout: "grouped",
-        directLabels: true,
-        alt: "a",
-      }),
-    ).toThrow(/directLabels needs the stacked layout/);
+    expect(fig.hasAttribute("data-enarratio-textured")).toBe(false);
+    const plain = parse(
+      barChart({ data, x: "year", series: "type", directLabels: false, alt: "a" }),
+    );
+    expect(plain.hasAttribute("data-enarratio-textured")).toBe(true);
   });
 });
 

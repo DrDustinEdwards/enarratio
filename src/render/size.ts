@@ -38,23 +38,25 @@ export function charWidth(width: number): number {
 const NUMERIC = /^[-−+]?[$€£¥]?[\d.,   ]+(?:[%kKMBTGµ]|e[-−+]?\d+)?$/;
 
 /**
- * The left margin a drawing needs for its y tick labels and, when it has one, the rotated y axis
- * title beside them, so the two never overlap at a narrow width: the tick gap (9), the widest
- * label, then the title (about one line of text, 12 units, and 4 apart) 3 from the edge. Only a
- * numeric value axis is fitted; category axes size their margins to their names already.
+ * The left margin a drawing needs for its y tick labels, so they never leave the drawing at a
+ * narrow width: the tick gap (9), the widest label, then 3 from the edge. The y axis title sits
+ * above the labels (record 0036), so it takes no room here. Only a numeric value axis is fitted;
+ * category axes size their margins to their names already.
  */
-export function leftMargin(
-  base: number,
-  labels: readonly string[],
-  title: boolean,
-  width: number,
-): number {
+export function leftMargin(base: number, labels: readonly string[], width: number): number {
   if (labels.length === 0 || !labels.every((l) => NUMERIC.test(l.trim()))) return base;
   const longest = Math.max(...labels.map((l) => l.length));
-  const needed = Math.ceil(
-    9 + longest * charWidth(width) + (title ? 4 + 12 * textGrowth(width) + 3 : 3),
-  );
-  return Math.max(base, needed);
+  return Math.max(base, Math.ceil(9 + longest * charWidth(width) + 3));
+}
+
+/**
+ * The top margin a drawing needs for a y axis title above its tick labels (record 0036): the
+ * title's line from 3 units below the top edge, then half a line for the top tick label, which is
+ * centered on the frame's edge, and 4 between them, all in text that grows as the drawing shrinks
+ * (record 0022). Never less than `base`.
+ */
+export function topMargin(base: number, title: boolean, width: number): number {
+  return title ? Math.max(base, Math.ceil(3 + 4 + 13 * 1.5 * textGrowth(width))) : base;
 }
 
 /**

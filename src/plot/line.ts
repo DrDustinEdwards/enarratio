@@ -12,8 +12,8 @@ import {
   rightMargin,
   type SeriesChartOptions,
   type SeriesModel,
-  spreadLabels,
 } from "../render/line-model.js";
+import { spreadLabels } from "../render/direct-labels.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
 import { drawAnnotations } from "./annotate.js";
@@ -59,9 +59,7 @@ function xScale(model: SeriesModel, width: number, plotWidth: number) {
   const { prepared, yearTicks, maxXTicks } = model;
   const base = {
     type: prepared.time ? "utc" : "linear",
-    label: prepared.xLabel,
-    labelAnchor: "center",
-    labelArrow: "none",
+    label: prepared.xTitle,
   } as const;
   if (yearTicks) {
     return {
@@ -198,7 +196,7 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
   }
 
   const width = options.width ?? DEFAULT_WIDTH;
-  const marginLeft = prepared.yLabel === null ? 48 : 64;
+  const marginLeft = 48;
   const marginRight = rightMargin(model, width);
   const rendered = renderPlot(
     {
@@ -212,8 +210,6 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
       y: {
         type: model.log ? "log" : "linear",
         label: prepared.yLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
         grid: true,
         nice: true,
         ...(model.log ? {} : { zero: options.zero ?? true }),
@@ -244,7 +240,8 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
   const { points, seriesNames } = prepared;
   const order = { order: seriesNames };
   const width = options.width ?? DEFAULT_WIDTH;
-  const marginLeft = prepared.yLabel === null ? 48 : 64;
+  const marginLeft = 48;
+  const marginRight = rightMargin(model, width);
 
   const rendered = renderPlot(
     {
@@ -252,13 +249,11 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
       height: options.height ?? DEFAULT_HEIGHT,
       marginTop: 20,
       marginLeft,
+      marginRight,
       marginBottom: 44,
-      // Plot's default right margin is 20.
-      x: xScale(model, width, width - marginLeft - 20),
+      x: xScale(model, width, width - marginLeft - marginRight),
       y: {
         label: prepared.yLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
         grid: true,
         nice: true,
         zero: true,
@@ -289,9 +284,10 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
             strokeWidth: 2,
           }),
         ),
+        // Each point on its band's top edge, where its line is (record 0036).
         Plot.dot(
           points,
-          Plot.stackY({
+          Plot.stackY2({
             ...order,
             x: "x",
             y: "value",

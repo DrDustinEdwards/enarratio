@@ -216,7 +216,7 @@ export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): str
       width,
       height: options.height ?? 360,
       marginTop: 20,
-      marginLeft: yLabel === null ? 48 : 64,
+      marginLeft: 48,
       marginBottom: 44,
       // Room for the size legend, and for the largest bubbles at the edges.
       // Points never sit on the axes, where the first one would cover a tick label (inset).
@@ -232,8 +232,6 @@ export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): str
         // Log axes label powers of ten only; Plot's default adds every minor tick.
         ...(options.xType === "log" ? { ticks: 5 } : {}),
         label: xLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
         grid: true,
         nice: true,
       },
@@ -246,8 +244,6 @@ export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): str
         // Log axes label powers of ten only; Plot's default adds every minor tick.
         ...(options.yType === "log" ? { ticks: 5 } : {}),
         label: yLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
         grid: true,
         nice: true,
       },

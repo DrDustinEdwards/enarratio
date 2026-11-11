@@ -10,16 +10,15 @@ import {
   type BarModel,
   type BarPoint,
   barModel,
-  labelFits,
+  FACET_PADDING,
 } from "../render/bar-model.js";
 import { markKey } from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
-import { bottomMargin, leftMargin } from "../render/size.js";
+import { bottomMargin, leftMargin, topMargin } from "../render/size.js";
 import { annotationMarkup, bandScale, continuousScale, errorBar } from "./annotate.js";
 import {
   axisLabel,
   axisTickLabels,
-  axisTicks,
   type Frame,
   facetTickLabels,
   grid,
@@ -47,7 +46,6 @@ interface Box {
 export type { BarChartOptions } from "../render/bar-model.js";
 
 const MARGIN_TOP = 20;
-const MARGIN_RIGHT = 20;
 const MARGIN_BOTTOM = 44;
 
 /** Each bar's extent along the value axis, stacked as Plot stacks it. */
@@ -93,12 +91,17 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
   let frame: Frame = {
     width,
     height,
-    marginTop: MARGIN_TOP,
-    marginRight: MARGIN_RIGHT,
+    // Room above for the y axis title, as renderPlot makes for Plot's (record 0036).
+    marginTop: topMargin(
+      MARGIN_TOP,
+      (horizontal ? model.categoryTitle : model.valueLabel) !== null,
+      width,
+    ),
+    marginRight: model.marginRight,
     // Room below for the x labels and title, as renderPlot fits Plot's.
     marginBottom: bottomMargin(
       MARGIN_BOTTOM,
-      (horizontal ? model.valueLabel : model.categoryLabel) !== null,
+      (horizontal ? model.valueLabel : model.categoryTitle) !== null,
       width,
       // A category label wrapped onto two lines takes a second line of room, as Plot's does.
       horizontal ? 1 : labelLines(xNames.map((name) => ({ label: model.tickLabel(name) }))),
@@ -144,14 +147,13 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
         }));
       })();
 
-  // Room for the value labels and the axis title beside them, as renderPlot makes for Plot's.
+  // Room for the value labels, as renderPlot makes for Plot's.
   if (!horizontal) {
     frame = {
       ...frame,
       marginLeft: leftMargin(
         frame.marginLeft,
         valueTicks.map((t) => t.label),
-        model.valueLabel !== null,
         width,
       ),
     };
@@ -161,7 +163,7 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
   const categoryRange: [number, number] = horizontal
     ? [frame.marginTop, height - frame.marginBottom]
     : [frame.marginLeft, width - frame.marginRight];
-  const facetBand = grouped ? band(xNames.length, categoryRange, 0.15, 0) : undefined;
+  const facetBand = grouped ? band(xNames.length, categoryRange, FACET_PADDING, 0) : undefined;
   let inner = frame;
   if (facetBand) {
     inner = horizontal
@@ -171,9 +173,12 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
   const innerRange: [number, number] = horizontal
     ? [inner.marginTop, inner.height - inner.marginBottom]
     : [inner.marginLeft, inner.width - inner.marginRight];
-  const category = grouped
-    ? band(seriesNames.length, innerRange, 0.05, 0.05)
-    : band(xNames.length, innerRange, 0.2, 0.2);
+  const category = band(
+    grouped ? seriesNames.length : xNames.length,
+    innerRange,
+    model.padding.inner,
+    model.padding.outer,
+  );
   const columnOf = new Map(xNames.map((name, i) => [name, i]));
   const rowOf = new Map(seriesNames.map((name, i) => [name, i]));
 
@@ -210,7 +215,7 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
 
   const parts: string[] = [];
   const thinned = model.thinned ? new Set(model.thinned) : undefined;
-  const label = model.categoryLabel;
+  const label = model.categoryTitle;
   const valueAt = valueTicks.map((t) => t.at);
 
   if (facets && outer) {
@@ -236,12 +241,6 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
       .map((t) => ({ ...t, label: model.tickLabel(t.label) }));
     const offset = category.bandwidth / 2;
     parts.push(
-      axisTicks(
-        k,
-        ticks.map((t) => t.at),
-        frame,
-        offset,
-      ),
       axisTickLabels(k, ticks, frame, { offset }),
       axisLabel(k, label, frame, frame, labelLines(ticks)),
     );
@@ -249,7 +248,6 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
   const valueAxis = (k: "x" | "y", placement: Placement): void => {
     parts.push(
       grid(k, valueAt, inner, drawn),
-      axisTicks(k, valueAt, inner, 0, placement),
       axisTickLabels(k, valueTicks, inner, { placement }),
       axisLabel(k, model.valueLabel, outer ?? frame, frame, labelLines(valueTicks)),
     );
@@ -315,39 +313,6 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
         : barMarkup(points),
     ),
   );
-
-  if (model.directLabels) {
-    // Each series' name inside the stacked segments it fits in, in the color for text on it.
-    const labels = points
-      .map((p) => {
-        const box = boxes.get(p) as Box;
-        if (!labelFits(p.series, box.width, box.height)) return "";
-        return el(
-          "text",
-          {
-            x: box.x + box.width / 2,
-            y: box.y + box.height / 2,
-            dy: "0.35em",
-            fill: `var(--enarratio-series-text-${(rowOf.get(p.series) ?? 0) + 1})`,
-          },
-          text(p.series),
-        );
-      })
-      .join("");
-    parts.push(
-      el(
-        "g",
-        {
-          "data-enarratio-mark": "bar label",
-          "aria-hidden": "true",
-          // Labels sit on the bars they name; pointer events go through them to the bar.
-          "pointer-events": "none",
-          "text-anchor": "middle",
-        },
-        labels,
-      ),
-    );
-  }
 
   // The rule at zero, across the frame (in each drawn facet).
   const zero = value(0);

@@ -5,13 +5,8 @@
  * @packageDocumentation
  */
 
-import {
-  type LineChartOptions,
-  lineModel,
-  type Point,
-  rightMargin,
-  spreadLabels,
-} from "../render/line-model.js";
+import { type LineChartOptions, lineModel, type Point, rightMargin } from "../render/line-model.js";
+import { spreadLabels } from "../render/direct-labels.js";
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
 import { annotationMarkup, continuousScale } from "./annotate.js";
 import {
@@ -70,7 +65,7 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
       marginTop: 20,
       marginRight: rightMargin(model, options.width ?? DEFAULT_WIDTH),
       marginBottom: 44,
-      marginLeft: prepared.yLabel === null ? 48 : 64,
+      marginLeft: 48,
     },
     xs,
     ys,

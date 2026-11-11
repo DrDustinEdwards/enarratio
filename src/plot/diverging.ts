@@ -10,8 +10,8 @@ import {
 import { categoryRange, valueRange } from "../render/describe.js";
 import {
   type AxisUnits,
-  type FigureOptions,
   figure,
+  type FigureOptions,
   type SeriesColor,
   unitLabel,
   validateFigure,
@@ -132,8 +132,6 @@ export function divergingBarChart<T extends object>(given: DivergingBarChartOpti
   });
   const valueScale = {
     label: valueLabel,
-    labelAnchor: "center",
-    labelArrow: "none",
     grid: true,
     nice: true,
     // Room beyond the longest bars for their labels.
