@@ -7,7 +7,22 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.13.1] - 2026-11-11
+
+0.13.1 replaces 0.13.0 for sites: it carries 0.13.0's chart types and these fixes.
+
 ### Fixed
+
+- Every chart fits a phone's 228-unit drawing ([record 0041](docs/design/0041-phone-width-drawings.md)). A sweep of the gallery's five pages at five widths, from 320 to 1280 pixels, found text overlapping or running past the drawing on fourteen chart types; it now finds none.
+  - Axis titles are centered under the drawing when they do not fit under the plot, else wrap onto two lines, the second cut short; the bottom margin grows to hold them. On the light renderers too.
+  - A numeric x axis on a plot under 200 units prints one tick per 50 units; month ticks on a plot under 240 units step by 1, 2, 3, 4, 6 or 12 months to what fits (Plot and light renderers alike).
+  - Waterfall: step names wrap onto up to three lines; where a word or value is wider than its slot, the steps run across as horizontal bars, names beside them, instead of rotated names. The gallery's waterfall now draws across at 640 units as well.
+  - Forest plot: on a narrow drawing each row's name and estimate go above its interval, with a halo over the line of no effect, and the favors words sit at the plot's edges.
+  - Slope chart, donut and pie, Kaplan-Meier, facets and small multiples, scatter size legend, funnel, dose-response midpoint labels, box and titer group names, histogram density peaks, timeline axis labels and the phylogenetic tree's distance axis each move their text to where there is room.
+  - Annotation notes and range labels turn inward rather than run off the drawing.
+  - Line charts' reference, marker and forecast labels have a halo in the background color, so a line under one does not cut through it.
+  - Grouped bars name two series over the last group only when each name fits half a group; otherwise the legend and textures name them.
+- The gallery's phone drawings were 944 units tall since 0.12.2: it read a toolbar icon's `viewBox` as the chart's. It reads the chart's own drawing now.
 
 - Bar charts drawn narrow (a phone's 228-unit drawing) keep room for their bars. Stacked bars name their series beside the last stack only while those names take at most a quarter of the width; otherwise the legend names them and the textures come back. Labels under vertical bars are fitted to the plot's real width, and `maxXTicks` is now the most labels to print, as on line charts, so a phone never prints more than fit. Before, "Entries per year, 2005 to 2026" drew 2-unit bars under eight overlapping years ([record 0040](docs/design/0040-narrow-bars-keep-their-plot.md)).
 
