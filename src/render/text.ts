@@ -97,6 +97,19 @@ export interface Terms {
   readonly latitude: string;
   /** A map's region column, when the caller names none. */
   readonly region: string;
+  readonly targetValue: string;
+  readonly band: string;
+  readonly stage: string;
+  readonly shareOfFirst: string;
+  readonly shareOfPrevious: string;
+  readonly ofPrevious: string;
+  readonly ofFirst: string;
+  readonly source: string;
+  readonly target: string;
+  readonly flow: string;
+  readonly flows: string;
+  readonly incoming: string;
+  readonly outgoing: string;
   /** A dot map's landmarks, in the table, when the caller names none. */
   readonly landmark: string;
   /** After the highlighted landmark's name in the table: "Pump 7 (highlighted)". */
@@ -224,6 +237,8 @@ export interface Strings {
     sign: "up" | "down",
     r: string,
   ) => string;
+  /** One measure's highest and lowest items, in parallel coordinates. */
+  readonly spread: (measure: string, high: At, low: At) => string;
   /** A box plot's medians, by group. */
   readonly medians: (points: readonly At[]) => string;
   /** Two values as a range: "3.1 to 4.2". */
@@ -386,6 +401,15 @@ export const ENGLISH: Strings = {
     dumbbell: "Dumbbell plot",
     slope: "Slope chart",
     pie: "Pie chart",
+    treemap: "Treemap",
+    sunburst: "Sunburst chart",
+    funnel: "Funnel chart",
+    sankey: "Sankey diagram",
+    chord: "Chord diagram",
+    radar: "Radar chart",
+    gauge: "Gauge",
+    bullet: "Bullet chart",
+    parallel: "Parallel coordinates",
     waterfall: "Waterfall chart",
     "small-multiples": "Small multiples",
     table: "Table",
@@ -422,6 +446,8 @@ export const ENGLISH: Strings = {
     strength === "weak"
       ? `The two values show little link (r = ${r}).`
       : `As one value goes up, the other tends to go ${sign} (${strength} link, r = ${r}).`,
+  spread: (measure, high, low) =>
+    `${measure} is highest for ${high.at} (${high.value}) and lowest for ${low.at} (${low.value}).`,
   medians: (points) =>
     `${points.length === 1 ? "The median is" : "Medians:"} ${points.map((p) => `${p.value} (${p.at})`).join(", ")}.`,
   range: (from, to) => `${from} to ${to}`,
@@ -542,6 +568,19 @@ export const ENGLISH: Strings = {
     longitude: "Longitude",
     latitude: "Latitude",
     region: "Region",
+    targetValue: "Target",
+    band: "Band",
+    stage: "Stage",
+    shareOfFirst: "Share of first",
+    shareOfPrevious: "Share of previous",
+    ofPrevious: "of previous",
+    ofFirst: "of first",
+    source: "From",
+    target: "To",
+    flow: "Flow",
+    flows: "Flows",
+    incoming: "In",
+    outgoing: "Out",
     landmark: "Landmark",
     highlightedLandmark: "highlighted",
     forecast: "Forecast",
