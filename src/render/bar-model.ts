@@ -591,7 +591,10 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     plan,
     horizontal,
     grouped,
-    directLabels: options.directLabels !== false && series !== undefined && (grouped || horizontal || stackNamed),
+    directLabels:
+      options.directLabels !== false &&
+      series !== undefined &&
+      (grouped || horizontal || stackNamed),
     categoryLabel,
     categoryTitle:
       time || rawX.every((v) => typeof v === "number" && isYears([v])) ? null : categoryLabel,
