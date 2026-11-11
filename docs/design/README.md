@@ -50,6 +50,7 @@ Each record says where a decision came from:
 | [0032](0032-screen-reader-run.md)                       | A screen reader run in CI (NVDA, VoiceOver)                                      |
 | [0033](0033-no-shift-on-load.md)                        | No layout shift when the layer loads                                             |
 | [0034](0034-gallery-swaps-without-shift.md)             | The gallery's phone drawings and controls do not move the page                   |
+| [0035](0035-chart-toolbar.md)                           | One toolbar above the chart, and a data table for screen readers and agents      |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

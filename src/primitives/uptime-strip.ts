@@ -3,7 +3,6 @@ import type { Terms } from "../render/text.js";
 import {
   type PrimitiveFigureOptions,
   type PrimitiveTable,
-  type PrimitiveTableOptions,
   primitiveFigure,
   primitiveTable,
   primitiveText,
@@ -192,10 +191,7 @@ export function uptimeStrip(options: UptimeStripOptions): string {
  * @example
  * const { summary, table } = uptimeStripTable({ slots: ["up", "down"], label: "Site, last 2 hours" });
  */
-export function uptimeStripTable(
-  options: UptimeStripOptions,
-  display?: PrimitiveTableOptions,
-): PrimitiveTable {
+export function uptimeStripTable(options: UptimeStripOptions): PrimitiveTable {
   const p = prepareUptimeStrip(options);
   const { strings } = primitiveText(options);
   return primitiveTable(
@@ -205,7 +201,6 @@ export function uptimeStripTable(
       rows: p.slots.map((s) => [s.name, s.word]),
     },
     p.subject || p.alt,
-    display,
     strings,
   );
 }

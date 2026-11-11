@@ -106,14 +106,13 @@ describe("locale formats", () => {
         alt: "a",
         title: "t",
         locale: "de-DE",
-        strings: { showData: "Daten zeigen", downloadCsv: "CSV herunterladen" },
+        strings: { downloadCsv: "CSV herunterladen" },
       }),
     );
     expect([...fig.querySelectorAll("tbody tr")].map((tr) => tr.textContent)).toEqual([
       "5. Januar 20261.234,5",
       "6. Januar 20262.000",
     ]);
-    expect(fig.querySelector(".enarratio-show")?.textContent).toBe("Daten zeigen");
     expect(fig.querySelector(".enarratio-csv")?.textContent).toBe("CSV herunterladen");
     // Filter events keep the ISO date, whatever the reader sees.
     expect(fig.querySelector("[data-enarratio-x]")?.getAttribute("data-enarratio-x")).toBe(

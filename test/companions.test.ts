@@ -59,12 +59,10 @@ describe("sparklineTable", () => {
     const out = sparklineTable({ values: [1, 2], label: "x", formatValue: (n) => `${n}%` });
     expect(cells(out.table, 1)).toEqual(["1%", "2%"]);
     const root = parse(markup);
-    expect(root.localName).toBe("details");
+    expect(root.localName).toBe("div");
+    expect(root.getAttribute("class")).toContain("enarratio-visually-hidden");
     expect(root.querySelector("caption")?.textContent).toBe("Data for: Entries per year");
     expect(root.querySelectorAll("tbody tr")).toHaveLength(5);
-    const hidden = parse(sparklineTable(options, { dataTable: "visually-hidden" }).markup);
-    expect(hidden.localName).toBe("div");
-    expect(hidden.getAttribute("class")).toContain("enarratio-visually-hidden");
   });
 
   it("keeps the generated summary when alt is given, and validates like the sparkline", () => {

@@ -27,15 +27,21 @@ interface Violation {
   nodes: { target: string[] }[];
 }
 
-async function audit(page: Page): Promise<Violation[]> {
+/** Axe over the page, or over only the elements `include` selects. */
+async function audit(page: Page, include?: string): Promise<Violation[]> {
   await page.addScriptTag({ path: axeSource });
-  return page.evaluate(async () => {
+  return page.evaluate(async (include) => {
     const axe = (
       window as unknown as {
-        axe: { run: (context: Document, options: object) => Promise<{ violations: Violation[] }> };
+        axe: {
+          run: (
+            context: Document | object,
+            options: object,
+          ) => Promise<{ violations: Violation[] }>;
+        };
       }
     ).axe;
-    const result = await axe.run(document, {
+    const result = await axe.run(include ? { include: [[include]] } : document, {
       runOnly: {
         type: "tag",
         values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"],
@@ -48,21 +54,34 @@ async function audit(page: Page): Promise<Violation[]> {
       help: v.help,
       nodes: v.nodes.slice(0, 5).map((n) => ({ target: n.target })),
     }));
-  });
+  }, include);
 }
 
+/** Opens every disclosure but the toolbar's panels, which open over the chart one at a time. */
+const openDisclosures = (page: Page): Promise<void> =>
+  page.$$eval("details:not(.enarratio-controls > details)", (all) => {
+    for (const d of all) d.open = true;
+  });
+
+/** Opens every toolbar panel, each over its own chart. */
+const openPanels = (page: Page): Promise<void> =>
+  page.$$eval(".enarratio-controls > details", (all) => {
+    for (const d of all) d.open = true;
+  });
+
 describe("narrow screens", () => {
-  // WCAG 1.4.10: at 320 CSS pixels a wide data table scrolls in its own region, which a keyboard
-  // reaches (2.1.1). Tables are only wide enough to scroll here, so the audit above never saw this.
+  // WCAG 1.4.10: at 320 CSS pixels the toolbar stays on one row and its open panels stay inside
+  // the page, so nothing scrolls sideways.
   it.each(schemes)(
-    "has no axe violations at 320 pixels with every table open, %s",
+    "has no axe violations at 320 pixels with every panel open, %s",
     async (scheme) => {
       const page = await harness.open("example.html", scheme);
       await page.setViewport({ width: 320, height: 256 });
-      await page.$$eval("details", (all) => {
-        for (const d of all) d.open = true;
-      });
+      await openDisclosures(page);
       expect(await audit(page)).toEqual([]);
+      // The Range and Download panels, open together; each covers its own chart while open.
+      await openPanels(page);
+      expect(await audit(page, ".enarratio-panel")).toEqual([]);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= 320)).toBe(true);
       await page.close();
     },
@@ -75,11 +94,11 @@ const schemes = ["light", "dark"] as const;
 describe.each(pages)("%s", (file) => {
   it.each(schemes)("has no axe violations when enhanced, %s", async (scheme) => {
     const page = await harness.open(file, scheme);
-    // Open every data table and source block, so their contents are audited too.
-    await page.$$eval("details", (all) => {
-      for (const d of all) d.open = true;
-    });
+    // Open every source block, so its contents are audited too, then every toolbar panel.
+    await openDisclosures(page);
     expect(await audit(page)).toEqual([]);
+    await openPanels(page);
+    expect(await audit(page, ".enarratio-panel")).toEqual([]);
     await page.close();
   });
 

@@ -3,7 +3,6 @@ import { type SeriesColor, slotStyle } from "../render/figure.js";
 import {
   type PrimitiveFigureOptions,
   type PrimitiveTable,
-  type PrimitiveTableOptions,
   primitiveFigure,
   primitiveTable,
   primitiveText,
@@ -184,10 +183,7 @@ export function progressRing(options: ProgressRingOptions): string {
  * @example
  * const { summary } = progressRingTable({ value: 7, max: 12, label: "Chapters drafted" });
  */
-export function progressRingTable(
-  options: ProgressRingOptions,
-  display?: PrimitiveTableOptions,
-): PrimitiveTable {
+export function progressRingTable(options: ProgressRingOptions): PrimitiveTable {
   const p = prepareProgressRing(options);
   const { strings, count } = primitiveText(options);
   const { terms } = strings;
@@ -198,7 +194,6 @@ export function progressRingTable(
       rows: [[p.subject || terms.progress, count(p.value), count(p.max), p.percentText]],
     },
     p.subject || p.alt,
-    display,
     strings,
   );
 }

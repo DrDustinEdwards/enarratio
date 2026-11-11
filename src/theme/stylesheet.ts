@@ -1,3 +1,4 @@
+import { ICONS } from "../controls.js";
 import { checkTheme } from "./check.js";
 import { labelColor } from "./color.js";
 import { LINE_DASHES } from "./dashes.js";
@@ -107,6 +108,14 @@ const SYMBOL_CLIPS = [
   "circle(50%)",
 ];
 
+/** Each toolbar icon as a mask: its path stroked on a 16-unit grid (record 0035). */
+const ICON_RULES = Object.entries(ICONS)
+  .map(([name, d]) => {
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='${d}'/></svg>`;
+    return `.enarratio-icon[data-icon="${name}"] { --enarratio-icon: url("data:image/svg+xml,${encodeURIComponent(svg)}"); }`;
+  })
+  .join("\n");
+
 /** Rules that do not depend on the theme: layout, legend, data table and the enhancement layer. */
 const BASE_RULES = `
 .enarratio {
@@ -163,19 +172,6 @@ svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; 
 }
 .enarratio-caption, .enarratio-note, .enarratio-source { color: var(--enarratio-text-muted); }
 .enarratio-source a { color: inherit; }
-/* The export and embed buttons beside the CSV link read as the link does (C3, C4). */
-.enarratio-source .enarratio-export {
-  min-height: 24px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-decoration: underline;
-  cursor: pointer;
-}
-.enarratio-data:not([open]) .enarratio-hide, .enarratio-data[open] .enarratio-show { display: none; }
 .enarratio-legend {
   display: flex;
   flex-wrap: wrap;
@@ -300,12 +296,7 @@ ${Array.from({ length: 5 }, (_, i) => {
 /* A table chart's wrapper is the one scroller (focusable, named); a host's table rule that makes the
    table scroll itself is overridden so there is one scroll region, not two. */
 .enarratio .enarratio-data.enarratio-table-chart { overflow-x: auto; }
-/* A data table behind "Show data" scrolls in its own focusable region (figure.ts), so a table wider
-   than the page never widens it; the host's rule that makes the table itself scroll is overridden. */
-.enarratio .enarratio-data > .enarratio-table { overflow-x: auto; }
-.enarratio .enarratio-data > .enarratio-table > table { display: table; overflow: visible; max-inline-size: none; }
 .enarratio .enarratio-data.enarratio-table-chart > table { display: table; overflow: visible; max-inline-size: none; margin-top: 0; }
-.enarratio-data summary { cursor: pointer; color: var(--enarratio-text-muted); }
 .enarratio-data table { border-collapse: collapse; margin-top: var(--enarratio-space, 0.5em); }
 .enarratio-data th, .enarratio-data td {
   padding: var(--enarratio-cell-padding, 0.2em 0.75em 0.2em 0);
@@ -332,6 +323,26 @@ ${Array.from({ length: 5 }, (_, i) => {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+/* The data table is for screen readers and AI agents (record 0035). A row header can be a link,
+   which a keyboard reaches: the table shows while focus is in it, so focus is never invisible
+   (WCAG 2.2 SC 2.4.7). */
+/* Hidden, the table never scrolls, whatever a host's table rule says: a 1-pixel box with a table
+   that scrolls inside it is a scroll region a keyboard cannot reach (axe
+   scrollable-region-focusable). */
+.enarratio-data.enarratio-visually-hidden > table {
+  display: table;
+  overflow: visible;
+  max-inline-size: none;
+}
+.enarratio-data.enarratio-visually-hidden:focus-within {
+  position: static !important;
+  width: auto;
+  height: auto;
+  margin: var(--enarratio-space, 0.5em) 0 0;
+  overflow-x: auto;
+  clip-path: none;
+  white-space: normal;
 }
 .enarratio-tooltip {
   position: absolute;
@@ -390,31 +401,134 @@ ${Array.from({ length: 5 }, (_, i) => {
   color: var(--enarratio-text-muted);
   font-size: var(--enarratio-font-size-small, 0.875em);
 }
+/* The toolbar above the drawing (record 0035): Sound, Range and Download, each an icon and a
+   word, on one row that never wraps. Its panels (the range form, the Download menu) open under
+   it, over the drawing, so opening one never moves the page. It is the container its narrow rule
+   measures, and sits above the frame so a panel paints over the chart. */
 .enarratio-controls {
+  position: relative;
+  z-index: var(--enarratio-z-controls, 2);
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--enarratio-gap-controls, 0.375em);
+  margin: var(--enarratio-space, 0.5em) 0;
+  font-size: var(--enarratio-font-size-small, 0.875em);
+  container-type: inline-size;
+}
+.enarratio-controls > :is(button, details) { flex: none; }
+.enarratio-controls > button, .enarratio-controls > details > summary {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--enarratio-gap-icon, 0.375em);
+  min-height: var(--enarratio-control-height, 2.25em);
+  padding: var(--enarratio-padding-control, 0.25em 0.75em);
+  border: var(--enarratio-border-width, 1px) solid var(--enarratio-grid);
+  border-radius: var(--enarratio-radius-control, 0.5em);
+  background: var(--enarratio-background);
+  color: inherit;
+  font: inherit;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  list-style: none;
+}
+.enarratio-controls > details > summary::-webkit-details-marker { display: none; }
+.enarratio-controls > button:hover, .enarratio-controls > details > summary:hover,
+.enarratio-controls > details[open] > summary, .enarratio-controls > button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--enarratio-text) 8%, var(--enarratio-background));
+}
+.enarratio-controls > button[aria-pressed="true"] { border-color: var(--enarratio-text-muted); }
+.enarratio-icon {
+  flex: none;
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background: currentColor;
+  mask: var(--enarratio-icon) center / contain no-repeat;
+}
+${ICON_RULES}
+/* The two panels: a card under the toolbar, as wide as its content and never wider. */
+.enarratio-panel {
+  position: absolute;
+  top: calc(100% + var(--enarratio-gap-controls, 0.375em));
+  left: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: var(--enarratio-padding-panel, 0.5em);
+  border: var(--enarratio-border-width, 1px) solid var(--enarratio-grid);
+  border-radius: var(--enarratio-radius-control, 0.5em);
+  background: var(--enarratio-background);
+  box-shadow: var(--enarratio-panel-shadow, 0 4px 16px rgb(0 0 0 / 15%));
+}
+.enarratio-range form {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: var(--enarratio-gap-row, 0.25em) var(--enarratio-gap-inline, 0.4em);
-  margin: var(--enarratio-space, 0.5em) 0 0;
-  font-size: var(--enarratio-font-size-small, 0.875em);
 }
-.enarratio-controls button, .enarratio-controls input, .enarratio-range summary {
-  min-height: 24px;
-  padding: var(--enarratio-padding-button, 0.125em 0.25em);
+/* The range panel is as wide as two date fields and its buttons, or the toolbar when narrower. */
+.enarratio-range > .enarratio-panel { inline-size: min(100%, 34em); }
+.enarratio-range label { display: grid; flex: 1 1 10em; gap: 0.25em; }
+.enarratio-range :is(input, button) {
+  box-sizing: border-box;
+  min-height: var(--enarratio-control-height, 2.25em);
+  padding: var(--enarratio-padding-control, 0.25em 0.75em);
   border: var(--enarratio-border-width, 1px) solid var(--enarratio-text-muted);
   border-radius: var(--enarratio-radius, 0.25em);
   background: var(--enarratio-background);
   color: inherit;
   font: inherit;
 }
-.enarratio-controls button, .enarratio-range summary { cursor: pointer; }
-.enarratio-range summary { width: fit-content; }
-.enarratio-range form {
+.enarratio-range input { inline-size: 100%; min-inline-size: 0; }
+.enarratio-range button { cursor: pointer; }
+.enarratio-menu { display: grid; min-inline-size: 12em; }
+.enarratio-menu > :is(a, button) {
+  box-sizing: border-box;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: var(--enarratio-gap-row, 0.25em) var(--enarratio-gap-inline, 0.4em);
-  margin-top: var(--enarratio-gap-row, 0.25em);
+  min-height: var(--enarratio-control-height, 2.25em);
+  margin: 0;
+  padding: var(--enarratio-padding-control, 0.25em 0.75em);
+  border: 0;
+  border-radius: var(--enarratio-radius, 0.25em);
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: 1.2;
+  text-align: start;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.enarratio-menu > :is(a, button):is(:hover, :focus-visible) {
+  background: color-mix(in srgb, var(--enarratio-text) 8%, var(--enarratio-background));
+}
+/* Narrow containers keep the one row, in steps: the buttons tighten; then Download shows its icon
+   and chevron without its word; then, so narrow that even that does not fit (200% text), every
+   control shows its icon alone. A hidden word stays as screen-reader text, so every name stays.
+   The thresholds are where three and four controls stop fitting (Sound, Range, Download, and
+   Expand); a container query cannot read a custom property. */
+@container (width < 23em) {
+  .enarratio-controls:not(:has(> :nth-child(4))) { gap: 0.25em; }
+  .enarratio-controls:not(:has(> :nth-child(4))) > :is(button, details > summary) { padding-inline: 0.5em; }
+}
+@container (width < 21.75em) {
+  .enarratio-controls:not(:has(> :nth-child(4))) > .enarratio-download .enarratio-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+@container (width < 17.25em) {
+  .enarratio-controls:not(:has(> :nth-child(4))) .enarratio-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+@container (width < 30em) {
+  .enarratio-controls:has(> :nth-child(4)) { gap: 0.25em; }
+  .enarratio-controls:has(> :nth-child(4)) > :is(button, details > summary) { padding-inline: 0.5em; }
+}
+@container (width < 26.75em) {
+  .enarratio-controls:has(> :nth-child(4)) > .enarratio-download .enarratio-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+@container (width < 22.25em) {
+  .enarratio-controls:has(> :nth-child(4)) .enarratio-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
 .enarratio-legend button { min-height: 24px; }
 .enarratio-legend button { box-sizing: border-box; }
@@ -436,8 +550,6 @@ ${Array.from({ length: 5 }, (_, i) => {
 }
 .enarratio-data th[aria-sort="ascending"] button::after { content: " \\2191" / ""; }
 .enarratio-data th[aria-sort="descending"] button::after { content: " \\2193" / ""; }
-.enarratio[data-enarratio-view-table] > :is(.enarratio-legend, .enarratio-frame, .enarratio-hint),
-.enarratio[data-enarratio-view-table] .enarratio-range { display: none; }
 .enarratio[data-enarratio-expanded] {
   position: fixed;
   inset: 0;
@@ -448,9 +560,9 @@ ${Array.from({ length: 5 }, (_, i) => {
 }
 /* Invisible targets that make small marks at least 24 CSS pixels to point at. */
 .enarratio-hit { fill: transparent; stroke: none; }
-.enarratio svg:focus-visible, .enarratio button:focus-visible, .enarratio-range summary:focus-visible,
-.enarratio-controls input:focus-visible, .enarratio-frame:focus-visible, .enarratio-table:focus-visible,
-.enarratio-table-chart:focus-visible, .enarratio-data summary:focus-visible {
+.enarratio svg:focus-visible, .enarratio button:focus-visible, .enarratio-controls summary:focus-visible,
+.enarratio-controls :is(a, input):focus-visible, .enarratio-frame:focus-visible,
+.enarratio-table-chart:focus-visible, .enarratio-data a:focus-visible {
   outline: var(--enarratio-focus-outline-width, 3px) solid var(--enarratio-focus);
   outline-offset: var(--enarratio-focus-outline-offset, 2px);
 }
@@ -530,6 +642,10 @@ ${Array.from({ length: 5 }, (_, i) => {
    sequential ramp becomes steps between Canvas and CanvasText. Set on the drawing and legend
    themselves, so they win over a theme or a per-chart override set on the figure (B57, D3). */
 @media (forced-colors: active) {
+  /* A mask paints its background, which forced colors would make Canvas: the icon keeps the
+     button's text color, and a pressed toggle shows by its Highlight border. */
+  .enarratio-icon { forced-color-adjust: none; background: ButtonText; }
+  .enarratio-controls > button[aria-pressed="true"] { border: 2px solid Highlight; }
   .enarratio svg, svg.enarratio { forced-color-adjust: none; }
   .enarratio svg, svg.enarratio, .enarratio-legend, .enarratio-tooltip {
     --enarratio-background: Canvas;
@@ -564,15 +680,14 @@ ${LINE_DASHES.map(
     `  .enarratio-legend[data-enarratio-legend="line"] [data-slot="${i + 2}"] .enarratio-swatch { background: ${dashGradient(dash)}; }`,
 ).join("\n")}
 }
-/* Print: the light scheme, the whole drawing on one page, the data table open and no
-   interactive overlays (C5). */
+/* Print: the light scheme, the whole drawing on one page, and no toolbar or interactive overlays
+   (C5). */
 @media print {
   .enarratio, .enarratio-tooltip { color-scheme: light; }
   .enarratio { break-inside: avoid; }
   .enarratio-frame { overflow: visible; background: none; }
   .enarratio-frame-wide > svg { min-width: 0; }
-  .enarratio-data::details-content { content-visibility: visible; block-size: auto; }
-  .enarratio-tooltip, .enarratio-brush, .enarratio [data-enarratio-control], .enarratio-export {
+  .enarratio-tooltip, .enarratio-brush, .enarratio [data-enarratio-control], .enarratio-controls {
     display: none !important;
   }
 }

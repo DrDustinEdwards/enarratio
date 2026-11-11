@@ -170,11 +170,11 @@ changes, at the height the server's drawing showed at that width, then enhanced.
 carries the layer's controls ahead of it, inert (the `controls` option), so neither step moves the
 page. A page that swaps in its own narrow drawings (`narrowChart`) draws them at the
 height the wide drawing shows on a phone (docs/api.md, `narrowChart`); one that enhances with
-`expand: true` writes Expand into the pending controls, as the gallery does.
+`expand: true` writes Expand into the toolbar before Download, as the gallery does.
 
 Without a bundler, serve `node_modules/enarratio/dist/enhance/index.js` as a
 file, with `sound.js` and `image.js` from the same folder beside it (index.js
-imports the first only when a reader presses "Play as sound", the second on the
+imports the first only when a reader presses Sound, the second on the
 first download), and load it with
 `<script type="module">import { enhance } from "/enhance.js"; enhance();</script>`,
 or from a CDN such as
@@ -343,8 +343,8 @@ and edited.
   every issue (no alt or title, an unlabeled axis, too many series or points,
   a CSV too large to inline) into an error that fails the build.
 - Numbers, dates and every generated string follow `locale` and `strings`.
-- Every chart carries an equivalent data table, in a disclosure or visually
-  hidden.
+- Every chart carries an equivalent data table, visually hidden right after the
+  drawing, for screen readers and AI agents.
 - Every mark has hover details that work without script, through SVG `<title>`.
 - Series are distinguished by more than hue: textures on filled bars and
   areas, legends and direct labels (moved apart so they never overlap),
@@ -357,11 +357,12 @@ and edited.
 - A chart's drawing is one named image (`role="img"`), enhanced or not; the
   enhancement layer's points sit beside it, in their own `role="application"`
   layer ([record 0027](docs/design/0027-contrast-export-and-roles.md)).
-- Enhanced charts add "Download SVG", "Download PNG", "Download tactile SVG"
-  (black on white on an 11 by 11.5 inch page, for a braille embosser or swell
-  paper) and, for a figure with an `id`, "Copy embed" (a link to the chart)
-  beside "Download CSV", and "Play as sound", which plays each series as rising
-  and falling notes.
+- One toolbar above the drawing holds Sound (each series as rising and falling
+  notes), Range and a Download menu, each an icon and a word on one row. The
+  menu has "Download CSV", which works without script, and on enhanced charts
+  "Download SVG", "Download PNG", "Download tactile SVG" (black on white on an
+  11 by 11.5 inch page, for a braille embosser or swell paper) and, for a
+  figure with an `id`, "Copy embed" (a link to the chart).
 - Maps take no boundaries from Enarratio: you pass GeoJSON, and each map has a
   summary, a data table and a keyboard walk from north to south, and never
   shows a value by color alone.

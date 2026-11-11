@@ -7,6 +7,27 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-11
+
+### Changed
+
+- One toolbar above the drawing, under the head: Sound, Range and Download, each an icon and a word, on one row that never wraps, phones included ([record 0035](docs/design/0035-chart-toolbar.md)). It is a WAI-ARIA toolbar with one tab stop and arrow keys. Range opens its From and To form, and Download opens a menu with "Download CSV" first, then "Download SVG", "Download PNG", "Download tactile SVG" and "Copy embed", in panels over the chart that never move the page. Escape, a click outside or focus leaving closes them. On a narrower phone the buttons tighten and Download drops its word (icon and chevron stay); at 200% text every control shows its icon alone. A hidden word stays as screen-reader text.
+- The data table is visually hidden, always, right after the drawing, for screen readers and AI agents. Sighted readers get the values from hover and focus details, the summary and "Download CSV". If a row header is a link, the table shows while focus is in it.
+- Sound and Expand are toggles with `aria-pressed` and a name that stays the same ("Sound", "Expand"), not "Play as sound" and "Stop sound" or "Close expanded view".
+- "Download CSV" moved from the source line into the toolbar's Download menu, a native disclosure, so it still works without script. The source line holds only the source and byline.
+- The `table` enhance option sorts a table chart's table; the hidden table gets no sort buttons.
+- `npm run size` holds the enhancement layer to 10 kB (was 9.5 kB): the toolbar brings it to 9.6 kB (record 0035).
+
+### Removed
+
+- The `dataTable` option, and with it the "Show data" disclosure: the strings `showData` and `hideData`.
+- The "Show table" switch: the strings `showTable` and `showChart`. Also `play`, `stop` and `collapse`; the new strings are `controls`, `sound` and `download`, and `range` is now "Range".
+- `PrimitiveTableOptions`, the companions' second argument; `dataTableBlock` takes only the table and its caption.
+
+### Fixed
+
+- `update()` keeps the "Download CSV" link's `data:text/csv` address; its sanitizer used to drop it.
+
 ## [0.10.0] - 2026-11-07
 
 ### Added

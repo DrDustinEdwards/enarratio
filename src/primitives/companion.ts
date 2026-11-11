@@ -1,15 +1,6 @@
 import { type DataTable, dataTableBlock, type FigureOptions, figure } from "../render/figure.js";
 import { numberFormat, type Strings, stringsFor } from "../render/text.js";
 
-/** Options for the companion functions (`sparklineTable` and the rest). */
-export interface PrimitiveTableOptions {
-  /**
-   * How `markup` shows the table: in a closed disclosure (default), or only to assistive
-   * technology. As on a figure.
-   */
-  readonly dataTable?: "details" | "visually-hidden";
-}
-
 /**
  * What a primitive's companion function returns: its numbers as a table and as a sentence, both
  * computed from the same values as the drawing, so neither can disagree with it.
@@ -19,7 +10,10 @@ export interface PrimitiveTable {
   readonly summary: string;
   /** The values as rows and columns; the first column holds row headers. */
   readonly table: DataTable;
-  /** The table as markup, in a disclosure or visually hidden, ready to put beside the primitive. */
+  /**
+   * The table as markup, visually hidden for screen readers and AI agents, ready to put beside
+   * the primitive (record 0035).
+   */
   readonly markup: string;
 }
 
@@ -28,14 +22,9 @@ export function primitiveTable(
   summary: string,
   table: DataTable,
   caption: string,
-  options: PrimitiveTableOptions | undefined,
   strings: Strings,
 ): PrimitiveTable {
-  return {
-    summary,
-    table,
-    markup: dataTableBlock(table, strings.dataFor(caption), options?.dataTable, strings),
-  };
+  return { summary, table, markup: dataTableBlock(table, strings.dataFor(caption)) };
 }
 
 /** A primitive's strings and number formats: its `strings` and `locale`, as on a chart. */
@@ -69,7 +58,6 @@ export interface PrimitiveFigureOptions extends Pick<
   | "csv"
   | "csvHref"
   | "id"
-  | "dataTable"
   | "locale"
   | "lang"
   | "strings"

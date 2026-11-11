@@ -1,7 +1,7 @@
 /**
- * Saving the drawing (C3, and tactile, B55) and copying a snippet that points at the chart (C4).
- * Buttons beside the "Download CSV" link, or in the control bar when the figure has none. The
- * files are made by ./image.js, which loads on the first press.
+ * Saving the drawing (C3, and tactile, B55) and copying a snippet that points at the chart (C4):
+ * items in the toolbar's Download menu, after "Download CSV" (record 0035). The files are made by
+ * ./image.js, which loads on the first press.
  */
 
 import { escapeHtml } from "../html.js";
@@ -16,21 +16,15 @@ function save(blob: Blob, file: string): void {
   setTimeout(() => URL.revokeObjectURL(a.href), 0);
 }
 
-/**
- * The export and embed buttons for one figure, placed beside its CSV link or appended to `bar`.
- * Returns the undo.
- */
-export function exportControls(
+/** The export and embed buttons for one figure, for its Download menu. */
+export function exportButtons(
   figure: HTMLElement,
   svg: SVGSVGElement,
   options: { readonly download: boolean; readonly tactile: boolean; readonly embed: boolean },
   strings: EnhanceStrings,
-  bar: HTMLElement,
   announce: (message: string) => void,
-): () => void {
+): HTMLButtonElement[] {
   const csv = figure.querySelector<HTMLAnchorElement>(".enarratio-csv");
-  // The server's inert copies of these buttons (figure.ts), replaced by the working ones.
-  csv?.parentElement?.querySelector(":scope > [data-enarratio-pending]")?.remove();
   const base = (
     csv?.getAttribute("download") ??
     figure.getAttribute("data-enarratio") ??
@@ -75,12 +69,5 @@ export function exportControls(
       }),
     );
   }
-  // Beside the CSV link, as links read, or in the control bar when the figure has none.
-  const added = csv ? buttons.flatMap((b) => [document.createTextNode(" · "), b]) : buttons;
-  for (const b of buttons) if (csv) b.className = "enarratio-export";
-  if (csv) csv.after(...added);
-  else bar.append(...added);
-  return () => {
-    for (const node of added) node.parentNode?.removeChild(node);
-  };
+  return buttons;
 }

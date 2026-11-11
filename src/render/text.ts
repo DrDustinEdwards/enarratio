@@ -182,9 +182,6 @@ export interface LogisticStatement {
  * them; the rest stay English. Functions take values already formatted for the locale.
  */
 export interface Strings {
-  /** The data disclosure's label while closed and open. */
-  readonly showData: string;
-  readonly hideData: string;
   /** The data table's accessible caption. */
   readonly dataFor: (name: string) => string;
   /** The name of a wide chart's scrolling frame. */
@@ -359,8 +356,6 @@ const plural = (n: string, one: string, many: string): string => `${n} ${n === "
 
 /** The English strings, the default. */
 export const ENGLISH: Strings = {
-  showData: "Show data",
-  hideData: "Hide data",
   dataFor: (name) => `Data for: ${name}`,
   scrollsSideways: (name) => `${name}, scrolls sideways`,
   chart: "Chart",

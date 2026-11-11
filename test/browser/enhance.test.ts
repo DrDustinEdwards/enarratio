@@ -139,55 +139,107 @@ describe("enhance: stacked bar", () => {
   });
 });
 
-describe("enhance: table, view switch, expand and address", () => {
-  it("sorts the table by a column, and switches between chart and table", async () => {
+describe("enhance: toolbar, expand and address", () => {
+  it("keeps the toolbar on one row above the chart, with the table hidden for screen readers", async () => {
     const p = await harness.open("index.html", "light");
-    const button = (text: string): Promise<void> =>
-      p.$$eval(
-        `${STACKED} .enarratio-controls button`,
-        (els, t) => (els.find((el) => el.textContent === t) as HTMLElement).click(),
-        text,
-      );
-    const years = (): Promise<(string | null)[]> =>
-      p.$$eval(`${STACKED} .enarratio-data tbody th`, (els) => els.map((el) => el.textContent));
-    expect(await years()).toEqual(["2019", "2020", "2021", "2022", "2023", "2024"]);
-    await button("Show table");
-    const shown = await p.$eval(`${STACKED} figure`, (f) => [
-      getComputedStyle(f.querySelector(".enarratio-frame") as Element).display,
-      (f.querySelector(".enarratio-data") as HTMLDetailsElement).open,
+    const bar = `${STACKED} .enarratio-controls`;
+    const row = (): Promise<{ names: string[]; tops: number[]; fits: boolean; above: boolean }> =>
+      p.$eval(bar, (el) => {
+        const controls = [...el.children].map(
+          (c) => (c.localName === "details" ? c.querySelector("summary") : c) as HTMLElement,
+        );
+        const frame = el.parentElement?.querySelector(".enarratio-frame") as HTMLElement;
+        return {
+          names: controls.map((c) => c.textContent ?? ""),
+          tops: controls.map((c) => Math.round(c.getBoundingClientRect().top)),
+          fits: el.scrollWidth <= el.clientWidth,
+          above: el.getBoundingClientRect().bottom <= frame.getBoundingClientRect().top,
+        };
+      });
+    const wide = await row();
+    expect(wide.names).toEqual(["Sound", "Expand", "Download"]);
+    expect(new Set(wide.tops).size).toBe(1);
+    expect(wide).toMatchObject({ fits: true, above: true });
+    expect(await p.$eval(bar, (el) => el.getAttribute("role"))).toBe("toolbar");
+    // A phone: still one row, every control still named.
+    await p.setViewport({ width: 320, height: 800 });
+    const narrow = await row();
+    expect(new Set(narrow.tops).size).toBe(1);
+    expect(narrow.fits).toBe(true);
+    expect(narrow.names).toEqual(wide.names);
+    await p.setViewport({ width: 800, height: 900 });
+    // The data table is in the page, read by screen readers, and takes no space.
+    const table = await p.$eval(`${STACKED} .enarratio-data`, (el) => [
+      el.classList.contains("enarratio-visually-hidden"),
+      el.getBoundingClientRect().height,
+      el.querySelectorAll("tbody tr").length,
+      el.querySelectorAll("th button").length,
     ]);
-    expect(shown).toEqual(["none", true]);
-    const publications = `${STACKED} .enarratio-data thead th:nth-child(2)`;
-    await p.click(`${publications} button`);
-    expect(await p.$eval(publications, (th) => th.getAttribute("aria-sort"))).toBe("ascending");
-    expect(await years()).toEqual(["2019", "2020", "2023", "2021", "2022", "2024"]);
-    await p.click(`${publications} button`);
-    expect(await years()).toEqual(["2024", "2022", "2021", "2020", "2023", "2019"]);
-    expect(await liveText(p, STACKED)).toBe("Sorted by Publications, descending");
-    await button("Show chart");
-    expect(await p.$eval(`${STACKED} .enarratio-data`, (d) => (d as HTMLDetailsElement).open)).toBe(
-      false,
+    expect(table).toEqual([true, 1, 6, 0]);
+    await p.close();
+  });
+
+  it("moves along the toolbar by arrows and opens the Download menu with CSV first", async () => {
+    const p = await harness.open("index.html", "light");
+    const bar = `${STACKED} .enarratio-controls`;
+    const active = (): Promise<string> =>
+      p.evaluate(() => document.activeElement?.textContent ?? "");
+    const stops = (): Promise<number> => p.$$eval(`${bar} [tabindex="0"]`, (els) => els.length);
+    expect(await stops()).toBe(1);
+    await p.focus(`${bar} [tabindex="0"]`);
+    expect(await active()).toBe("Sound");
+    await p.keyboard.press("End");
+    expect(await active()).toBe("Download");
+    await p.keyboard.press("ArrowRight");
+    expect(await active()).toBe("Sound");
+    await p.keyboard.press("ArrowLeft");
+    expect(await stops()).toBe(1);
+    await p.keyboard.press("ArrowDown");
+    expect(await active()).toBe("Download CSV");
+    const items = await p.$$eval(`${bar} .enarratio-menu > *`, (els) =>
+      els.map((el) => el.textContent),
     );
-    // The gallery turns expand on: Escape closes it.
-    await button("Expand");
+    expect(items).toEqual([
+      "Download CSV",
+      "Download SVG",
+      "Download PNG",
+      "Download tactile SVG",
+      "Copy embed",
+    ]);
+    await p.keyboard.press("ArrowUp");
+    expect(await active()).toBe("Copy embed");
+    // Escape closes the menu, focus back on its button, and the page did not move.
+    await p.keyboard.press("Escape");
+    expect(await p.$(`${bar} details[open]`)).toBeNull();
+    expect(await active()).toBe("Download");
+    await p.close();
+  });
+
+  it("toggles Expand with aria-pressed and a name that stays the same", async () => {
+    const p = await harness.open("index.html", "light");
+    const expand = `${STACKED} .enarratio-controls button:nth-child(2)`;
+    await p.click(expand);
     expect(await p.$eval(`${STACKED} figure`, (f) => getComputedStyle(f).position)).toBe("fixed");
+    expect(await p.$eval(expand, (b) => [b.textContent, b.getAttribute("aria-pressed")])).toEqual([
+      "Expand",
+      "true",
+    ]);
     await p.keyboard.press("Escape");
     expect(await p.$(`${STACKED} [data-enarratio-expanded]`)).toBeNull();
+    expect(await p.$eval(expand, (b) => b.getAttribute("aria-pressed"))).toBe("false");
     await p.close();
   });
 
   it("plays each series as sound, the tooltip following, and stops on Escape", async () => {
     const p = await harness.open("index.html", "light");
-    const controls = `${STACKED} .enarratio-controls button`;
-    const labels = (): Promise<string> =>
-      p.$$eval(controls, (els) => els.map((el) => el.textContent).join("|"));
-    await p.$$eval(controls, (els) =>
-      (els.find((el) => el.textContent === "Play as sound") as HTMLElement).click(),
-    );
+    const sound = `${STACKED} .enarratio-controls button:first-child`;
+    const pressed = (): Promise<string | null> =>
+      p.$eval(sound, (b) => b.getAttribute("aria-pressed"));
+    await p.click(sound);
     await p.waitForFunction(
-      (sel) => [...document.querySelectorAll(sel)].some((b) => b.textContent === "Stop sound"),
+      (sel) => document.querySelector(sel)?.getAttribute("aria-pressed") === "true",
       {},
-      controls,
+      sound,
     );
     // Each series is named as it starts; the first starts a moment after the press.
     await p.waitForFunction(
@@ -197,7 +249,8 @@ describe("enhance: table, view switch, expand and address", () => {
     );
     await p.waitForSelector(".enarratio-tooltip:not([hidden])");
     await p.keyboard.press("Escape");
-    expect(await labels()).toBe("Show table|Expand|Play as sound");
+    expect(await pressed()).toBe("false");
+    expect(await p.$eval(sound, (b) => b.textContent)).toBe("Sound");
     await p.close();
   });
 
@@ -247,11 +300,13 @@ describe("enhance: table, view switch, expand and address", () => {
     await p.close();
   });
 
-  it("sorts a table chart's one table, with no chart and table switch", async () => {
+  it("sorts a table chart's one table, its toolbar holding only Expand and Download", async () => {
     const p = await harness.open("index.html", "light");
     const TABLE = '[data-example="table-chart"]';
     const first = `${TABLE} .enarratio-data thead th:nth-child(2)`;
-    expect(await p.$(`${TABLE} .enarratio-controls`)).toBeNull();
+    expect(
+      await p.$$eval(`${TABLE} .enarratio-controls > *`, (els) => els.map((el) => el.textContent)),
+    ).toEqual(["Expand", "DownloadDownload CSV"]);
     await p.click(`${first} button`);
     expect(await p.$eval(first, (th) => th.getAttribute("aria-sort"))).toBe("ascending");
     expect(await liveText(p, TABLE)).toMatch(/^Sorted by /);
