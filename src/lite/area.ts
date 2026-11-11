@@ -88,8 +88,12 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
   const { x, y, frame } = layout;
 
   // Annotations from the same scales Plot's are placed with: ranges behind the marks, notes last.
-  const notes = annotationMarkup("areaChart", options.annotations, (axis) =>
-    continuousScale(axis === "x" ? x : y),
+  const notes = annotationMarkup(
+    "areaChart",
+    options.annotations,
+    (axis) => continuousScale(axis === "x" ? x : y),
+    false,
+    frame.width,
   );
   const parts = [
     layout.axes,

@@ -21,7 +21,7 @@ import {
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
-import { DEFAULT_WIDTH } from "../render/size.js";
+import { DEFAULT_WIDTH, slotLabel } from "../render/size.js";
 import { numberFormat, type Strings, stringsFor, valueFormat } from "../render/text.js";
 import { type Annotated, drawAnnotations, withNotes } from "./annotate.js";
 import { named } from "./marks.js";
@@ -223,7 +223,8 @@ export function frame(r: Read): Plot.PlotOptions {
       type: "linear",
       domain: [-0.5, r.groups.length - 0.5],
       ticks: r.groups.map((_, i) => i),
-      tickFormat: (i: number) => r.groups[i] ?? "",
+      // A name wider than its group's slot wraps (record 0041).
+      tickFormat: (i: number) => slotLabel(r.groups[i] ?? "", pixels(r).perGroup, r.width),
       label: r.xLabel,
     },
     y: {

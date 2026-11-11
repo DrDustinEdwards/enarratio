@@ -4,7 +4,7 @@ import { type KeysOfType, markKey, readLabel, readNumber } from "../render/data.
 import { datumAttributes } from "../render/datum.js";
 import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
 import { planSeries } from "../render/series.js";
-import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
+import { charWidth, cutText, DEFAULT_HEIGHT, DEFAULT_WIDTH, textGrowth } from "../render/size.js";
 import { numberFormat, stringsFor, valueFormat } from "../render/text.js";
 
 /** Options for {@link pieChart}. */
@@ -106,11 +106,21 @@ export function pieChart<T extends object>(options: PieChartOptions<T>): string 
 
   const width = options.width ?? DEFAULT_WIDTH;
   const height = options.height ?? DEFAULT_HEIGHT;
-  const cx = width / 2;
-  const cy = height / 2;
+  const char = charWidth(width);
+  const labelText = (s: Slice): string => `${s.name} ${percent(s.share)}`;
   // Room beside the pie for the longest label, at about 7 pixels a character.
-  const room = Math.max(...slices.map((s) => `${s.name} ${percent(s.share)}`.length)) * 7 + 36;
-  const outer = Math.max(20, Math.min(height / 2 - 24, width / 2 - room));
+  const room = Math.max(...slices.map((s) => labelText(s).length)) * 7 + 36;
+  // Where the labels beside the pie would leave it under 40 units across (a phone's drawing), they
+  // are listed under it instead, each with a swatch of its slice's color, in the slices' clockwise
+  // order from 12 o'clock (record 0041).
+  const listed = width / 2 - room < 40;
+  const line = 16 * textGrowth(width);
+  const listHeight = listed ? slices.length * line + 12 : 0;
+  const cx = width / 2;
+  const cy = listed ? 8 + Math.min((width - 16) / 2, (height - listHeight - 16) / 2) : height / 2;
+  const outer = listed
+    ? Math.max(20, cy - 8)
+    : Math.max(20, Math.min(height / 2 - 24, width / 2 - room));
   const inner = options.donut ? outer * 0.58 : 0;
   const describe = (s: Slice): string => `${s.name}: ${format(s.value)} (${percent(s.share)})`;
 
@@ -154,23 +164,46 @@ export function pieChart<T extends object>(options: PieChartOptions<T>): string 
       height - 10,
     );
   }
-  const labels = placed
-    .map((p) => {
-      const tx = p.right ? cx + outer + 24 : cx - outer - 24;
-      return [
-        el("path", {
-          d: `M${n2(p.ax)},${n2(p.ay)}L${n2(p.bx)},${n2(p.by)}L${n2(tx + (p.right ? -4 : 4))},${n2(p.y)}`,
-          fill: "none",
-          stroke: "var(--enarratio-text-muted)",
-        }),
-        el(
-          "text",
-          { x: n2(tx), y: n2(p.y), dy: "0.32em", "text-anchor": p.right ? "start" : "end" },
-          text(`${p.s.name} ${percent(p.s.share)}`),
-        ),
-      ].join("");
-    })
-    .join("");
+  const listRoom = Math.max(4, Math.floor((width - 16 - 18) / char));
+  const listTop = cy + outer + 12;
+  const labels = listed
+    ? slices
+        .map((s, i) => {
+          const y = listTop + i * line + line / 2;
+          return [
+            el("rect", {
+              x: 8,
+              y: n2(y - 5),
+              width: 10,
+              height: 10,
+              rx: 2,
+              fill: plan.range[s.index],
+            }),
+            el(
+              "text",
+              { x: 26, y: n2(y), dy: "0.32em", "text-anchor": "start" },
+              text(cutText(labelText(s), listRoom)),
+            ),
+          ].join("");
+        })
+        .join("")
+    : placed
+        .map((p) => {
+          const tx = p.right ? cx + outer + 24 : cx - outer - 24;
+          return [
+            el("path", {
+              d: `M${n2(p.ax)},${n2(p.ay)}L${n2(p.bx)},${n2(p.by)}L${n2(tx + (p.right ? -4 : 4))},${n2(p.y)}`,
+              fill: "none",
+              stroke: "var(--enarratio-text-muted)",
+            }),
+            el(
+              "text",
+              { x: n2(tx), y: n2(p.y), dy: "0.32em", "text-anchor": p.right ? "start" : "end" },
+              text(labelText(p.s)),
+            ),
+          ].join("");
+        })
+        .join("");
   // The center label sits on the hole, painted in the background color, with a halo of it where
   // the label is wider than the hole, so it is read, and measured, against the background (B1).
   const center =

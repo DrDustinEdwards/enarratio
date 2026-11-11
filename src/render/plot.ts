@@ -10,7 +10,17 @@ import { escapeHtml } from "../html.js";
 import { roundNumbers } from "../lite/svg.js";
 import { datumAttributes, type MarkDatum } from "./datum.js";
 import type { ScaleDescription } from "./figure.js";
-import { bottomMargin, leftMargin, markFontSize, TITLE_LINES, topMargin } from "./size.js";
+import {
+  bottomMargin,
+  cutText,
+  fitTitle,
+  leftMargin,
+  markFontSize,
+  TITLE_LEADING,
+  TITLE_LINES,
+  titleLines,
+  topMargin,
+} from "./size.js";
 
 export type { MarkDatum } from "./datum.js";
 
@@ -197,6 +207,64 @@ function placeXTitle(svg: Element): void {
 }
 
 /**
+ * One tick per 50 units asked of a numeric x axis on a plot under 200 across (a phone's), where
+ * Plot's one per 80 pixels prints one or two (record 0041). A chart that sets its own ticks keeps them.
+ */
+function narrowTicks(options: Plot.PlotOptions): Plot.PlotOptions {
+  const x = options.x as Record<string, unknown> | undefined;
+  const width = options.width ?? 640;
+  const left = typeof options.marginLeft === "number" ? options.marginLeft : 40;
+  const right = typeof options.marginRight === "number" ? options.marginRight : 20;
+  if (!x || x["ticks"] !== undefined || x["axis"] === null || width - left - right >= 200) {
+    return options;
+  }
+  if (x["type"] !== undefined && x["type"] !== "linear" && x["type"] !== "log") return options;
+  const ticks = Math.max(1, Math.floor((width - left - right) / 50));
+  return { ...options, x: { ...x, ticks } } as Plot.PlotOptions;
+}
+
+/** The x axis title's text element, when it is one line Plot drew (not a facet's, not wrapped). */
+function xTitleText(svg: Element): Element | undefined {
+  const title = svg.querySelector('[aria-label="x-axis label"] text');
+  return title && !title.querySelector("tspan") ? title : undefined;
+}
+
+/**
+ * Fits the x axis title to the drawing (fitTitle, record 0041): moved toward the middle of the
+ * drawing, or wrapped onto `most` lines, the last cut short if it still does not fit.
+ */
+function fitXTitle(svg: Element, width: number, most: number): void {
+  const title = xTitleText(svg);
+  if (!title) return;
+  const transform = title.getAttribute("transform") ?? "";
+  const at = /translate\(([^,]+),([^)]+)\)/.exec(transform);
+  if (!at) return;
+  const fit = fitTitle(title.textContent ?? "", Number(at[1]), width);
+  const lines =
+    fit.lines.length > most
+      ? [cutText(title.textContent ?? "", fit.lines[0]?.length ?? 0)]
+      : [...fit.lines];
+  title.setAttribute("transform", `translate(${Math.round(fit.x * 100) / 100},${at[2]})`);
+  if (lines.length === 1) {
+    title.textContent = lines[0] ?? "";
+    return;
+  }
+  const doc = title.ownerDocument;
+  title.textContent = "";
+  // Where Plot placed the title (at the foot of the bottom margin, not under the ticks), the lines
+  // start one line higher, so the last sits where the one line did.
+  const placed = title.hasAttribute("y");
+  lines.forEach((line, i) => {
+    const span = doc.createElementNS("http://www.w3.org/2000/svg", "tspan");
+    span.setAttribute("x", "0");
+    if (i > 0) span.setAttribute("dy", `${TITLE_LEADING}em`);
+    else if (!placed) span.setAttribute("dy", `${-TITLE_LEADING * (lines.length - 1)}em`);
+    span.textContent = line;
+    title.append(span);
+  });
+}
+
+/**
  * Draws a Plot specification into SVG markup named by `alt`: one image (record 0027). Throws if Plot warns, because a warning means the chart shown would not be the
  * chart intended.
  */
@@ -209,7 +277,7 @@ export function renderPlot(
   const document = createDocument();
   const draw = (o: Plot.PlotOptions) =>
     Plot.plot({ ...niceToTicks(o), document }) as unknown as SVGSVGElement & Plot.Plot;
-  let fitted = quietAxes(options);
+  let fitted = quietAxes(narrowTicks(options));
   let svg = draw(fitted);
   // Axis labels and titles that would overlap at a narrow width get the margins they need, as
   // the light charts compute them: the top for the y title, then the bottom, since it sets the y
@@ -224,10 +292,13 @@ export function renderPlot(
     fitted = { ...fitted, marginTop: top };
     svg = draw(fitted);
   }
+  // An x title too long for the drawing wraps onto a second line (record 0041), which the bottom
+  // margin makes room for.
+  const xLines = titleLines(xTitleText(svg)?.textContent, width);
   if (typeof options.marginBottom === "number") {
     const title = svg.querySelector('[aria-label$="x-axis label"]') !== null;
     const lines = tickLines(svg);
-    const needed = bottomMargin(options.marginBottom, title, width, lines);
+    const needed = bottomMargin(options.marginBottom, title, width, lines, xLines);
     if (needed > options.marginBottom) {
       fitted = { ...fitted, marginBottom: needed };
       svg = draw(fitted);
@@ -245,6 +316,7 @@ export function renderPlot(
   }
 
   placeXTitle(svg);
+  fitXTitle(svg, width, typeof options.marginBottom === "number" ? xLines : 1);
 
   // Plot's warning is its own node: a top-level <text> whose <title> counts the warnings. Found by
   // that structure, not by the glyph, which data may contain (F13).

@@ -22,7 +22,7 @@ import { texture } from "../render/texture.js";
 import type { KeysOfType } from "../render/data.js";
 import { spreadLabels } from "../render/direct-labels.js";
 import { keyed, renderPlot } from "../render/plot.js";
-import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
+import { DEFAULT_HEIGHT, DEFAULT_WIDTH, monthTicks } from "../render/size.js";
 import { named } from "./marks.js";
 import { drawAnnotations } from "./annotate.js";
 
@@ -34,6 +34,17 @@ export type {
   ReferenceLine,
   SeriesChartOptions,
 } from "../render/line-model.js";
+
+/**
+ * A halo in the background color under rule labels, so a line or point under one does not cut
+ * through it (record 0041). The light charts draw the same.
+ */
+const HALO = {
+  fill: "currentColor",
+  stroke: "var(--enarratio-background)",
+  strokeWidth: 3,
+  paintOrder: "stroke",
+} as const;
 
 function annotations(
   options: Pick<SeriesChartOptions<object>, "references">,
@@ -50,13 +61,21 @@ function annotations(
         frameAnchor: "right",
         textAnchor: "end",
         dy: -6,
+        ...HALO,
       }),
     );
   }
   if (markers.length > 0) {
     marks.push(
       Plot.ruleX(markers, { x: "x", strokeDasharray: "2,3" }),
-      Plot.text(markers, { x: "x", text: "label", frameAnchor: "top", textAnchor: "start", dx: 4 }),
+      Plot.text(markers, {
+        x: "x",
+        text: "label",
+        frameAnchor: "top",
+        textAnchor: "start",
+        dx: 4,
+        ...HALO,
+      }),
     );
   }
   return marks;
@@ -82,7 +101,13 @@ function xScale(model: SeriesModel, width: number, plotWidth: number) {
     const fitted = fitTicks(days, () => "Jun 07", width, plotWidth, maxXTicks);
     return { ...base, ticks: fitted.map((t) => new Date(t)) };
   }
-  // Plot's own ticks come about one per 80 pixels; a limit lowers the count.
+  // Plot's own ticks come about one per 80 pixels; a limit lowers the count. A plot under 240
+  // across (a phone's) asks for three, which Plot's one per 80 would cut to one or two labels
+  // (record 0041).
+  const ats = prepared.points.map((p) => p.at);
+  const months = prepared.time ? monthTicks(ats, width, plotWidth, maxXTicks) : null;
+  // maxXTicks stays the most labels to print (record 0040).
+  if (months) return { ...base, ticks: months.map((t) => new Date(t)) };
   return maxXTicks === undefined ? base : { ...base, ticks: Math.min(maxXTicks, plotWidth / 80) };
 }
 
@@ -99,7 +124,14 @@ function forecastRule(at: number | Date, label: string): Plot.Markish[] {
   const rule = [{ x: at, label }];
   return [
     Plot.ruleX(rule, { x: "x", strokeDasharray: "2,3" }),
-    Plot.text(rule, { x: "x", text: "label", frameAnchor: "top", textAnchor: "start", dx: 4 }),
+    Plot.text(rule, {
+      x: "x",
+      text: "label",
+      frameAnchor: "top",
+      textAnchor: "start",
+      dx: 4,
+      ...HALO,
+    }),
   ];
 }
 

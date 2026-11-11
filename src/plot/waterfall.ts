@@ -11,7 +11,7 @@ import {
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
-import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
+import { charWidth, cutText, DEFAULT_HEIGHT, DEFAULT_WIDTH, slotLabel } from "../render/size.js";
 import { stringsFor, valueFormat, signed as withSign } from "../render/text.js";
 import { type Annotated, drawAnnotations, withNotes } from "./annotate.js";
 import { named } from "./marks.js";
@@ -115,30 +115,32 @@ export function waterfallChart<T extends object>(given: WaterfallChartOptions<T>
     y: s.end,
   }));
   const longest = Math.max(1, maxOf(names.map((n) => n.length)));
-  const { svg } = renderPlot(
-    {
-      width: options.width ?? DEFAULT_WIDTH,
-      height: options.height ?? DEFAULT_HEIGHT,
-      marginTop: 24,
-      marginLeft: 52,
-      marginBottom: longest > 10 ? 64 : 44,
-      x: {
-        type: "band",
-        domain: names,
-        label: categoryLabel,
-        padding: 0.25,
-        tickRotate: longest > 10 ? -20 : 0,
-      },
-      y: {
-        label: valueLabel,
-        grid: true,
-        nice: true,
-        zero: true,
-        insetTop: 12,
-      },
-      color: { domain: kinds, range: [...plan.range] },
-      marks: [
-        Plot.link(connectors, {
+  const width = options.width ?? DEFAULT_WIDTH;
+  const char = charWidth(width);
+  const valueText = (s: Step): string => (s.kind === totalName ? format(s.end) : signed(s.change));
+  const widestValue = Math.max(1, maxOf(steps.map((s) => valueText(s).length)));
+  // Upright steps need room under each bar for its name and above it for its value. Where a step's
+  // slot holds neither (a phone's drawing: seven steps in 156 units), the steps run down the
+  // drawing instead, each on its own row with its name beside it and its value past its end, as
+  // horizontal bars are drawn (record 0041).
+  const slot = (width - 52 - 20) / steps.length;
+  // Upright, a step's name wraps onto up to three lines of its slot (slotLabel); a word longer
+  // than the slot, or a value wider than it, turns the steps across.
+  const room = Math.floor((slot - 4) / char);
+  const longestWord = Math.max(...names.flatMap((n) => n.split(" ").map((w) => w.length)));
+  const across = slot < Math.max(6, widestValue + 1) * char || longestWord > room;
+  const marks = (horizontal: boolean): Plot.Markish[] => [
+    horizontal
+      ? Plot.link(connectors, {
+          y1: "x1",
+          y2: "x2",
+          x1: "y",
+          x2: "y",
+          stroke: "var(--enarratio-text-muted)",
+          strokeDasharray: "3,3",
+          render: named("connector"),
+        })
+      : Plot.link(connectors, {
           x1: "x1",
           x2: "x2",
           y1: "y",
@@ -147,35 +149,95 @@ export function waterfallChart<T extends object>(given: WaterfallChartOptions<T>
           strokeDasharray: "3,3",
           render: named("connector"),
         }),
-        Plot.barY(steps, {
-          x: "name",
-          y1: "start",
-          y2: "end",
-          fill: "kind",
-          title: describe,
-          render: keyed(steps, (s) => ({
-            key: markKey(s.name),
-            filter: { field: x, value: s.name },
-            x: s.name,
-            series: s.kind,
-            column: s.index,
-            row: 0,
-          })),
-        }),
-        Plot.text(steps, {
+    (horizontal ? Plot.barX : Plot.barY)(steps, {
+      ...(horizontal
+        ? { y: "name", x1: "start", x2: "end" }
+        : { x: "name", y1: "start", y2: "end" }),
+      fill: "kind",
+      title: describe,
+      render: keyed(steps, (s) => ({
+        key: markKey(s.name),
+        filter: { field: x, value: s.name },
+        x: s.name,
+        series: s.kind,
+        column: s.index,
+        row: 0,
+      })),
+    }),
+    horizontal
+      ? Plot.text(steps, {
+          y: "name",
+          x: (s: Step) => Math.max(s.start, s.end),
+          text: valueText,
+          textAnchor: "start",
+          dx: 4,
+          fill: "var(--enarratio-text)",
+        })
+      : Plot.text(steps, {
           x: "name",
           y: (s: Step) => Math.max(s.start, s.end),
-          text: (s: Step) => (s.kind === totalName ? format(s.end) : signed(s.change)),
+          text: valueText,
           lineAnchor: "bottom",
           dy: -4,
           fill: "var(--enarratio-text)",
         }),
-        Plot.ruleY([0]),
-      ],
-    },
+    horizontal ? Plot.ruleX([0]) : Plot.ruleY([0]),
+  ];
+  // Beside the rows, names up to 45% of the drawing; a longer one is cut there (the table
+  // and each bar's description keep it whole).
+  const nameRoom = Math.max(4, Math.floor((width * 0.45 - 16) / char));
+  const { svg } = renderPlot(
+    across
+      ? {
+          width,
+          height: options.height ?? Math.max(160, steps.length * 28 + 70),
+          marginTop: 24,
+          marginLeft: Math.ceil(Math.min(longest, nameRoom) * char + 16),
+          marginRight: Math.ceil(4 + widestValue * char + 6),
+          marginBottom: 32,
+          y: {
+            type: "band",
+            domain: names,
+            label: categoryLabel,
+            padding: 0.25,
+            tickFormat: (name: string) => cutText(name, nameRoom),
+          },
+          x: {
+            label: valueLabel,
+            grid: true,
+            nice: true,
+            zero: true,
+            ticks: Math.max(2, Math.floor((width - 120) / 60)),
+          },
+          color: { domain: kinds, range: [...plan.range] },
+          marks: marks(true),
+        }
+      : {
+          width,
+          height: options.height ?? DEFAULT_HEIGHT,
+          marginTop: 24,
+          marginLeft: 52,
+          marginBottom: 44,
+          x: {
+            type: "band",
+            domain: names,
+            label: categoryLabel,
+            padding: 0.25,
+            tickFormat: (name: string) => slotLabel(name, slot, width),
+          },
+          y: {
+            label: valueLabel,
+            grid: true,
+            nice: true,
+            zero: true,
+            insetTop: 12,
+          },
+          color: { domain: kinds, range: [...plan.range] },
+          marks: marks(false),
+        },
     options.alt,
     "img",
-    drawAnnotations(KIND, options.annotations),
+    drawAnnotations(KIND, options.annotations, across),
   );
   return figure(options, {
     kind: "waterfall",

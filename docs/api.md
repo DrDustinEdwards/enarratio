@@ -642,7 +642,10 @@ default, or `"vertical"`), `sort` (`"data"` or `"descending"`),
 total to another: each change floats from the level the last one reached,
 joined by dashed connectors, and totals stand on zero. Increases, decreases and
 totals differ in color and every bar is labeled with its signed change or its
-total. The data table gives each change and the running total.
+total. The data table gives each change and the running total. Step names wrap
+onto up to three lines under their bars; where a word or a value is wider than
+a step's slot, the steps run down the drawing as horizontal bars, each name
+beside its bar and its value past the bar's end.
 
 ### `WaterfallChartOptions`
 
@@ -1276,7 +1279,9 @@ one per distinct time with an event.
 `forestPlot(options: ForestPlotOptions<T>): string`. Study estimates as squares
 sized by weight with their 95% intervals, against a line of no effect, and the
 pooled estimate as a diamond spanning its interval. Every estimate and
-interval is also printed in a column on the right. The caption states the
+interval is also printed in a column on the right, or, where the plot would
+keep under 120 units beside that column (a phone), above its row with the
+study's name. The caption states the
 pooling method and heterogeneity; the data table gives every row and weight.
 
 ### `ForestPlotOptions`

@@ -18,7 +18,7 @@ import {
 } from "../render/interval.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
-import { DEFAULT_WIDTH } from "../render/size.js";
+import { bottomMargin, charWidth, DEFAULT_WIDTH, titleLines } from "../render/size.js";
 import { numberFormat, stringsFor, valueFormat } from "../render/text.js";
 import { type Annotated, drawAnnotations, withNotes } from "./annotate.js";
 import { capErrorBars, named, steps, svgElement } from "./marks.js";
@@ -85,6 +85,8 @@ function padded(
 
 /** The largest bubble's radius, in pixels. */
 const MAX_RADIUS = 18;
+/** The height of the size legend as a row under the axis title: its heading and largest circle. */
+const LEGEND_ROW = 20 + 2 * MAX_RADIUS + 8;
 
 const KIND = "scatterPlot";
 
@@ -211,18 +213,27 @@ export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): str
 
   const sizes = points.flatMap((p) => (p.size === undefined ? [] : [p.size]));
   const width = options.width ?? DEFAULT_WIDTH;
+  // The size legend takes 112 units on the right. Where that would leave the plot under 140 (a
+  // phone's drawing), it is a row under the x axis title instead (record 0041).
+  const below = size !== undefined && width - 48 - 112 < 140;
   const rendered = renderPlot(
     {
       width,
-      height: options.height ?? 360,
+      height: (options.height ?? 360) + (below && options.height === undefined ? LEGEND_ROW : 0),
       marginTop: 20,
       marginLeft: 48,
-      marginBottom: 44,
+      marginBottom: below
+        ? bottomMargin(44, xLabel !== null, width, 1, titleLines(xLabel, width)) + LEGEND_ROW
+        : 44,
       // Room for the size legend, and for the largest bubbles at the edges.
       // Points never sit on the axes, where the first one would cover a tick label (inset).
       ...(size === undefined
         ? { inset: 8 }
-        : { marginRight: 112, inset: MAX_RADIUS, r: { range: [0, MAX_RADIUS] } }),
+        : {
+            marginRight: below ? 20 : 112,
+            inset: MAX_RADIUS,
+            r: { range: [0, MAX_RADIUS] },
+          }),
       x: {
         type: options.xType ?? "linear",
         ...padded(
@@ -255,7 +266,7 @@ export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): str
     "img",
     steps(
       withBounds.length > 0 ? capErrorBars : undefined,
-      sizeLabel === undefined ? undefined : sizeLegend(sizeLabel, sizes, width, format),
+      sizeLabel === undefined ? undefined : sizeLegend(sizeLabel, sizes, width, format, below),
       drawAnnotations(KIND, options.annotations),
     ),
   );
@@ -351,6 +362,7 @@ function sizeLegend(
   sizes: readonly number[],
   width: number,
   format: (value: number) => string,
+  below = false,
 ): (svg: SVGSVGElement) => void {
   return (svg) => {
     const scale = (svg as unknown as Plot.Plot).scale("r");
@@ -365,6 +377,42 @@ function sizeLegend(
       "data-enarratio-mark": "size legend",
       "aria-hidden": "true",
     });
+    if (below) {
+      // A row along the foot of the drawing: the heading, then each circle with its value.
+      const height = Number(svg.getAttribute("height"));
+      const heading = svgElement(doc, "text", {
+        x: 8,
+        y: height - LEGEND_ROW + 12,
+        "text-anchor": "start",
+      });
+      heading.textContent = title;
+      legend.append(heading);
+      let x = 8;
+      for (const v of values) {
+        const r = scale.apply(v) as number;
+        const cy = height - 8 - r;
+        legend.append(
+          svgElement(doc, "circle", {
+            cx: x + r,
+            cy,
+            r,
+            fill: "none",
+            stroke: "var(--enarratio-text-muted)",
+          }),
+        );
+        const text = svgElement(doc, "text", {
+          x: x + 2 * r + 4,
+          y: cy,
+          dy: "0.32em",
+          "text-anchor": "start",
+        });
+        text.textContent = format(v);
+        legend.append(text);
+        x += 2 * r + 4 + format(v).length * charWidth(width) + 10;
+      }
+      svg.append(legend);
+      return;
+    }
     const cx = width - 112 + 8 + MAX_RADIUS;
     const heading = svgElement(doc, "text", { x: width - 104, y: 28, "text-anchor": "start" });
     heading.textContent = title;
