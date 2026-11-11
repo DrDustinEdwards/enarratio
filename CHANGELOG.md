@@ -7,6 +7,8 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+- **The gallery enforces Trusted Types.** site-runtime 0.132.0 (dev dependency) makes the gallery's registry entry enforce `require-trusted-types-for 'script'`, so `_headers` and the Worker's responses carry it in the enforced Content-Security-Policy instead of the Report-Only one. The charts' parser already goes through its `enarratio` policy. Not part of the package.
+
 ## [0.13.1] - 2026-11-11
 
 0.13.1 replaces 0.13.0 for sites: it carries 0.13.0's chart types and these fixes.
