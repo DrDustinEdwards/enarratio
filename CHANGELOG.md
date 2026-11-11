@@ -7,6 +7,16 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.12.2] - 2026-11-11
+
+### Fixed
+
+- The toolbar icons show on pages whose Content Security Policy is `img-src 'self'`. They were CSS masks made from `data:` URLs, which such a policy blocks. Each icon is now an inline `<svg class="enarratio-icon">` stroked in the button's color, built from elements by the enhancement layer, so no policy change and no Trusted Types policy is needed ([record 0037](docs/design/0037-inline-toolbar-icons.md)).
+
+### Changed
+
+- The toolbar's icons are `<svg>` elements, not empty `<span data-icon>` elements. A host selector that picks the drawing with `.enarratio svg` should use `.enarratio-frame > svg`. The `--enarratio-icon` custom property is gone.
+
 ## [0.12.1] - 2026-11-11
 
 ### Fixed

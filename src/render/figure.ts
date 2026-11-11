@@ -8,7 +8,7 @@
  * descendants: naming the figure would hide the caption and table from the readers they exist for.
  */
 
-import { BRUSH_SCALES, ENHANCE_STRINGS, type ICONS } from "../controls.js";
+import { BRUSH_SCALES, ENHANCE_STRINGS, ICONS } from "../controls.js";
 import { element, escapeHtml } from "../html.js";
 import { requireSize, safeHref } from "./data.js";
 import { type ChartDescription, overview, summarize } from "./describe.js";
@@ -330,9 +330,13 @@ function pending(tag: string, attrs: Record<string, string | undefined>, content
   return element(tag, { ...attrs, "data-enarratio-pending": true, inert: true }, content);
 }
 
-/** A toolbar icon: an empty span the stylesheet draws, hidden from assistive technology. */
+/** A toolbar icon: an inline SVG stroked in the button's color, hidden from assistive technology. */
 function iconMarkup(name: keyof typeof ICONS): string {
-  return element("span", { class: "enarratio-icon", "data-icon": name, "aria-hidden": "true" });
+  return element(
+    "svg",
+    { class: "enarratio-icon", viewBox: "0 0 16 16", "aria-hidden": "true", focusable: "false" },
+    element("path", { d: ICONS[name] }),
+  );
 }
 
 /** A toolbar control's face: its icon and its word, which is also its name. */
