@@ -259,6 +259,50 @@ describe("enhance: toolbar, expand and address", () => {
     await p.close();
   });
 
+  it("saves a primitive's drawing from its Download menu, as any chart's", async () => {
+    const p = await harness.open("index.html", "light");
+    const SPARK = '[data-example="sparkline"] figure';
+    await p.$eval(SPARK, (el) => el.scrollIntoView());
+    await p.waitForSelector(`${SPARK}[data-enarratio-enhanced]`);
+    const items = await p.$eval(SPARK, (el) =>
+      [...el.querySelectorAll(".enarratio-menu > *")].map((i) => [
+        i.textContent,
+        i.hasAttribute("inert"),
+      ]),
+    );
+    expect(items).toEqual([
+      ["Download CSV", false],
+      ["Download SVG", false],
+      ["Download PNG", false],
+      ["Download tactile SVG", false],
+    ]);
+    // A primitive has no points, so no Sound, Range or Expand.
+    expect(
+      await p.$eval(SPARK, (el) => el.querySelector(".enarratio-controls")?.childElementCount),
+    ).toBe(1);
+    await p.evaluate(() => {
+      const w = window as unknown as { saved?: Blob };
+      URL.createObjectURL = (blob) => {
+        w.saved = blob as Blob;
+        return "blob:kept";
+      };
+      HTMLAnchorElement.prototype.click = () => undefined;
+    });
+    await p.$eval(SPARK, (el) =>
+      (
+        [...el.querySelectorAll("button")].find(
+          (b) => b.textContent === "Download SVG",
+        ) as HTMLElement
+      ).click(),
+    );
+    await p.waitForFunction(() => (window as unknown as { saved?: Blob }).saved);
+    const file = await p.evaluate(() =>
+      ((window as unknown as { saved: Blob }).saved as Blob).text(),
+    );
+    expect(file).toContain("<svg");
+    await p.close();
+  });
+
   it("downloads a tactile SVG: black on white, no gridlines, thick lines, labels level", async () => {
     const p = await harness.open("index.html", "dark");
     const LINE = '[data-example="line"]';
