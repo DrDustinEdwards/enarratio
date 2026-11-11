@@ -371,7 +371,9 @@ function toolbarMarkup(
       ),
     );
   }
-  const exports = layer
+  // A primitive (parts.fixed) has no Sound or Range, but its drawing saves as any chart's does.
+  const files = !parts.tableMarkup && options.controls !== false;
+  const exports = files
     ? [s.downloadSvg, s.downloadPng, s.downloadTactile, ...(options.id ? [s.copyEmbed] : [])]
     : [];
   if (csv || exports.length > 0) {

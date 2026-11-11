@@ -24,6 +24,10 @@ change the public API; every such change is listed here.
 - The plot-wide pointer picks the mark whose shape is under it before the nearest box, so overlapping rings, ribbons and bands answer where they are drawn. This holds on every chart.
 - The pie's arc geometry moved to `src/render/arc.ts`, shared with the sunburst and chord diagram. Its drawing is unchanged.
 
+### Fixed
+
+- A primitive's figure (sparkline, uptime strip, heat strip, progress ring, timeline) has the same Download menu as every chart: "Download CSV", "Download SVG", "Download PNG", "Download tactile SVG" and, with an id, "Copy embed". `enhance()` now picks up these figures and builds only their toolbar; they still get no points, Sound, Range or Expand (record 0037).
+
 ## [0.12.1] - 2026-11-11
 
 ### Fixed

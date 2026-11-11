@@ -258,7 +258,7 @@ const PENDING_EXPAND = `<button type="button" aria-pressed="false" data-enarrati
  * records 0034, 0035).
  */
 function withExpand(markup: string): string {
-  // A primitive's figure is never enhanced, so it gets no Expand.
+  // A primitive's figure is never expanded (enhance/chart.ts), so it gets no Expand.
   if (!markup.includes('class="enarratio-controls"') || markup.includes("data-enarratio-static")) {
     return markup;
   }

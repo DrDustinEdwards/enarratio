@@ -16,8 +16,8 @@ import { narrowChart, REDRAW_ATTRIBUTE } from "../dist/redraw/narrow.js";
 import { enhance } from "./enhance.js";
 
 const OPTIONS = { expand: true, url: true };
-/** The chart enhance() would pick up (a primitive's figure has nothing to interact with). */
-const FIGURES = "figure.enarratio:not([data-enarratio-static])";
+/** The charts enhance() picks up; a primitive's figure gets only its Download menu. */
+const FIGURES = "figure.enarratio";
 /** How far from the viewport a chart is enhanced: two screens' worth. */
 const NEAR = "200% 0px";
 

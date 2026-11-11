@@ -1310,7 +1310,8 @@ summary and table, and the CSV link, with the text and issue options of
 `source`, `byline`, `summary`, `csv`, `csvHref`, `id`, `locale`,
 `lang`, `strings`, `strict`, `onIssue`). `inline: true` returns the bare drawing,
 word-sized, for a sentence or a table cell. The figure carries
-`data-enarratio-static`, so `enhance()` leaves it alone.
+`data-enarratio-static`, so `enhance()` builds only its toolbar: the Download menu
+with "Download CSV", the drawing's files and, with an `id`, "Copy embed" (record 0037).
 
 ### `PrimitiveTable`
 
