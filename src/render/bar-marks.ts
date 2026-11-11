@@ -41,16 +41,36 @@ export interface FinishedBars {
 }
 
 /**
+ * How a chart's bars are found in its markup, for charts that draw more than one model's bars:
+ * small multiples key each bar and stack with its panel, and name no series in the panels.
+ */
+export interface BarLayout {
+  readonly points: readonly BarPoint[];
+  /** A bar's `data-enarratio-key`. */
+  readonly keyOf: (p: BarPoint) => string;
+  /** The stack a bar is part of (its own key when grouped). */
+  readonly stackOf: (p: BarPoint) => string;
+  /** Whether series may be named beside the drawing. */
+  readonly names: boolean;
+}
+
+const layoutOf = (model: BarModel): BarLayout => ({
+  points: model.points,
+  keyOf: (p) => markKey(p.x, p.series),
+  stackOf: (p) => (model.grouped ? markKey(p.x, p.series) : p.x),
+  names: true,
+});
+
+/**
  * The outer end of each bar that has one: the last positive and last negative segment of each
  * stack, or each bar of a grouped or single-series chart. Zero-length bars have none.
  */
-function outerEnds(model: BarModel): Map<string, End> {
+function outerEnds(model: BarModel, layout: BarLayout): Map<string, End> {
   const ends = new Map<string, End>();
   const last = new Map<string, BarPoint>();
-  for (const p of model.points) {
+  for (const p of layout.points) {
     if (p.value === 0) continue;
-    const stack = model.grouped ? markKey(p.x, p.series) : p.x;
-    last.set(`${stack}\u0000${p.value > 0 ? "+" : "-"}`, p);
+    last.set(`${layout.stackOf(p)}\u0000${p.value > 0 ? "+" : "-"}`, p);
   }
   for (const p of last.values()) {
     const end: End = model.horizontal
@@ -60,7 +80,7 @@ function outerEnds(model: BarModel): Map<string, End> {
       : p.value > 0
         ? "top"
         : "bottom";
-    ends.set(markKey(p.x, p.series), end);
+    ends.set(layout.keyOf(p), end);
   }
   return ends;
 }
@@ -104,11 +124,15 @@ const offsetOf = (tag: string): [number, number] => {
  * Rounds the bars' outer ends and reads where each bar is drawn, walking the bar group's markup
  * with the facet offsets it nests bars in.
  */
-function shapeBars(svg: string, model: BarModel): { svg: string; drawn: Drawn[] } | undefined {
+function shapeBars(
+  svg: string,
+  model: BarModel,
+  layout: BarLayout,
+): { svg: string; drawn: Drawn[] } | undefined {
   const open = svg.indexOf('<g data-enarratio-mark="bar">');
   if (open === -1) return undefined;
-  const byKey = new Map(model.points.map((p) => [markKey(p.x, p.series), p]));
-  const ends = outerEnds(model);
+  const byKey = new Map(layout.points.map((p) => [layout.keyOf(p), p]));
+  const ends = outerEnds(model, layout);
   const drawn: Drawn[] = [];
   const offsets: [number, number][] = [[0, 0]];
   const tags = /<(\/?)(g|rect)\b([^>]*?)(\/?)>/g;
@@ -187,8 +211,12 @@ function label(
  * and each bar's value (each stack's total) at its tip where every one of them fits. Reports
  * whether every series is named, so the figure knows to fall back on textures (record 0036).
  */
-export function finishBars(svg: string, model: BarModel): FinishedBars {
-  const shaped = shapeBars(svg, model);
+export function finishBars(
+  svg: string,
+  model: BarModel,
+  layout: BarLayout = layoutOf(model),
+): FinishedBars {
+  const shaped = shapeBars(svg, model, layout);
   const several = model.seriesNames.length > 1;
   if (!shaped) return { svg, labeled: !several };
   const { drawn } = shaped;
@@ -211,7 +239,7 @@ export function finishBars(svg: string, model: BarModel): FinishedBars {
   };
   const stacks = new Map<string, Stack>();
   for (const d of drawn) {
-    const id = model.grouped ? markKey(d.point.x, d.point.series) : d.point.x;
+    const id = layout.stackOf(d.point);
     const start = vertical ? d.y : d.x;
     const end = vertical ? d.y + d.height : d.x + d.width;
     const center = vertical ? d.x + d.width / 2 : d.y + d.height / 2;
@@ -256,7 +284,7 @@ export function finishBars(svg: string, model: BarModel): FinishedBars {
   }
 
   // Series names beside the last stack of a vertical stacked chart (spread so none overlap).
-  if (several && model.directLabels && !model.grouped && vertical) {
+  if (several && layout.names && model.directLabels && !model.grouped && vertical) {
     const lastColumn = [...model.xNames]
       .reverse()
       .find((x) => drawn.some((d) => d.point.x === x && d.point.value !== 0));
@@ -294,6 +322,7 @@ export function finishBars(svg: string, model: BarModel): FinishedBars {
   // its bar's middle, the second starting there, so the two never meet.
   if (
     several &&
+    layout.names &&
     model.directLabels &&
     model.grouped &&
     vertical &&

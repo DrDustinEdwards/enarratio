@@ -29,7 +29,10 @@ Look:
    of them fit the slot and there are no error bars. Inside bar labels are gone.
 4. **Bars are shapes.** A 2px background gap between bars and segments
    (`--enarratio-bar-gap`); bars at most 40 units wide, the band padding growing instead; the
-   outer end of each bar or stack rounded at 4 units, its base square.
+   outer end of each bar or stack rounded at 4 units, its base square. Small multiples of bars get the same
+   shapes and tip values, with headroom under each panel's name, and keep their textures since a
+   panel has no room for names. Histogram bins and waterfall steps stay square: each measures a
+   range or a running total edge to edge.
 5. **Quiet axes.** No tick marks and no y-axis line; a hairline grid and the stronger zero rule.
    The y title sits above the y labels, unrotated. No x title under a year or date axis; the
    data table and the description keep it.
