@@ -486,7 +486,8 @@ ${ICON_RULES}
 .enarratio-menu { display: grid; min-inline-size: 12em; }
 .enarratio-menu > :is(a, button) {
   box-sizing: border-box;
-  display: block;
+  display: flex;
+  align-items: center;
   min-height: var(--enarratio-control-height, 2.25em);
   margin: 0;
   padding: var(--enarratio-padding-control, 0.25em 0.75em);
@@ -495,7 +496,7 @@ ${ICON_RULES}
   background: none;
   color: inherit;
   font: inherit;
-  line-height: 1.75;
+  line-height: 1.2;
   text-align: start;
   text-decoration: none;
   white-space: nowrap;
