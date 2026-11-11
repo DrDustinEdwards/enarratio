@@ -60,9 +60,15 @@ const self = (specifier: string): string => {
 const NARROW_WIDTH = 228;
 /** 30rem at the default 16 px rem: a wide drawing keeps this width in a narrower column (A13). */
 const WIDE_PX = 480;
-/** A drawing's viewBox size. */
+/**
+ * A drawing's viewBox size: the svg in its frame, not the toolbar's 16-unit icons ahead of it
+ * (an icon's box once made every phone drawing 944 units tall).
+ */
 function viewBox(markup: string): { width: number; height: number } | undefined {
-  const box = /<svg[^>]*\sviewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(markup);
+  const frame = markup.indexOf('class="enarratio-frame');
+  const box = /<svg[^>]*\sviewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(
+    frame === -1 ? markup : markup.slice(frame),
+  );
   return box ? { width: Number(box[1]), height: Number(box[2]) } : undefined;
 }
 /**
@@ -88,6 +94,14 @@ const KEEP_HEIGHT = new Set([
   "funnel",
   "bullet",
   "radar",
+  "forest",
+  "waterfall",
+  "dot",
+  "range",
+  "dumbbell",
+  "small-multiples",
+  "small-multiples-bar",
+  "bubble",
 ]);
 /**
  * The maps. A map keeps its shape, so drawn 228 wide it is far shorter than its wide drawing shows
@@ -232,7 +246,7 @@ async function loadExamples(): Promise<Example[]> {
     const heading = /^\/\/ (.+)$/m.exec(source)?.[1] ?? file;
     const id = basename(file, ".ts");
     const from = /from "(enarratio[^"]*)"/.exec(source)?.[1] ?? "enarratio";
-    const drawnWidth = Number(/<svg[^>]* width="(\d+(?:\.\d+)?)"/.exec(module.default)?.[1] ?? 0);
+    const drawnWidth = viewBox(module.default)?.width ?? 0;
     const narrow =
       /export default \w+\(/.test(source) && drawnWidth > NARROW_WIDTH
         ? frameOf(

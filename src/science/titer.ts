@@ -11,7 +11,7 @@ import {
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
-import { DEFAULT_WIDTH } from "../render/size.js";
+import { DEFAULT_WIDTH, slotLabel } from "../render/size.js";
 import { numberFormat, stringsFor } from "../render/text.js";
 import { type GeometricSummary, geometricSummary } from "./stats.js";
 
@@ -230,9 +230,10 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
     }),
   ];
 
+  const width = options.width ?? DEFAULT_WIDTH;
   const { svg } = renderPlot(
     {
-      width: options.width ?? DEFAULT_WIDTH,
+      width,
       height: options.height ?? 360,
       marginTop: 20,
       marginLeft: 56,
@@ -241,7 +242,9 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
         type: "linear",
         domain: [-0.5, groups.length - 0.5],
         ticks: groups.map((_, i) => i),
-        tickFormat: (i: number) => groups[i] ?? "",
+        // A name wider than its group's slot wraps (record 0041).
+        tickFormat: (i: number) =>
+          slotLabel(groups[i] ?? "", (width - 56 - 20) / Math.max(1, groups.length), width),
         label: groupLabel,
       },
       y: {

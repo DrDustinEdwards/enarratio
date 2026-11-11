@@ -13,7 +13,7 @@ import {
 import { type LineChartOptions, lineModel, type Point } from "../render/line-model.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
-import { DEFAULT_WIDTH } from "../render/size.js";
+import { charWidth, DEFAULT_WIDTH, fitTicks, textGrowth, topMargin } from "../render/size.js";
 import { texture } from "../render/texture.js";
 
 /** What every small multiple shares: the facet field and the grid. */
@@ -79,9 +79,20 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
   const raw = data.map((row, i) => readLabel(KIND, row, facet, i));
   const names = domainOf(KIND, facet, raw, options.facetDomain?.map(String));
   if (names.length > 24) throw new Error(`${KIND}: ${names.length} panels are too many to compare`);
-  const columns = Math.min(options.columns ?? 3, names.length);
-  if (!(Number.isInteger(columns) && columns >= 1)) {
+  const asked = Math.min(options.columns ?? 3, names.length);
+  if (!(Number.isInteger(asked) && asked >= 1)) {
     throw new Error(`${KIND}: columns must be a whole number of 1 or more`);
+  }
+  const width = options.width ?? DEFAULT_WIDTH;
+  const char = charWidth(width);
+  // A panel's column, with the gap after it, at the margins both kinds of panel use.
+  const step = (n: number): number => (width - 44 - 20) / (n + 0.12);
+  // `columns` is the most panels to a row: fewer where a panel's name would not fit over it or a
+  // panel would be under 60 units across (a phone's drawing, record 0041).
+  const longestName = Math.max(...names.map((n) => n.length));
+  let columns = asked;
+  while (columns > 1 && (step(columns) < longestName * char + 6 || step(columns) * 0.88 < 60)) {
+    columns -= 1;
   }
   const panels: Panel[] = names.map((name, index) => ({
     name,
@@ -101,8 +112,15 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
           options.seriesDomain,
         );
   const rows = Math.ceil(names.length / columns);
-  const width = options.width ?? DEFAULT_WIDTH;
-  const height = options.height ?? rows * (options.panelHeight ?? 160) + 64;
+  // Panels 160 high, or shorter where they are narrow, so a column of them is not a tower.
+  const panelHeight =
+    options.panelHeight ?? Math.round(Math.min(160, Math.max(100, step(columns) * 1.3)));
+  // The y axis title over the first row's panel names, each on its own line (record 0041).
+  const marginTop = Math.max(
+    28,
+    (options.yLabel === null ? 0 : topMargin(0, true, width)) + Math.ceil(16 * textGrowth(width)),
+  );
+  const height = options.height ?? rows * panelHeight + 36 + marginTop;
   const facetScales = {
     fx: { domain: [...Array(columns).keys()], axis: null, padding: 0.12 },
     fy: { domain: [...Array(rows).keys()], axis: null, padding: 0.22 },
@@ -164,11 +182,19 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
       {
         width,
         height,
-        marginTop: 28,
+        marginTop,
         marginLeft: 44,
         marginBottom: 44,
         ...facetScales,
-        x: { type: "band", domain: xNames, label: first.categoryTitle, padding: barPadding },
+        x: {
+          type: "band",
+          domain: xNames,
+          label: first.categoryTitle,
+          padding: barPadding,
+          // Names that would run into each other under a narrow panel are thinned (record 0041).
+          ticks: fitTicks(xNames, (n) => first.tickLabel(n), width, panel),
+          tickFormat: first.tickLabel,
+        },
         y: {
           label: first.valueLabel,
           grid: true,
@@ -293,7 +319,7 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
     {
       width,
       height,
-      marginTop: 28,
+      marginTop,
       marginLeft: 44,
       marginRight: 20,
       marginBottom: 44,

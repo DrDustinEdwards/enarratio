@@ -26,7 +26,7 @@ import {
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
-import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
+import { charWidth, DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
 import { numberFormat, stringsFor, valueFormat } from "../render/text.js";
 import { type Annotated, drawAnnotations, withNotes } from "./annotate.js";
 import { dashFor, named } from "./marks.js";
@@ -286,10 +286,36 @@ export function densityPlot<T extends object>(given: DensityPlotOptions<T>): str
     }),
   );
   if (names.length > 1) {
+    // Each name over its curve's peak. Names that would overlap (close peaks on a phone's
+    // drawing) are moved apart, upward, and every name is kept inside the plot (record 0041).
+    const width = options.width ?? DEFAULT_WIDTH;
+    const height = options.height ?? DEFAULT_HEIGHT;
+    const char = charWidth(width);
+    const plotWidth = width - 56 - 20;
+    const plotHeight = height - 24 - 44;
+    const yTop = maxOf(curves.map((ys) => maxOf(ys))) * 1.1;
+    const toPx = (x: number): number => ((x - lo) / (hi - lo || 1)) * plotWidth;
+    const placed: { left: number; right: number; y: number }[] = [];
     const peaks = names.map((name, k) => {
       const ys = curves[k] as number[];
       const top = ys.indexOf(maxOf(ys));
-      return { name, x: xs[top] as number, y: ys[top] as number, k };
+      const half = (name.length * char) / 2;
+      const at = toPx(xs[top] as number);
+      const px = Math.min(Math.max(at, half), plotWidth - half);
+      const peak = ((ys[top] as number) / yTop) * plotHeight;
+      let py = peak;
+      while (
+        placed.some((b) => b.left < px + half && px - half < b.right && Math.abs(b.y - py) < 17)
+      ) {
+        py += 17;
+      }
+      placed.push({ left: px - half, right: px + half, y: py });
+      return {
+        name,
+        x: px === at ? (xs[top] as number) : lo + (px / plotWidth) * (hi - lo),
+        y: py === peak ? (ys[top] as number) : (py / plotHeight) * yTop,
+        k,
+      };
     });
     marks.push(
       Plot.text(peaks, {

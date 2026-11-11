@@ -48,9 +48,10 @@ export function annotationMarkup(
   annotations: readonly Annotation[] | undefined,
   scaleOf: (axis: "x" | "y") => AnnotationScale | undefined,
   swap = false,
+  width?: number,
 ): { readonly behind: string; readonly above: string } {
   if (!annotations || annotations.length === 0) return { behind: "", above: "" };
-  const { behind, above } = annotationShapes(kind, annotations, scaleOf, swap);
+  const { behind, above } = annotationShapes(kind, annotations, scaleOf, swap, width);
   const group = (attrs: Attrs, list: readonly Shape[]): string =>
     list.length === 0 ? "" : el("g", attrs, list.map(shape).join(""));
   return {

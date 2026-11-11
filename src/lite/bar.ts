@@ -14,7 +14,7 @@ import {
 } from "../render/bar-model.js";
 import { markKey } from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
-import { bottomMargin, leftMargin, topMargin } from "../render/size.js";
+import { bottomMargin, leftMargin, titleLines, topMargin } from "../render/size.js";
 import { annotationMarkup, bandScale, continuousScale, errorBar } from "./annotate.js";
 import {
   axisLabel,
@@ -105,6 +105,7 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
       width,
       // A category label wrapped onto two lines takes a second line of room, as Plot's does.
       horizontal ? 1 : labelLines(xNames.map((name) => ({ label: model.tickLabel(name) }))),
+      titleLines(horizontal ? model.valueLabel : model.categoryTitle, width),
     ),
     marginLeft: model.marginLeft,
   };
@@ -302,6 +303,7 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
         ? bandScale(category, xNames, categoryRange)
         : continuousScale(value),
     horizontal,
+    width,
   );
   parts.push(notes.behind);
   parts.push(

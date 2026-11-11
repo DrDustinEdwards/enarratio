@@ -1,6 +1,6 @@
 /** Axes and grids drawn as Plot draws them: the same groups, positions and offsets. */
 
-import { TITLE_LINES } from "../render/size.js";
+import { fitTitle, TITLE_LEADING, TITLE_LINES } from "../render/size.js";
 import {
   type Attrs,
   el,
@@ -155,17 +155,22 @@ export function axisLabel(
   const horizontal = k === "x" || k === "fx";
   // Below a bottom x axis, the title sits a fixed number of ems under the tick labels' lines, as
   // renderPlot places Plot's (placeXTitle).
+  // A title too long for the drawing moves to its middle or wraps (fitTitle, record 0041).
   if (k === "x" && lines !== undefined && !/[\r\n]/.test(label)) {
+    const fit = fitTitle(label, (marginLeft + width - marginRight) / 2, width);
     return el(
       "g",
       { ...HIDDEN, "data-enarratio-mark": "x-axis label", transform: translate(0, 9) },
       el(
         "text",
-        {
-          transform: translate((marginLeft + width - marginRight) / 2, height - marginBottom),
-          y: `${lines + TITLE_LINES}em`,
-        },
-        text(label),
+        { transform: translate(fit.x, height - marginBottom), y: `${lines + TITLE_LINES}em` },
+        fit.lines.length === 1
+          ? text(fit.lines[0] ?? "")
+          : fit.lines
+              .map((line, i) =>
+                el("tspan", { x: 0, dy: i > 0 ? `${TITLE_LEADING}em` : undefined }, text(line)),
+              )
+              .join(""),
       ),
     );
   }

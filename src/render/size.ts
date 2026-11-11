@@ -73,10 +73,102 @@ export const TITLE_LINES = 1.5;
  * over "Oct"), and TITLE_LINES and a descender's quarter more for the title. Never less than
  * `base`.
  */
-export function bottomMargin(base: number, title: boolean, width: number, lines = 1): number {
-  return title
-    ? Math.max(base, Math.ceil(10 + 13 * (lines + TITLE_LINES + 0.25) * textGrowth(width)))
-    : base;
+export function bottomMargin(
+  base: number,
+  title: boolean,
+  width: number,
+  lines = 1,
+  titleLines = 1,
+): number {
+  if (title) {
+    return Math.max(
+      base,
+      Math.ceil(
+        10 +
+          13 * (lines + TITLE_LINES + 0.25 + (titleLines - 1) * TITLE_LEADING) * textGrowth(width),
+      ),
+    );
+  }
+  // Without a title, tick labels wrapped onto more lines still need their room: the tick gap and
+  // a line of 12 for each (record 0041).
+  return lines > 1 ? Math.max(base, Math.ceil(9 + 12 * lines * textGrowth(width))) : base;
+}
+
+/** How many lines an x axis title takes at a drawing's narrowest (fitTitle): 1 or 2. */
+export const titleLines = (title: string | null | undefined, width: number): number =>
+  title ? fitTitle(title, width / 2, width).lines.length : 1;
+
+/** The line height, in ems, of an x axis title wrapped onto a second line (record 0041). */
+export const TITLE_LEADING = 1.2;
+
+/** Text cut to `room` characters, ending in an ellipsis when it was longer. */
+export const cutText = (text: string, room: number): string =>
+  text.length <= room ? text : `${text.slice(0, Math.max(1, room - 1)).trimEnd()}…`;
+
+/**
+ * An x axis title fitted to a drawing `width` wide at its narrowest (record 0041): centered under
+ * the plot at `center` while it fits there, else centered on the drawing, else wrapped at the
+ * space that best balances two lines, the second cut short if it still runs past the edges. Each
+ * line keeps 3 units from either edge. The table and the text alternative keep the whole title.
+ */
+export function fitTitle(
+  title: string,
+  center: number,
+  width: number,
+): { readonly x: number; readonly lines: readonly string[] } {
+  const char = charWidth(width);
+  const room = Math.floor((width - 6) / char);
+  if (title.length * char <= 2 * Math.min(center - 3, width - 3 - center)) {
+    return { x: center, lines: [title] };
+  }
+  if (title.length <= room) return { x: width / 2, lines: [title] };
+  return { x: width / 2, lines: wrapTwo(title, room) };
+}
+
+/**
+ * Text in at most two lines of `room` characters: broken at the space that best balances them,
+ * the second cut short if it still runs over; one cut line when no space breaks it.
+ */
+export function wrapTwo(value: string, room: number): string[] {
+  if (value.length <= room) return [value];
+  const words = value.split(" ");
+  let best: [string, string] | undefined;
+  for (let i = 1; i < words.length; i++) {
+    const first = words.slice(0, i).join(" ");
+    const rest = words.slice(i).join(" ");
+    if (first.length > room) break;
+    if (
+      best === undefined ||
+      Math.max(first.length, rest.length) < Math.max(best[0].length, best[1].length)
+    )
+      best = [first, rest];
+  }
+  return best ? [best[0], cutText(best[1], room)] : [cutText(value, room)];
+}
+
+/**
+ * A group's label on a category axis whose slots are `slot` units apart (record 0041): whole
+ * while it fits its slot, else filled word by word onto up to three lines, the last cut short if
+ * the name still runs over. Plot and the light charts write a label with line breaks as lines.
+ */
+export function slotLabel(name: string, slot: number, width: number): string {
+  const room = Math.max(3, Math.floor((slot - 4) / charWidth(width)));
+  if (name.length <= room) return name;
+  const lines: string[] = [];
+  let line = "";
+  for (const word of name.split(" ")) {
+    if (line === "" || `${line} ${word}`.length <= room)
+      line = line === "" ? word : `${line} ${word}`;
+    else {
+      lines.push(line);
+      line = word;
+    }
+  }
+  lines.push(line);
+  const kept = lines.slice(0, 3);
+  const rest = lines.slice(2).join(" ");
+  if (lines.length > 3) kept[2] = rest;
+  return kept.map((l) => cutText(l, room)).join("\n");
 }
 
 /**
@@ -106,4 +198,39 @@ export function fitTicks<T>(
   // least step would print no more than two either.
   if (step === last && Math.floor(last / least) + 1 > 2) step = least;
   return ticks.filter((_, i) => i % step === 0);
+}
+
+/**
+ * Month ticks, in milliseconds, for a time axis over `ats` on a plot under 240 across (a phone's),
+ * where one tick per 80 pixels prints one or two (record 0041): every month, or every 2, 3, 4, 6
+ * or 12, the fewest that leave each label (a month over its year, "Jan" over "2026") room. Null
+ * on a wider plot, or for a span under two months, which is labeled by day. Both renderers use it.
+ */
+export function monthTicks(
+  ats: readonly number[],
+  width: number,
+  plotWidth: number,
+  max?: number,
+): number[] | null {
+  if (plotWidth >= 240 || ats.length === 0) return null;
+  const lo = new Date(Math.min(...ats));
+  const hi = new Date(Math.max(...ats));
+  const span =
+    (hi.getUTCFullYear() - lo.getUTCFullYear()) * 12 + hi.getUTCMonth() - lo.getUTCMonth();
+  if (span < 2) return null;
+  const fit = Math.max(2, Math.floor(plotWidth / (4 * charWidth(width) + 12)) + 1);
+  const step = [1, 2, 3, 4, 6, 12].find((k) => Math.floor(span / k) + 1 <= fit) ?? 12;
+  const out: number[] = [];
+  // From the first month start on or after the first point, on months the step divides.
+  const year = lo.getUTCFullYear();
+  let month = lo.getUTCMonth() + (lo.getTime() > Date.UTC(year, lo.getUTCMonth(), 1) ? 1 : 0);
+  month = Math.ceil(month / step) * step;
+  for (;;) {
+    const at = Date.UTC(year + Math.floor(month / 12), month % 12, 1);
+    if (at > hi.getTime()) break;
+    out.push(at);
+    month += step;
+  }
+  // maxXTicks stays the most labels to print (record 0040).
+  return out.length >= 2 && out.length <= (max ?? Infinity) ? out : null;
 }
