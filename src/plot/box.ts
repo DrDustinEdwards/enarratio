@@ -26,8 +26,9 @@ import { numberFormat, type Strings, stringsFor, valueFormat } from "../render/t
 import { type Annotated, drawAnnotations, withNotes } from "./annotate.js";
 import { named } from "./marks.js";
 
-/** Options shared by {@link boxPlot} and {@link stripPlot}. */
-interface GroupedValuesOptions<T extends object> extends FigureOptions, AxisUnits, Annotated {
+/** Options shared by {@link boxPlot}, {@link stripPlot} and the violin plot. */
+export interface GroupedValuesOptions<T extends object>
+  extends FigureOptions, AxisUnits, Annotated {
   readonly data: readonly T[];
   /** The field naming each value's group, one column per group. */
   readonly x: KeysOfType<T, string | number>;
@@ -60,7 +61,7 @@ export interface BoxPlotOptions<T extends object> extends GroupedValuesOptions<T
   readonly points?: boolean;
 }
 
-interface Value {
+export interface Value {
   readonly key: string;
   readonly name: string;
   readonly group: string;
@@ -74,7 +75,7 @@ const RADIUS = 3.5;
 const MARGIN_TOP = 20;
 const MARGIN_BOTTOM = 44;
 
-interface Read {
+export interface Read {
   readonly strings: Strings;
   /** Whole numbers for the locale: counts. */
   readonly count: (n: number) => string;
@@ -90,7 +91,7 @@ interface Read {
   readonly marginLeft: number;
 }
 
-function read<T extends object>(
+export function read<T extends object>(
   kind: string,
   options: GroupedValuesOptions<T> & { readonly label?: KeysOfType<T, string | number> },
 ): Read {
@@ -132,7 +133,7 @@ function read<T extends object>(
  * The groups along x and every value as one series, so the summary names the highest and lowest
  * values and any far from the rest, each with its group.
  */
-function describeValues(r: Read, extra?: Partial<ChartDescription>): ChartDescription {
+export function describeValues(r: Read, extra?: Partial<ChartDescription>): ChartDescription {
   return {
     axes: [
       categoryRange("x", r.xLabel, r.groups),
@@ -210,7 +211,7 @@ function pixels(r: Read): { perValue: number; perGroup: number } {
   };
 }
 
-function frame(r: Read): Plot.PlotOptions {
+export function frame(r: Read): Plot.PlotOptions {
   return {
     width: r.width,
     height: r.height,

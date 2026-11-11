@@ -110,6 +110,20 @@ export interface Terms {
   readonly flows: string;
   readonly incoming: string;
   readonly outgoing: string;
+  readonly task: string;
+  readonly milestone: string;
+  readonly today: string;
+  /** A Gantt chart's duration column. */
+  readonly durationDays: string;
+  /** After a length in days: "36 days". */
+  readonly days: string;
+  readonly open: string;
+  readonly high: string;
+  readonly low: string;
+  readonly close: string;
+  /** A calendar heatmap's table rows: "Week of". */
+  readonly weekOf: string;
+  readonly bandwidth: string;
   /** A dot map's landmarks, in the table, when the caller names none. */
   readonly landmark: string;
   /** After the highlighted landmark's name in the table: "Pump 7 (highlighted)". */
@@ -410,6 +424,12 @@ export const ENGLISH: Strings = {
     gauge: "Gauge",
     bullet: "Bullet chart",
     parallel: "Parallel coordinates",
+    gantt: "Gantt chart",
+    candlestick: "Candlestick chart",
+    calendar: "Calendar heatmap",
+    streamgraph: "Streamgraph",
+    violin: "Violin plot",
+    ridgeline: "Ridgeline plot",
     waterfall: "Waterfall chart",
     "small-multiples": "Small multiples",
     table: "Table",
@@ -581,6 +601,17 @@ export const ENGLISH: Strings = {
     flows: "Flows",
     incoming: "In",
     outgoing: "Out",
+    task: "Task",
+    milestone: "Milestone",
+    today: "Today",
+    durationDays: "Duration (days)",
+    days: "days",
+    open: "Open",
+    high: "High",
+    low: "Low",
+    close: "Close",
+    weekOf: "Week of",
+    bandwidth: "Bandwidth",
     landmark: "Landmark",
     highlightedLandmark: "highlighted",
     forecast: "Forecast",

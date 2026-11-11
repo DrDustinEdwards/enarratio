@@ -465,6 +465,25 @@ each x stacks to 100%: every series is drawn, described and tabled as its share
 of that x's total, the y label defaults to "Share of total (%)" and values print
 as percentages. `enarratio/lite` draws `percent` too, identically.
 
+### `streamgraph`
+
+`streamgraph(options: StreamgraphOptions<T>): string`. Several series over time
+as layers flowing around a moving center line: Byron and Wattenberg's "wiggle"
+baseline with inside-out order (d3's `stackOffsetWiggle` and
+`stackOrderInsideOut`), so the layers' slopes stay small and the earliest peaks
+sit in the middle. It shows how a whole and its parts rise and fall, not exact
+values, so there is no value axis. Each layer is named on the drawing where it
+is thickest; a layer too thin for its name takes its texture. Hover, the keys
+and the data table give the values. A stacked `areaChart` compares totals more
+precisely.
+
+### `StreamgraphOptions`
+
+`SeriesChartOptions` with `series` required, and without `references`,
+`directLabels` or `yUnit`: `data`, `x`, `y`, `series`, `xType`,
+`seriesDomain`, `colors`, `xLabel`, `formatValue`, `formatX`, `markers`,
+`maxXTicks`, `annotations`.
+
 ### `SeriesChartOptions`
 
 Options shared by line and area charts: `data`, `x`, `y`, `series`, `xType`
@@ -677,6 +696,24 @@ evenly spaced values.
 `data`, `x`, `series`, `seriesDomain`, `bandwidth`, `colors`, `xLabel`,
 `yLabel` (default "Density"), `formatValue`, `annotations`.
 
+### `ridgelinePlot`
+
+`ridgelinePlot(options: RidgelinePlotOptions<T>): string`. One Gaussian kernel
+density per row on a shared x scale, the rows overlapping a little, so many
+groups' shapes compare in little room. The ridges share one density scale, so
+heights compare across rows. Rows run top to bottom in first-seen order or as
+`yDomain` gives them: order them by a key that means something, such as time
+or rank. Each row is named at its baseline, left of the ridges or, on a narrow
+drawing, inside its row. The caption states each row's n and bandwidth, and the
+data table gives each row's density at 15 evenly spaced values, which hover and
+the keys reach. The x axis takes the Range control.
+
+### `RidgelinePlotOptions`
+
+`data`, `x` (the measurement), `y` (the row), `yDomain`, `overlap` (how far the
+tallest ridge rises into the row above, in rows; default 0.5, 0 to 3),
+`bandwidth`, `color`, `xLabel`, `xUnit`, `formatValue`.
+
 ### `boxPlot`
 
 `boxPlot(options: BoxPlotOptions<T>): string`. A Tukey box plot per group: the
@@ -690,6 +727,25 @@ maximum, whiskers and outliers.
 
 `data`, `x` (group), `y` (value), `xDomain`, `points`, `colorByGroup`,
 `colors`, `xLabel`, `yLabel`, `formatValue`, `annotations`.
+
+### `violinPlot`
+
+`violinPlot(options: ViolinPlotOptions<T>): string`. A violin per group (Hintze
+and Nelson 1998): the group's Gaussian kernel density mirrored either side of
+its center and trimmed to its values' range, with a bar across the quartiles
+and a dot at the median inside. Every violin is as wide as the others at its
+widest, so shapes compare across groups; widths do not. Where any group has
+fewer than 30 values, every value is also drawn as a point inside its violin,
+since a density from few values can show shapes that are not there (Wilke);
+`points` turns this on or off. Group names wrap to fit their column. The data
+table gives each group's n, minimum, quartiles, maximum and bandwidth, and the
+caption states n and bandwidth. A `boxPlot` is simpler to read where the shape
+is not the point.
+
+### `ViolinPlotOptions`
+
+`data`, `x` (group), `y` (value), `xDomain`, `bandwidth`, `points`,
+`colorByGroup`, `colors`, `xLabel`, `yLabel`, `formatValue`, `annotations`.
 
 ### `stripPlot`
 
@@ -921,6 +977,57 @@ in cells in a readable color, and dashed outlines for empty cells.
 values; default equal intervals), `cellLabels`, `xLabel`, `yLabel`,
 `valueLabel`, `formatValue`. Once enhanced, a click on a cell filters by its
 row (the `y` field), and arrow keys move across columns and down rows.
+
+### `ganttChart`
+
+`ganttChart(options: GanttChartOptions<T>): string`. Tasks as rows, top to
+bottom in data order, each a bar from its start to its end on a time axis. A
+row with no end, or one equal to its start, is a milestone, drawn as a diamond.
+`today` draws a dashed line labeled "Today" (or `todayLabel`). Each task is
+named left of its bar, or above it on a narrow drawing. `group` colors tasks by
+team or phase with a legend, and the bars then take their textures, since
+groups are not named on the drawing. The data table gives each task's start,
+end and length in days; the time axis takes the Range control.
+
+### `GanttChartOptions`
+
+`data`, `task`, `start`, `end`, `group`, `groupDomain`, `colors`, `today`,
+`todayLabel`, `xLabel`.
+
+### `candlestickChart`
+
+`candlestickChart(options: CandlestickChartOptions<T>): string`. One candle per
+period on a time axis: the body runs from open to close and the wick from low
+to high. A period that closed at or above its open is a hollow body outlined in
+the first series color; one that closed below is a solid body in the second, so
+rising and falling differ by fill as well as hue (WCAG 1.4.1), and the legend's
+swatches match. Bodies are 60% of the closest spacing between periods. A row
+whose open or close lies outside its low and high throws. The data table gives
+each period's open, high, low, close and change; the time axis takes the Range
+control.
+
+### `CandlestickChartOptions`
+
+`data`, `x` (the period), `open`, `high`, `low`, `close`, `xLabel`, `yLabel`
+(default "Close"), `yUnit`, `formatValue`.
+
+### `calendarHeatmap`
+
+`calendarHeatmap(options: CalendarHeatmapOptions<T>): string`. One cell per day,
+weeks as columns and weekdays as rows, colored on the theme's five-step
+sequential ramp with a labeled legend, and the months named above. A day with
+no value (`null`, or no row between the first and last day) is outlined with a
+dashed line, never colored as zero. Weeks start on the locale's first day, or
+Monday when no `locale` is given. When the weeks are too many for cells a reader
+can see and touch (a year on a phone), the calendar turns: weekdays run across
+and weeks down the page. The data table has one row per week. Rows must be
+calendar days (midnight UTC); a time of day throws.
+
+### `CalendarHeatmapOptions`
+
+`data`, `date`, `value`, `thresholds` (four ascending values; default equal
+intervals), `weekStart` (0 Sunday to 6 Saturday, as `getUTCDay()` counts),
+`valueLabel`, `formatValue`.
 
 ### `networkChart`
 

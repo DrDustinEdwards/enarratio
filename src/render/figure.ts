@@ -496,6 +496,8 @@ const LINE_KINDS = new Set([
   "parallel",
 ]);
 const SYMBOL_KINDS = new Set(["scatter", "dot", "tree", "network"]);
+/** Charts whose first series is drawn hollow (a candlestick's rising candles). */
+const HOLLOW_KINDS = new Set(["candlestick"]);
 
 function legendMarkup(parts: FigureParts): string {
   const swatch = element("span", { class: "enarratio-swatch", "aria-hidden": "true" });
@@ -515,7 +517,9 @@ function legendMarkup(parts: FigureParts): string {
     ? "line"
     : SYMBOL_KINDS.has(parts.kind)
       ? "symbol"
-      : undefined;
+      : HOLLOW_KINDS.has(parts.kind)
+        ? "hollow"
+        : undefined;
   return element(
     "ul",
     { class: "enarratio-legend", "data-enarratio-legend": mark },
