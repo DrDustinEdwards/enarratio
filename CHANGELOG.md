@@ -7,6 +7,12 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-11-11
+
+### Fixed
+
+- npm's `latest` tag points at the newest release again. 0.11.0 was approved on npm after 0.12.0, so it took `latest`; this release is 0.12.0 unchanged, published again so `npm install enarratio` gets it. `docs/releasing.md` now says to approve only the newest staged version and reject older ones.
+
 ## [0.12.0] - 2026-11-11
 
 ### Changed
