@@ -42,7 +42,9 @@ describe("enhance: stacked bar", () => {
     expect(points.every(([tag]) => tag === "BUTTON")).toBe(true);
     expect(points.filter(([, tab]) => tab === "0")).toHaveLength(1);
     expect(points[0]?.[2]).toBe("Year 2019, Publications: 3, 1 of 6");
-    expect(await page.$eval(`${STACKED} svg`, (svg) => svg.getAttribute("role"))).toBe("img");
+    expect(
+      await page.$eval(`${STACKED} svg:not(.enarratio-icon)`, (svg) => svg.getAttribute("role")),
+    ).toBe("img");
     expect(await page.$(`${STACKED} [data-enarratio-key] title`)).toBeNull();
     const hint = await page.$eval(`${STACKED} .enarratio-points`, (layer) => [
       layer.getAttribute("role"),
@@ -426,7 +428,7 @@ describe("enhance: update and destroy", () => {
         announced,
         during,
         after,
-        role: figure.querySelector("svg")?.getAttribute("role"),
+        role: figure.querySelector("svg:not(.enarratio-icon)")?.getAttribute("role"),
         titles: figure.querySelectorAll("[data-enarratio-key] > title").length,
         frameTab: figure.querySelector(".enarratio-frame")?.getAttribute("tabindex"),
       };
@@ -448,7 +450,7 @@ describe("enhance: brush on a time axis", () => {
 
   it("picks a range by dragging and reports it in data units", async () => {
     const p = await harness.open("index.html", "light");
-    const box = await p.$eval(`${LINE} svg`, (svg) => {
+    const box = await p.$eval(`${LINE} svg:not(.enarratio-icon)`, (svg) => {
       svg.scrollIntoView({ block: "center" });
       const r = svg.getBoundingClientRect();
       return { x: r.x, y: r.y, width: r.width, height: r.height };
@@ -533,7 +535,9 @@ describe("enhance: selecting a year, page-set filters and links", () => {
 
   it("selects the bar's year, and fires nothing for filters the page sets itself", async () => {
     const p = await harness.open("index.html", "light");
-    await p.$eval(`${YEARS} svg`, (svg) => svg.scrollIntoView({ block: "center" }));
+    await p.$eval(`${YEARS} svg:not(.enarratio-icon)`, (svg) =>
+      svg.scrollIntoView({ block: "center" }),
+    );
     await p.click(`${YEARS} [data-enarratio-x="2012"][data-enarratio-series="Grants"]`);
     expect(await eventLog(p, YEARS)).toBe(
       'enarratio:select {"chartId":"entries-by-year-select","field":"year","value":"2012","x":"2012"}',

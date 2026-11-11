@@ -54,6 +54,7 @@ Each record says where a decision came from:
 | [0036](0036-quiet-charts.md)                            | Quiet charts: solid fills, names on the chart, and a pointer that reads the whole plot |
 | [0037](0037-primitives-save-their-drawing.md)           | A primitive's drawing downloads as any chart's does                                    |
 | [0038](0038-more-chart-types.md)                        | Fifteen more chart types, drawn by Enarratio                                           |
+| [0039](0039-inline-toolbar-icons.md)                    | Toolbar icons are inline SVG, not CSS data URLs, so `img-src 'self'` pages show them   |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

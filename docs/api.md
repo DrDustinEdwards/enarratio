@@ -179,7 +179,9 @@ A chart returns:
   </p>
   <div class="enarratio-controls" role="toolbar" aria-label="Chart controls">
     <button type="button" aria-pressed="false" data-enarratio-pending inert>
-      <span class="enarratio-icon" data-icon="sound" aria-hidden="true"></span>
+      <svg class="enarratio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="..." />
+      </svg>
       <span class="enarratio-label">Sound</span>
     </button>
     <details class="enarratio-range" data-enarratio-pending inert>

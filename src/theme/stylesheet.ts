@@ -1,4 +1,3 @@
-import { ICONS } from "../controls.js";
 import { checkTheme } from "./check.js";
 import { labelColor } from "./color.js";
 import { LINE_DASHES } from "./dashes.js";
@@ -133,14 +132,6 @@ const SYMBOL_CLIPS = [
   "polygon(38% 0, 62% 0, 62% 44%, 98% 72%, 86% 92%, 50% 64%, 14% 92%, 2% 72%, 38% 44%)",
   "circle(50%)",
 ];
-
-/** Each toolbar icon as a mask: its path stroked on a 16-unit grid (record 0035). */
-const ICON_RULES = Object.entries(ICONS)
-  .map(([name, d]) => {
-    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='${d}'/></svg>`;
-    return `.enarratio-icon[data-icon="${name}"] { --enarratio-icon: url("data:image/svg+xml,${encodeURIComponent(svg)}"); }`;
-  })
-  .join("\n");
 
 /** Rules that do not depend on the theme: layout, legend, data table and the enhancement layer. */
 const BASE_RULES = `
@@ -490,15 +481,22 @@ ${Array.from({ length: 8 }, (_, i) => {
   background: color-mix(in srgb, var(--enarratio-text) 8%, var(--enarratio-background));
 }
 .enarratio-controls > button[aria-pressed="true"] { border-color: var(--enarratio-text-muted); }
-.enarratio-icon {
+/* Written as svg.enarratio-icon under .enarratio so it outranks the drawing rules above, which set
+   an svg's display, size and font size. */
+.enarratio svg.enarratio-icon {
   flex: none;
   display: inline-block;
   width: 1em;
   height: 1em;
-  background: currentColor;
-  mask: var(--enarratio-icon) center / contain no-repeat;
+  max-width: none;
+  overflow: visible;
+  font-size: inherit;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
-${ICON_RULES}
 /* The two panels: a card under the toolbar, as wide as its content and never wider. */
 .enarratio-panel {
   position: absolute;
@@ -693,9 +691,7 @@ ${textureRules(".enarratio:has(pattern)")}
    sequential ramp becomes steps between Canvas and CanvasText. Set on the drawing and legend
    themselves, so they win over a theme or a per-chart override set on the figure (B57, D3). */
 @media (forced-colors: active) {
-  /* A mask paints its background, which forced colors would make Canvas: the icon keeps the
-     button's text color, and a pressed toggle shows by its Highlight border. */
-  .enarratio-icon { forced-color-adjust: none; background: ButtonText; }
+  /* The icon strokes in the button's text color; a pressed toggle shows by its Highlight border. */
   .enarratio-controls > button[aria-pressed="true"] { border: 2px solid Highlight; }
   .enarratio svg, svg.enarratio { forced-color-adjust: none; }
   .enarratio svg, svg.enarratio, .enarratio-legend, .enarratio-tooltip {

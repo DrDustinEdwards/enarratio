@@ -48,7 +48,7 @@ describe("F1: marks on continuous charts can be clicked with a real pointer", ()
 describe("A4: a range can be picked without dragging", () => {
   it("sets a range from two clicks on the plot", async () => {
     const p = await harness.open("index.html", "light");
-    const svg = '[data-example="line"] svg';
+    const svg = '[data-example="line"] svg:not(.enarratio-icon)';
     await p.$eval(svg, (el) => el.scrollIntoView({ block: "center" }));
     const box = await p.$eval(svg, (el) => {
       const r = el.getBoundingClientRect();
