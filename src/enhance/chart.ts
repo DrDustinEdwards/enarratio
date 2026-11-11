@@ -148,6 +148,13 @@ export class Chart implements EnhancedChart {
       this.live.setAttribute("aria-live", "polite");
     }
     if (!this.live.isConnected) this.figure.append(this.live);
+    // A primitive (sparkline, uptime strip, heat strip, progress ring, timeline) has no points:
+    // it gets its toolbar, so its drawing downloads as any chart's does, and nothing else.
+    if (this.figure.hasAttribute("data-enarratio-static")) {
+      this.figure.removeAttribute("data-enarratio-interactive");
+      this.attachControls();
+      return;
+    }
     // A figure that is only a table (tableChart) gets its sortable headers and nothing else.
     if (!svg) {
       if (this.options.table)
@@ -429,7 +436,8 @@ export class Chart implements EnhancedChart {
     }
     const scale = parseScale(this.figure);
     if (this.brushRect && scale) bar.append(this.rangeForm(scale));
-    if (this.options.expand) {
+    // A primitive is small and has no points to read up close, so it is never expanded.
+    if (this.options.expand && !this.figure.hasAttribute("data-enarratio-static")) {
       this.expandButton = expander(this.figure, s, listen);
       bar.append(this.expandButton);
     }

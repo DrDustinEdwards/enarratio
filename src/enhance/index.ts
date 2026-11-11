@@ -52,8 +52,9 @@ export function enhance(
     sound: options.sound ?? true,
     strings: { ...ENHANCE_STRINGS, ...options.strings },
   };
-  // A primitive's figure (data-enarratio-static) has nothing to interact with.
-  const selector = "figure.enarratio:not([data-enarratio-static])";
+  // A primitive's figure (data-enarratio-static) has no points to read or filter, so it gets
+  // only its toolbar: the Download menu with the drawing's files (chart.ts attach).
+  const selector = "figure.enarratio";
   const figures = [...root.querySelectorAll<HTMLElement>(selector)];
   if (root instanceof HTMLElement && root.matches(selector)) figures.unshift(root);
   return figures.map((figure) => {
