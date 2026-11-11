@@ -199,3 +199,38 @@ export function fitTicks<T>(
   if (step === last && Math.floor(last / least) + 1 > 2) step = least;
   return ticks.filter((_, i) => i % step === 0);
 }
+
+/**
+ * Month ticks, in milliseconds, for a time axis over `ats` on a plot under 240 across (a phone's),
+ * where one tick per 80 pixels prints one or two (record 0041): every month, or every 2, 3, 4, 6
+ * or 12, the fewest that leave each label (a month over its year, "Jan" over "2026") room. Null
+ * on a wider plot, or for a span under two months, which is labeled by day. Both renderers use it.
+ */
+export function monthTicks(
+  ats: readonly number[],
+  width: number,
+  plotWidth: number,
+  max?: number,
+): number[] | null {
+  if (plotWidth >= 240 || ats.length === 0) return null;
+  const lo = new Date(Math.min(...ats));
+  const hi = new Date(Math.max(...ats));
+  const span =
+    (hi.getUTCFullYear() - lo.getUTCFullYear()) * 12 + hi.getUTCMonth() - lo.getUTCMonth();
+  if (span < 2) return null;
+  const fit = Math.max(2, Math.floor(plotWidth / (4 * charWidth(width) + 12)) + 1);
+  const step = [1, 2, 3, 4, 6, 12].find((k) => Math.floor(span / k) + 1 <= fit) ?? 12;
+  const out: number[] = [];
+  // From the first month start on or after the first point, on months the step divides.
+  const year = lo.getUTCFullYear();
+  let month = lo.getUTCMonth() + (lo.getTime() > Date.UTC(year, lo.getUTCMonth(), 1) ? 1 : 0);
+  month = Math.ceil(month / step) * step;
+  for (;;) {
+    const at = Date.UTC(year + Math.floor(month / 12), month % 12, 1);
+    if (at > hi.getTime()) break;
+    out.push(at);
+    month += step;
+  }
+  // maxXTicks stays the most labels to print (record 0040).
+  return out.length >= 2 && out.length <= (max ?? Infinity) ? out : null;
+}

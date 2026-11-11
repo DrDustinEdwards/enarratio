@@ -12,7 +12,7 @@ import {
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
-import { DEFAULT_WIDTH } from "../render/size.js";
+import { charWidth, DEFAULT_WIDTH } from "../render/size.js";
 import { numberFormat, stringsFor } from "../render/text.js";
 import { parseNewick, type TreeNode } from "./newick.js";
 
@@ -188,16 +188,27 @@ export function phylogeneticTree(options: PhylogeneticTreeOptions): string {
       }),
     );
   }
+  const width = options.width ?? DEFAULT_WIDTH;
+  const marginRight = Math.min(260, longest * 7 + 24);
+  // Where the branches have no room for two distance labels (a phone's drawing), the axis keeps
+  // one: the largest round distance, as a scale bar from the root (record 0041).
+  const top = scaleTop(maxOf(nodes.map((n) => n.x)));
+  const one = scaled && width - 16 - marginRight < 2 * (at(top).length * charWidth(width) + 6);
   const { svg } = renderPlot(
     {
-      width: options.width ?? DEFAULT_WIDTH,
+      width,
       height: options.height ?? tips * ROW + 64,
       marginTop: 16,
       marginLeft: 16,
-      marginRight: Math.min(260, longest * 7 + 24),
+      marginRight,
       marginBottom: scaled ? 44 : 16,
       x: scaled
-        ? { label: lengthLabel, grid: true, nice: true }
+        ? {
+            label: lengthLabel,
+            grid: true,
+            nice: true,
+            ...(one ? { ticks: [top], tickFormat: number } : {}),
+          }
         : { axis: null, domain: [0, deepest] },
       y: { axis: null, domain: [tips - 0.5, -0.5] },
       color: { domain: groupNames, range: [...plan.range] },
@@ -247,4 +258,11 @@ export function phylogeneticTree(options: PhylogeneticTreeOptions): string {
       ]),
     },
   });
+}
+
+/** The largest of 1, 2 and 5 times a power of ten that is no more than `value`. */
+function scaleTop(value: number): number {
+  if (!(value > 0)) return 1;
+  const power = 10 ** Math.floor(Math.log10(value));
+  return [5, 2, 1].map((k) => k * power).find((v) => v <= value) ?? power;
 }

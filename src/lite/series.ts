@@ -9,7 +9,7 @@ import {
   type SeriesChartOptions,
   type SeriesModel,
 } from "../render/line-model.js";
-import { bottomMargin, leftMargin, titleLines, topMargin } from "../render/size.js";
+import { bottomMargin, leftMargin, monthTicks, titleLines, topMargin } from "../render/size.js";
 import { axisLabel, axisTickLabels, type Frame, grid, labelLines, type Tick } from "./axis.js";
 import {
   type Continuous,
@@ -74,7 +74,10 @@ export function seriesFrame(
     const days = dayTicks(prepared, givenWidth);
     if (days) return fitTicks(days, () => "Jun 07", given.width, givenWidth, model.maxXTicks);
     const count = Math.min(model.maxXTicks ?? Infinity, givenWidth / 80);
-    return timeTicks(xDomain[0], xDomain[1], count);
+    return (
+      monthTicks([xDomain[0], xDomain[1]], given.width, givenWidth, model.maxXTicks) ??
+      timeTicks(xDomain[0], xDomain[1], count)
+    );
   };
   const lines =
     prepared.time && !model.yearTicks
@@ -135,7 +138,10 @@ export function seriesFrame(
     xTicks = thin(model.yearTicks, String).map((t) => ({ at: x(t), label: String(t) }));
   } else if (prepared.time) {
     const days = dayTicks(prepared, askedWidth);
-    const at = days ? thin(days, () => "Jun 07") : timeTicks(xDomain[0], xDomain[1], xCount);
+    const at = days
+      ? thin(days, () => "Jun 07")
+      : (monthTicks([xDomain[0], xDomain[1]], width, askedWidth, model.maxXTicks) ??
+        timeTicks(xDomain[0], xDomain[1], xCount));
     const labels = timeTickLabels(at);
     xTicks = at.map((t, i) => ({ at: x(t), label: labels[i] ?? "" }));
   } else {
@@ -270,6 +276,14 @@ export function dots(
   );
 }
 
+/** The halo Plot draws under rule labels (plot/line.ts, record 0041). */
+const HALO = {
+  "paint-order": "stroke",
+  "stroke-linejoin": "round",
+  "stroke-width": 3,
+  stroke: "var(--enarratio-background)",
+} as const;
+
 /** Reference lines across the frame, and markers down it, each labeled, as Plot draws them. */
 export function annotations(
   options: Pick<SeriesChartOptions<object>, "references">,
@@ -289,7 +303,7 @@ export function annotations(
         .join(""),
     );
     out += labels(
-      { "data-enarratio-mark": "text", "text-anchor": "end", transform: translate(0, -6) },
+      { "data-enarratio-mark": "text", "text-anchor": "end", transform: translate(0, -6), ...HALO },
       references
         .filter((r) => r.label !== "")
         .map((r) =>
@@ -317,7 +331,12 @@ export function verticalRules(rules: readonly Tick[], frame: Frame): string {
         .join(""),
     ) +
     labels(
-      { "data-enarratio-mark": "text", "text-anchor": "start", transform: translate(4, 0) },
+      {
+        "data-enarratio-mark": "text",
+        "text-anchor": "start",
+        transform: translate(4, 0),
+        ...HALO,
+      },
       rules
         .filter((r) => r.label !== "")
         .map((r) => textElement({ transform: translate(r.at, marginTop) }, r.label, "top")),

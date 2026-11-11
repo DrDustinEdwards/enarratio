@@ -445,14 +445,21 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     !grouped &&
     !horizontal &&
     stackNames <= width / 4;
+  // Two grouped series are named over the last group, each name running half a group's step
+  // from its middle; where a name is longer than that (a phone's drawing) it would run over the
+  // next group's bars, so the legend names them and the textures come back (record 0041).
+  const groupNamed =
+    options.directLabels !== false &&
+    grouped &&
+    !horizontal &&
+    seriesNames.length === 2 &&
+    longest(seriesNames) * char <= (width - 44 - 20) / Math.max(1, xNames.length) / 2;
   const baseRight = Math.ceil(
     Math.max(
       20,
       stackNamed ? stackNames : 0,
       // The second of two grouped series, named from the middle of the last bar.
-      options.directLabels !== false && grouped && !horizontal && seriesNames.length === 2
-        ? longest(seriesNames.slice(1)) * char - BAR_MAX / 2 + 10
-        : 0,
+      groupNamed ? longest(seriesNames.slice(1)) * char - BAR_MAX / 2 + 10 : 0,
       // Values past the ends of horizontal bars.
       horizontal ? 6 + longest(points.map((p) => format(p.value))) * char + 4 : 0,
     ),
@@ -617,7 +624,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     directLabels:
       options.directLabels !== false &&
       series !== undefined &&
-      (grouped || horizontal || stackNamed),
+      ((grouped && (groupNamed || seriesNames.length !== 2)) || horizontal || stackNamed),
     categoryLabel,
     categoryTitle:
       time || rawX.every((v) => typeof v === "number" && isYears([v])) ? null : categoryLabel,
