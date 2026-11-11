@@ -103,9 +103,15 @@ for (const { id, kind } of CHARTS) {
     await expectHeard(screenReader, f.alt, "the drawing's name");
     await expectHeard(screenReader, f.overview, "the overview");
 
-    // Reading on: the data table, visually hidden right after the drawing (record 0035). The reader
-    // walks every point in the drawing first, so start from the last one.
-    await section.locator("figure [tabindex][aria-label]").last().focus();
+    // Reading on: the data table, visually hidden right after the drawing (record 0035). Start from
+    // the key hint after the drawing: a point would put NVDA in the application's focus mode.
+    await section
+      .locator("figure .enarratio-hint")
+      .first()
+      .evaluate((hint) => {
+        hint.setAttribute("tabindex", "-1");
+        (hint as HTMLElement).focus();
+      });
     await pause(1000);
     await screenReader.clearSpokenPhraseLog();
     await readUntil(screenReader, "table", 10);
@@ -113,7 +119,7 @@ for (const { id, kind } of CHARTS) {
 
     // Into the points, by the reader's own keys (Guidepup logs what follows its commands): from
     // the first point, the next key must say "2 of N" and the previous key the first point again.
-    await section.locator("figure [tabindex][aria-label]").first().focus();
+    await section.locator('figure [tabindex="0"][aria-label]').first().focus();
     await pause(1000);
     const total = f.first.match(/of (\d+)$/)?.[1];
     await screenReader.clearSpokenPhraseLog();
