@@ -114,10 +114,23 @@ export function funnelChart<T extends object>(options: FunnelChartOptions<T>): s
     })
     .join("");
 
+  // Where a count and share fit neither in its bar nor beside it, on a phone's drawing, it goes on
+  // the stage's name line, at the right, and the name moves to the left (record 0041). Figures
+  // are measured a tenth wider than letters.
+  const place = (i: number): "inside" | "right" | "left" | "line" => {
+    const w = ((values[i] as number) / max) * plotWidth;
+    const wide = shown(i).length * char * 1.1;
+    if (wide + 12 <= w) return "inside";
+    if (mid + w / 2 + 6 + wide <= width - 3) return "right";
+    if (mid - w / 2 - 6 - wide >= 3 || !stacked) return "left";
+    return "line";
+  };
   const stageLabels = names
     .map((name, i) =>
       stacked
-        ? el("text", { x: n2(mid), y: n2(top(i) - 5) }, text(name))
+        ? place(i) === "line"
+          ? el("text", { x: n2(left), y: n2(top(i) - 5), "text-anchor": "start" }, text(name))
+          : el("text", { x: n2(mid), y: n2(top(i) - 5) }, text(name))
         : el("text", { x: n2(left - 12), y: n2(top(i) + bar / 2), dy: "0.32em" }, text(name)),
     )
     .join("");
@@ -127,16 +140,27 @@ export function funnelChart<T extends object>(options: FunnelChartOptions<T>): s
     .map((_, i) => {
       const w = ((values[i] as number) / max) * plotWidth;
       const label = shown(i);
-      const wide = label.length * char;
-      const inside = wide + 12 <= w;
-      const right = mid + w / 2 + 6 + wide <= width - 2;
+      const at = place(i);
+      const inside = at === "inside";
+      if (at === "line") {
+        return el(
+          "text",
+          {
+            x: n2(width - 4),
+            y: n2(top(i) - 5),
+            "text-anchor": "end",
+            fill: "var(--enarratio-text)",
+          },
+          text(label),
+        );
+      }
       return el(
         "text",
         {
-          x: n2(inside ? mid : right ? mid + w / 2 + 6 : mid - w / 2 - 6),
+          x: n2(inside ? mid : at === "right" ? mid + w / 2 + 6 : mid - w / 2 - 6),
           y: n2(top(i) + bar / 2),
           dy: "0.32em",
-          "text-anchor": inside ? "middle" : right ? "start" : "end",
+          "text-anchor": inside ? "middle" : at === "right" ? "start" : "end",
           fill: inside ? "var(--enarratio-series-text-1)" : "var(--enarratio-text)",
         },
         text(label),

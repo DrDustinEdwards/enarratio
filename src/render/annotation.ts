@@ -8,6 +8,7 @@
  */
 
 import type { FigureOptions } from "./figure.js";
+import { charWidth } from "./size.js";
 import { dateFormat, numberFormat, stringsFor } from "./text.js";
 
 /** A position on an axis: a number, a date (Date or ISO 8601 string) or a category. */
@@ -161,7 +162,12 @@ export function annotationShapes(
   annotations: readonly Annotation[],
   scaleOf: (axis: "x" | "y") => AnnotationScale | undefined,
   swap = false,
+  width?: number,
 ): AnnotationShapes {
+  // Text kept inside a drawing `width` wide, at its narrowest (record 0041).
+  const char = width === undefined ? 0 : charWidth(width);
+  const inside = (left: number, right: number): boolean =>
+    width === undefined || (left >= 3 && right <= width - 3);
   const scale = (axis: "x" | "y"): AnnotationScale | undefined =>
     scaleOf(swap ? (axis === "x" ? "y" : "x") : axis);
   const horizontal = (axis: "x" | "y"): boolean => (axis === "x") !== swap;
@@ -197,20 +203,47 @@ export function annotationShapes(
               attrs: { ...rect, fill: "var(--enarratio-text)", "fill-opacity": 0.08 },
             },
       );
-      if (a.label) behind.push(label(rect.x + 4, rect.y + 8, a.label, "start", true));
+      if (a.label) {
+        // From the range's left edge, or ending at its right edge where it would run off the
+        // drawing that way.
+        const room = a.label.length * char;
+        const fromLeft = inside(rect.x + 4, rect.x + 4 + room);
+        const end = Math.min(rect.x + rect.width - 4, (width ?? Infinity) - 3);
+        behind.push(
+          fromLeft
+            ? label(rect.x + 4, rect.y + 8, a.label, "start", true)
+            : label(end, rect.y + 8, a.label, "end", true),
+        );
+      }
       continue;
     }
     const [px, py] = swap
       ? [place(kind, scale("y"), a.y), place(kind, scale("x"), a.x)]
       : [place(kind, scale("x"), a.x), place(kind, scale("y"), a.y)];
-    const dx = a.dx ?? 0;
+    const room = a.text.length * char;
+    const extent = (x: number, along: number): [number, number] =>
+      along > 0 ? [x, x + room] : along < 0 ? [x - room, x] : [x - room / 2, x + room / 2];
+    // A note that would run off the drawing is set the other side of its point.
+    const given = a.dx ?? 0;
+    const dx =
+      !inside(...extent(px + given, given)) && inside(...extent(px - given, -given))
+        ? -given
+        : given;
     const dy = a.dy ?? 0;
-    const tx = px + dx;
+    // Where neither side has room, the text moves in from the edge it would cross.
+    const [left, right] = extent(px + dx, dx);
+    const shift =
+      width === undefined || inside(left, right)
+        ? 0
+        : right > width - 3
+          ? Math.max(width - 3 - right, 3 - left)
+          : 3 - left;
+    const tx = px + dx + shift;
     const ty = py + dy;
-    const length = Math.hypot(dx, dy);
+    const length = Math.hypot(tx - px, dy);
     if (length > 12) {
       // From just short of the text to just short of the point, with a head at the point.
-      const ux = -dx / length;
+      const ux = -(tx - px) / length;
       const uy = -dy / length;
       const end = { x: px - ux * 3, y: py - uy * 3 };
       const start = { x: tx + ux * 8, y: ty + uy * 8 };

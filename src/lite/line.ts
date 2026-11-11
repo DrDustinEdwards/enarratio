@@ -88,8 +88,12 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
 
   const hollow = forecast !== undefined;
   // Annotations from the same scales Plot's are placed with: ranges behind the marks, notes last.
-  const notes = annotationMarkup("lineChart", options.annotations, (axis) =>
-    continuousScale(axis === "x" ? x : y),
+  const notes = annotationMarkup(
+    "lineChart",
+    options.annotations,
+    (axis) => continuousScale(axis === "x" ? x : y),
+    false,
+    layout.frame.width,
   );
   const parts = [
     layout.axes,

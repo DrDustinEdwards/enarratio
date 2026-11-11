@@ -12,7 +12,7 @@ import {
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
-import { DEFAULT_WIDTH } from "../render/size.js";
+import { charWidth, DEFAULT_WIDTH, wrapTwo } from "../render/size.js";
 import { numberFormat, stringsFor, valueFormat } from "../render/text.js";
 import { fitLogistic, type LogisticFit, type LogisticParameters, logistic } from "./logistic.js";
 
@@ -127,6 +127,25 @@ export function doseResponse<T extends object>(options: DoseResponseOptions<T>):
   const midpoints = curves.map((c, k) => ({ ...c, k, y: (c.fit.bottom + c.fit.top) / 2 }));
   const inRange = midpoints.filter((m) => m.fit.ec50 >= lo && m.fit.ec50 <= hi);
 
+  const width = options.width ?? DEFAULT_WIDTH;
+  const char = charWidth(width);
+  // Where a midpoint is drawn, on the log axis between the margins.
+  const atOf = (m: (typeof inRange)[number]): number =>
+    48 +
+    ((Math.log(m.fit.ec50) - Math.log(lo)) / (Math.log(hi) - Math.log(lo) || 1)) * (width - 72);
+  const roomOf = (m: (typeof inRange)[number], side: "left" | "right"): number =>
+    Math.floor((side === "left" ? atOf(m) - 9 : width - 9 - atOf(m)) / char);
+  const whole = (m: (typeof inRange)[number]): string =>
+    `${multi ? `${m.name} ` : ""}${midpoint} ${sig(m.fit.ec50)}`;
+  // Left of the midpoint while the label fits there, else right of it, else on two lines on the
+  // side with more room (record 0041).
+  const sideOf = (m: (typeof inRange)[number]): "left" | "right" =>
+    whole(m).length <= roomOf(m, "left") ||
+    (whole(m).length > roomOf(m, "right") && roomOf(m, "left") >= roomOf(m, "right"))
+      ? "left"
+      : "right";
+  const labelOf = (m: (typeof inRange)[number]): string =>
+    wrapTwo(whole(m), Math.max(4, roomOf(m, sideOf(m)))).join("\n");
   const marks: Plot.Markish[] = [
     ...curves.map((c, k) =>
       Plot.line(
@@ -148,24 +167,43 @@ export function doseResponse<T extends object>(options: DoseResponseOptions<T>):
       strokeDasharray: "3,3",
     }),
     // Labels sit left of and below each midpoint, a line lower for every other curve, so two
-    // curves' labels do not collide.
-    ...[0, 1].map((parity) =>
-      Plot.text(
-        inRange.filter((m) => m.k % 2 === parity),
-        {
-          x: (m: (typeof inRange)[number]) => m.fit.ec50,
-          y: "y",
-          text: (m: (typeof inRange)[number]) =>
-            `${multi ? `${m.name} ` : ""}${midpoint} ${sig(m.fit.ec50)}`,
-          textAnchor: "end",
-          dx: -6,
-          dy: parity === 0 ? 14 : 30,
-          fill: "var(--enarratio-text)",
-          stroke: "var(--enarratio-background)",
-          strokeWidth: 3,
-          paintOrder: "stroke",
-        },
-      ),
+    // curves' labels do not collide; a label that would run off the drawing's left edge sits
+    // right of its midpoint instead (record 0041).
+    ...[0, 1].flatMap((parity) =>
+      (["left", "right"] as const)
+        // Right-side labels only where there are any, so a wide drawing keeps its two groups.
+        .filter(
+          (side) =>
+            side === "left" || inRange.some((m) => m.k % 2 === parity && sideOf(m) === side),
+        )
+        .map((side) =>
+          Plot.text(
+            inRange.filter((m) => m.k % 2 === parity && sideOf(m) === side),
+            {
+              x: (m: (typeof inRange)[number]) => m.fit.ec50,
+              y: "y",
+              text: labelOf,
+              textAnchor: side === "left" ? "end" : "start",
+              dx: side === "left" ? -6 : 6,
+              // The second curve's labels a line below the first's, however many lines those take.
+              dy:
+                parity === 0
+                  ? 14
+                  : 14 +
+                    16 *
+                      Math.max(
+                        1,
+                        ...inRange
+                          .filter((m) => m.k % 2 === 0)
+                          .map((m) => labelOf(m).split("\n").length),
+                      ),
+              fill: "var(--enarratio-text)",
+              stroke: "var(--enarratio-background)",
+              strokeWidth: 3,
+              paintOrder: "stroke",
+            },
+          ),
+        ),
     ),
     Plot.dot(points, {
       x: "dose",
@@ -187,7 +225,7 @@ export function doseResponse<T extends object>(options: DoseResponseOptions<T>):
   ];
   const { svg } = renderPlot(
     {
-      width: options.width ?? DEFAULT_WIDTH,
+      width,
       height: options.height ?? 360,
       marginTop: 24,
       marginLeft: 48,

@@ -254,6 +254,28 @@ describe("light barChart", () => {
     },
   );
 
+  // A phone's drawing (record 0041): month ticks, a wrapped x title and a note kept inside.
+  it("matches the Plot chart on a phone's 228-unit drawing", () => {
+    const weeks = Array.from({ length: 20 }, (_, i) => ({
+      week: new Date(Date.UTC(2025, 9, 6) + i * 7 * 86_400_000).toISOString().slice(0, 10),
+      visits: 10 + ((i * 37) % 90),
+    }));
+    const options = {
+      data: weeks,
+      x: "week" as const,
+      y: "visits" as const,
+      width: 228,
+      height: 240,
+      xLabel: "Week starting, in the season's surveillance calendar",
+      annotations: [
+        { type: "note" as const, x: "2025-12-29", y: 50, text: "Peak, 104 visits", dx: 64, dy: 20 },
+      ],
+      alt: "Visits",
+    };
+    same(lite.lineChart(options), plot.lineChart(options));
+    same(lite.areaChart(options), plot.areaChart(options));
+  });
+
   it("draws values that are all zero as bars of no height on a 0 to 1 axis, as Plot does (B41)", () => {
     const options = {
       data: [
