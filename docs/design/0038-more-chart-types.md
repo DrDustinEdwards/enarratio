@@ -60,12 +60,12 @@ Rules taken from the sources, by type:
 
 ## Decision
 
-1. **Enarratio draws all fifteen, in three releases.**
-   - 0.13.0, parts and flows: `treemap`, `sunburst`, `funnelChart`, `sankeyDiagram`,
-     `chordDiagram`.
-   - 0.14.0, targets and profiles: `radarChart`, `gaugeChart`, `bulletChart`,
-     `parallelCoordinates`.
-   - 0.15.0, time and distribution: `ganttChart`, `candlestickChart`, `calendarHeatmap`,
+1. **Enarratio draws all fifteen, built in three steps and released in two.**
+   - Parts and flows: `treemap`, `sunburst`, `funnelChart`, `sankeyDiagram`, `chordDiagram`.
+   - Targets and profiles: `radarChart`, `gaugeChart`, `bulletChart`, `parallelCoordinates`.
+     These two steps ship together as 0.13.0, since 0.12.2 was still awaiting approval when
+     both were ready.
+   - 0.14.0, time and distribution: `ganttChart`, `candlestickChart`, `calendarHeatmap`,
      `streamgraph`, `violinPlot`, `ridgelinePlot`.
 
    All are in `enarratio/plot`, beside `pieChart`.

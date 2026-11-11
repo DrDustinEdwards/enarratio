@@ -7,22 +7,6 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
-## [0.14.0] - 2026-11-11
-
-### Added
-
-- Four chart types for comparing measures, in `enarratio/plot` ([record 0038](docs/design/0038-more-chart-types.md)). Each is a full figure: toolbar, hidden data table, generated overview and summary, keyboard reading, the one-card tooltip and the quiet look.
-  - `radarChart`: a few series' profiles over three to twelve measures on one scale, each an outline with a light fill, the second on dashed. More than four series is reported as an issue.
-  - `gaugeChart`: one reading against its scale as a 240° arc, with up to five qualitative bands in one hue (darkest is worst, `lowerIsBetter` reverses them) and a target tick.
-  - `bulletChart`: Few's bullet graph, one row per measure: a bar for the value, a line for the target, and qualitative bands behind it, the same for every row or set per row. Each row has its own scale unless `sharedScale`.
-  - `parallelCoordinates`: many items over three to twelve measures, one axis each, with groups in colors and `highlight` to bring items forward and fade the rest. Up to ten lines, or the highlighted ones, are named.
-- The `QualitativeBand` type, the terms `targetValue` and `band` in `strings.terms`, and `strings.spread` for the parallel coordinates summary.
-
-### Changed
-
-- The plot-wide pointer measures distance to an unfilled line along its length, not to its bounding box, so the nearest line answers on parallel coordinates and radar outlines.
-- Names at the rim of a radial chart (radar, chord) go centered over their points when that leaves the circle much larger, as on a phone, lifted clear of the circle and of each other. The chord diagram's default height shrinks to fit a small circle.
-
 ## [0.13.0] - 2026-11-11
 
 ### Added
@@ -32,13 +16,19 @@ change the public API; every such change is listed here.
   - `sunburst`: the same hierarchy as rings, named inside the arcs where the name fits, the whole in the hole.
   - `funnelChart`: stages of a process, with each stage's share of the first and the share of the previous stage that carried on. On a narrow drawing the stage names move above the bars.
   - `sankeyDiagram`: flows from stage to stage (`from`, `to`, `value`), bands as thick as their values, nodes placed to cut crossings. A cycle throws.
-  - `chordDiagram`: flows among up to eight groups as ribbons, `directed` or shared, with the flow matrix as its table.
+  - `chordDiagram`: flows among up to eight groups as ribbons, `directed` or shared, with the flow matrix as its table. On a phone the group names go centered over the rim and the drawing gets shorter, as on the radar chart.
 - Gallery examples for each, and the terms they print (`stage`, `shareOfFirst`, `shareOfPrevious`, `ofFirst`, `ofPrevious`, `source`, `target`, `flow`, `flows`, `incoming`, `outgoing`) in `strings.terms`.
+- Four chart types for comparing measures, full figures in the same way:
+  - `radarChart`: a few series' profiles over three to twelve measures on one scale, each an outline with a light fill, the second on dashed. More than four series is reported as an issue.
+  - `gaugeChart`: one reading against its scale as a 240° arc, with up to five qualitative bands in one hue (darkest is worst, `lowerIsBetter` reverses them) and a target tick.
+  - `bulletChart`: Few's bullet graph, one row per measure: a bar for the value, a line for the target, and qualitative bands behind it, the same for every row or set per row. Each row has its own scale unless `sharedScale`.
+  - `parallelCoordinates`: many items over three to twelve measures, one axis each, with groups in colors and `highlight` to bring items forward and fade the rest. Up to ten lines, or the highlighted ones, are named.
+- The `QualitativeBand` type, the terms `targetValue` and `band` in `strings.terms`, and `strings.spread` for the parallel coordinates summary.
 
 ### Changed
 
-- The plot-wide pointer picks the mark whose shape is under it before the nearest box, so overlapping rings, ribbons and bands answer where they are drawn. This holds on every chart.
-- The pie's arc geometry moved to `src/render/arc.ts`, shared with the sunburst and chord diagram. Its drawing is unchanged.
+- The plot-wide pointer picks the mark whose shape is under it before the nearest box, so overlapping rings, ribbons and bands answer where they are drawn, and measures distance to an unfilled line along its length rather than to its box, so the nearest line answers on parallel coordinates. This holds on every chart.
+- The pie's arc geometry moved to `src/render/arc.ts`, shared with the sunburst, chord diagram, radar chart and gauge. Its drawing is unchanged.
 
 ## [0.12.2] - 2026-11-11
 

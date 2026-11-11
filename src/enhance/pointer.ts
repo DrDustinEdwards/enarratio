@@ -71,8 +71,8 @@ export class Picker {
   /** Points along each unfilled line mark, or null for a filled mark; read once. */
   private traced(): (readonly { x: number; y: number }[] | null)[] {
     this.traces ??= this.marks.map((mark) => {
-      const s = shape(mark);
-      if (!(s instanceof SVGGeometryElement) || getComputedStyle(s).fill !== "none") return null;
+      const s = shape(mark) as SVGGeometryElement;
+      if (!s.getTotalLength || getComputedStyle(s).fill != "none") return null;
       const length = s.getTotalLength();
       return Array.from({ length: 65 }, (_, k) => s.getPointAtLength((length * k) / 64));
     });
@@ -121,18 +121,19 @@ export class Picker {
     }
     const reach = REACH / (scale || 1);
     // A mark whose shape holds the pointer wins: rings, ribbons and flows overlap each other's
-    // boxes (record 0037).
+    // boxes (record 0038).
+    const boxes = this.read();
     const inside = this.marks.findIndex((mark, i) => {
-      const b = this.read()[i];
+      const b = boxes[i];
       if (!b || x < b.x || x > b.x + b.width || y < b.y || y > b.y + b.height) return false;
-      const s = shape(mark);
-      return "isPointInFill" in s && (s as SVGGeometryElement).isPointInFill(new DOMPoint(x, y));
+      const s = shape(mark) as SVGGeometryElement;
+      return !!s.isPointInFill && s.isPointInFill(new DOMPoint(x, y));
     });
     if (inside >= 0) return { indexes: [inside], column: false };
     let found = -1;
     let least = Infinity;
     const traces = this.traced();
-    this.read().forEach((b, i) => {
+    boxes.forEach((b, i) => {
       // Distance to a drawn line along its length (a parallel coordinates line crosses the whole
       // plot, so its box says nothing), else to the box, so a large mark is picked anywhere over it.
       const trace = traces[i];
