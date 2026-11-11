@@ -25,7 +25,7 @@ upgrading:
    carries a `font-size` presentation attribute that raises the size as the drawing shrinks:
    `clamp(mark, calc(a - b·cqw), max)`, measured against the frame (now a size container).
    The direct labels' fixed 11 and the progress ring's 11.2 are gone.
-4. **Textures for filled series.** Bars and areas fill series 2 to 8 with an 8-unit SVG
+4. **Textures for filled series.** (Replaced by [0036](0036-quiet-charts.md): solid fills and names on the chart, textures only where those cannot be read.) Bars and areas fill series 2 to 8 with an 8-unit SVG
    pattern (series color plus a texture in the color for text on it); series 1 stays solid.
    Legend swatches show the same textures with CSS gradients. Stacked segments and bars get a
    1px background-colored edge (grid-colored since [0026](0026-rollout-fixes.md)), and names

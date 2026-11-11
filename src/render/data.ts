@@ -219,3 +219,10 @@ function hasUserinfo(compact: string, scheme: string | undefined): boolean {
     return true;
   }
 }
+
+/**
+ * Whether numbers look like years: they print without a thousands separator (F4), and an axis of
+ * them needs no title (record 0036).
+ */
+export const isYears = (values: readonly number[]): boolean =>
+  values.length > 0 && values.every((v) => Number.isInteger(v) && v >= 1000 && v <= 2999);

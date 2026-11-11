@@ -9,16 +9,8 @@ import {
   type SeriesChartOptions,
   type SeriesModel,
 } from "../render/line-model.js";
-import { bottomMargin, leftMargin } from "../render/size.js";
-import {
-  axisLabel,
-  axisTickLabels,
-  axisTicks,
-  type Frame,
-  grid,
-  labelLines,
-  type Tick,
-} from "./axis.js";
+import { bottomMargin, leftMargin, topMargin } from "../render/size.js";
+import { axisLabel, axisTickLabels, type Frame, grid, labelLines, type Tick } from "./axis.js";
 import {
   type Continuous,
   continuous,
@@ -90,7 +82,9 @@ export function seriesFrame(
       : 1;
   const asked: Frame = {
     ...given,
-    marginBottom: bottomMargin(given.marginBottom, prepared.xLabel !== null, given.width, lines),
+    // Room above for the y axis title, as renderPlot makes for Plot's (record 0036).
+    marginTop: topMargin(given.marginTop, prepared.yLabel !== null, given.width),
+    marginBottom: bottomMargin(given.marginBottom, prepared.xTitle !== null, given.width, lines),
   };
   const { width, height, marginTop, marginRight, marginBottom } = asked;
 
@@ -117,7 +111,6 @@ export function seriesFrame(
   const marginLeft = leftMargin(
     asked.marginLeft,
     yTicks.map((t) => t.label),
-    prepared.yLabel !== null,
     width,
   );
   const frame: Frame = { ...asked, marginLeft };
@@ -150,20 +143,10 @@ export function seriesFrame(
       yTicks.map((t) => t.at),
       frame,
     ),
-    axisTicks(
-      "y",
-      yTicks.map((t) => t.at),
-      frame,
-    ),
     axisTickLabels("y", yTicks, frame),
     axisLabel("y", prepared.yLabel, frame),
-    axisTicks(
-      "x",
-      xTicks.map((t) => t.at),
-      frame,
-    ),
     axisTickLabels("x", xTicks, frame),
-    axisLabel("x", prepared.xLabel, frame, frame, labelLines(xTicks)),
+    axisLabel("x", prepared.xTitle, frame, frame, labelLines(xTicks)),
   ].join("");
 
   return {

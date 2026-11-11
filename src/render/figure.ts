@@ -198,6 +198,11 @@ export interface FigureParts {
   /** The data field series come from, which legend filters report. */
   readonly seriesField?: string;
   readonly x?: ScaleDescription;
+  /**
+   * Whether the chart's filled series are not all named on the drawing, so its textures show
+   * (record 0036): otherwise they show only for readers who ask for them.
+   */
+  readonly textured?: boolean;
   /** Which way bars run, for the entrance animation. */
   readonly orientation?: "vertical" | "horizontal";
   /** Per-figure overrides of palette slots, as CSS custom property declarations. */
@@ -591,6 +596,7 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
       "data-enarratio-x-scale": parts.x ? JSON.stringify(parts.x) : undefined,
       "data-enarratio-series-field": parts.seriesField,
       "data-enarratio-colors": slotStyle(parts.slotColors),
+      "data-enarratio-textured": parts.textured,
       // Nothing in a primitive's drawing is interactive, so enhance() leaves the figure alone.
       "data-enarratio-static": parts.fixed,
     },

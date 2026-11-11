@@ -296,8 +296,6 @@ export function genomeTrack(options: GenomeTrackOptions): string {
         type: "linear",
         domain: [1, length],
         label: positionLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
         grid: true,
       },
       y: {
@@ -305,7 +303,6 @@ export function genomeTrack(options: GenomeTrackOptions): string {
         domain: rows,
         tickFormat: trackLabel,
         label: null,
-        tickSize: 0,
         padding: 0,
       },
       color: { domain: types, range: [...plan.range] },

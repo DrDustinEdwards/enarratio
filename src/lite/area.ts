@@ -10,6 +10,7 @@ import {
   type AreaChartOptions,
   areaModel,
   type Point,
+  rightMargin,
 } from "../render/line-model.js";
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
 import { annotationMarkup, continuousScale } from "./annotate.js";
@@ -76,9 +77,9 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
       width: options.width ?? DEFAULT_WIDTH,
       height: options.height ?? DEFAULT_HEIGHT,
       marginTop: 20,
-      marginRight: 20,
+      marginRight: rightMargin(model, options.width ?? DEFAULT_WIDTH),
       marginBottom: 44,
-      marginLeft: prepared.yLabel === null ? 48 : 64,
+      marginLeft: 48,
     },
     [...points.map((p) => p.at), ...model.markers.map((m) => Number(m.x))],
     ys,
@@ -126,7 +127,8 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
       { "fill-opacity": "0" },
       (p) => ({
         cx: x(p.at),
-        cy: y((span(p)[0] + span(p)[1]) / 2),
+        // On the band's top edge, where its line is (record 0036).
+        cy: y(span(p)[1]),
         r: 4,
         fill: color(p),
       }),

@@ -17,6 +17,13 @@ export interface MarkDatum {
    */
   readonly column?: number;
   readonly row?: number;
+  /**
+   * The category or x value as a reader sees it, heading the tooltip card for the mark's column
+   * (record 0036).
+   */
+  readonly at?: string;
+  /** The mark's value as a reader sees it, first in its row of the tooltip card (record 0036). */
+  readonly shown?: string;
 }
 
 /** A datum's keys as attribute names and values, in the order they are written. */
@@ -30,5 +37,7 @@ export function datumAttributes(datum: MarkDatum): [string, string][] {
   if (datum.series !== undefined) out.push(["data-enarratio-series", datum.series]);
   if (datum.column !== undefined) out.push(["data-enarratio-col", String(datum.column)]);
   if (datum.row !== undefined) out.push(["data-enarratio-row", String(datum.row)]);
+  if (datum.at !== undefined) out.push(["data-enarratio-at", datum.at]);
+  if (datum.shown !== undefined) out.push(["data-enarratio-shown", datum.shown]);
   return out;
 }

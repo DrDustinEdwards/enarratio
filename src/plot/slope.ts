@@ -202,7 +202,6 @@ export function slopeChart<T extends object>(options: SlopeChartOptions<T>): str
         padding: 0,
         axis: "top",
         label: null,
-        tickSize: 0,
       },
       y: { domain: [...domain], axis: null },
       marks,

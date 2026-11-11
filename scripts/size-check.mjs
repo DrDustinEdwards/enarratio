@@ -21,8 +21,8 @@ import { rolldown } from "rolldown";
 
 /** The most a light chart entry may weigh, bundled, minified and gzipped (40 kB). */
 const LITE_LIMIT = 40_000;
-/** The most the enhancement layer may weigh, bundled, minified and gzipped (D6, record 0035). */
-const ENHANCE_LIMIT = 10_000;
+/** The most the enhancement layer may weigh, bundled, minified and gzipped (D6, records 0035 and 0036). */
+const ENHANCE_LIMIT = 12_000;
 
 const root = resolve(import.meta.dirname, "..");
 const pkg = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));

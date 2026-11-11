@@ -235,7 +235,7 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
       width: options.width ?? DEFAULT_WIDTH,
       height: options.height ?? 360,
       marginTop: 20,
-      marginLeft: titerLabel === null ? 56 : 72,
+      marginLeft: 56,
       marginBottom: 44,
       x: {
         type: "linear",
@@ -243,8 +243,6 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
         ticks: groups.map((_, i) => i),
         tickFormat: (i: number) => groups[i] ?? "",
         label: groupLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
       },
       y: {
         type: "log",
@@ -253,8 +251,6 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
         ticks,
         tickFormat: tick,
         label: titerLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
         grid: true,
       },
       color: { domain: plan.names, range: [...plan.range] },

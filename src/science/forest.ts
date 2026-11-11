@@ -233,8 +233,6 @@ export function forestPlot<T extends object>(options: ForestPlotOptions<T>): str
         domain: [Math.min(...allX), Math.max(...allX)],
         nice: true,
         label: estimateLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
         labelOffset: favors ? 50 : 34,
         ...(log ? { ticks: 5, tickFormat: plain } : {}),
         grid: true,
@@ -244,7 +242,6 @@ export function forestPlot<T extends object>(options: ForestPlotOptions<T>): str
         ticks: names.map((_, i) => (i === rows.length ? rows.length + 0.2 : i)),
         tickFormat: (v: number) =>
           v === rows.length + 0.2 ? (pooledName ?? "") : (rows[v]?.name ?? ""),
-        tickSize: 0,
         label: null,
       },
       marks,

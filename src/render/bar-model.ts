@@ -9,6 +9,7 @@ import {
   calendarDates,
   DAY,
   domainOf,
+  isYears,
   type KeysOfType,
   markKey,
   maxOf,
@@ -31,8 +32,9 @@ import {
 } from "./figure.js";
 import { type Bounds, type IntervalFields, intervalText, readInterval } from "./interval.js";
 import { planSeries, type SeriesPlan } from "./series.js";
-import { DEFAULT_HEIGHT, DEFAULT_WIDTH, fitTicks } from "./size.js";
+import { charWidth, DEFAULT_HEIGHT, DEFAULT_WIDTH, fitTicks } from "./size.js";
 import { stringsFor, valueAxis, valueFormat } from "./text.js";
+import { finishBars } from "./bar-marks.js";
 import { texture } from "./texture.js";
 
 /** Options for `barChart`, from `enarratio/plot` or `enarratio/lite`. */
@@ -92,7 +94,11 @@ export interface BarChartOptions<T extends object> extends FigureOptions, AxisUn
    * label (`yLabel`).
    */
   readonly colors?: Readonly<Record<string, SeriesColor>>;
-  /** The category axis label; defaults to the `x` field name; `null` hides it. */
+  /**
+   * The category axis label; defaults to the `x` field name; `null` hides it. A time axis or an
+   * axis of years draws no title, its labels saying what they are; the data table, hover details
+   * and summary still use it.
+   */
   readonly xLabel?: string | null;
   /** The value axis label; defaults to the `y` field name or "Count"; `null` hides it. */
   readonly yLabel?: string | null;
@@ -115,9 +121,11 @@ export interface BarChartOptions<T extends object> extends FigureOptions, AxisUn
    */
   readonly maxXTicks?: number;
   /**
-   * Print each series' name inside its bars where the name fits, so series are told apart by
-   * text as well as color (A1). Stacked layouts only; small segments keep their hover details and
-   * the data table.
+   * Name the series on the drawing (default true): beside the last stack of vertical stacked
+   * bars, or over the last group of two grouped series, so series are told apart by text as well
+   * as color (A1, record 0036). A chart whose series are not all named this way (horizontal or
+   * more than two grouped series, a series missing from the last stack, or `false` here) fills
+   * series 2 to 8 with textures instead.
    */
   readonly directLabels?: boolean;
   /**
@@ -275,14 +283,26 @@ export interface BarModel {
   readonly horizontal: boolean;
   /** Series side by side, each category a facet. */
   readonly grouped: boolean;
-  /** Whether a series name goes inside each stacked segment it fits in. */
+  /** Whether the series are named on the drawing where they can be (finishBars). */
   readonly directLabels: boolean;
   readonly categoryLabel: string | null;
+  /**
+   * The category axis title the drawing shows: none on a time axis or an axis of years, whose
+   * labels say what they are (record 0036). The table and text keep `categoryLabel`.
+   */
+  readonly categoryTitle: string | null;
   readonly valueLabel: string | null;
   readonly format: (value: number) => string;
   readonly width: number;
   readonly height: number;
   readonly marginLeft: number;
+  /** Room on the right for the series names beside the last stack, or the values past the bars. */
+  readonly marginRight: number;
+  /**
+   * The padding of the band the bars sit in (categories, or each group's series when grouped),
+   * as fractions of a step, wide enough that no bar is drawn wider than {@link BAR_MAX}.
+   */
+  readonly padding: { readonly inner: number; readonly outer: number };
   /** The category labels to print, when not all of them are. */
   readonly thinned: readonly string[] | undefined;
   /** The value axis's tick format for huge values, and whether every value is zero (B41). */
@@ -311,9 +331,6 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   const { data, x, y, series } = options;
   validateFigure(KIND, options);
   if (data.length === 0) throw new Error(`${KIND}: data is empty`);
-  if (options.directLabels && options.layout === "grouped") {
-    throw new Error(`${KIND}: directLabels needs the stacked layout; grouped bars have a legend`);
-  }
   if (options.wholeNumbers && y === undefined) {
     throw new Error(
       `${KIND}: wholeNumbers is for bars with y; counted bars always have whole ticks`,
@@ -407,6 +424,8 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     ...(series === undefined ? {} : { series: p.series }),
     column: columnOf.get(p.x) ?? 0,
     row: rowOf.get(p.series) ?? 0,
+    at: p.x,
+    shown: `${format(p.value)}${intervalOf(p)}`,
   });
   const linkOf = options.href;
 
@@ -462,6 +481,42 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
       )
     : 0;
 
+  // No bar wider than BAR_MAX (record 0036). The band's length is taken at the margins given;
+  // a margin widened later for the tick labels only narrows the bars further.
+  const marginLeft = horizontal ? Math.min(labelMargin, labelWidth * 7 + 16) : 44;
+  const char = charWidth(width);
+  const longest = (names: Iterable<string>): number =>
+    Math.max(0, ...[...names].map((n) => n.length));
+  const marginRight = Math.ceil(
+    Math.max(
+      20,
+      // Series names beside the last stack: the leader and the name.
+      options.directLabels !== false && series !== undefined && !grouped && !horizontal
+        ? 14 + longest(seriesNames) * char + 4
+        : 0,
+      // The second of two grouped series, named from the middle of the last bar.
+      options.directLabels !== false && grouped && !horizontal && seriesNames.length === 2
+        ? longest(seriesNames.slice(1)) * char - BAR_MAX / 2 + 10
+        : 0,
+      // Values past the ends of horizontal bars.
+      horizontal ? 6 + longest(points.map((p) => format(p.value))) * char + 4 : 0,
+    ),
+  );
+  const length = horizontal ? height - 20 - 44 : width - marginLeft - marginRight;
+  const padding = grouped
+    ? (() => {
+        const facet = (length * (1 - FACET_PADDING)) / (xNames.length + FACET_PADDING);
+        const n = seriesNames.length;
+        const inner = 0.05;
+        const outer = (facet * (1 - inner)) / BAR_MAX - n + inner;
+        return { inner, outer: Math.max(0.05, outer / 2) };
+      })()
+    : (() => {
+        const n = xNames.length;
+        const p = Math.max(0.2, Math.min(0.9, (length - BAR_MAX * n) / (length + BAR_MAX)));
+        return { inner: p, outer: p };
+      })();
+
   const rows = xNames.map((name) => [
     name,
     ...seriesNames.map((s) => {
@@ -515,24 +570,24 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     },
   ] as const;
 
-  return {
+  const model: BarModel = {
     points,
     xNames,
     seriesNames,
     plan,
     horizontal,
     grouped,
-    directLabels: options.directLabels === true && series !== undefined,
+    directLabels: options.directLabels !== false && series !== undefined,
     categoryLabel,
+    categoryTitle:
+      time || rawX.every((v) => typeof v === "number" && isYears([v])) ? null : categoryLabel,
     valueLabel,
     format,
     width,
     height,
-    marginLeft: horizontal
-      ? Math.min(labelMargin, labelWidth * 7 + 16)
-      : valueLabel === null
-        ? 44
-        : 60,
+    marginLeft,
+    marginRight,
+    padding,
     thinned,
     tickLabel,
     valueAxis: valueAxis(ends, options.locale),
@@ -542,10 +597,12 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     link: linkOf ? (p) => safeHref(KIND, linkOf(p.x)) : undefined,
     bounds,
     alt: options.alt,
-    figure: (svg) =>
-      figure(options, {
+    figure: (svg) => {
+      const finished = finishBars(svg, model);
+      return figure(options, {
         kind: "bar",
-        svg: texture(svg, slotStyle(plan.slotColors)),
+        svg: texture(finished.svg, slotStyle(plan.slotColors)),
+        textured: !finished.labeled,
         orientation: horizontal ? "horizontal" : "vertical",
         legend: series === undefined ? [] : plan.legend,
         ...(series === undefined ? {} : { seriesField: series }),
@@ -574,21 +631,16 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
           // The bars' links, which the image does not expose, are reached here (0026).
           ...(linkOf ? { links: xNames.map((name) => safeHref(KIND, linkOf(name))) } : {}),
         },
-      }),
+      });
+    },
   };
+  return model;
 }
 
-/** A name fits in a segment when the segment is this much taller and wider than the text. */
-const LABEL_HEIGHT = 16;
-const CHAR_WIDTH = 7.2;
-
-/**
- * Whether a series name fits inside a stacked segment of the given size, for `directLabels`.
- * Both renderers decide with this, from the drawn geometry.
- */
-export function labelFits(name: string, width: number, height: number): boolean {
-  return height >= LABEL_HEIGHT && width >= name.length * CHAR_WIDTH + 8;
-}
+/** The widest a bar is drawn, in user units: wider ones read as blocks, not lengths (record 0036). */
+export const BAR_MAX = 40;
+/** The padding between groups of grouped bars, each a facet. */
+export const FACET_PADDING = 0.15;
 
 /**
  * A category name in two lines of at most `room` characters, broken at the last space that fits;

@@ -1,5 +1,10 @@
 import * as Plot from "@observablehq/plot";
-import { type BarChartOptions, type BarPoint, barModel, labelFits } from "../render/bar-model.js";
+import {
+  type BarChartOptions,
+  type BarPoint,
+  barModel,
+  FACET_PADDING,
+} from "../render/bar-model.js";
 import type { Bounds } from "../render/interval.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { drawAnnotations } from "./annotate.js";
@@ -22,7 +27,7 @@ export type { BarChartOptions } from "../render/bar-model.js";
  */
 export function barChart<T extends object>(options: BarChartOptions<T>): string {
   const model = barModel(options);
-  const { points, xNames, seriesNames, horizontal, grouped, thinned, categoryLabel } = model;
+  const { points, xNames, seriesNames, horizontal, grouped, thinned, categoryTitle } = model;
 
   // The SVG is one image, so a bar holds no link: its link rides on it for enhance(), and the
   // data table carries the same links for keyboards and screen readers (0026).
@@ -48,15 +53,16 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
 
   const categoryScale = {
     domain: grouped ? seriesNames : xNames,
-    label: grouped ? null : categoryLabel,
-    padding: grouped ? 0.05 : 0.2,
+    label: grouped ? null : categoryTitle,
+    paddingInner: model.padding.inner,
+    paddingOuter: model.padding.outer,
     ...(grouped ? { axis: null } : { tickFormat: model.tickLabel }),
     ...(!grouped && thinned ? { ticks: thinned } : {}),
   };
   const facetScale = {
     domain: xNames,
-    label: categoryLabel,
-    padding: 0.15,
+    label: categoryTitle,
+    padding: FACET_PADDING,
     axis: horizontal ? "left" : "bottom",
     tickFormat: model.tickLabel,
     ...(thinned ? { ticks: thinned } : {}),
@@ -64,8 +70,6 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
   const ticks = model.countTicks;
   const valueScale = {
     label: model.valueLabel,
-    labelArrow: "none",
-    labelAnchor: "center",
     grid: true,
     zero: true,
     // Counts are whole numbers, so their axis never shows 0.5, and the axis ends at the last
@@ -90,6 +94,7 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
       height: model.height,
       marginTop: 20,
       marginLeft: model.marginLeft,
+      marginRight: model.marginRight,
       marginBottom: 44,
       ...(horizontal
         ? {
@@ -108,7 +113,6 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
     model.alt,
     "img",
     steps(
-      model.directLabels ? (svg) => labelSegments(svg) : undefined,
       model.bounds ? capErrorBars : undefined,
       drawAnnotations("barChart", options.annotations, horizontal),
     ),
@@ -136,39 +140,4 @@ function errorMarks(model: ReturnType<typeof barModel>): Plot.Markish[] {
       ? Plot.ruleX(rows, { x: "series", fx: "x", y1: "lower", y2: "upper", ...style })
       : Plot.ruleX(rows, { x: "x", y1: "lower", y2: "upper", ...style }),
   ];
-}
-
-/**
- * Writes each series' name inside the stacked segments it fits in, in the color chosen for text
- * on that series. Drawn after Plot lays out the bars, from their final geometry.
- */
-function labelSegments(svg: SVGSVGElement): void {
-  const group = svg.querySelector('[data-enarratio-mark="bar"]');
-  if (!group) return;
-  const document = svg.ownerDocument;
-  const labels = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  labels.setAttribute("data-enarratio-mark", "bar label");
-  labels.setAttribute("aria-hidden", "true");
-  // Labels sit on the bars they name; pointer events go through them to the bar.
-  labels.setAttribute("pointer-events", "none");
-  labels.setAttribute("text-anchor", "middle");
-  for (const mark of group.querySelectorAll("[data-enarratio-key]")) {
-    const shape = mark.localName === "rect" ? mark : mark.querySelector("rect");
-    const name = mark.getAttribute("data-enarratio-series");
-    const fill = shape?.getAttribute("fill") ?? "";
-    const slot = /--enarratio-series-(\d)/.exec(fill)?.[1];
-    if (!shape || !name || !slot) continue;
-    const [bx, by, bw, bh] = ["x", "y", "width", "height"].map((a) =>
-      Number(shape.getAttribute(a)),
-    ) as [number, number, number, number];
-    if (!labelFits(name, bw, bh)) continue;
-    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute("x", String(bx + bw / 2));
-    text.setAttribute("y", String(by + bh / 2));
-    text.setAttribute("dy", "0.35em");
-    text.setAttribute("fill", `var(--enarratio-series-text-${slot})`);
-    text.textContent = name;
-    labels.append(text);
-  }
-  group.after(labels);
 }

@@ -26,6 +26,7 @@ import {
   type XScale,
 } from "./marks.js";
 import { animateFrom, DURATION, geometry, reducedMotion } from "./motion.js";
+import { crosshair, fillCard, type Picked, Picker } from "./pointer.js";
 import { sanitize } from "./sanitize.js";
 import { drawHits, measureHits } from "./targets.js";
 import type { BrushDetail, EnhancedChart, ResolvedOptions, SelectDetail } from "./types.js";
@@ -90,6 +91,14 @@ export class Chart implements EnhancedChart {
   private hideTimer: ReturnType<typeof setTimeout> | undefined;
   /** The first end of a range picked by clicking twice (A4). */
   private rangeStart: number | null = null;
+  /** Finds the column or mark nearest a pointer (record 0036). */
+  private picker: Picker | null = null;
+  /** Moves the crosshair of a line or area chart, or hides it. */
+  private cross: ((picked: Picked | null) => void) | null = null;
+  /** The kind of pointer that last pressed on the drawing. */
+  private pointerType = "mouse";
+  /** Where the pointer is across the page, so a column's card never sits under it; null by key. */
+  private pointerX: number | null = null;
 
   constructor(figure: HTMLElement, options: ResolvedOptions) {
     this.figure = figure;
@@ -166,10 +175,10 @@ export class Chart implements EnhancedChart {
       });
     }
 
+    // Clicks belong to the marks and their targets; hovering belongs to the whole drawing
+    // (attachPointer).
     const pointAt = (mark: SVGGraphicsElement, target: Element): void => {
       const href = mark.getAttribute("data-enarratio-href");
-      this.listen(target, "pointerenter", () => this.hover(mark));
-      this.listen(target, "pointerleave", () => this.hover(null));
       if (this.filters(mark)) this.listen(target, "click", () => this.toggleMark(mark));
       else if (href !== null) this.listen(target, "click", () => location.assign(href));
     };
@@ -187,7 +196,9 @@ export class Chart implements EnhancedChart {
       },
     );
 
+    if (marks.length > 0) this.attachPointer(svg);
     if (this.options.filter) this.attachLegend();
+    this.attachSpotlight();
     if (this.options.brush && parseScale(this.figure)) this.attachBrush(svg);
     this.attachControls();
     if (this.options.entrance) this.attachEntrance();
@@ -309,7 +320,10 @@ export class Chart implements EnhancedChart {
         if (point) place(point, rect, box.left, box.top);
       });
     };
-    this.layout = () => this.later(read, write);
+    this.layout = () => {
+      this.picker?.reset();
+      this.later(read, write);
+    };
     // Also when a chart enhanced while hidden is shown, and when the window resizes.
     if (typeof ResizeObserver === "function") {
       this.cleanup.push(onResize(svg, () => this.layout()));
@@ -330,6 +344,71 @@ export class Chart implements EnhancedChart {
   private rowOf(index: number): number {
     const mark = this.marks[index];
     return mark ? place(mark).row : 0;
+  }
+
+  /**
+   * The whole drawing answers a pointer (record 0036): moving over it picks the nearest column of
+   * a bar, line or area chart, or the nearest mark within reach on others, and shows it as a
+   * keyboard focus would. A finger dragging across scrubs the same way (the drawing pans only
+   * vertically, CSS), and a tap shows what is under it; the card stays until a tap elsewhere.
+   */
+  private attachPointer(svg: SVGSVGElement): void {
+    const picker = new Picker(this.figure, this.marks);
+    this.picker = picker;
+    const kind = this.figure.getAttribute("data-enarratio");
+    if (picker.byColumn && (kind === "line" || kind === "area")) {
+      this.cross = crosshair(svg, picker, this.marks);
+      this.cleanup.push(() => svg.querySelector(".enarratio-crosshair")?.remove());
+    }
+    const at = (event: PointerEvent): void => {
+      this.pointerX = event.clientX;
+      const p = svgPoint(svg, event);
+      const scale = svg.getScreenCTM()?.a ?? 1;
+      this.show(picker.pick(p.x, p.y, scale));
+    };
+    this.listen(svg, "pointermove", (e) => {
+      const event = e as PointerEvent;
+      // A touch moves the view only once pressed; a mouse hovers, and a mouse dragging picks a
+      // range, which the card would cover.
+      if (event.pointerType !== "mouse" && event.buttons === 0) return;
+      if (event.pointerType === "mouse" && event.buttons !== 0) {
+        this.show(null);
+        return;
+      }
+      at(event);
+    });
+    this.listen(svg, "pointerdown", (e) => {
+      const event = e as PointerEvent;
+      this.pointerType = event.pointerType;
+      if (event.pointerType !== "mouse") at(event);
+    });
+    this.listen(svg, "pointerleave", (e) => {
+      if ((e as PointerEvent).pointerType === "mouse") this.show(null);
+    });
+    this.listen(document, "pointerdown", (e) => {
+      if (!this.figure.contains(e.target as Node)) this.show(null);
+    });
+  }
+
+  /**
+   * Legend entries spotlight their series while pointed at or focused: every other series' marks,
+   * lines and names fade (record 0036). A click still filters, where the chart filters.
+   */
+  private attachSpotlight(): void {
+    for (const item of this.figure.querySelectorAll<HTMLElement>(
+      ".enarratio-legend li[data-slot]",
+    )) {
+      const slot = item.getAttribute("data-slot") ?? "";
+      const on = (): void => {
+        if (!this.selected) this.figure.setAttribute("data-enarratio-spotlight", slot);
+      };
+      const off = (): void => this.figure.removeAttribute("data-enarratio-spotlight");
+      this.listen(item, "pointerenter", on);
+      this.listen(item, "pointerleave", off);
+      this.listen(item, "focusin", on);
+      this.listen(item, "focusout", off);
+      this.cleanup.push(off);
+    }
   }
 
   /**
@@ -519,7 +598,8 @@ export class Chart implements EnhancedChart {
     let dragged = false;
     this.listen(svg, "pointerdown", (e) => {
       const event = e as PointerEvent;
-      if (event.button !== 0) return;
+      // A finger dragging scrubs instead (attachPointer); a range is the Range form's then.
+      if (event.button !== 0 || event.pointerType === "touch") return;
       start = clampX(svgPoint(svg, event).x);
       dragging = false;
     });
@@ -558,6 +638,8 @@ export class Chart implements EnhancedChart {
       }
       const target = event.target as Element | null;
       if (target?.closest(`${MARK}, .enarratio-hit`)) return;
+      // A tap reads the column under it (attachPointer) rather than starting a range.
+      if (this.pointerType === "touch") return;
       const x = svgPoint(svg, event).x;
       if (x < Math.min(r0, r1) || x > Math.max(r0, r1)) return;
       if (this.rangeStart === null) {
@@ -638,36 +720,77 @@ export class Chart implements EnhancedChart {
   }
 
   /**
-   * A mark under the pointer or with focus: its tooltip, and the other series dimmed while no
-   * filter is on (C9). Null when it leaves.
+   * A mark with focus, or one the sound is playing: shows its column, as a pointer over it would,
+   * or the mark alone on charts without columns. Null when it leaves.
    */
   private hover(mark: SVGGraphicsElement | null): void {
-    const series = mark?.getAttribute("data-enarratio-series") ?? null;
-    for (const m of this.marks) {
-      m.toggleAttribute(
-        "data-enarratio-faded",
-        series !== null && !this.selected && m.getAttribute("data-enarratio-series") !== series,
-      );
-    }
-    if (mark) this.showTip(mark);
+    this.pointerX = null;
+    const index = mark ? this.marks.indexOf(mark) : -1;
+    const picked =
+      index < 0 ? null : (this.picker?.columnOf(index) ?? { indexes: [index], column: false });
+    this.show(picked);
+  }
+
+  /**
+   * Shows what was picked (record 0036): one tooltip card for it; on bars the other columns fade,
+   * on lines and areas the crosshair moves to it, and on other charts the other series fade, while
+   * no filter is on (C9). Null hides it all.
+   */
+  private show(picked: Picked | null): void {
+    const chosen = new Set(picked?.indexes ?? []);
+    const series =
+      picked && !picked.column
+        ? (this.marks[picked.indexes[0] ?? -1]?.getAttribute("data-enarratio-series") ?? null)
+        : null;
+    const bars = this.figure.getAttribute("data-enarratio") === "bar";
+    this.marks.forEach((m, i) => {
+      const fade =
+        picked !== null &&
+        !this.selected &&
+        (picked.column
+          ? bars && !chosen.has(i)
+          : series !== null && m.getAttribute("data-enarratio-series") !== series);
+      m.toggleAttribute("data-enarratio-faded", fade);
+    });
+    this.cross?.(picked);
+    if (picked) this.showTip(picked.indexes.flatMap((i) => this.marks[i] ?? []));
     else this.scheduleHide();
   }
 
-  private showTip(mark: SVGGraphicsElement): void {
+  private showTip(marks: readonly SVGGraphicsElement[]): void {
     const tip = this.tooltip;
-    if (!tip) return;
+    if (!tip || marks.length === 0) return;
     clearTimeout(this.hideTimer);
-    tip.textContent = this.texts.get(mark) ?? label(mark);
+    fillCard(tip, this.figure, marks, this.texts);
     tip.hidden = false;
-    const box = mark.getBoundingClientRect();
+    const boxes = marks.map((m) => m.getBoundingClientRect());
+    const box = {
+      left: Math.min(...boxes.map((b) => b.left)),
+      right: Math.max(...boxes.map((b) => b.right)),
+      top: Math.min(...boxes.map((b) => b.top)),
+      bottom: Math.max(...boxes.map((b) => b.bottom)),
+    };
     const tipBox = tip.getBoundingClientRect();
-    const left = Math.min(
-      Math.max(TIP_GAP, box.left + box.width / 2 - tipBox.width / 2),
-      document.documentElement.clientWidth - tipBox.width - TIP_GAP,
-    );
-    const above = box.top - tipBox.height - TIP_GAP;
+    const page = document.documentElement.clientWidth;
+    let left: number;
+    let top: number;
+    if (marks.length > 1) {
+      // A column: beside it and past the pointer, on the right where it fits, else the left,
+      // level with its top, so the card never covers what the pointer is reading.
+      const px = this.pointerX;
+      left = Math.max(box.right, px ?? box.right) + TIP_GAP;
+      if (left + tipBox.width > page - TIP_GAP) {
+        left = Math.min(box.left, px ?? box.left) - tipBox.width - TIP_GAP;
+      }
+      top = Math.max(TIP_GAP, box.top);
+    } else {
+      left = box.left + (box.right - box.left) / 2 - tipBox.width / 2;
+      const above = box.top - tipBox.height - TIP_GAP;
+      top = above > 0 ? above : box.bottom + TIP_GAP;
+    }
+    left = Math.min(Math.max(TIP_GAP, left), page - tipBox.width - TIP_GAP);
     tip.style.left = `${left + scrollX}px`;
-    tip.style.top = `${(above > 0 ? above : box.bottom + TIP_GAP) + scrollY}px`;
+    tip.style.top = `${top + scrollY}px`;
   }
 
   private hideTip(): void {
@@ -966,6 +1089,8 @@ export class Chart implements EnhancedChart {
     this.tooltip?.remove();
     this.tooltip = null;
     this.brushRect = null;
+    this.picker = null;
+    this.cross = null;
     this.rangeInputs = [];
     this.expandButton = null;
     this.layout = () => {};
@@ -988,6 +1113,7 @@ export class Chart implements EnhancedChart {
       mark.removeAttribute("data-enarratio-dimmed");
       mark.removeAttribute("data-enarratio-faded");
     }
+    this.figure.removeAttribute("data-enarratio-spotlight");
     for (const [title, parent] of titles) parent.append(title);
     this.untabbedFrame?.setAttribute("tabindex", "0");
     this.untabbedFrame = null;

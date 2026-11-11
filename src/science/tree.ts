@@ -197,7 +197,7 @@ export function phylogeneticTree(options: PhylogeneticTreeOptions): string {
       marginRight: Math.min(260, longest * 7 + 24),
       marginBottom: scaled ? 44 : 16,
       x: scaled
-        ? { label: lengthLabel, labelAnchor: "center", labelArrow: "none", grid: true, nice: true }
+        ? { label: lengthLabel, grid: true, nice: true }
         : { axis: null, domain: [0, deepest] },
       y: { axis: null, domain: [tips - 0.5, -0.5] },
       color: { domain: groupNames, range: [...plan.range] },

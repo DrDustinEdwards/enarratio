@@ -18,6 +18,32 @@ const dashGradient = (dash: string): string => {
 };
 
 import { assertCssText, defineTheme } from "./define.js";
+
+/**
+ * The legend's textures for series 2 to 8, matching the patterns in the drawing, under `scope`:
+ * a chart that shows its textures, or any chart with patterns in a media query that asks for
+ * them (record 0036).
+ */
+function textureRules(scope: string): string {
+  const stripes = (deg: number): string =>
+    `repeating-linear-gradient(${deg}deg, var(--enarratio-stripes))`;
+  const textures = [
+    stripes(-45),
+    "radial-gradient(var(--enarratio-ink) 1px, transparent 1.5px) 0 0 / 4px 4px",
+    stripes(0),
+    stripes(90),
+    stripes(45),
+    `${stripes(0)}, ${stripes(90)}`,
+    `${stripes(45)}, ${stripes(-45)}`,
+  ];
+  return [
+    `${scope} [data-slot] {
+  --enarratio-ink: color-mix(in srgb, var(--enarratio-slot-ink) calc(var(--enarratio-opacity-texture, 0.6) * 100%), transparent);
+  --enarratio-stripes: transparent 0 3px, var(--enarratio-ink) 3px 4.5px;
+}`,
+    ...textures.map((t, i) => `${scope} [data-slot="${i + 2}"] { --enarratio-texture: ${t}; }`),
+  ].join("\n");
+}
 import { sequentialEdges, seriesLabels } from "./shades.js";
 import type { ColorScheme, Gridlines, Theme } from "./types.js";
 
@@ -232,8 +258,7 @@ ${SYMBOL_CLIPS.map(
 ${Array.from(
   { length: 8 },
   (_, i) =>
-    `.enarratio [data-slot="${i + 1}"] { --enarratio-slot: var(--enarratio-series-${i + 1}); --enarratio-slot-ink: var(--enarratio-series-text-${i + 1}); }
-.enarratio [data-enarratio-mark="bar label"] [fill="var(--enarratio-series-text-${i + 1})"] { stroke: var(--enarratio-series-${i + 1}); }`,
+    `.enarratio [data-slot="${i + 1}"] { --enarratio-slot: var(--enarratio-series-${i + 1}); --enarratio-slot-ink: var(--enarratio-series-text-${i + 1}); }`,
 ).join("\n")}
 ${Array.from(
   { length: 5 },
@@ -260,35 +285,22 @@ ${Array.from({ length: 5 }, (_, i) => {
 .enarratio, .enarratio-tooltip { --enarratio-texture: none; --enarratio-slot-edge: transparent; }
 .enarratio-swatch { box-sizing: border-box; border: var(--enarratio-border-width, 1px) solid var(--enarratio-slot-edge); }
 .enarratio-swatch { background: var(--enarratio-texture), var(--enarratio-slot); }
-/* Filled series 2 to 8 carry a texture as well as a color (B5); the legend shows the same ones. */
-.enarratio-texture { stroke-opacity: var(--enarratio-opacity-texture, 0.6); }
-.enarratio:has(pattern) [data-slot] {
-  --enarratio-ink: color-mix(in srgb, var(--enarratio-slot-ink) calc(var(--enarratio-opacity-texture, 0.6) * 100%), transparent);
-  --enarratio-stripes: transparent 0 3px, var(--enarratio-ink) 3px 4.5px;
+/* Filled series are solid. Series 2 to 8 carry a texture as well (B5), and the legend the same
+   ones, on a chart that does not name every series on the drawing (data-enarratio-textured), and
+   for readers who ask for more contrast, force colors or print (record 0036). */
+.enarratio-texture { stroke-opacity: 0; }
+.enarratio[data-enarratio-textured] .enarratio-texture {
+  stroke-opacity: var(--enarratio-opacity-texture, 0.6);
 }
-.enarratio:has(pattern) [data-slot="2"] { --enarratio-texture: repeating-linear-gradient(-45deg, var(--enarratio-stripes)); }
-.enarratio:has(pattern) [data-slot="3"] { --enarratio-texture: radial-gradient(var(--enarratio-ink) 1px, transparent 1.5px) 0 0 / 4px 4px; }
-.enarratio:has(pattern) [data-slot="4"] { --enarratio-texture: repeating-linear-gradient(0deg, var(--enarratio-stripes)); }
-.enarratio:has(pattern) [data-slot="5"] { --enarratio-texture: repeating-linear-gradient(90deg, var(--enarratio-stripes)); }
-.enarratio:has(pattern) [data-slot="6"] { --enarratio-texture: repeating-linear-gradient(45deg, var(--enarratio-stripes)); }
-.enarratio:has(pattern) [data-slot="7"] {
-  --enarratio-texture: repeating-linear-gradient(0deg, var(--enarratio-stripes)), repeating-linear-gradient(90deg, var(--enarratio-stripes));
-}
-.enarratio:has(pattern) [data-slot="8"] {
-  --enarratio-texture: repeating-linear-gradient(45deg, var(--enarratio-stripes)), repeating-linear-gradient(-45deg, var(--enarratio-stripes));
-}
-/* A grid-colored edge, so adjacent bars and stacked segments never touch (B6). It is decoration,
-   like a gridline, so a contrast check reads a bar by its fill, not by this edge (0026). */
+${textureRules(".enarratio[data-enarratio-textured]")}
+/* A background-colored gap between adjacent bars and stacked segments, so they never touch (B6,
+   record 0036). */
 .enarratio [data-enarratio-mark="bar"] [data-enarratio-key] {
-  stroke: var(--enarratio-grid);
-  stroke-width: var(--enarratio-bar-gap, 1px);
+  stroke: var(--enarratio-background);
+  stroke-width: var(--enarratio-bar-gap, 2px);
 }
-/* Names printed on bars keep a halo of their bar's color over its texture. */
-.enarratio [data-enarratio-mark="bar label"] text {
-  paint-order: stroke;
-  stroke-width: var(--enarratio-halo-width, 3px);
-  stroke-linejoin: round;
-}
+/* Values and series names written beside the bars (record 0036). */
+.enarratio [data-enarratio-mark="bar label"] text { font-variant-numeric: tabular-nums; }
 .enarratio-data {
   margin: var(--enarratio-space, 0.5em) 0 0;
   font-size: var(--enarratio-font-size-small, 0.875em);
@@ -348,9 +360,10 @@ ${Array.from({ length: 5 }, (_, i) => {
   position: absolute;
   z-index: var(--enarratio-z-tooltip, 10);
   max-width: var(--enarratio-tooltip-max-width, 18em);
-  padding: var(--enarratio-tooltip-padding, 0.35em 0.6em);
+  min-width: var(--enarratio-tooltip-min-width, 8em);
+  padding: var(--enarratio-tooltip-padding, 0.5em 0.65em);
   border: var(--enarratio-border-width, 1px) solid var(--enarratio-grid);
-  border-radius: var(--enarratio-radius-tooltip, 0.3em);
+  border-radius: var(--enarratio-radius-tooltip, 0.5em);
   background: var(--enarratio-background);
   color: var(--enarratio-text);
   font-family: var(--enarratio-font);
@@ -359,9 +372,46 @@ ${Array.from({ length: 5 }, (_, i) => {
   box-shadow: var(--enarratio-tooltip-shadow, 0 2px 8px rgb(0 0 0 / 15%));
 }
 .enarratio-tooltip[hidden] { display: none; }
-.enarratio [data-enarratio-key] {
+/* The tooltip card (record 0036): what the column is, then a row per mark, value first. */
+.enarratio-tooltip p { margin: 0; }
+.enarratio-tip-at {
+  margin-bottom: var(--enarratio-gap-row, 0.25em) !important;
+  color: var(--enarratio-text-muted);
+}
+.enarratio-tip-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: var(--enarratio-gap-inline, 0.4em);
+}
+.enarratio-tip-row b {
+  font-weight: var(--enarratio-font-weight-emphasis, 600);
+  font-variant-numeric: tabular-nums;
+}
+.enarratio-tip-row span:last-child:not(.enarratio-tip-key) { color: var(--enarratio-text-muted); }
+.enarratio-tip-key {
+  display: inline-block;
+  width: 0.75em;
+  height: 0.25em;
+  border-radius: 0.125em;
+  forced-color-adjust: none;
+}
+.enarratio [data-enarratio-key],
+.enarratio svg :is([fill^="var(--enarratio-series-"], [stroke^="var(--enarratio-series-"], [fill^="url(#enarratio-"]) {
   transition: opacity var(--enarratio-duration-hover, 150ms) var(--enarratio-ease-out, ease-out);
 }
+/* A finger dragging across a drawing scrubs it (record 0036); the page still scrolls up and down.
+   A wide drawing that scrolls sideways in its frame keeps its sideways pan. */
+.enarratio[data-enarratio-enhanced] .enarratio-frame:not(.enarratio-frame-wide) > svg { touch-action: pan-y; }
+/* The crosshair at the picked x of a line or area chart. */
+.enarratio-crosshair line { stroke: var(--enarratio-text-muted); stroke-width: 1px; }
+.enarratio-crosshair circle { stroke: var(--enarratio-background); stroke-width: 2px; }
+/* A legend entry pointed at or focused spotlights its series: every mark, line and name in
+   another series' color fades (record 0036). */
+${Array.from({ length: 8 }, (_, i) => {
+  const n = i + 1;
+  return `.enarratio[data-enarratio-spotlight="${n}"] svg :is([fill^="var(--enarratio-series-"], [stroke^="var(--enarratio-series-"], [fill^="url(#enarratio-"]):not([fill="var(--enarratio-series-${n})"], [stroke="var(--enarratio-series-${n})"], [fill$="-${n})"]) { opacity: var(--enarratio-opacity-dimmed, 0.25); }`;
+}).join("\n")}
 .enarratio[data-enarratio-interactive] [data-enarratio-field] { cursor: pointer; }
 .enarratio[data-enarratio-enhanced] [data-enarratio-href] { cursor: pointer; }
 .enarratio [data-enarratio-dimmed] { opacity: var(--enarratio-opacity-dimmed, 0.25); }
@@ -386,7 +436,7 @@ ${Array.from({ length: 5 }, (_, i) => {
   outline-offset: calc(var(--enarratio-focus-width-inner, 5px) / 2);
   box-shadow: 0 0 0 calc(var(--enarratio-focus-width-inner, 5px) / 2) var(--enarratio-background);
 }
-.enarratio [data-enarratio-faded] { opacity: var(--enarratio-opacity-faded, 0.5); }
+.enarratio [data-enarratio-faded] { opacity: var(--enarratio-opacity-faded, 0.35); }
 /* The keys, shown while a point has focus and read as the points' description otherwise. */
 .enarratio-frame:not(:focus-within) + .enarratio-hint {
   position: absolute;
@@ -632,7 +682,8 @@ ${ICON_RULES}
 }
 /* More contrast: full-strength textures, wider gaps, and gridlines in the muted text color (B43). */
 @media (prefers-contrast: more) {
-  .enarratio-texture { stroke-opacity: 1; }
+  .enarratio[data-enarratio] .enarratio-texture { stroke-opacity: 1; }
+${textureRules(".enarratio:has(pattern)")}
   .enarratio [data-enarratio-mark="bar"] [data-enarratio-key] { stroke-width: 2px; }
   .enarratio [data-enarratio-mark$="grid"] { stroke: var(--enarratio-text-muted); }
   .enarratio-swatch { outline: 1px solid var(--enarratio-text); }
@@ -669,7 +720,8 @@ ${[10, 25, 40, 70, 100]
   )
   .join("\n")}
   }
-  .enarratio-texture { stroke-opacity: 1; }
+  .enarratio[data-enarratio] .enarratio-texture { stroke-opacity: 1; }
+${textureRules(".enarratio:has(pattern)")}
   .enarratio [data-enarratio-mark="area"] { fill-opacity: 1; }
 ${LINE_DASHES.map(
   (dash, i) =>
@@ -684,6 +736,8 @@ ${LINE_DASHES.map(
    (C5). */
 @media print {
   .enarratio, .enarratio-tooltip { color-scheme: light; }
+  .enarratio[data-enarratio] .enarratio-texture { stroke-opacity: var(--enarratio-opacity-texture, 0.6); }
+${textureRules(".enarratio:has(pattern)")}
   .enarratio { break-inside: avoid; }
   .enarratio-frame { overflow: visible; background: none; }
   .enarratio-frame-wide > svg { min-width: 0; }

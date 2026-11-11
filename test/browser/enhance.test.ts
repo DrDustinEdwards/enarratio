@@ -81,13 +81,18 @@ describe("enhance: stacked bar", () => {
     }
   });
 
-  it("shows hover details for the focused mark and fades the other series", async () => {
-    const tip = await page.$eval(".enarratio-tooltip:not([hidden])", (el) => el.textContent);
-    expect(tip).toBe("Year 2019, Publications: 3");
-    const faded = await page.$$eval(`${STACKED} [data-enarratio-faded]`, (els) => [
-      ...new Set(els.map((el) => el.getAttribute("data-enarratio-series"))),
+  it("shows the focused mark's column as one card and fades the other columns", async () => {
+    const card = await page.$eval(".enarratio-tooltip:not([hidden])", (el) => [
+      el.querySelector(".enarratio-tip-at")?.textContent,
+      [...el.querySelectorAll(".enarratio-tip-row")].map((r) => r.textContent),
     ]);
-    expect(faded.sort()).toEqual(["Grants", "Talks"]);
+    expect(card[0]).toBe("2019");
+    expect(card[1]).toContain("3Publications");
+    const faded = await page.$$eval(`${STACKED} [data-enarratio-faded]`, (els) => [
+      ...new Set(els.map((el) => el.getAttribute("data-enarratio-x"))),
+    ]);
+    expect(faded.length).toBeGreaterThan(0);
+    expect(faded).not.toContain("2019");
   });
 
   it("filters with Enter, dims other series, and clears with Escape", async () => {
@@ -295,8 +300,13 @@ describe("enhance: toolbar, expand and address", () => {
     ).toBe(false);
     expect([...doc.querySelectorAll("svg > text")].map((t) => t.textContent)).toEqual([
       "Weekly positive tests by county",
-      "Positive tests",
     ]);
+    // The y title stands level above its labels, so it stays in the drawing (record 0036).
+    expect(
+      [...doc.querySelectorAll('[data-enarratio-mark="y-axis label"] text')].map(
+        (t) => t.textContent,
+      ),
+    ).toEqual(["Positive tests"]);
     await p.close();
   });
 
@@ -351,18 +361,23 @@ describe("enhance: update and destroy", () => {
       const server = figure.outerHTML;
       const [chart] = enhance(section);
       if (!chart) throw new Error("no chart");
-      const before = figure.querySelector('[data-enarratio-x="Contact"]')?.getAttribute("width");
+      // Rounded bars are paths (record 0036); the update gives Contact another bar's shape.
+      const before = figure.querySelector('[data-enarratio-x="Contact"]')?.getAttribute("d");
+      const target = figure.querySelector('[data-enarratio-x="Publications"]')?.getAttribute("d");
       const template = document.createElement("template");
       template.innerHTML = server;
-      template.content.querySelector('[data-enarratio-x="Contact"]')?.setAttribute("width", "100");
+      template.content
+        .querySelector('[data-enarratio-x="Contact"]')
+        ?.setAttribute("d", target ?? "");
       const next = template.innerHTML;
       chart.update(next);
       const announced = figure.querySelector("[aria-live]")?.textContent;
-      const during = figure.querySelector('[data-enarratio-x="Contact"]')?.getAttribute("width");
+      const during = figure.querySelector('[data-enarratio-x="Contact"]')?.getAttribute("d");
       await new Promise((r) => setTimeout(r, 700));
-      const after = figure.querySelector('[data-enarratio-x="Contact"]')?.getAttribute("width");
+      const after = figure.querySelector('[data-enarratio-x="Contact"]')?.getAttribute("d");
       chart.destroy();
       return {
+        target,
         before,
         announced,
         during,
@@ -373,12 +388,13 @@ describe("enhance: update and destroy", () => {
       };
     });
     expect(result.announced).toBe("Chart updated");
-    expect(Number(result.during)).toBeLessThan(100);
-    expect(result.after).toBe("100");
+    // It starts from the old shape and tweens to the new one.
+    expect(result.during).toBe(result.before);
+    expect(result.after).toBe(result.target);
     expect(result.role).toBe("img");
     expect(result.titles).toBe(5);
     expect(result.frameTab).toBe("0");
-    expect(result.before).not.toBe("100");
+    expect(result.before).not.toBe(result.target);
     await p.close();
   });
 });

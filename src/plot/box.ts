@@ -13,8 +13,8 @@ import { type ChartDescription, categoryRange, valueRange } from "../render/desc
 import { type BoxStats, boxStats } from "../render/distribution.js";
 import {
   type AxisUnits,
-  type FigureOptions,
   figure,
+  type FigureOptions,
   type SeriesColor,
   unitLabel,
   validateFigure,
@@ -124,7 +124,7 @@ function read<T extends object>(
     domain: niceLinear([minOf(all), maxOf(all)]) as [number, number],
     width: options.width ?? DEFAULT_WIDTH,
     height: options.height ?? 360,
-    marginLeft: options.yLabel === null ? 48 : 64,
+    marginLeft: 48,
   };
 }
 
@@ -224,14 +224,10 @@ function frame(r: Read): Plot.PlotOptions {
       ticks: r.groups.map((_, i) => i),
       tickFormat: (i: number) => r.groups[i] ?? "",
       label: r.xLabel,
-      labelAnchor: "center",
-      labelArrow: "none",
     },
     y: {
       domain: [...r.domain],
       label: r.yLabel,
-      labelAnchor: "center",
-      labelArrow: "none",
       grid: true,
     },
   };

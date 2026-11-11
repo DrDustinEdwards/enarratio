@@ -190,14 +190,12 @@ export function doseResponse<T extends object>(options: DoseResponseOptions<T>):
       width: options.width ?? DEFAULT_WIDTH,
       height: options.height ?? 360,
       marginTop: 24,
-      marginLeft: responseLabel === null ? 48 : 64,
+      marginLeft: 48,
       marginRight: 24,
       marginBottom: 44,
       x: {
         type: "log",
         label: doseLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
         grid: true,
         // Powers of ten as plain numbers (0.01, not Plot's 10m), the ticks between unlabeled.
         tickFormat: (v: number) =>
@@ -205,8 +203,6 @@ export function doseResponse<T extends object>(options: DoseResponseOptions<T>):
       },
       y: {
         label: responseLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
         grid: true,
         nice: true,
       },

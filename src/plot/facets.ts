@@ -1,12 +1,20 @@
 import * as Plot from "@observablehq/plot";
-import { type BarChartOptions, type BarPoint, barModel } from "../render/bar-model.js";
+import { finishBars } from "../render/bar-marks.js";
+import { BAR_MAX, type BarChartOptions, type BarPoint, barModel } from "../render/bar-model.js";
 import { domainOf, type KeysOfType, markKey, readCategory, readLabel } from "../render/data.js";
 import { type ChartDescription, categoryRange, valueRange } from "../render/describe.js";
-import { type AxisUnits, type FigureOptions, figure, validateFigure } from "../render/figure.js";
+import {
+  type AxisUnits,
+  type FigureOptions,
+  figure,
+  slotStyle,
+  validateFigure,
+} from "../render/figure.js";
 import { type LineChartOptions, lineModel, type Point } from "../render/line-model.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
 import { DEFAULT_WIDTH } from "../render/size.js";
+import { texture } from "../render/texture.js";
 
 /** What every small multiple shares: the facet field and the grid. */
 interface FacetOptions<T extends object> extends FigureOptions, AxisUnits {
@@ -139,22 +147,35 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
     const points = models.flatMap(({ p, m }) => m.points.map((pt) => ({ ...pt, p })));
     type Bar = BarPoint & { readonly p: Panel };
     const describe = (b: Bar): string => `${b.p.name}, ${first.describe(b)}`;
-    const { svg } = renderPlot(
+    // No bar wider than BAR_MAX (record 0036): each panel's band, at Plot's default right margin.
+    const panel =
+      ((width - 44 - 20) * (1 - facetScales.fx.padding)) / (columns + facetScales.fx.padding);
+    const barPadding = Math.max(
+      0.2,
+      Math.min(0.9, (panel - BAR_MAX * xNames.length) / (panel + BAR_MAX)),
+    );
+    const totals = new Map<string, number>();
+    for (const b of points) {
+      const id = markKey(b.p.name, b.x);
+      totals.set(id, (totals.get(id) ?? 0) + Math.max(0, b.value));
+    }
+    const tallest = Math.max(0, ...totals.values());
+    const { svg: drawn } = renderPlot(
       {
         width,
         height,
         marginTop: 28,
-        marginLeft: first.valueLabel === null ? 44 : 60,
+        marginLeft: 44,
         marginBottom: 44,
         ...facetScales,
-        x: { type: "band", domain: xNames, label: first.categoryLabel, padding: 0.2 },
+        x: { type: "band", domain: xNames, label: first.categoryTitle, padding: barPadding },
         y: {
           label: first.valueLabel,
-          labelAnchor: "center",
-          labelArrow: "none",
           grid: true,
           nice: true,
           zero: true,
+          // Headroom for the values at the tips, under the panel names (record 0036).
+          domain: [0, tallest * 1.15],
         },
         color: { domain: [...allSeries], range: [...plan.range] },
         marks: [
@@ -185,6 +206,13 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
       },
       alt,
     );
+    // Rounded tops and values at the tips, bar by bar in each panel (record 0036).
+    const { svg } = finishBars(drawn, first, {
+      points,
+      keyOf: (b) => markKey((b as Bar).p.name, b.x, b.series),
+      stackOf: (b) => markKey((b as Bar).p.name, b.x),
+      names: false,
+    });
     const cell = new Map(points.map((b) => [markKey(b.p.name, b.x, b.series), b]));
     const stacks = new Map<string, number>();
     for (const b of points) {
@@ -209,9 +237,12 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
         })),
       ),
     };
+    // Panels have no room to name their series, so several series keep the textures (record 0036).
+    const several = series !== undefined && allSeries.length > 1;
     return figure(options, {
       kind: "bar",
-      svg,
+      svg: several ? texture(svg, slotStyle(plan.slotColors)) : svg,
+      ...(several ? { textured: true } : {}),
       description,
       limits,
       legend: series === undefined ? [] : plan.legend,
@@ -263,22 +294,18 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
       width,
       height,
       marginTop: 28,
-      marginLeft: prepared.yLabel === null ? 44 : 60,
+      marginLeft: 44,
       marginRight: 20,
       marginBottom: 44,
       ...facetScales,
       x: {
         type: prepared.time ? "utc" : "linear",
-        label: prepared.xLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
+        label: prepared.xTitle,
         ticks: 4,
         ...(prepared.years ? { tickFormat: (d: number) => String(d) } : {}),
       },
       y: {
         label: prepared.yLabel,
-        labelAnchor: "center",
-        labelArrow: "none",
         grid: true,
         nice: true,
         zero: true,

@@ -60,38 +60,8 @@ export function grid(
 }
 
 /**
- * Tick marks on the left (y) or bottom (x) of the frame. `offset` moves them to the middle of a
- * band, for categories.
- */
-export function axisTicks(
-  k: "x" | "y",
-  at: readonly number[],
-  frame: Frame,
-  offset = 0,
-  placement?: Placement,
-): string {
-  if (at.length === 0) return "";
-  const paths = at
-    .map((p) =>
-      k === "y"
-        ? el("path", { transform: translate(frame.marginLeft, p), d: "M0,0L-6,0" })
-        : el("path", { transform: translate(p, frame.height - frame.marginBottom), d: "M0,0L0,6" }),
-    )
-    .join("");
-  return markGroup(
-    {
-      ...HIDDEN,
-      "data-enarratio-mark": `${k}-axis tick`,
-      transform: offset ? (k === "y" ? translate(0, offset) : translate(offset, 0)) : undefined,
-    },
-    { fill: "none", stroke: "currentColor" },
-    place(placement, paths),
-  );
-}
-
-/**
- * Tick labels beside the ticks. `padding` is the gap from the frame: 9 beside a tick mark, as
- * on value and category axes. Figures are proportional: tabular
+ * Tick labels beside the frame, 9 from its edge on value and category axes, as Plot keeps them
+ * with no tick marks (record 0036). Figures are proportional: tabular
  * figures widen the comma in some faces ("1 , 600"), and end-anchored labels need no columns.
  */
 export function axisTickLabels(
@@ -163,14 +133,15 @@ export function facetTickLabels(
   );
 }
 
-/**
- * An axis label: centered below the frame for x, or rotated and centered beside it for y. The
- * position comes from `frame`; the offset from `inset`, the margins as given.
- */
 /** The most lines in any of the ticks' labels: the `lines` axisLabel takes. */
 export const labelLines = (ticks: readonly { readonly label: string }[]): number =>
   Math.max(1, ...ticks.map((t) => t.label.split(/\r\n?|\n/).length));
 
+/**
+ * An axis label: centered below the frame for x, or across the top of the tick labels for y, where
+ * it reads as the unit (record 0036), as renderPlot has Plot draw them. The position comes from
+ * `frame`; the offset from `inset`, the margins as given.
+ */
 export function axisLabel(
   k: "x" | "y" | "fx" | "fy",
   label: string | null,
@@ -198,28 +169,29 @@ export function axisLabel(
       ),
     );
   }
-  const node = horizontal
-    ? textElement(
-        { transform: translate((marginLeft + width - marginRight) / 2, height - marginBottom) },
-        label,
-        "bottom",
-      )
-    : textElement(
-        {
-          transform: `${translate(marginLeft, (marginTop + height - marginBottom) / 2)} rotate(-90)`,
-        },
-        label,
-        "top",
-      );
+  if (!horizontal) {
+    return el(
+      "g",
+      {
+        ...HIDDEN,
+        "data-enarratio-mark": `${k}-axis label`,
+        transform: translate(-(inset.marginLeft - 3), -(inset.marginTop - 3)),
+        "text-anchor": "start",
+      },
+      textElement({ transform: translate(marginLeft, marginTop) }, label, "top"),
+    );
+  }
   return el(
     "g",
     {
       ...HIDDEN,
       "data-enarratio-mark": `${k}-axis label`,
-      transform: horizontal
-        ? translate(0, inset.marginBottom - 3)
-        : translate(-(inset.marginLeft - 3), 0),
+      transform: translate(0, inset.marginBottom - 3),
     },
-    node,
+    textElement(
+      { transform: translate((marginLeft + width - marginRight) / 2, height - marginBottom) },
+      label,
+      "bottom",
+    ),
   );
 }

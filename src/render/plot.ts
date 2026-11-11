@@ -10,7 +10,7 @@ import { escapeHtml } from "../html.js";
 import { roundNumbers } from "../lite/svg.js";
 import { datumAttributes, type MarkDatum } from "./datum.js";
 import type { ScaleDescription } from "./figure.js";
-import { bottomMargin, leftMargin, markFontSize, TITLE_LINES } from "./size.js";
+import { bottomMargin, leftMargin, markFontSize, TITLE_LINES, topMargin } from "./size.js";
 
 export type { MarkDatum } from "./datum.js";
 
@@ -144,6 +144,28 @@ function niceToTicks(options: Plot.PlotOptions): Plot.PlotOptions {
   return { ...options, ...(y ? { y } : {}) } as Plot.PlotOptions;
 }
 
+/**
+ * Quiet axes on every chart (record 0036): no tick marks, since the labels and gridlines already
+ * say where each value is (ONS, Apple's chart guidance), and the y axis title written across the
+ * top of the tick labels, where it reads as the unit, rather than turned on its side. A chart can
+ * still give a scale its own tick size or title place.
+ */
+function quietAxes(options: Plot.PlotOptions): Plot.PlotOptions {
+  const quiet = (scale: unknown, anchor: "center" | "top"): Record<string, unknown> => ({
+    tickSize: 0,
+    labelAnchor: anchor,
+    labelArrow: "none",
+    ...(scale as Record<string, unknown> | undefined),
+  });
+  return {
+    ...options,
+    x: quiet(options.x, "center"),
+    y: quiet(options.y, "top"),
+    ...(options.fx ? { fx: quiet(options.fx, "center") } : {}),
+    ...(options.fy ? { fy: quiet(options.fy, "top") } : {}),
+  } as Plot.PlotOptions;
+}
+
 /** The most lines in any x tick label: two on a time axis that names its month ("24" over "Oct"). */
 function tickLines(svg: Element): number {
   const labels = [...svg.querySelectorAll('[aria-label="x-axis tick label"] text')];
@@ -185,30 +207,40 @@ export function renderPlot(
   after?: (svg: SVGSVGElement) => void,
 ): RenderedPlot {
   const document = createDocument();
-  let svg = Plot.plot({ ...niceToTicks(options), document }) as unknown as SVGSVGElement &
-    Plot.Plot;
+  const draw = (o: Plot.PlotOptions) =>
+    Plot.plot({ ...niceToTicks(o), document }) as unknown as SVGSVGElement & Plot.Plot;
+  let fitted = quietAxes(options);
+  let svg = draw(fitted);
   // Axis labels and titles that would overlap at a narrow width get the margins they need, as
-  // the light charts compute them: the bottom first, since it sets the y ticks, then the left.
+  // the light charts compute them: the top for the y title, then the bottom, since it sets the y
+  // ticks, then the left.
   const width = Number(svg.getAttribute("width"));
-  let fitted = options;
+  const top = topMargin(
+    typeof options.marginTop === "number" ? options.marginTop : 20,
+    svg.querySelector('[aria-label$="y-axis label"]') !== null,
+    width,
+  );
+  if (top > (typeof options.marginTop === "number" ? options.marginTop : 20)) {
+    fitted = { ...fitted, marginTop: top };
+    svg = draw(fitted);
+  }
   if (typeof options.marginBottom === "number") {
     const title = svg.querySelector('[aria-label$="x-axis label"]') !== null;
     const lines = tickLines(svg);
     const needed = bottomMargin(options.marginBottom, title, width, lines);
     if (needed > options.marginBottom) {
       fitted = { ...fitted, marginBottom: needed };
-      svg = Plot.plot({ ...niceToTicks(fitted), document }) as unknown as SVGSVGElement & Plot.Plot;
+      svg = draw(fitted);
     }
   }
   if (typeof options.marginLeft === "number") {
     const labels = [...svg.querySelectorAll('[aria-label="y-axis tick label"] text')].map(
       (t) => t.textContent ?? "",
     );
-    const title = svg.querySelector('[aria-label="y-axis label"]') !== null;
-    const needed = leftMargin(options.marginLeft, labels, title, width);
+    const needed = leftMargin(options.marginLeft, labels, width);
     if (needed > options.marginLeft) {
       fitted = { ...fitted, marginLeft: needed };
-      svg = Plot.plot({ ...niceToTicks(fitted), document }) as unknown as SVGSVGElement & Plot.Plot;
+      svg = draw(fitted);
     }
   }
 
