@@ -123,7 +123,7 @@ Rules taken from the sources, by type:
 - Wilke, _Fundamentals of Data Visualization_, ch. 9: https://clauswilke.com/dataviz/boxplots-violins.html
 - Hintze and Nelson, "Violin Plots: A Box Plot-Density Trace Synergism", _The American Statistician_
   52(2), 1998, doi:10.1080/00031305.1998.10480559
-- Data Viz Catalogue: https://datavizcatalogue.com/ (the treemap, sunburst, Sankey, chord, radar,
+- Data Viz Catalogue: https://datavizcatalogue.com/ (the treemap, sunburst, Sankey, chord, radar, <!-- codespell:ignore -->
   parallel coordinates, Gantt, candlestick, violin, stream graph and calendar pages)
 - FT Visual Vocabulary: https://github.com/Financial-Times/chart-doctor/blob/main/visual-vocabulary/README.md
 - Highcharts chart types and accessibility module:
