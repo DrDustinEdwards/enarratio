@@ -54,6 +54,7 @@ Each record says where a decision came from:
 | [0036](0036-quiet-charts.md)                            | Quiet charts: solid fills, names on the chart, and a pointer that reads the whole plot |
 | [0037](0037-primitives-save-their-drawing.md)           | A primitive's drawing downloads as any chart's does                                    |
 | [0039](0039-inline-toolbar-icons.md)                    | Toolbar icons are inline SVG, not CSS data URLs, so `img-src 'self'` pages show them   |
+| [0040](0040-narrow-bars-keep-their-plot.md)             | A narrow bar chart keeps its plot: names beside the bars only when they leave it room  |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

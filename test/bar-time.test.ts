@@ -133,8 +133,13 @@ describe("barChart time axis", () => {
     expect(ticks.length).toBeGreaterThan(1);
     expect(ticks.length).toBeLessThan(15);
     expect(rows(fig)).toHaveLength(60);
-    const all = parse(barChart({ ...base, data: long, maxXTicks: 60 }));
-    expect(all.querySelectorAll('[data-enarratio-mark="x-axis tick label"] text')).toHaveLength(60);
+    // maxXTicks caps the count; it never prints more than fit (record 0040).
+    const capped = (max: number): number =>
+      parse(barChart({ ...base, data: long, maxXTicks: max })).querySelectorAll(
+        '[data-enarratio-mark="x-axis tick label"] text',
+      ).length;
+    expect(capped(60)).toBe(ticks.length);
+    expect(capped(2)).toBe(2);
   });
 
   it("filters by the interval's label once enhanced", () => {

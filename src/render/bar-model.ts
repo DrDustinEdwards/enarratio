@@ -124,7 +124,8 @@ export interface BarChartOptions<T extends object> extends FigureOptions, AxisUn
    * Name the series on the drawing (default true): beside the last stack of vertical stacked
    * bars, or over the last group of two grouped series, so series are told apart by text as well
    * as color (A1, record 0036). A chart whose series are not all named this way (horizontal or
-   * more than two grouped series, a series missing from the last stack, or `false` here) fills
+   * more than two grouped series, a series missing from the last stack, names wider than a
+   * quarter of the drawing (record 0040), or `false` here) fills
    * series 2 to 8 with textures instead.
    */
   readonly directLabels?: boolean;
@@ -432,17 +433,48 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   const width = options.width ?? DEFAULT_WIDTH;
   const height =
     options.height ?? (horizontal ? Math.max(120, xNames.length * 28 + 60) : DEFAULT_HEIGHT);
+  const char = charWidth(width);
+  const longest = (names: Iterable<string>): number =>
+    Math.max(0, ...[...names].map((n) => n.length));
+  // Series names beside the last stack (record 0036) need a leader and the longest name. They are
+  // written only while that room is at most a quarter of the drawing; on a narrower drawing (a
+  // phone) they would squeeze the bars into a sliver, so the legend names the series instead and
+  // the textures come back (record 0040).
+  const stackNames = 14 + longest(seriesNames) * char + 4;
+  const stackNamed =
+    options.directLabels !== false &&
+    series !== undefined &&
+    !grouped &&
+    !horizontal &&
+    stackNames <= width / 4;
+  const marginRight = Math.ceil(
+    Math.max(
+      20,
+      stackNamed ? stackNames : 0,
+      // The second of two grouped series, named from the middle of the last bar.
+      options.directLabels !== false && grouped && !horizontal && seriesNames.length === 2
+        ? longest(seriesNames.slice(1)) * char - BAR_MAX / 2 + 10
+        : 0,
+      // Values past the ends of horizontal bars.
+      horizontal ? 6 + longest(points.map((p) => format(p.value))) * char + 4 : 0,
+    ),
+  );
   // Category labels below the bars are thinned, as line charts' x ticks are (fitTicks), when
   // they would come closer than the least gap at the width drawn ("Sun" on "Mon" at 254 px).
-  // maxXTicks, when given, sets the count instead. The table, hover details and each bar's name
+  // maxXTicks, when given, caps the count lower still; it never prints more than fit, so a
+  // phone's drawing thins further than the wide one asked for. Beside horizontal bars each label
+  // has its own row, so only maxXTicks thins them. The table, hover details and each bar's name
   // keep every one.
   thinTicks(xNames, options.maxXTicks);
-  const across = options.maxXTicks === undefined ? width - 80 : Number.POSITIVE_INFINITY;
+  // The room the labels share is the plot's: 80 px less than the drawing, or less where the
+  // right margin holds series names or values.
+  const plot = horizontal ? width - 80 : Math.min(width - 80, width - 44 - marginRight);
+  const across = horizontal ? Number.POSITIVE_INFINITY : plot;
   // Below vertical bars, every category keeps its label while its slot holds four characters:
   // a long one wraps onto a second line and is cut there, rather than a neighbor going unnamed
   // ("Vega-Lite configuration" between two others in a 273 px column). Narrower slots thin.
   // Seven units a character is a capital's width, so lowercase text leaves a gap at the edges.
-  const slotRoom = Math.floor((width - 80) / Math.max(1, xNames.length) / 7);
+  const slotRoom = Math.floor(plot / Math.max(1, xNames.length) / 7);
   const named = !horizontal && !time && options.maxXTicks === undefined && slotRoom >= 4;
   const fitted =
     (horizontal && options.maxXTicks === undefined) || named
@@ -459,7 +491,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     ? Math.floor((labelMargin - 16) / 7)
     : named
       ? slotRoom
-      : Math.max(4, Math.floor((width - 80) / (thinned?.length ?? xNames.length) / 7));
+      : Math.max(4, Math.floor(plot / (thinned?.length ?? xNames.length) / 7));
   const cut = (text: string): string =>
     text.length <= room ? text : `${text.slice(0, room - 1).trimEnd()}…`;
   const tickLabel = (name: string): string =>
@@ -484,24 +516,6 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   // No bar wider than BAR_MAX (record 0036). The band's length is taken at the margins given;
   // a margin widened later for the tick labels only narrows the bars further.
   const marginLeft = horizontal ? Math.min(labelMargin, labelWidth * 7 + 16) : 44;
-  const char = charWidth(width);
-  const longest = (names: Iterable<string>): number =>
-    Math.max(0, ...[...names].map((n) => n.length));
-  const marginRight = Math.ceil(
-    Math.max(
-      20,
-      // Series names beside the last stack: the leader and the name.
-      options.directLabels !== false && series !== undefined && !grouped && !horizontal
-        ? 14 + longest(seriesNames) * char + 4
-        : 0,
-      // The second of two grouped series, named from the middle of the last bar.
-      options.directLabels !== false && grouped && !horizontal && seriesNames.length === 2
-        ? longest(seriesNames.slice(1)) * char - BAR_MAX / 2 + 10
-        : 0,
-      // Values past the ends of horizontal bars.
-      horizontal ? 6 + longest(points.map((p) => format(p.value))) * char + 4 : 0,
-    ),
-  );
   const length = horizontal ? height - 20 - 44 : width - marginLeft - marginRight;
   const padding = grouped
     ? (() => {
@@ -577,7 +591,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     plan,
     horizontal,
     grouped,
-    directLabels: options.directLabels !== false && series !== undefined,
+    directLabels: options.directLabels !== false && series !== undefined && (grouped || horizontal || stackNamed),
     categoryLabel,
     categoryTitle:
       time || rawX.every((v) => typeof v === "number" && isYears([v])) ? null : categoryLabel,

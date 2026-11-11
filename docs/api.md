@@ -412,11 +412,13 @@ one row per item (a CV entry, a case) is enough.
   follows its link, and its point is that link. Only relative and `http(s)`
   links are allowed.
 - `maxXTicks`: the most category labels to print; with more categories, every
-  nth label is printed from the first. Without it, labels under vertical bars
-  are thinned the same way when they would come within 12 units of each other
-  at the width drawn (seven day names at 254), as line charts' x ticks are.
+  nth label is printed from the first. Labels under vertical bars are also
+  thinned the same way when they would come within 12 units of each other at
+  the width drawn (seven day names at 254), as line charts' x ticks are, so
+  the fewer of the two print.
 - `directLabels`: name the series on the chart, on by default with `series`.
-  Stacked bars name each series beside the last column, grouped bars with two
+  Stacked bars name each series beside the last column while the names take at
+  most a quarter of the width (record 0040), grouped bars with two
   series name them over the last group, and every bar prints its value at its
   tip when all the values fit. A chart whose series cannot all be named this
   way, or with `directLabels: false`, shows the legend textures instead
