@@ -182,7 +182,10 @@ export function ganttChart<T extends object>(options: GanttChartOptions<T>): str
         text: "name",
         frameAnchor: "left",
         textAnchor: "start",
-        dy: -pitch * 0.3,
+        // Bottom-anchored just above the bar's top edge (a band padded 0.55 leaves the bar under
+        // a quarter of the pitch either side of center), so a name never touches its bar.
+        lineAnchor: "bottom",
+        dy: -(pitch * 0.25 + 2),
         fill: "var(--enarratio-text)",
         stroke: "var(--enarratio-background)",
         strokeWidth: 3,
