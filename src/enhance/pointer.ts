@@ -107,6 +107,15 @@ export class Picker {
       return best ? { indexes: best.indexes, column: true } : null;
     }
     const reach = REACH / (scale || 1);
+    // A mark whose shape holds the pointer wins: rings, ribbons and flows overlap each other's
+    // boxes (record 0037).
+    const inside = this.marks.findIndex((mark, i) => {
+      const b = this.read()[i];
+      if (!b || x < b.x || x > b.x + b.width || y < b.y || y > b.y + b.height) return false;
+      const s = shape(mark);
+      return "isPointInFill" in s && (s as SVGGeometryElement).isPointInFill(new DOMPoint(x, y));
+    });
+    if (inside >= 0) return { indexes: [inside], column: false };
     let found = -1;
     let least = Infinity;
     this.read().forEach((b, i) => {

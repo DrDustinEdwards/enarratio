@@ -52,6 +52,7 @@ Each record says where a decision came from:
 | [0034](0034-gallery-swaps-without-shift.md)             | The gallery's phone drawings and controls do not move the page                         |
 | [0035](0035-chart-toolbar.md)                           | One toolbar above the chart, and a data table for screen readers and agents            |
 | [0036](0036-quiet-charts.md)                            | Quiet charts: solid fills, names on the chart, and a pointer that reads the whole plot |
+| [0038](0038-more-chart-types.md)                        | Fifteen more chart types, drawn by Enarratio                                           |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

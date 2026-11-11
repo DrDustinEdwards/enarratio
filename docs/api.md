@@ -764,6 +764,79 @@ of zero, throws. The data table gives each value, its share and the total.
 `data`, `label`, `value`, `donut`, `centerLabel` (text in the donut's hole),
 `colors`, `formatValue`.
 
+### `treemap`
+
+`treemap(options: TreemapOptions<T>): string`. Parts of a whole as nested
+rectangles whose areas are their values, for a whole with many parts or parts
+in levels. Each row is one tile, placed by `path`, the fields from the
+outermost level in (one to four). Tiles are squarified (Bruls, Huizing and van
+Wijk 2000) and sorted largest first. Each one shows its name, and its value
+below when there is room. On two or more levels each top-level group takes a
+color and a header line with its name and total; on one level every tile is
+one color. A negative value, a repeated path or a total of zero throws. The
+data table lists every part with its value and share, each group's subtotal,
+and the whole (record 0038).
+
+### `TreemapOptions`
+
+`data`, `path`, `value`, `valueLabel`, `colors` (by top-level group),
+`formatValue`.
+
+### `sunburst`
+
+`sunburst(options: SunburstOptions<T>): string`. Parts of a whole in levels as
+rings, the top level innermost, each arc spanning its share of its parent's.
+Each top-level group takes a color its parts keep. An arc is named where its
+name fits inside it, level or along the arc. The hole holds the whole. Angles
+compare worse than areas, so prefer `treemap` when exact comparison matters.
+Same data, `path` and table as `treemap`.
+
+### `SunburstOptions`
+
+`data`, `path`, `value`, `valueLabel`, `centerLabel` (text in the hole; default
+the total), `colors`, `formatValue`.
+
+### `funnelChart`
+
+`funnelChart(options: FunnelChartOptions<T>): string`. How many reached each
+stage of a process, as bars centered on one axis, in data order. Each bar
+prints its count and its share of the first stage, and each gap the share of
+the previous stage that carried on. A negative value, or a first stage of zero,
+throws. The data table holds both shares.
+
+### `FunnelChartOptions`
+
+`data`, `stage`, `value`, `valueLabel`, `formatValue`.
+
+### `sankeyDiagram`
+
+`sankeyDiagram(options: SankeyDiagramOptions<T>): string`. Flows from stage to
+stage, one row per flow, each band as thick as what it carries. Nodes sit in
+columns by their longest path from a source, with sinks in the last column,
+and are moved so bands cross less. Each first-column node takes a color the
+flows it feeds keep, and every node is named with its total. A cycle, a loop
+or a repeated pair throws. The data table lists every flow.
+
+### `SankeyDiagramOptions`
+
+`data`, `from`, `to`, `value`, `valueLabel`, `colors` (by first-column node),
+`formatValue`. The fields are named `from` and `to` because `source` is the
+figure's source line.
+
+### `chordDiagram`
+
+`chordDiagram(options: ChordDiagramOptions<T>): string`. Flows among up to
+eight groups. Each group is an arc as long as what it sends, and each pair is a
+ribbon whose ends are as wide as what flows each way, in the color of the group
+that sends more. With `directed: false` a row is shared by both groups and
+counted on both arcs. More than eight groups throws, advising a Sankey diagram
+or a heatmap. The data table is the matrix of flows with each group's total.
+
+### `ChordDiagramOptions`
+
+`data`, `from`, `to`, `value`, `directed` (default true), `valueLabel`,
+`colors`, `formatValue`.
+
 ### `heatmap`
 
 `heatmap(options: HeatmapOptions<T>): string`. A grid colored on the theme's

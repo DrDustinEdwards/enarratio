@@ -97,6 +97,17 @@ export interface Terms {
   readonly latitude: string;
   /** A map's region column, when the caller names none. */
   readonly region: string;
+  readonly stage: string;
+  readonly shareOfFirst: string;
+  readonly shareOfPrevious: string;
+  readonly ofPrevious: string;
+  readonly ofFirst: string;
+  readonly source: string;
+  readonly target: string;
+  readonly flow: string;
+  readonly flows: string;
+  readonly incoming: string;
+  readonly outgoing: string;
   /** A dot map's landmarks, in the table, when the caller names none. */
   readonly landmark: string;
   /** After the highlighted landmark's name in the table: "Pump 7 (highlighted)". */
@@ -386,6 +397,11 @@ export const ENGLISH: Strings = {
     dumbbell: "Dumbbell plot",
     slope: "Slope chart",
     pie: "Pie chart",
+    treemap: "Treemap",
+    sunburst: "Sunburst chart",
+    funnel: "Funnel chart",
+    sankey: "Sankey diagram",
+    chord: "Chord diagram",
     waterfall: "Waterfall chart",
     "small-multiples": "Small multiples",
     table: "Table",
@@ -542,6 +558,17 @@ export const ENGLISH: Strings = {
     longitude: "Longitude",
     latitude: "Latitude",
     region: "Region",
+    stage: "Stage",
+    shareOfFirst: "Share of first",
+    shareOfPrevious: "Share of previous",
+    ofPrevious: "of previous",
+    ofFirst: "of first",
+    source: "From",
+    target: "To",
+    flow: "Flow",
+    flows: "Flows",
+    incoming: "In",
+    outgoing: "Out",
     landmark: "Landmark",
     highlightedLandmark: "highlighted",
     forecast: "Forecast",

@@ -7,6 +7,23 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-11-11
+
+### Added
+
+- Five chart types for parts and flows, in `enarratio/plot` ([record 0038](docs/design/0038-more-chart-types.md)). Each is a full figure: toolbar, hidden data table, generated overview and summary, keyboard reading, the one-card tooltip and the quiet look.
+  - `treemap`: parts of a whole as squarified tiles, in one to four levels (`path`), each top-level group in its own color under a header with its total.
+  - `sunburst`: the same hierarchy as rings, named inside the arcs where the name fits, the whole in the hole.
+  - `funnelChart`: stages of a process, with each stage's share of the first and the share of the previous stage that carried on. On a narrow drawing the stage names move above the bars.
+  - `sankeyDiagram`: flows from stage to stage (`from`, `to`, `value`), bands as thick as their values, nodes placed to cut crossings. A cycle throws.
+  - `chordDiagram`: flows among up to eight groups as ribbons, `directed` or shared, with the flow matrix as its table.
+- Gallery examples for each, and the terms they print (`stage`, `shareOfFirst`, `shareOfPrevious`, `ofFirst`, `ofPrevious`, `source`, `target`, `flow`, `flows`, `incoming`, `outgoing`) in `strings.terms`.
+
+### Changed
+
+- The plot-wide pointer picks the mark whose shape is under it before the nearest box, so overlapping rings, ribbons and bands answer where they are drawn. This holds on every chart.
+- The pie's arc geometry moved to `src/render/arc.ts`, shared with the sunburst and chord diagram. Its drawing is unchanged.
+
 ## [0.12.1] - 2026-11-11
 
 ### Fixed

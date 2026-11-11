@@ -10,6 +10,7 @@ export type { IntervalFields } from "../render/interval.js";
 export type { Annotation, AnnotationValue } from "./annotate.js";
 export { type BarChartOptions, barChart } from "./bar.js";
 export { type BoxPlotOptions, boxPlot, type StripPlotOptions, stripPlot } from "./box.js";
+export { type ChordDiagramOptions, chordDiagram } from "./chord.js";
 export { type DivergingBarChartOptions, divergingBarChart } from "./diverging.js";
 export {
   type DotPlotOptions,
@@ -20,6 +21,7 @@ export {
   rangePlot,
 } from "./dot.js";
 export { type SmallMultiplesOptions, smallMultiples } from "./facets.js";
+export { type FunnelChartOptions, funnelChart } from "./funnel.js";
 export { type HeatmapOptions, heatmap } from "./heatmap.js";
 export {
   type DensityPlotOptions,
@@ -38,6 +40,9 @@ export {
   type SeriesChartOptions,
 } from "./line.js";
 export { type PieChartOptions, pieChart } from "./pie.js";
+export { type SankeyDiagramOptions, sankeyDiagram } from "./sankey.js";
 export { type ScatterPlotOptions, scatterPlot } from "./scatter.js";
 export { type SlopeChartOptions, slopeChart } from "./slope.js";
+export { type SunburstOptions, sunburst } from "./sunburst.js";
+export { type TreemapOptions, treemap } from "./treemap.js";
 export { type WaterfallChartOptions, waterfallChart } from "./waterfall.js";
