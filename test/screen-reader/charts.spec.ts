@@ -105,10 +105,13 @@ for (const { id, kind } of CHARTS) {
 
     // Reading on: the data table, visually hidden right after the drawing (record 0035). Start from
     // the key hint after the drawing: a point would put NVDA in the application's focus mode.
-    await section.locator("figure .enarratio-hint").first().evaluate((hint) => {
-      hint.setAttribute("tabindex", "-1");
-      (hint as HTMLElement).focus();
-    });
+    await section
+      .locator("figure .enarratio-hint")
+      .first()
+      .evaluate((hint) => {
+        hint.setAttribute("tabindex", "-1");
+        (hint as HTMLElement).focus();
+      });
     await pause(1000);
     await screenReader.clearSpokenPhraseLog();
     await readUntil(screenReader, "table", 10);
