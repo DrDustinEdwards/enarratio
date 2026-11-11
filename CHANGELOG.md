@@ -24,9 +24,16 @@ change the public API; every such change is listed here.
 - The plot-wide pointer picks the mark whose shape is under it before the nearest box, so overlapping rings, ribbons and bands answer where they are drawn. This holds on every chart.
 - The pie's arc geometry moved to `src/render/arc.ts`, shared with the sunburst and chord diagram. Its drawing is unchanged.
 
+## [0.12.2] - 2026-11-11
+
 ### Fixed
 
+- The toolbar icons show on pages whose Content Security Policy is `img-src 'self'`. They were CSS masks made from `data:` URLs, which such a policy blocks. Each icon is now an inline `<svg class="enarratio-icon">` stroked in the button's color, built from elements by the enhancement layer, so no policy change and no Trusted Types policy is needed ([record 0039](docs/design/0039-inline-toolbar-icons.md)).
 - A primitive's figure (sparkline, uptime strip, heat strip, progress ring, timeline) has the same Download menu as every chart: "Download CSV", "Download SVG", "Download PNG", "Download tactile SVG" and, with an id, "Copy embed". `enhance()` now picks up these figures and builds only their toolbar; they still get no points, Sound, Range or Expand (record 0037).
+
+### Changed
+
+- The toolbar's icons are `<svg>` elements, not empty `<span data-icon>` elements. A host selector that picks the drawing with `.enarratio svg` should use `.enarratio-frame > svg`. The `--enarratio-icon` custom property is gone.
 
 ## [0.12.1] - 2026-11-11
 

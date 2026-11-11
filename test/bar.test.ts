@@ -58,7 +58,7 @@ describe("barChart", () => {
     );
     expect(fig.tagName.toLowerCase()).toBe("figure");
     expect(fig.hasAttribute("aria-label")).toBe(false);
-    const svg = fig.querySelector("svg");
+    const svg = fig.querySelector("svg:not(.enarratio-icon)");
     expect(svg?.getAttribute("role")).toBe("img");
     expect(svg?.getAttribute("aria-label")).toBe("Entries by year");
     expect(svg?.querySelector("figcaption, table, p")).toBeNull();
@@ -277,7 +277,7 @@ describe("barChart", () => {
       barChart({ data: entries, x: "year", alt: "  ", onIssue: (i) => issues.push(i.code) }),
     );
     expect(issues).toEqual(["title-missing", "alt-missing"]);
-    expect(fig.querySelector("svg")?.getAttribute("aria-label")).toBe(
+    expect(fig.querySelector("svg:not(.enarratio-icon)")?.getAttribute("aria-label")).toBe(
       "Bar chart with 3 points. X axis, year: 2022 to 2024. Y axis, Count: 0 to 3. Count rose from 2 (2022) to 3 (2024). The highest value is 3 (2024). The lowest is 1 (2023).",
     );
     expect(fig.querySelector(".enarratio-finding")).toBeNull();

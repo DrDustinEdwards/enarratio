@@ -3,7 +3,8 @@
  * buttons and popovers, expand, and sorting a table chart's table.
  */
 
-import type { ICONS } from "../controls.js";
+import { ICONS } from "../controls.js";
+import { SVG_NS } from "./marks.js";
 import type { EnhanceStrings } from "./types.js";
 
 /** Fills `{name}` in a string with its value. */
@@ -110,13 +111,17 @@ export function expander(
   return toggle;
 }
 
-/** A toolbar icon: an empty span the stylesheet draws, hidden from assistive technology. */
-function icon(name: keyof typeof ICONS): HTMLSpanElement {
-  const el = document.createElement("span");
-  el.className = "enarratio-icon";
-  el.setAttribute("data-icon", name);
-  el.setAttribute("aria-hidden", "true");
-  return el;
+/** A toolbar icon: an inline SVG built from elements, stroked in the button's color, hidden from assistive technology. */
+function icon(name: keyof typeof ICONS): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("class", "enarratio-icon");
+  svg.setAttribute("viewBox", "0 0 16 16");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  const path = document.createElementNS(SVG_NS, "path");
+  path.setAttribute("d", ICONS[name]);
+  svg.append(path);
+  return svg;
 }
 
 /** A toolbar control's face: its icon and its word, which is also its name. */
