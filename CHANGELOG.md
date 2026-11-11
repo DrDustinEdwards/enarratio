@@ -11,7 +11,7 @@ change the public API; every such change is listed here.
 
 ### Fixed
 
-- The toolbar icons show on pages whose Content Security Policy is `img-src 'self'`. They were CSS masks made from `data:` URLs, which such a policy blocks. Each icon is now an inline `<svg class="enarratio-icon">` stroked in the button's color, built from elements by the enhancement layer, so no policy change and no Trusted Types policy is needed ([record 0037](docs/design/0037-inline-toolbar-icons.md)).
+- The toolbar icons show on pages whose Content Security Policy is `img-src 'self'`. They were CSS masks made from `data:` URLs, which such a policy blocks. Each icon is now an inline `<svg class="enarratio-icon">` stroked in the button's color, built from elements by the enhancement layer, so no policy change and no Trusted Types policy is needed ([record 0039](docs/design/0039-inline-toolbar-icons.md)).
 - A primitive's figure (sparkline, uptime strip, heat strip, progress ring, timeline) has the same Download menu as every chart: "Download CSV", "Download SVG", "Download PNG", "Download tactile SVG" and, with an id, "Copy embed". `enhance()` now picks up these figures and builds only their toolbar; they still get no points, Sound, Range or Expand (record 0037).
 
 ### Changed

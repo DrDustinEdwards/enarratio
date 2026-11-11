@@ -1,4 +1,4 @@
-# 0037. Toolbar icons are inline SVG, not CSS data URLs
+# 0039. Toolbar icons are inline SVG, not CSS data URLs
 
 Status: accepted, 2026-11-11. Replaces the "Icons are masks" item of [0035](0035-chart-toolbar.md).
 

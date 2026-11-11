@@ -43,7 +43,7 @@ readers and AI agents, which read it from the HTML whether or not it is shown.
   only the layer can do is inert and hidden with scripts off, and "Download CSV" is a link in a native
   disclosure, so it works without script. A table chart and a primitive's figure have the toolbar with
   only Download.
-- **Icons are masks** (replaced by [0037](0037-inline-toolbar-icons.md): inline SVG), drawn by the stylesheet on empty, hidden spans, so no icon is an `<svg>` a page's
+- **Icons are masks** (replaced by [0039](0039-inline-toolbar-icons.md): inline SVG), drawn by the stylesheet on empty, hidden spans, so no icon is an `<svg>` a page's
   chart selectors could pick up. In forced colors they take `ButtonText`.
 - **A keyboard never lands on something invisible.** A table chart's table still sorts; the hidden
   table gets no sort buttons. If a row header is a link, the table shows while focus is in it (WCAG 2.2
