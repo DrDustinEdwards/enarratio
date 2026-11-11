@@ -136,7 +136,7 @@
     "pngjs": "7.0.0",
     "puppeteer": "25.16.0",
     "rolldown": "1.2.16",
-    "typescript": "5.9.3",
+    "typescript": "7.0.2",
     "vitest": "4.1.12"
   },
   "peerDependencies": {
