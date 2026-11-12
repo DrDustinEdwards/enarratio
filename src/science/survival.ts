@@ -19,7 +19,7 @@ import {
   validateFigure,
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
-import { planSeries } from "../render/series.js";
+import { planSeries, seriesLegend } from "../render/series.js";
 import { charWidth, DEFAULT_WIDTH, TITLE_LINES, textGrowth } from "../render/size.js";
 import { numberFormat, stringsFor } from "../render/text.js";
 import { atRiskAt, kaplanMeier, type SurvivalEstimate, type SurvivalStep } from "./kaplan-meier.js";
@@ -68,8 +68,7 @@ interface Curve {
  */
 export function survivalPlot<T extends object>(options: SurvivalPlotOptions<T>): string {
   const { data, time, event, group } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const strings = stringsFor(options.strings);
   const { terms } = strings;
   const locale = options.locale ? { locale: options.locale } : {};
@@ -349,9 +348,7 @@ export function survivalPlot<T extends object>(options: SurvivalPlotOptions<T>):
         ],
       })),
     },
-    legend: multi ? plan.legend : [],
-    ...(multi && group ? { seriesField: group } : {}),
-    slotColors: plan.slotColors,
+    ...seriesLegend(plan, multi, group),
     table: {
       columns: [
         ...(multi ? [group] : []),

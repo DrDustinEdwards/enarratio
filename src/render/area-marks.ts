@@ -4,7 +4,7 @@
  * construction, as {@link texture} does for patterns.
  */
 
-import { escapeHtml } from "../html.js";
+import { escapeHtml, readAttributes, unescapeHtml } from "../html.js";
 import { num } from "../lite/svg.js";
 import { spreadLabels } from "./direct-labels.js";
 import type { Prepared } from "./line-model.js";
@@ -12,16 +12,6 @@ import type { SeriesPlan } from "./series.js";
 
 /** How far past the last point a band's name starts, in user units. */
 const OFFSET = 6;
-
-const ATTRIBUTE = /\s([\w:-]+)="([^"]*)"/g;
-
-const unescape = (value: string): string =>
-  value
-    .replaceAll("&quot;", '"')
-    .replaceAll("&#39;", "'")
-    .replaceAll("&lt;", "<")
-    .replaceAll("&gt;", ">")
-    .replaceAll("&amp;", "&");
 
 /**
  * Names each stacked band at the last x, in the middle of the band there, spread so no two names
@@ -39,13 +29,13 @@ export function finishAreas(
   if (!directLabels) return { svg, labeled: false };
   // The points: one circle per value, keyed by column and row.
   const points = [...svg.matchAll(/<circle\b([^>]*)>/g)]
-    .map((m) => new Map([...(m[1] ?? "").matchAll(ATTRIBUTE)].map((a) => [a[1], a[2] ?? ""])))
+    .map((m) => readAttributes(m[1] ?? ""))
     .filter((a) => a.has("data-enarratio-key") && a.has("data-enarratio-col"));
   const last = Math.max(...points.map((a) => Number(a.get("data-enarratio-col"))));
   const ends = points
     .filter((a) => Number(a.get("data-enarratio-col")) === last)
     .map((a) => ({
-      series: unescape(a.get("data-enarratio-series") ?? ""),
+      series: unescapeHtml(a.get("data-enarratio-series") ?? ""),
       row: Number(a.get("data-enarratio-row")),
       x: Number(a.get("cx")),
       y: Number(a.get("cy")),

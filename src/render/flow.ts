@@ -3,7 +3,24 @@
  * rows, and the Sankey layout.
  */
 
-import { readLabel, readNumber } from "./data.js";
+import { type KeysOfType, readLabel, readNumber } from "./data.js";
+import type { ChartDescription } from "./describe.js";
+import type { FigureOptions } from "./figure.js";
+
+/** The options the flow diagrams share: which fields name a flow's ends and size it. */
+export interface FlowOptions<T extends object> extends FigureOptions {
+  /** One row per flow. */
+  readonly data: readonly T[];
+  /** The field naming where each flow comes from. */
+  readonly from: KeysOfType<T, string | number>;
+  /** The field naming where it goes. */
+  readonly to: KeysOfType<T, string | number>;
+  /** The field for how much flows: zero or more. */
+  readonly value: KeysOfType<T, number>;
+  /** What the value measures, for the table and hover details (default: the field's name). */
+  readonly valueLabel?: string;
+  readonly formatValue?: (value: number) => string;
+}
 
 /** One flow from a source to a target. */
 export interface FlowLink {
@@ -11,6 +28,23 @@ export interface FlowLink {
   readonly target: string;
   readonly value: number;
   readonly index: number;
+}
+
+/** The overview of a flow diagram: one series, each flow a point named "source → target". */
+export function flowDescription(
+  format: (value: number) => string,
+  valueLabel: string,
+  links: readonly FlowLink[],
+): ChartDescription {
+  return {
+    format,
+    series: [
+      {
+        name: valueLabel,
+        points: links.map((l) => ({ at: `${l.source} → ${l.target}`, value: l.value })),
+      },
+    ],
+  };
 }
 
 /** Reads links from rows; throws on a negative value or a repeated pair. */

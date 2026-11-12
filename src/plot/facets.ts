@@ -12,7 +12,7 @@ import {
 } from "../render/figure.js";
 import { type LineChartOptions, lineModel, type Point } from "../render/line-model.js";
 import { keyed, renderPlot } from "../render/plot.js";
-import { planSeries } from "../render/series.js";
+import { planSeries, seriesLegend } from "../render/series.js";
 import { charWidth, DEFAULT_WIDTH, fitTicks, textGrowth, topMargin } from "../render/size.js";
 import { texture } from "../render/texture.js";
 
@@ -63,6 +63,14 @@ interface Panel {
   readonly fy: number;
 }
 
+/** Each panel's own model, and the first one's, whose series and formats every panel shares. */
+function panelModels<M>(panels: readonly Panel[], sub: (p: Panel) => M) {
+  const models = panels.map((p) => ({ p, m: sub(p) }));
+  const first = models[0]?.m;
+  if (!first) throw new Error(`${KIND}: data is empty`);
+  return { models, first };
+}
+
 /**
  * Small multiples: one bar or line chart per group, in a grid, on shared scales, so panels
  * compare by position alone. Each panel is named above it; series keep one color and legend
@@ -74,8 +82,7 @@ interface Panel {
  */
 export function smallMultiples<T extends object>(options: SmallMultiplesOptions<T>): string {
   const { data, facet } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const raw = data.map((row, i) => readLabel(KIND, row, facet, i));
   const names = domainOf(KIND, facet, raw, options.facetDomain?.map(String));
   if (names.length > 24) throw new Error(`${KIND}: ${names.length} panels are too many to compare`);
@@ -157,9 +164,7 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
         xDomain: xNames,
         ...(seriesNames ? { seriesDomain: seriesNames } : {}),
       });
-    const models = panels.map((p) => ({ p, m: sub(p) }));
-    const first = models[0]?.m;
-    if (!first) throw new Error(`${KIND}: data is empty`);
+    const { models, first } = panelModels(panels, sub);
     const allSeries = first.seriesNames;
     const plan = planSeries(KIND, [...allSeries], options.colors);
     const points = models.flatMap(({ p, m }) => m.points.map((pt) => ({ ...pt, p })));
@@ -271,9 +276,7 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
       ...(several ? { textured: true } : {}),
       description,
       limits,
-      legend: series === undefined ? [] : plan.legend,
-      ...(series === undefined ? {} : { seriesField: series }),
-      slotColors: plan.slotColors,
+      ...seriesLegend(plan, series !== undefined, series),
       table: {
         columns: [
           String(facet),
@@ -300,9 +303,7 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
       data: rowsOf(p),
       ...(seriesNames ? { seriesDomain: seriesNames } : {}),
     });
-  const models = panels.map((p) => ({ p, m: sub(p) }));
-  const first = models[0]?.m;
-  if (!first) throw new Error(`${KIND}: data is empty`);
+  const { models, first } = panelModels(panels, sub);
   const prepared = first.prepared;
   const allSeries = prepared.seriesNames;
   const plan = planSeries(KIND, allSeries, options.colors);
@@ -400,9 +401,7 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
     svg,
     description,
     limits,
-    legend: series === undefined ? [] : plan.legend,
-    ...(series === undefined ? {} : { seriesField: series }),
-    slotColors: plan.slotColors,
+    ...seriesLegend(plan, series !== undefined, series),
     table: {
       columns: [String(facet), prepared.xLabel ?? options.x, ...allSeries],
       rows: panels.flatMap((p) =>

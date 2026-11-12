@@ -1,27 +1,26 @@
 import { el, svgRoot, text } from "../lite/svg.js";
 import { n2, polar, type RimLabel, rimLabels } from "../render/arc.js";
-import { type KeysOfType, markKey, maxOf, readLabel, readNumber } from "../render/data.js";
+import {
+  type KeysOfType,
+  markKey,
+  type MeasuresOptions,
+  maxOf,
+  readLabel,
+  readNumber,
+} from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
-import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
-import { planSeries } from "../render/series.js";
+import { figure, validateFigure } from "../render/figure.js";
+import { planSeries, seriesLegend } from "../render/series.js";
 import { charWidth, DEFAULT_WIDTH, textGrowth } from "../render/size.js";
 import { valueFormat } from "../render/text.js";
 import { LINE_DASHES } from "../theme/dashes.js";
 
 /** Options for {@link radarChart}. */
-export interface RadarChartOptions<T extends object> extends FigureOptions {
-  /** One row per series (a team, a product, a sample). */
-  readonly data: readonly T[];
-  /** The field naming each row's series. */
-  readonly label: KeysOfType<T, string | number>;
+export interface RadarChartOptions<T extends object> extends MeasuresOptions<T> {
   /** The measures, one spoke each, clockwise from 12 o'clock: three to twelve, on one scale. */
   readonly axes: readonly KeysOfType<T, number>[];
-  /** Names for the spokes, by field (default: the field's name). */
-  readonly axisLabels?: Readonly<Partial<Record<KeysOfType<T, number>, string>>>;
   /** The value at the rim (default: the largest value, rounded up). The center is zero. */
   readonly max?: number;
-  readonly colors?: Readonly<Record<string, SeriesColor>>;
-  readonly formatValue?: (value: number) => string;
 }
 
 const KIND = "radar";
@@ -50,8 +49,7 @@ export function niceCeil(v: number): number {
  */
 export function radarChart<T extends object>(options: RadarChartOptions<T>): string {
   const { data, label, axes } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   if (axes.length < 3 || axes.length > 12) {
     throw new Error(`${KIND}: ${axes.length} axes; a radar chart needs 3 to 12`);
   }
@@ -78,18 +76,12 @@ export function radarChart<T extends object>(options: RadarChartOptions<T>): str
   const width = options.width ?? DEFAULT_WIDTH;
   const growth = textGrowth(width);
   const char = charWidth(width);
-  const lineHeight = 14 * growth;
   const angle = (k: number): number => (k / axes.length) * 2 * Math.PI;
-  const place = (h: number) =>
-    rimLabels(
-      axes.map(axisName),
-      axes.map((_, k) => angle(k)),
-      { width, height: h, char, line: lineHeight, cap: Math.min(width, h) / 2 - 4 },
-    );
-  // Where the names at the rim keep the circle small (a phone), the default height shrinks to fit it.
-  const fit = place(400);
-  const height = options.height ?? Math.min(400, Math.ceil(2 * fit.radius + 2 * lineHeight + 32));
-  const rim = options.height === undefined && height === 400 ? fit : place(height);
+  const { height, ...rim } = rimLabels(
+    axes.map(axisName),
+    axes.map((_, k) => angle(k)),
+    { width, height: options.height, char, line: 14 * growth },
+  );
   const cx = width / 2;
   const cy = height / 2;
   const radius = rim.radius;
@@ -239,9 +231,7 @@ export function radarChart<T extends object>(options: RadarChartOptions<T>): str
         points: axes.map((field, k) => ({ at: axisName(field), value: values[s]?.[k] ?? 0 })),
       })),
     },
-    legend: plan.legend,
-    seriesField: label,
-    slotColors: plan.slotColors,
+    ...seriesLegend(plan, true, label),
     table: {
       columns: [label, ...axes.map(axisName)],
       rows: names.map((name, s) => [name, ...(values[s] ?? []).map(format)]),

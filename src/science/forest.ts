@@ -18,7 +18,7 @@ import {
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { bottomMargin, charWidth, DEFAULT_WIDTH, TITLE_LINES, titleLines } from "../render/size.js";
-import { numberFormat, stringsFor } from "../render/text.js";
+import { numberFormat, shareFormat, stringsFor } from "../render/text.js";
 import { type PooledEstimate, poolEstimates, type StudyEstimate } from "./meta.js";
 
 /** Options for {@link forestPlot}. */
@@ -75,14 +75,13 @@ const KIND = "forestPlot";
  */
 export function forestPlot<T extends object>(options: ForestPlotOptions<T>): string {
   const { data, label } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const strings = stringsFor(options.strings);
   const { terms } = strings;
   const locale = options.locale ? { locale: options.locale } : {};
   const plain = numberFormat(locale);
   const format = options.formatValue ?? numberFormat({ ...locale, maximumSignificantDigits: 3 });
-  const share = numberFormat({ ...locale, style: "percent", maximumFractionDigits: 1 });
+  const share = shareFormat(options);
   const log = options.log === true;
   const rows = data.map((row, i): Row => {
     const estimate = readNumber(KIND, row, options.estimate, i);

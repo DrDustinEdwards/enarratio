@@ -22,23 +22,22 @@ import {
 } from "./data.js";
 import type { MarkDatum } from "./datum.js";
 import {
-  type AxisUnits,
-  type FigureOptions,
   figure,
+  type SeriesAxesOptions,
   type SeriesColor,
   slotStyle,
   unitLabel,
   validateFigure,
 } from "./figure.js";
 import { type Bounds, type IntervalFields, intervalText, readInterval } from "./interval.js";
-import { planSeries, type SeriesPlan } from "./series.js";
+import { planSeries, type SeriesPlan, seriesLegend } from "./series.js";
 import { charWidth, DEFAULT_HEIGHT, DEFAULT_WIDTH, fitTicks } from "./size.js";
 import { stringsFor, valueAxis, valueFormat } from "./text.js";
 import { finishBars } from "./bar-marks.js";
 import { texture } from "./texture.js";
 
 /** Options for `barChart`, from `enarratio/plot` or `enarratio/lite`. */
-export interface BarChartOptions<T extends object> extends FigureOptions, AxisUnits, Annotated {
+export interface BarChartOptions<T extends object> extends SeriesAxesOptions, Annotated {
   readonly data: readonly T[];
   /**
    * The field for categories along the bar axis: a label, or a number such as a year. With
@@ -87,8 +86,6 @@ export interface BarChartOptions<T extends object> extends FigureOptions, AxisUn
    * `xType: "time"`, which builds its own domain.
    */
   readonly xDomain?: readonly (string | number)[];
-  /** Every series in display and color order. Without it, first-seen order. */
-  readonly seriesDomain?: readonly string[];
   /**
    * Color overrides by series name. A chart without `series` has one series, named by its value
    * label (`yLabel`).
@@ -102,8 +99,6 @@ export interface BarChartOptions<T extends object> extends FigureOptions, AxisUn
   readonly xLabel?: string | null;
   /** The value axis label; defaults to the `y` field name or "Count"; `null` hides it. */
   readonly yLabel?: string | null;
-  /** Formats values in hover details and the data table. */
-  readonly formatValue?: (value: number) => string;
   /**
    * What a click on a bar filters by, once enhanced: its series (default when there are series)
    * or its category (`"x"`, e.g. "this year"). A chart without series always filters by category.
@@ -280,6 +275,9 @@ export interface BarModel {
   readonly xNames: readonly string[];
   /** Every series, in display and color order. */
   readonly seriesNames: readonly string[];
+  /** Each category's place in `xNames`, and each series' in `seriesNames`. */
+  readonly columnOf: ReadonlyMap<string, number>;
+  readonly rowOf: ReadonlyMap<string, number>;
   readonly plan: SeriesPlan;
   readonly horizontal: boolean;
   /** Series side by side, each category a facet. */
@@ -330,8 +328,7 @@ export interface BarModel {
 export function barModel<T extends object>(given: BarChartOptions<T>): BarModel {
   const options = withNotes(given);
   const { data, x, y, series } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   if (options.wholeNumbers && y === undefined) {
     throw new Error(
       `${KIND}: wholeNumbers is for bars with y; counted bars always have whole ticks`,
@@ -618,6 +615,8 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     points,
     xNames,
     seriesNames,
+    columnOf,
+    rowOf,
     plan,
     horizontal,
     grouped,
@@ -651,9 +650,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
         svg: texture(finished.svg, slotStyle(plan.slotColors)),
         textured: !finished.labeled,
         orientation: horizontal ? "horizontal" : "vertical",
-        legend: series === undefined ? [] : plan.legend,
-        ...(series === undefined ? {} : { seriesField: series }),
-        slotColors: plan.slotColors,
+        ...seriesLegend(plan, series !== undefined, series),
         description: {
           axes,
           ordered,

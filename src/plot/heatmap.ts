@@ -5,12 +5,13 @@ import {
   markKey,
   maxOf,
   minOf,
+  rampLegend,
   rampStep,
   rampThresholds,
   readCategory,
   readNumberOrNull,
 } from "../render/data.js";
-import { type FigureOptions, figure, type RampItem, validateFigure } from "../render/figure.js";
+import { type FigureOptions, figure, validateFigure } from "../render/figure.js";
 import { decorate, keyed, renderPlot } from "../render/plot.js";
 import { DEFAULT_WIDTH } from "../render/size.js";
 import { stringsFor, valueFormat } from "../render/text.js";
@@ -59,8 +60,7 @@ const KIND = "heatmap";
  */
 export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
   const { data, x, y, value } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const format = valueFormat(options);
   const strings = stringsFor(options.strings);
   const valueLabel = options.valueLabel ?? value;
@@ -164,16 +164,7 @@ export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
     options.alt,
   );
 
-  const edges = [min, ...thresholds, max];
-  const ramp: RampItem[] = [1, 2, 3, 4, 5].map((step) => ({
-    step,
-    label:
-      step === 1
-        ? strings.below(format(edges[1] as number))
-        : step === 5
-          ? strings.orMore(format(edges[4] as number))
-          : strings.range(format(edges[step - 1] as number), format(edges[step] as number)),
-  }));
+  const ramp = rampLegend([min, ...thresholds, max], format, strings);
   const cellOf = new Map(cells.map((c) => [`${c.x}|${c.y}`, c]));
 
   return figure(options, {

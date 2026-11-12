@@ -25,7 +25,7 @@ import {
   validateFigure,
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
-import { planSeries } from "../render/series.js";
+import { planSeries, seriesLegend } from "../render/series.js";
 import { charWidth, DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
 import { numberFormat, stringsFor, valueFormat } from "../render/text.js";
 import { type Annotated, drawAnnotations, withNotes } from "./annotate.js";
@@ -374,9 +374,7 @@ export function densityPlot<T extends object>(given: DensityPlotOptions<T>): str
         })),
       })),
     },
-    legend: series === undefined ? [] : plan.legend,
-    ...(series === undefined ? {} : { seriesField: series }),
-    slotColors: plan.slotColors,
+    ...seriesLegend(plan, series !== undefined, series),
     table: {
       columns: [
         sole,

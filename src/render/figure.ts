@@ -135,6 +135,24 @@ export interface AxisUnits {
   readonly yUnit?: string;
 }
 
+/** The options of a chart on x and y axes. */
+export interface AxesOptions extends FigureOptions, AxisUnits {
+  /** Color overrides by series name. */
+  readonly colors?: Readonly<Record<string, SeriesColor>>;
+  /** The x axis label; defaults to the field name; `null` hides it. */
+  readonly xLabel?: string | null;
+  /** The y axis label; defaults to the field name; `null` hides it. */
+  readonly yLabel?: string | null;
+  /** Formats values in hover details and the data table. */
+  readonly formatValue?: (value: number) => string;
+}
+
+/** The options of a chart on x and y axes with series: bars, lines, areas and scatter plots. */
+export interface SeriesAxesOptions extends AxesOptions {
+  /** Every series in display and color order. Without it, first-seen order. */
+  readonly seriesDomain?: readonly string[];
+}
+
 /**
  * A label with its unit, "Weight (kg)"; a hidden (null) label stays hidden, and a label that
  * already names its unit as a word ("Reads per sample", unit "reads") is not repeated.
@@ -231,7 +249,7 @@ export interface FigureParts {
 }
 
 /** Sends an issue where the options say: thrown when strict, to `onIssue`, or warned. */
-export function report(options: IssueOptions, issue: ChartIssue): void {
+function report(options: IssueOptions, issue: ChartIssue): void {
   if (options.strict) throw new Error(`${issue.chart}: ${issue.message}`);
   if (options.onIssue) options.onIssue(issue);
   else console.warn(`enarratio: ${issue.chart}: ${issue.message}`);
@@ -239,9 +257,14 @@ export function report(options: IssueOptions, issue: ChartIssue): void {
 
 /**
  * Checks the options every chart shares before anything is drawn: a positive finite width and
- * height when given (A7, F15). A missing `alt` is reported by {@link figure}, which can generate one.
+ * height when given (A7, F15), and, when the chart passes its `data`, at least one row. A missing
+ * `alt` is reported by {@link figure}, which can generate one.
  */
-export function validateFigure(kind: string, options: FigureOptions): void {
+export function validateFigure(
+  kind: string,
+  options: FigureOptions,
+  data?: readonly unknown[],
+): void {
   requireSize(kind, "width", options.width);
   requireSize(kind, "height", options.height);
   if (options.lang !== undefined) {
@@ -251,6 +274,7 @@ export function validateFigure(kind: string, options: FigureOptions): void {
       throw new Error(`${kind}: lang "${options.lang}" is not a BCP 47 language tag, such as "de"`);
     }
   }
+  if (data?.length === 0) throw new Error(`${kind}: data is empty`);
 }
 
 /** What a caller-supplied color may contain: enough for hex, color functions and var(), not url(). */

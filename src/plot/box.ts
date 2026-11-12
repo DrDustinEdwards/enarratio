@@ -95,8 +95,7 @@ function read<T extends object>(
   options: GroupedValuesOptions<T> & { readonly label?: KeysOfType<T, string | number> },
 ): Read {
   const { data, x, y, label } = options;
-  validateFigure(kind, options);
-  if (data.length === 0) throw new Error(`${kind}: data is empty`);
+  validateFigure(kind, options, data);
   const strings = stringsFor(options.strings);
   const raw = data.map((row, i) => readLabel(kind, row, x, i));
   const groups = domainOf(kind, x, raw, options.xDomain?.map(String));

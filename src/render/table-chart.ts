@@ -93,8 +93,7 @@ function cellBar(value: number, reach: number, negative: boolean): string {
  */
 export function tableChart<T extends object>(options: TableChartOptions<T>): string {
   const { data, columns } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   if (columns.length === 0) throw new Error(`${KIND}: columns is empty`);
   const valueAt = (row: T, field: string): unknown => (row as Record<string, unknown>)[field];
   const numbersOf = (c: TableColumn<T>): number[] =>

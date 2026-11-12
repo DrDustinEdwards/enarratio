@@ -119,8 +119,9 @@ pointer position back into data.
 
 ### `validateFigure`
 
-`validateFigure(kind: string, options: FigureOptions): void`. Throws unless
-any `width` and `height` are positive and finite.
+`validateFigure(kind: string, options: FigureOptions, data?: readonly unknown[]): void`.
+Throws unless any `width` and `height` are positive and finite, and, when `data` is given,
+unless it has a row ("kind: data is empty").
 
 ### `slotStyle`
 

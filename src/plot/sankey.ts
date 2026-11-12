@@ -1,28 +1,24 @@
 import { el, svgRoot, text } from "../lite/svg.js";
 import { n2 } from "../render/arc.js";
-import { type KeysOfType, markKey } from "../render/data.js";
+import { markKey } from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
-import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
-import { readLinks, type SankeyLink, type SankeyNode, sankeyLayout } from "../render/flow.js";
+import { figure, type SeriesColor, validateFigure } from "../render/figure.js";
+import {
+  flowDescription,
+  type FlowOptions,
+  readLinks,
+  type SankeyLink,
+  type SankeyNode,
+  sankeyLayout,
+} from "../render/flow.js";
 import { planSeries } from "../render/series.js";
 import { charWidth, DEFAULT_WIDTH, textGrowth } from "../render/size.js";
 import { stringsFor, valueFormat } from "../render/text.js";
 
 /** Options for {@link sankeyDiagram}. */
-export interface SankeyDiagramOptions<T extends object> extends FigureOptions {
-  /** One row per flow. */
-  readonly data: readonly T[];
-  /** The field naming where each flow comes from. */
-  readonly from: KeysOfType<T, string | number>;
-  /** The field naming where it goes. */
-  readonly to: KeysOfType<T, string | number>;
-  /** The field for how much flows: zero or more. */
-  readonly value: KeysOfType<T, number>;
-  /** What the value measures, for the table and hover details (default: the field's name). */
-  readonly valueLabel?: string;
+export interface SankeyDiagramOptions<T extends object> extends FlowOptions<T> {
   /** Colors for the nodes of the first column, by name; the flows they feed take them on. */
   readonly colors?: Readonly<Record<string, SeriesColor>>;
-  readonly formatValue?: (value: number) => string;
 }
 
 const KIND = "sankey";
@@ -228,15 +224,7 @@ export function sankeyDiagram<T extends object>(options: SankeyDiagramOptions<T>
     kind: KIND,
     svg,
     limits: { series: 8 },
-    description: {
-      format,
-      series: [
-        {
-          name: valueLabel,
-          points: links.map((l) => ({ at: `${l.source} → ${l.target}`, value: l.value })),
-        },
-      ],
-    },
+    description: flowDescription(format, valueLabel, links),
     ...(colored ? { legend: plan.legend } : {}),
     slotColors: plan.slotColors,
     table: {

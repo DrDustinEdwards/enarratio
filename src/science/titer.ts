@@ -80,8 +80,7 @@ const KIND = "titerPlot";
  */
 export function titerPlot<T extends object>(options: TiterPlotOptions<T>): string {
   const { data, group, titer } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const dilution = options.dilution ?? { start: 10, factor: 2 };
   if (!(dilution.start > 0) || !(dilution.factor > 1)) {
     throw new Error(`${KIND}: dilution needs start above 0 and factor above 1`);

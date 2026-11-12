@@ -10,9 +10,8 @@ import {
   type AreaChartOptions,
   areaModel,
   type Point,
-  rightMargin,
+  seriesMargins,
 } from "../render/line-model.js";
-import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
 import { annotationMarkup, continuousScale } from "./annotate.js";
 import {
   annotations,
@@ -73,14 +72,7 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
   for (const r of options.references ?? []) ys.push(r.y);
   const layout = seriesFrame(
     model,
-    {
-      width: options.width ?? DEFAULT_WIDTH,
-      height: options.height ?? DEFAULT_HEIGHT,
-      marginTop: 20,
-      marginRight: rightMargin(model, options.width ?? DEFAULT_WIDTH),
-      marginBottom: 44,
-      marginLeft: 48,
-    },
+    seriesMargins(model, options),
     [...points.map((p) => p.at), ...model.markers.map((m) => Number(m.x))],
     ys,
     { log: false, zero: true },

@@ -3,7 +3,7 @@
 import type * as Plot from "@observablehq/plot";
 import { capsOf } from "../lite/annotate.js";
 
-export const SVG_NS = "http://www.w3.org/2000/svg";
+const SVG_NS = "http://www.w3.org/2000/svg";
 
 /**
  * A render transform that names a mark's group, so CSS, tests and later steps can find it as

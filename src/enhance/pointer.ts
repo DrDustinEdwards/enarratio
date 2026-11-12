@@ -159,7 +159,7 @@ const rect = (b: DOMRect): Omit<Box, "cx" | "cy"> => ({
 });
 
 /** The palette slot a mark is drawn in, from its fill: a series color or its pattern. */
-export function slotOf(mark: Element): number | null {
+function slotOf(mark: Element): number | null {
   const paint = shape(mark).getAttribute("fill") ?? mark.getAttribute("fill") ?? "";
   const m = /--enarratio-series-(\d)\)/.exec(paint) ?? /^url\(#enarratio-[^)]*-(\d)\)$/.exec(paint);
   return m ? Number(m[1]) : null;

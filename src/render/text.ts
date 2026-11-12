@@ -4,11 +4,11 @@
  * formats, a reading-grade measure, and the CSV a figure links to.
  */
 
-export type { DateFormatOptions, NumberFormatOptions } from "./format.js";
 export {
   dateFormat,
   defaultFormat,
   numberFormat,
+  shareFormat,
   signed,
   valueAxis,
   valueFormat,
@@ -179,7 +179,7 @@ interface StatusCount {
 }
 
 /** One fitted dose-response curve, as {@link Strings.logisticMethod} states it. */
-export interface LogisticStatement {
+interface LogisticStatement {
   readonly name?: string;
   readonly midpoint: string;
   readonly ec50: string;
@@ -691,7 +691,7 @@ export function readingGrade(text: string): number {
  * spreadsheet would run as a formula (starting with =, @, a tab or carriage return, or with + or -
  * not followed by a number) gets a leading apostrophe, so a downloaded file cannot run one.
  */
-export function csvField(value: string): string {
+function csvField(value: string): string {
   const safe = /^[=@\t\r]|^[+-](?![\d.])/.test(value) ? `'${value}` : value;
   return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }

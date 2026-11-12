@@ -12,7 +12,7 @@ export type Rgb = readonly [number, number, number];
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 /** Whether a string is a hex color Enarratio can measure. */
-export function isHexColor(value: string): value is HexColor {
+function isHexColor(value: string): value is HexColor {
   return HEX.test(value);
 }
 

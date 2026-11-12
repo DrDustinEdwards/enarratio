@@ -2,14 +2,7 @@ import * as Plot from "@observablehq/plot";
 import { ticks } from "../lite/scale.js";
 import { domainOf, type KeysOfType, readLabel, readNumber } from "../render/data.js";
 import { correlation, valueRange } from "../render/describe.js";
-import {
-  type AxisUnits,
-  type FigureOptions,
-  figure,
-  type SeriesColor,
-  unitLabel,
-  validateFigure,
-} from "../render/figure.js";
+import { figure, type SeriesAxesOptions, unitLabel, validateFigure } from "../render/figure.js";
 import {
   type Bounds,
   type IntervalFields,
@@ -17,14 +10,14 @@ import {
   readInterval,
 } from "../render/interval.js";
 import { keyed, renderPlot } from "../render/plot.js";
-import { planSeries } from "../render/series.js";
+import { planSeries, seriesLegend } from "../render/series.js";
 import { bottomMargin, charWidth, DEFAULT_WIDTH, titleLines } from "../render/size.js";
 import { numberFormat, stringsFor, valueFormat } from "../render/text.js";
 import { type Annotated, drawAnnotations, withNotes } from "./annotate.js";
 import { capErrorBars, named, steps, svgElement } from "./marks.js";
 
 /** Options for {@link scatterPlot}. */
-export interface ScatterPlotOptions<T extends object> extends FigureOptions, AxisUnits, Annotated {
+export interface ScatterPlotOptions<T extends object> extends SeriesAxesOptions, Annotated {
   readonly data: readonly T[];
   readonly x: KeysOfType<T, number>;
   readonly y: KeysOfType<T, number>;
@@ -36,11 +29,6 @@ export interface ScatterPlotOptions<T extends object> extends FigureOptions, Axi
   readonly yType?: "linear" | "log";
   /** Draw an ordinary least-squares line (per series), with its 95% confidence band. */
   readonly regression?: boolean;
-  readonly seriesDomain?: readonly string[];
-  readonly colors?: Readonly<Record<string, SeriesColor>>;
-  readonly xLabel?: string | null;
-  readonly yLabel?: string | null;
-  readonly formatValue?: (value: number) => string;
   /**
    * A field sizing each point by area, making a bubble chart. Values are zero or more; a size
    * legend shows three reference sizes, and the data table gives every value.
@@ -101,8 +89,7 @@ const KIND = "scatterPlot";
 export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): string {
   const options = withNotes(given);
   const { data, x, y, series, label, size, errorBars } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const format = valueFormat(options);
   const strings = stringsFor(options.strings);
   const { terms } = strings;
@@ -327,9 +314,7 @@ export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): str
     },
     svg: rendered.svg,
     ...(rendered.x ? { x: rendered.x } : {}),
-    legend: multi ? plan.legend : [],
-    ...(multi && series ? { seriesField: series } : {}),
-    slotColors: plan.slotColors,
+    ...seriesLegend(plan, multi, series),
     table: {
       columns: [
         terms.point,

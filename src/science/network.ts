@@ -12,7 +12,7 @@ import {
 import { maxOf, minOf } from "../render/data.js";
 import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
-import { planSeries } from "../render/series.js";
+import { planSeries, seriesLegend } from "../render/series.js";
 import { DEFAULT_WIDTH } from "../render/size.js";
 import { numberFormat, stringsFor } from "../render/text.js";
 
@@ -234,9 +234,7 @@ export function networkChart(options: NetworkChartOptions): string {
         components: number(components(laidOut, edges)),
       }),
     },
-    legend: grouped ? plan.legend : [],
-    ...(grouped ? { seriesField: "group" } : {}),
-    slotColors: plan.slotColors,
+    ...seriesLegend(plan, grouped, "group"),
     table: {
       columns: [terms.node, ...(grouped ? [terms.group] : []), terms.connectedTo],
       rows: laidOut.map((n) => [

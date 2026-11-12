@@ -17,6 +17,17 @@ export function valueFormat(options: {
   return options.formatValue ?? numberFormat(options.locale ? { locale: options.locale } : {});
 }
 
+/** A chart's share of a whole: a percent with at most one decimal, for its locale ("12.5%"). */
+export function shareFormat(options: {
+  readonly locale?: string | undefined;
+}): (value: number) => string {
+  return numberFormat({
+    ...(options.locale ? { locale: options.locale } : {}),
+    style: "percent",
+    maximumFractionDigits: 1,
+  });
+}
+
 /** Options for {@link numberFormat}. */
 export interface NumberFormatOptions {
   /** A BCP 47 locale such as `"de-DE"` (default `"en-US"`). */
