@@ -1,6 +1,7 @@
 // Every value as a point, spread in a beeswarm so none hides another.
 import { stripPlot } from "enarratio/plot";
 
+// jscpd:ignore-start: each example is a snippet the gallery shows whole, so each keeps its own seeded sample
 let seed = 3;
 const random = (): number => {
   seed = (seed * 16807) % 2147483647;
@@ -8,6 +9,7 @@ const random = (): number => {
 };
 const normal = (mean: number, sd: number): number =>
   mean + sd * Math.sqrt(-2 * Math.log(random())) * Math.cos(2 * Math.PI * random());
+// jscpd:ignore-end
 const cohorts = { "18 to 49": [62, 10], "50 to 64": [70, 9], "65 and over": [78, 7] } as const;
 const scores = Object.entries(cohorts).flatMap(([age, [mean, sd]]) =>
   Array.from({ length: 30 }, () => ({ age, score: Math.min(100, Math.round(normal(mean, sd))) })),
