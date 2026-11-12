@@ -19,7 +19,7 @@ jobs:
     # The Node.js lines the README says CI tests: 24, which consumers run, and 26, the .nvmrc line.
     # The tooling jobs read the version from .nvmrc.
     name: Typecheck, lint, unit and render tests, package (Node ${{ matrix.node }})
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -51,7 +51,7 @@ jobs:
 
   browser:
     name: Accessibility, interaction and visual tests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -110,7 +110,7 @@ jobs:
   # refused ping is a warning, never a failed deploy.
   indexnow:
     needs: deploy
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

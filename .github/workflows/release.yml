@@ -38,7 +38,7 @@ jobs:
   tag:
     name: Tag and publish the release
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
     outputs:
@@ -84,7 +84,7 @@ jobs:
     needs: tag
     # A hand-pushed tag (the tag job skipped), or a tag the tag job just made.
     if: ${{ !cancelled() && (github.ref_type == 'tag' || needs.tag.outputs.created == 'true') }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       # Lets the job request the OIDC token that npm exchanges for a short-lived publish token, and
