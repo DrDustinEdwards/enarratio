@@ -231,7 +231,7 @@ export interface FigureParts {
 }
 
 /** Sends an issue where the options say: thrown when strict, to `onIssue`, or warned. */
-export function report(options: IssueOptions, issue: ChartIssue): void {
+function report(options: IssueOptions, issue: ChartIssue): void {
   if (options.strict) throw new Error(`${issue.chart}: ${issue.message}`);
   if (options.onIssue) options.onIssue(issue);
   else console.warn(`enarratio: ${issue.chart}: ${issue.message}`);

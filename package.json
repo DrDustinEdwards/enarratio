@@ -106,11 +106,11 @@
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "prepare": "npm run build",
     "size": "node scripts/size-check.mjs",
-    "bloat": "devkit-no-bloat --warn-only"
+    "bloat": "devkit-no-bloat"
   },
   "devDependencies": {
     "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.42.0",
-    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.27.0",
+    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.37.1",
     "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.132.0",
     "@guidepup/guidepup": "0.40.0",
     "@guidepup/playwright": "0.21.0",

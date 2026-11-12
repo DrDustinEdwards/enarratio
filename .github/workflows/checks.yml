@@ -39,5 +39,5 @@ jobs:
       install: PUPPETEER_SKIP_DOWNLOAD=true npm ci
       # The gallery Worker serves site/dist, so the bundle is measured after the package and the gallery are built.
       worker-size-prepare: npm run build && npm run gallery
-      # The no-bloat report stays in ci.yml's check job, warn-only (`npm run bloat`), as before.
+      # The no-bloat ratchet runs in ci.yml's check job (`npm run bloat`).
       no-bloat: false
