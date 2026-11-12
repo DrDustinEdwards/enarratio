@@ -1,10 +1,25 @@
 /** Helpers for reading caller data by key, with errors that name the chart, row and field. */
 
+import type { FigureOptions, RampItem, SeriesColor } from "./figure.js";
+import type { Strings } from "./text.js";
+
 /** The keys of `T` whose values are assignable to `V`. */
 export type KeysOfType<T, V> = {
   [K in keyof T]-?: T[K] extends V ? K : never;
 }[keyof T] &
   string;
+
+/** The options of a chart of several measures per row: parallel coordinates and the radar chart. */
+export interface MeasuresOptions<T extends object> extends FigureOptions {
+  /** One row per item: a line across the axes, or an outline over the spokes. */
+  readonly data: readonly T[];
+  /** The field naming each item. */
+  readonly label: KeysOfType<T, string | number>;
+  /** Names for the measures, by field (default: the field's name). */
+  readonly axisLabels?: Readonly<Partial<Record<KeysOfType<T, number>, string>>>;
+  readonly colors?: Readonly<Record<string, SeriesColor>>;
+  readonly formatValue?: (value: number) => string;
+}
 
 /** Reads a finite number, or throws naming where it was expected. */
 export function readNumber(kind: string, row: object, key: string, index: number): number {
@@ -157,6 +172,23 @@ export function rampStep(value: number, thresholds: readonly number[]): number {
   let step = 1;
   for (const t of thresholds) if (value >= t) step += 1;
   return step;
+}
+
+/** The legend of a five-step ramp: below the first threshold, the three ranges, and the rest. */
+export function rampLegend(
+  stops: readonly number[],
+  format: (value: number) => string,
+  strings: Strings,
+): RampItem[] {
+  return [1, 2, 3, 4, 5].map((step) => ({
+    step,
+    label:
+      step === 1
+        ? strings.below(format(stops[1] as number))
+        : step === 5
+          ? strings.orMore(format(stops[4] as number))
+          : strings.range(format(stops[step - 1] as number), format(stops[step] as number)),
+  }));
 }
 
 /**

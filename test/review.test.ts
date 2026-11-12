@@ -22,6 +22,9 @@ import {
   lineChart,
   scatterPlot,
 } from "../src/plot/index.js";
+import * as map from "../src/map/index.js";
+import * as plot from "../src/plot/index.js";
+import * as science from "../src/science/index.js";
 import { titerPlot } from "../src/science/index.js";
 import { labelColor } from "../src/theme/color.js";
 import { defaultTheme } from "../src/themes/index.js";
@@ -86,10 +89,24 @@ describe("A3: local-midnight Dates are calendar dates", () => {
 });
 
 describe("A7 and F15: empty and impossible input throws", () => {
-  it("refuses empty bar data, all-empty series and non-positive sizes", () => {
-    expect(() => barChart({ data: [] as { k: string }[], x: "k", alt: "a" })).toThrow(
-      /data is empty/,
-    );
+  // Every chart of rows refuses none, through the check validateFigure makes for all of them.
+  const ROWS = {
+    ...plot,
+    doseResponse: science.doseResponse,
+    forestPlot: science.forestPlot,
+    survivalPlot: science.survivalPlot,
+    titerPlot: science.titerPlot,
+    ...map,
+  };
+  it.each(Object.keys(ROWS).filter((name) => name !== "gaugeChart"))(
+    "%s refuses empty data",
+    (name) => {
+      const draw = ROWS[name as keyof typeof ROWS] as (options: object) => string;
+      expect(() => draw({ data: [], alt: "a" })).toThrow(/: data is empty$/);
+    },
+  );
+
+  it("refuses all-empty series and non-positive sizes", () => {
     expect(() => lineChart({ data: [{ t: 1, v: null }], x: "t", y: "v", alt: "a" })).toThrow(
       /every value is empty/,
     );

@@ -4,7 +4,7 @@ import { type KeysOfType, markKey, maxOf, readLabel, readNumber } from "../rende
 import { datumAttributes } from "../render/datum.js";
 import { type FigureOptions, figure, validateFigure } from "../render/figure.js";
 import { charWidth, DEFAULT_WIDTH, textGrowth } from "../render/size.js";
-import { numberFormat, stringsFor, valueFormat } from "../render/text.js";
+import { shareFormat, stringsFor, valueFormat } from "../render/text.js";
 
 /** Options for {@link funnelChart}. */
 export interface FunnelChartOptions<T extends object> extends FigureOptions {
@@ -34,15 +34,10 @@ const STEP_GAP = 22;
  */
 export function funnelChart<T extends object>(options: FunnelChartOptions<T>): string {
   const { data, stage, value } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const format = valueFormat(options);
   const { terms } = stringsFor(options.strings);
-  const percent = numberFormat({
-    ...(options.locale ? { locale: options.locale } : {}),
-    style: "percent",
-    maximumFractionDigits: 1,
-  });
+  const percent = shareFormat(options);
   const names = data.map((row, i) => readLabel(KIND, row, stage, i));
   if (new Set(names).size !== names.length) throw new Error(`${KIND}: two stages share a name`);
   const values = data.map((row, i) => {

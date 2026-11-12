@@ -9,13 +9,13 @@ import {
   lineModel,
   type MarkerPoint,
   type Point,
-  rightMargin,
+  seriesMargins,
   type SeriesChartOptions,
   type SeriesModel,
 } from "../render/line-model.js";
 import { spreadLabels } from "../render/direct-labels.js";
 import { keyed, renderPlot } from "../render/plot.js";
-import { DEFAULT_HEIGHT, DEFAULT_WIDTH, monthTicks } from "../render/size.js";
+import { monthTicks } from "../render/size.js";
 import { drawAnnotations } from "./annotate.js";
 
 export type {
@@ -227,18 +227,11 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
     );
   }
 
-  const width = options.width ?? DEFAULT_WIDTH;
-  const marginLeft = 48;
-  const marginRight = rightMargin(model, width);
+  const frame = seriesMargins(model, options);
   const rendered = renderPlot(
     {
-      width,
-      height: options.height ?? DEFAULT_HEIGHT,
-      marginTop: 20,
-      marginLeft,
-      marginRight,
-      marginBottom: 44,
-      x: xScale(model, width, width - marginLeft - marginRight),
+      ...frame,
+      x: xScale(model, frame.width, frame.width - frame.marginLeft - frame.marginRight),
       y: {
         type: model.log ? "log" : "linear",
         label: prepared.yLabel,
@@ -271,19 +264,11 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
   const { prepared } = model;
   const { points, seriesNames } = prepared;
   const order = { order: seriesNames };
-  const width = options.width ?? DEFAULT_WIDTH;
-  const marginLeft = 48;
-  const marginRight = rightMargin(model, width);
-
+  const frame = seriesMargins(model, options);
   const rendered = renderPlot(
     {
-      width,
-      height: options.height ?? DEFAULT_HEIGHT,
-      marginTop: 20,
-      marginLeft,
-      marginRight,
-      marginBottom: 44,
-      x: xScale(model, width, width - marginLeft - marginRight),
+      ...frame,
+      x: xScale(model, frame.width, frame.width - frame.marginLeft - frame.marginRight),
       y: {
         label: prepared.yLabel,
         grid: true,

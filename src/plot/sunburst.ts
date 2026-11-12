@@ -2,33 +2,26 @@ import { el, svgRoot, text } from "../lite/svg.js";
 import { arcPath, n2, polar } from "../render/arc.js";
 import { type KeysOfType, markKey } from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
-import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
+import { figure, type SeriesColor } from "../render/figure.js";
 import {
-  buildHierarchy,
   eachNode,
   type HierarchyNode,
+  type HierarchyOptions,
   hierarchyTable,
+  readHierarchy,
   leaves,
 } from "../render/hierarchy.js";
-import { planSeries } from "../render/series.js";
-import { charWidth, DEFAULT_WIDTH, textGrowth } from "../render/size.js";
-import { numberFormat, stringsFor, valueFormat } from "../render/text.js";
+import { planSeries, seriesLegend } from "../render/series.js";
 import { texture } from "../render/texture.js";
 
 /** Options for {@link sunburst}. */
-export interface SunburstOptions<T extends object> extends FigureOptions {
-  readonly data: readonly T[];
+export interface SunburstOptions<T extends object> extends HierarchyOptions<T> {
   /** The fields naming each row's place, from the innermost ring out: `["region", "country"]`. */
   readonly path: readonly KeysOfType<T, string | number>[];
-  /** The field for each part's size: zero or more. */
-  readonly value: KeysOfType<T, number>;
-  /** What the value measures, for the table and hover details (default: the field's name). */
-  readonly valueLabel?: string;
   /** Text in the hole, such as the whole ("$4,750 a month"). Defaults to the total. */
   readonly centerLabel?: string;
   /** Colors for top-level groups, by name. */
   readonly colors?: Readonly<Record<string, SeriesColor>>;
-  readonly formatValue?: (value: number) => string;
 }
 
 const KIND = "sunburst";
@@ -96,29 +89,15 @@ function fitsAlong(arc: Arc, w: number, h: number): boolean {
  * sunburst({ data: budget, path: ["department", "program"], value: "spend", alt: "..." });
  */
 export function sunburst<T extends object>(options: SunburstOptions<T>): string {
-  const { data, path, value } = options;
-  validateFigure(KIND, options);
-  const format = valueFormat(options);
-  const { terms } = stringsFor(options.strings);
-  const percent = numberFormat({
-    ...(options.locale ? { locale: options.locale } : {}),
-    style: "percent",
-    maximumFractionDigits: 1,
-  });
-  const tops = buildHierarchy(KIND, data, path, value);
+  const { path } = options;
+  const { format, terms, percent, tops, whole, valueLabel, width, height, char, line } =
+    readHierarchy(KIND, options);
   const plan = planSeries(
     KIND,
     tops.map((t) => t.name),
     options.colors,
   );
-  const whole = tops.reduce((sum, n) => sum + n.value, 0);
-  const valueLabel = options.valueLabel ?? value;
 
-  const width = options.width ?? DEFAULT_WIDTH;
-  const height = options.height ?? 400;
-  const growth = textGrowth(width);
-  const char = charWidth(width);
-  const line = 14 * growth;
   const cx = width / 2;
   const cy = height / 2;
   const radius = Math.max(40, Math.min(width, height) / 2 - 4);
@@ -255,9 +234,7 @@ export function sunburst<T extends object>(options: SunburstOptions<T>): string 
       format,
       series: [{ name: valueLabel, points: parts.map((n) => ({ at: named(n), value: n.value })) }],
     },
-    legend: plan.legend,
-    seriesField: path[0] as string,
-    slotColors: plan.slotColors,
+    ...seriesLegend(plan, true, path[0] as string),
     table: hierarchyTable(tops, [...path, valueLabel, terms.share], format, percent, terms.total),
   });
 }

@@ -16,6 +16,23 @@ export function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (ch) => ESCAPES[ch] ?? ch);
 }
 
+/** The text {@link escapeHtml} escaped, back as it was. */
+export function unescapeHtml(value: string): string {
+  return value
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&");
+}
+
+/** The double-quoted attributes in one tag's markup, by name, values still escaped. */
+export function readAttributes(markup: string): Map<string, string> {
+  return new Map(
+    [...markup.matchAll(/\s([\w:-]+)="([^"]*)"/g)].map((a) => [a[1] ?? "", a[2] ?? ""]),
+  );
+}
+
 /** An attribute value; `false` and `undefined` omit the attribute, `true` writes it bare. */
 export type AttributeValue = string | number | boolean | undefined;
 

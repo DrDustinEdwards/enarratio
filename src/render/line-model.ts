@@ -22,21 +22,21 @@ import {
 } from "./data.js";
 import type { MarkDatum } from "./datum.js";
 import {
-  type AxisUnits,
-  type FigureOptions,
   figure,
   type ScaleDescription,
+  type SeriesAxesOptions,
   type SeriesColor,
   slotStyle,
   unitLabel,
   validateFigure,
 } from "./figure.js";
-import { planSeries, type SeriesPlan } from "./series.js";
-import { charWidth } from "./size.js";
+import { planSeries, type SeriesPlan, seriesLegend } from "./series.js";
+import { charWidth, DEFAULT_HEIGHT, DEFAULT_WIDTH } from "./size.js";
 import {
   dateFormat,
   defaultFormat,
   numberFormat,
+  shareFormat,
   type Strings,
   stringsFor,
   valueAxis,
@@ -59,7 +59,7 @@ export interface EventMarker {
 }
 
 /** Options shared by `lineChart` and `areaChart`. */
-export interface SeriesChartOptions<T extends object> extends FigureOptions, AxisUnits, Annotated {
+export interface SeriesChartOptions<T extends object> extends SeriesAxesOptions, Annotated {
   readonly data: readonly T[];
   /**
    * The field along the x axis: dates or numbers. Dates are Date objects or ISO 8601 strings;
@@ -77,19 +77,11 @@ export interface SeriesChartOptions<T extends object> extends FigureOptions, Axi
    * strings are time.
    */
   readonly xType?: "time" | "linear";
-  /** Every series in display and color order. Without it, first-seen order. */
-  readonly seriesDomain?: readonly string[];
   /**
    * Color overrides by series name. A chart without `series` has one series, named by `yLabel`
    * (or "Value" when the y label is hidden).
    */
   readonly colors?: Readonly<Record<string, SeriesColor>>;
-  /** The x axis label; defaults to the field name; `null` hides it. */
-  readonly xLabel?: string | null;
-  /** The y axis label; defaults to the field name; `null` hides it. */
-  readonly yLabel?: string | null;
-  /** Formats values in hover details and the data table. */
-  readonly formatValue?: (value: number) => string;
   /**
    * Formats x values in hover details, the data table and the summary. Dates are written out
    * for the locale ("October 6, 2025"), with the time and "UTC" added when any value falls
@@ -230,8 +222,7 @@ type Forecastable<T extends object> = SeriesChartOptions<T> &
 /** Reads and checks the rows shared by line and area charts. */
 function prepare<T extends object>(kind: string, options: Forecastable<T>): Prepared {
   const { data, x, y, series } = options;
-  validateFigure(kind, options);
-  if (data.length === 0) throw new Error(`${kind}: data is empty`);
+  validateFigure(kind, options, data);
   const first: unknown = (data[0] as Record<string, unknown>)[x];
   const time = options.xType ? options.xType === "time" : typeof first !== "number";
   const locale = options.locale ?? "en-US";
@@ -553,9 +544,7 @@ function seriesModel<T extends object>(
         svg: area ? area.svg : svg,
         ...(area && !area.labeled ? { textured: true } : {}),
         ...(x ? { x } : {}),
-        legend: multi ? plan.legend : [],
-        ...(multi && options.series ? { seriesField: options.series } : {}),
-        slotColors: plan.slotColors,
+        ...seriesLegend(plan, multi, options.series),
         description,
         table: table(prepared, xColumn, multi),
       });
@@ -638,16 +627,27 @@ export function lineModel<T extends object>(options: LineChartOptions<T>): LineM
 }
 
 /**
- * The right margin a line chart leaves: room for the longest series name as a direct label (6
- * from the line's end, at the text size of the width drawn), else 24. A drawing 480 or wider
- * keeps at least 96, so desktop charts share one gutter; a narrower one takes only what its
- * labels need, and the plot keeps the rest.
+ * The size and margins a line or area chart is drawn at, by Plot and by `enarratio/lite` alike.
+ * The right margin leaves room for the longest series name as a direct label (6 from the line's
+ * end, at the text size of the width drawn), else 24. A drawing 480 or wider keeps at least 96,
+ * so desktop charts share one gutter; a narrower one takes only what its labels need, and the
+ * plot keeps the rest.
  */
-export function rightMargin(model: SeriesModel, width: number): number {
-  if (!model.directLabels) return 24;
+export function seriesMargins(
+  model: SeriesModel,
+  options: { readonly width?: number; readonly height?: number },
+) {
+  const width = options.width ?? DEFAULT_WIDTH;
   const longest = Math.max(...model.prepared.seriesNames.map((n) => n.length));
   const need = Math.ceil(6 + longest * charWidth(width) + 4);
-  return Math.max(width >= 480 ? 96 : 24, need);
+  return {
+    width,
+    height: options.height ?? DEFAULT_HEIGHT,
+    marginTop: 20,
+    marginRight: model.directLabels ? Math.max(width >= 480 ? 96 : 24, need) : 24,
+    marginBottom: 44,
+    marginLeft: 48,
+  };
 }
 
 const AREA = "areaChart";
@@ -683,11 +683,7 @@ function asShares(prepared: Prepared): Prepared {
 
 /** Reads and checks an area chart's options. Throws on anything it cannot draw. */
 export function areaModel<T extends object>(given: AreaChartOptions<T>): SeriesModel {
-  const percent = numberFormat({
-    ...(given.locale ? { locale: given.locale } : {}),
-    style: "percent",
-    maximumFractionDigits: 1,
-  });
+  const percent = shareFormat(given);
   const options: AreaChartOptions<T> = given.percent
     ? {
         ...given,

@@ -3,8 +3,22 @@
  * flat rows and a path of fields, the squarified layout, and the table both charts share.
  */
 
-import { readLabel, readNumber } from "./data.js";
-import type { DataTable } from "./figure.js";
+import { type KeysOfType, readLabel, readNumber } from "./data.js";
+import { type DataTable, type FigureOptions, validateFigure } from "./figure.js";
+import { charWidth, DEFAULT_WIDTH, textGrowth } from "./size.js";
+import { shareFormat, stringsFor, valueFormat } from "./text.js";
+
+/** The options the treemap and the sunburst share. */
+export interface HierarchyOptions<T extends object> extends FigureOptions {
+  readonly data: readonly T[];
+  /** The fields naming each row's place, one to four levels. */
+  readonly path: readonly KeysOfType<T, string | number>[];
+  /** The field for each part's size: zero or more. */
+  readonly value: KeysOfType<T, number>;
+  /** What the value measures, for the table and hover details (default: the field's name). */
+  readonly valueLabel?: string;
+  readonly formatValue?: (value: number) => string;
+}
 
 /** One node of a hierarchy: a group, or a leaf for one row. */
 export interface HierarchyNode {
@@ -18,6 +32,32 @@ export interface HierarchyNode {
   readonly children: HierarchyNode[];
   /** The index of its top-level ancestor (itself at depth 1), for its color and series. */
   readonly top: number;
+}
+
+/**
+ * What the treemap and the sunburst read before they draw: the checked options, the tree
+ * ({@link buildHierarchy}) and its whole, how values and shares are written, and the drawing's
+ * size and text metrics (400 tall by default).
+ */
+export function readHierarchy<T extends object>(kind: string, options: HierarchyOptions<T>) {
+  validateFigure(kind, options);
+  const format = valueFormat(options);
+  const { terms } = stringsFor(options.strings);
+  const percent = shareFormat(options);
+  const tops = buildHierarchy(kind, options.data, options.path, options.value);
+  const width = options.width ?? DEFAULT_WIDTH;
+  return {
+    format,
+    terms,
+    percent,
+    tops,
+    whole: tops.reduce((sum, n) => sum + n.value, 0),
+    valueLabel: options.valueLabel ?? options.value,
+    width,
+    height: options.height ?? 400,
+    char: charWidth(width),
+    line: 14 * textGrowth(width),
+  };
 }
 
 /**

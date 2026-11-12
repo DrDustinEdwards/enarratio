@@ -1,14 +1,7 @@
 import * as Plot from "@observablehq/plot";
 import { type KeysOfType, markKey, maxOf, readLabel, readNumberOrNull } from "../render/data.js";
 import { categoryRange, valueRange } from "../render/describe.js";
-import {
-  type AxisUnits,
-  figure,
-  type FigureOptions,
-  type SeriesColor,
-  unitLabel,
-  validateFigure,
-} from "../render/figure.js";
+import { type AxesOptions, figure, unitLabel, validateFigure } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
 import { charWidth, cutText, DEFAULT_HEIGHT, DEFAULT_WIDTH, slotLabel } from "../render/size.js";
@@ -17,8 +10,7 @@ import { type Annotated, drawAnnotations, withNotes } from "./annotate.js";
 import { named } from "./marks.js";
 
 /** Options for {@link waterfallChart}. */
-export interface WaterfallChartOptions<T extends object>
-  extends FigureOptions, AxisUnits, Annotated {
+export interface WaterfallChartOptions<T extends object> extends AxesOptions, Annotated {
   readonly data: readonly T[];
   /** The field naming each step, in order. */
   readonly x: KeysOfType<T, string | number>;
@@ -37,10 +29,6 @@ export interface WaterfallChartOptions<T extends object>
   readonly increaseLabel?: string;
   readonly decreaseLabel?: string;
   readonly totalLabel?: string;
-  readonly colors?: Readonly<Record<string, SeriesColor>>;
-  readonly xLabel?: string | null;
-  readonly yLabel?: string | null;
-  readonly formatValue?: (value: number) => string;
 }
 
 interface Step {
@@ -67,8 +55,7 @@ const KIND = "waterfallChart";
 export function waterfallChart<T extends object>(given: WaterfallChartOptions<T>): string {
   const options = withNotes(given);
   const { data, x, y, total } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const format = valueFormat(options);
   const strings = stringsFor(options.strings);
   const { terms } = strings;

@@ -9,7 +9,7 @@ import {
   withUnit,
 } from "../render/figure.js";
 import { decorate, keyed, renderPlot } from "../render/plot.js";
-import { planSeries } from "../render/series.js";
+import { planSeries, seriesLegend } from "../render/series.js";
 import { numberFormat, stringsFor } from "../render/text.js";
 
 /** One annotated feature on a genome: a gene, a coding sequence, a primer, a mutation site. */
@@ -333,9 +333,7 @@ export function genomeTrack(options: GenomeTrackOptions): string {
         overlaps: number(overlappingPairs(features, trackOf)),
       }),
     },
-    legend: plan.legend,
-    seriesField: "type",
-    slotColors: plan.slotColors,
+    ...seriesLegend(plan, true, "type"),
     table: {
       columns: [
         terms.feature,

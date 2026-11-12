@@ -4,6 +4,7 @@ import {
   markKey,
   maxOf,
   minOf,
+  rampLegend,
   rampStep,
   rampThresholds,
   readLabel,
@@ -11,12 +12,12 @@ import {
 } from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
 import { valueRange } from "../render/describe.js";
-import { type FigureOptions, figure, type RampItem, validateFigure } from "../render/figure.js";
+import { type FigureOptions, figure, validateFigure } from "../render/figure.js";
 import { charWidth, DEFAULT_WIDTH, textGrowth } from "../render/size.js";
 import { stringsFor, valueFormat } from "../render/text.js";
 import { type BasemapLayer, clipped, drawBasemap, readingRanks } from "./draw.js";
 import {
-  aspect,
+  mapSize,
   extentOf,
   fitExtent,
   type GeoExtent,
@@ -84,8 +85,7 @@ interface Region {
  */
 export function choroplethMap<T extends object>(options: ChoroplethMapOptions<T>): string {
   const { data, value } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const format = valueFormat(options);
   const strings = stringsFor(options.strings);
   const valueLabel = options.valueLabel ?? value;
@@ -129,14 +129,12 @@ export function choroplethMap<T extends object>(options: ChoroplethMapOptions<T>
   const width = options.width ?? DEFAULT_WIDTH;
   const extent = options.extent ?? extentOf(positionsOf(shapes), 0.02);
   const pad = 4;
-  const mapWidth = width - 2 * pad;
-  const mapHeight =
-    options.height === undefined
-      ? Math.round(
-          Math.min(1.5 * width, Math.max(160, mapWidth * aspect(options.projection, extent))),
-        )
-      : Math.max(40, options.height - 2 * pad);
-  const height = options.height ?? mapHeight + 2 * pad;
+  const { mapWidth, mapHeight, height } = mapSize(options.projection, extent, {
+    width,
+    height: options.height,
+    pad,
+    below: 0,
+  });
   const frame = { left: 0, top: 0, width, height };
   const project = Object.assign(
     fitExtent(options.projection, extent, {
@@ -263,16 +261,7 @@ export function choroplethMap<T extends object>(options: ChoroplethMapOptions<T>
     ].join(""),
   );
 
-  const stops = [min, ...thresholds, max];
-  const ramp: RampItem[] = [1, 2, 3, 4, 5].map((step) => ({
-    step,
-    label:
-      step === 1
-        ? strings.below(format(stops[1] as number))
-        : step === 5
-          ? strings.orMore(format(stops[4] as number))
-          : strings.range(format(stops[step - 1] as number), format(stops[step] as number)),
-  }));
+  const ramp = rampLegend([min, ...thresholds, max], format, strings);
   const ordered = [...regions].sort((a, b) => a.name.localeCompare(b.name));
 
   return figure(options, {

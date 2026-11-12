@@ -23,7 +23,7 @@ import {
   readInterval,
 } from "../render/interval.js";
 import { keyed, renderPlot } from "../render/plot.js";
-import { planSeries } from "../render/series.js";
+import { planSeries, seriesLegend } from "../render/series.js";
 import { DEFAULT_WIDTH } from "../render/size.js";
 import { type AxisRange, type Strings, signed, stringsFor, valueFormat } from "../render/text.js";
 import { type Annotated, drawAnnotations, withNotes } from "./annotate.js";
@@ -95,8 +95,7 @@ function readItems<T extends object>(
   options: ItemOptions<T>,
   valueField: string,
 ): Read & { readonly raw: readonly string[] } {
-  validateFigure(kind, options);
-  if (options.data.length === 0) throw new Error(`${kind}: data is empty`);
+  validateFigure(kind, options, options.data);
   const raw = options.data.map((row, i) => readLabel(kind, row, options.y, i));
   return {
     raw,
@@ -280,9 +279,7 @@ export function dotPlot<T extends object>(given: DotPlotOptions<T>): string {
         }),
       })),
     },
-    legend: multi ? plan.legend : [],
-    ...(multi && series ? { seriesField: series } : {}),
-    slotColors: plan.slotColors,
+    ...seriesLegend(plan, multi, series),
     table: {
       columns: [
         r.itemLabel,

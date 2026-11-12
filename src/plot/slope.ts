@@ -80,8 +80,7 @@ function spread(ys: readonly number[], top: number, bottom: number): number[] {
  */
 export function slopeChart<T extends object>(options: SlopeChartOptions<T>): string {
   const { data, label, from, to } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   if (data.length > 30)
     throw new Error(`${KIND}: ${data.length} items are too many to label; use a dumbbell plot`);
   const format = valueFormat(options);

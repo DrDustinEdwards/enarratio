@@ -11,7 +11,7 @@ import {
   validateFigure,
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
-import { planSeries } from "../render/series.js";
+import { planSeries, seriesLegend } from "../render/series.js";
 import { charWidth, DEFAULT_WIDTH } from "../render/size.js";
 import { numberFormat, stringsFor } from "../render/text.js";
 import { parseNewick, type TreeNode } from "./newick.js";
@@ -238,9 +238,7 @@ export function phylogeneticTree(options: PhylogeneticTreeOptions): string {
         },
       ],
     },
-    legend: groups ? plan.legend : [],
-    ...(groups ? { seriesField: "group" } : {}),
-    slotColors: plan.slotColors,
+    ...seriesLegend(plan, groups !== undefined, "group"),
     table: {
       columns: [
         terms.node,

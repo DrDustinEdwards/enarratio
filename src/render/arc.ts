@@ -58,7 +58,7 @@ export interface RimLabel {
  * above it on the upper half, below on the lower, lifted clear of the circle and of each other.
  * `cap` is the most the radius may be.
  */
-export function rimLabels(
+function rimAt(
   names: readonly string[],
   angles: readonly number[],
   size: { width: number; height: number; char: number; line: number; cap: number },
@@ -159,4 +159,23 @@ export function rimLabels(
     };
   });
   return { radius: beside, labels };
+}
+
+/**
+ * The circle a radial chart draws with names at its rim, at the given angles: its height, its
+ * radius and where each name sits ({@link rimAt}). With no height given, the drawing is 400 tall,
+ * or shorter where the names keep the circle small (a phone).
+ */
+export function rimLabels(
+  names: readonly string[],
+  angles: readonly number[],
+  size: { width: number; height: number | undefined; char: number; line: number },
+): { height: number; radius: number; labels: RimLabel[] } {
+  const { width, char, line } = size;
+  const place = (h: number) =>
+    rimAt(names, angles, { width, height: h, char, line, cap: Math.min(width, h) / 2 - 4 });
+  const fit = place(400);
+  const height = size.height ?? Math.min(400, Math.ceil(2 * fit.radius + 2 * line + 32));
+  const rim = size.height === undefined && height === 400 ? fit : place(height);
+  return { height, ...rim };
 }

@@ -5,7 +5,7 @@
  * construction, as {@link texture} does for patterns.
  */
 
-import { escapeHtml } from "../html.js";
+import { escapeHtml, readAttributes, unescapeHtml } from "../html.js";
 import { num } from "../lite/svg.js";
 import type { BarModel, BarPoint } from "./bar-model.js";
 import { markKey } from "./data.js";
@@ -105,16 +105,6 @@ function roundedPath(b: Omit<Drawn, "point">, end: End): string {
   }
 }
 
-const ATTRIBUTE = /\s([\w:-]+)="([^"]*)"/g;
-
-const unescape = (value: string): string =>
-  value
-    .replaceAll("&quot;", '"')
-    .replaceAll("&#39;", "'")
-    .replaceAll("&lt;", "<")
-    .replaceAll("&gt;", ">")
-    .replaceAll("&amp;", "&");
-
 const offsetOf = (tag: string): [number, number] => {
   const m = /\stransform="translate\(([-\d.e]+),([-\d.e]+)\)"/.exec(tag);
   return m ? [Number(m[1]), Number(m[2])] : [0, 0];
@@ -168,9 +158,9 @@ function shapeBars(
       }
       continue;
     }
-    const values = new Map([...attrs.matchAll(ATTRIBUTE)].map((a) => [a[1], a[2] ?? ""]));
+    const values = readAttributes(attrs);
     const key = values.get("data-enarratio-key");
-    const point = key === undefined ? undefined : byKey.get(unescape(key));
+    const point = key === undefined ? undefined : byKey.get(unescapeHtml(key));
     if (!selfClosing) closeAs.push("rect");
     if (!point || key === undefined) continue;
     const [dx, dy] = offsets.at(-1) ?? [0, 0];
@@ -181,7 +171,7 @@ function shapeBars(
       height: Number(values.get("height")),
     };
     drawn.push({ point, x: box.x + dx, y: box.y + dy, width: box.width, height: box.height });
-    const end = ends.get(unescape(key));
+    const end = ends.get(unescapeHtml(key));
     if (!end || !(box.width > 0 && box.height > 0)) continue;
     const kept = attrs.replace(/\s(?:x|y|width|height)="[^"]*"/g, "");
     out += `${svg.slice(from, m.index)}<path${kept} d="${roundedPath(box, end)}"${selfClosing ? "/" : ""}>`;

@@ -65,8 +65,7 @@ interface Row {
  */
 export function bulletChart<T extends object>(options: BulletChartOptions<T>): string {
   const { data, label, value } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const format = valueFormat(options);
   const { terms } = stringsFor(options.strings);
   const valueLabel = options.valueLabel ?? value;

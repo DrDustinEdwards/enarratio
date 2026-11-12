@@ -1,26 +1,28 @@
 import { el, svgRoot, text } from "../lite/svg.js";
 import { n2 } from "../render/arc.js";
-import { type KeysOfType, markKey, maxOf, minOf, readLabel, readNumber } from "../render/data.js";
+import {
+  type KeysOfType,
+  markKey,
+  type MeasuresOptions,
+  maxOf,
+  minOf,
+  readLabel,
+  readNumber,
+} from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
 import { spreadLabels } from "../render/direct-labels.js";
-import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
+import { figure, validateFigure } from "../render/figure.js";
 import { planSeries } from "../render/series.js";
 import { charWidth, DEFAULT_WIDTH, textGrowth } from "../render/size.js";
 import { stringsFor, valueFormat } from "../render/text.js";
 
 /** Options for {@link parallelCoordinates}. */
-export interface ParallelCoordinatesOptions<T extends object> extends FigureOptions {
-  /** One row per item: a line across every axis. */
-  readonly data: readonly T[];
-  /** The field naming each item. */
-  readonly label: KeysOfType<T, string | number>;
+export interface ParallelCoordinatesOptions<T extends object> extends MeasuresOptions<T> {
   /**
    * The measures, one vertical axis each, left to right: three to twelve. Their order is the
    * chart's argument, since neighbors compare most easily; put measures that relate side by side.
    */
   readonly axes: readonly KeysOfType<T, number>[];
-  /** Names for the axes, by field (default: the field's name). */
-  readonly axisLabels?: Readonly<Partial<Record<KeysOfType<T, number>, string>>>;
   /** A field grouping items, each group in a color (eight at most). */
   readonly series?: KeysOfType<T, string | number>;
   /**
@@ -28,8 +30,6 @@ export interface ParallelCoordinatesOptions<T extends object> extends FigureOpti
    * faded. A static drawing cannot brush, so this is how it points at the lines that matter.
    */
   readonly highlight?: readonly string[];
-  readonly colors?: Readonly<Record<string, SeriesColor>>;
-  readonly formatValue?: (value: number) => string;
 }
 
 const KIND = "parallel";
@@ -51,8 +51,7 @@ export function parallelCoordinates<T extends object>(
   options: ParallelCoordinatesOptions<T>,
 ): string {
   const { data, label, axes } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   if (axes.length < 3 || axes.length > 12) {
     throw new Error(`${KIND}: ${axes.length} axes; parallel coordinates need 3 to 12`);
   }

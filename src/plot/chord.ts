@@ -1,34 +1,23 @@
 import { el, svgRoot, text } from "../lite/svg.js";
 import { arcPath, n2, polar, type RimLabel, rimLabels } from "../render/arc.js";
-import { type KeysOfType, markKey } from "../render/data.js";
+import { markKey } from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
-import { type FigureOptions, figure, type SeriesColor, validateFigure } from "../render/figure.js";
-import { readLinks } from "../render/flow.js";
+import { figure, type SeriesColor, validateFigure } from "../render/figure.js";
+import { flowDescription, type FlowOptions, readLinks } from "../render/flow.js";
 import { planSeries } from "../render/series.js";
 import { charWidth, DEFAULT_WIDTH, textGrowth } from "../render/size.js";
-import { numberFormat, stringsFor, valueFormat } from "../render/text.js";
+import { shareFormat, stringsFor, valueFormat } from "../render/text.js";
 import { texture } from "../render/texture.js";
 
 /** Options for {@link chordDiagram}. */
-export interface ChordDiagramOptions<T extends object> extends FigureOptions {
-  /** One row per flow between two groups. */
-  readonly data: readonly T[];
-  /** The field naming where each flow comes from. */
-  readonly from: KeysOfType<T, string | number>;
-  /** The field naming where it goes. */
-  readonly to: KeysOfType<T, string | number>;
-  /** The field for how much flows: zero or more. */
-  readonly value: KeysOfType<T, number>;
+export interface ChordDiagramOptions<T extends object> extends FlowOptions<T> {
   /**
    * Whether a row is a flow one way (default true: a migration, a trade), so each group's arc is
    * what it sends and a ribbon's two ends differ; `false` reads each row as shared by both groups
    * (co-authorship, co-occurrence), counted on both arcs.
    */
   readonly directed?: boolean;
-  /** What the value measures, for the table and hover details (default: the field's name). */
-  readonly valueLabel?: string;
   readonly colors?: Readonly<Record<string, SeriesColor>>;
-  readonly formatValue?: (value: number) => string;
 }
 
 const KIND = "chord";
@@ -53,11 +42,7 @@ export function chordDiagram<T extends object>(options: ChordDiagramOptions<T>):
   validateFigure(KIND, options);
   const format = valueFormat(options);
   const { terms } = stringsFor(options.strings);
-  const percent = numberFormat({
-    ...(options.locale ? { locale: options.locale } : {}),
-    style: "percent",
-    maximumFractionDigits: 1,
-  });
+  const percent = shareFormat(options);
   const valueLabel = options.valueLabel ?? value;
   const directed = options.directed ?? true;
   const { links, names } = readLinks(KIND, data, from, to, value);
@@ -108,17 +93,11 @@ export function chordDiagram<T extends object>(options: ChordDiagramOptions<T>):
     angle += PAD;
   }
 
-  const lineHeight = 14 * growth;
-  const place = (h: number) =>
-    rimLabels(
-      names,
-      groups.map((g) => (g.a0 + g.a1) / 2),
-      { width, height: h, char, line: lineHeight, cap: Math.min(width, h) / 2 - 4 },
-    );
-  // Where the names at the rim keep the circle small (a phone), the default height shrinks to fit it.
-  const fit = place(400);
-  const height = options.height ?? Math.min(400, Math.ceil(2 * fit.radius + 2 * lineHeight + 32));
-  const rim = options.height === undefined && height === 400 ? fit : place(height);
+  const { height, ...rim } = rimLabels(
+    names,
+    groups.map((g) => (g.a0 + g.a1) / 2),
+    { width, height: options.height, char, line: 14 * growth },
+  );
   const cx = width / 2;
   const cy = height / 2;
   const outer = Math.max(30, rim.radius);
@@ -251,15 +230,7 @@ export function chordDiagram<T extends object>(options: ChordDiagramOptions<T>):
   return figure(options, {
     kind: KIND,
     svg,
-    description: {
-      format,
-      series: [
-        {
-          name: valueLabel,
-          points: links.map((l) => ({ at: `${l.source} → ${l.target}`, value: l.value })),
-        },
-      ],
-    },
+    description: flowDescription(format, valueLabel, links),
     legend: plan.legend,
     slotColors: plan.slotColors,
     table: {
