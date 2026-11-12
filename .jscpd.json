@@ -1,5 +1,18 @@
 {
-  "path": ["src", "scripts", "worker", "site/gallery.js", "site/theme.js"],
+  "path": [
+    "src",
+    "scripts",
+    "worker",
+    "examples",
+    "site/gallery.js",
+    "site/theme.js",
+    "oxfmt.config.ts",
+    "oxlint.config.ts",
+    "stryker.config.mjs",
+    "vitest.browser.config.ts",
+    "vitest.config.ts",
+    "vitest.stryker.config.ts"
+  ],
   "format": ["typescript", "javascript", "css"],
   "ignore": ["**/node_modules/**", "**/dist/**"],
   "gitignore": true,
