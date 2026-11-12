@@ -5,9 +5,13 @@
  * @packageDocumentation
  */
 
-import { type LineChartOptions, lineModel, type Point, rightMargin } from "../render/line-model.js";
+import {
+  type LineChartOptions,
+  lineModel,
+  type Point,
+  seriesMargins,
+} from "../render/line-model.js";
 import { spreadLabels } from "../render/direct-labels.js";
-import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
 import { annotationMarkup, continuousScale } from "./annotate.js";
 import {
   annotations,
@@ -57,20 +61,10 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
     ...model.markers.map((m) => Number(m.x)),
     ...(forecast ? [Number(forecast.x)] : []),
   ];
-  const layout = seriesFrame(
-    model,
-    {
-      width: options.width ?? DEFAULT_WIDTH,
-      height: options.height ?? DEFAULT_HEIGHT,
-      marginTop: 20,
-      marginRight: rightMargin(model, options.width ?? DEFAULT_WIDTH),
-      marginBottom: 44,
-      marginLeft: 48,
-    },
-    xs,
-    ys,
-    { log: model.log, zero: !model.log && (options.zero ?? true) },
-  );
+  const layout = seriesFrame(model, seriesMargins(model, options), xs, ys, {
+    log: model.log,
+    zero: !model.log && (options.zero ?? true),
+  });
   const { x, y } = layout;
   const at = (p: Point): [number, number] => [x(p.at), y(p.value ?? 0)];
   const hasValue = (p: Point): boolean => p.value !== null;

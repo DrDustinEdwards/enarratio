@@ -8,6 +8,7 @@ export {
   dateFormat,
   defaultFormat,
   numberFormat,
+  shareFormat,
   signed,
   valueAxis,
   valueFormat,

@@ -8,7 +8,7 @@ import { charWidth, DEFAULT_WIDTH, textGrowth } from "../render/size.js";
 import { numberFormat, stringsFor, valueFormat } from "../render/text.js";
 import { type BasemapLayer, clipped, drawBasemap, readingRanks } from "./draw.js";
 import {
-  aspect,
+  mapSize,
   extentOf,
   fitExtent,
   type GeoExtent,
@@ -93,8 +93,7 @@ function readCoordinate(row: object, key: string, i: number, limit: number): num
  */
 export function dotMap<T extends object>(options: DotMapOptions<T>): string {
   const { data, longitude, latitude, value } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const format = valueFormat(options);
   const strings = stringsFor(options.strings);
   const { terms } = strings;
@@ -241,14 +240,12 @@ export function dotMap<T extends object>(options: DotMapOptions<T>): string {
       ...landmarks.map((l) => [l.longitude, l.latitude] as [number, number]),
     ]);
   const pad = maxRadius + 2;
-  const mapWidth = width - 2 * pad;
-  const mapHeight =
-    options.height === undefined
-      ? Math.round(
-          Math.min(1.5 * width, Math.max(160, mapWidth * aspect(options.projection, extent))),
-        )
-      : Math.max(40, options.height - keyHeight - 2 * pad);
-  const height = options.height ?? mapHeight + 2 * pad + keyHeight;
+  const { mapWidth, mapHeight, height } = mapSize(options.projection, extent, {
+    width,
+    height: options.height,
+    pad,
+    below: keyHeight,
+  });
   const project = fitExtent(options.projection, extent, {
     left: pad,
     top: pad,

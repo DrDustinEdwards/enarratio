@@ -87,7 +87,8 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
 }
 
 function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>): string {
-  const { width, height, horizontal, grouped, xNames, seriesNames, points } = model;
+  const { width, height, horizontal, grouped, xNames, seriesNames, points, columnOf, rowOf } =
+    model;
   let frame: Frame = {
     width,
     height,
@@ -180,8 +181,6 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
     model.padding.inner,
     model.padding.outer,
   );
-  const columnOf = new Map(xNames.map((name, i) => [name, i]));
-  const rowOf = new Map(seriesNames.map((name, i) => [name, i]));
 
   // Facets in category order; a category without bars is an empty facet, drawn without marks.
   const byCategory = new Map<string, BarPoint[]>();

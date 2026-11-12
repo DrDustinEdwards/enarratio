@@ -245,9 +245,27 @@ function planarBox(
 }
 
 /** The height over width of an extent once projected, for a map whose height is not given. */
-export function aspect(projection: Projection | undefined, extent: GeoExtent): number {
+function aspect(projection: Projection | undefined, extent: GeoExtent): number {
   const b = planarBox(planar(projection, extent), extent);
   return (b.y1 - b.y0) / (b.x1 - b.x0 || 1);
+}
+
+/**
+ * The size of a map drawn `width` wide with `pad` around it and `below` more under it (a key): the
+ * caller's height, or one that follows the extent's shape, at most 1.5 times the width.
+ */
+export function mapSize(
+  projection: Projection | undefined,
+  extent: GeoExtent,
+  size: { width: number; height: number | undefined; pad: number; below: number },
+): { mapWidth: number; mapHeight: number; height: number } {
+  const { width, height, pad, below } = size;
+  const mapWidth = width - 2 * pad;
+  const mapHeight =
+    height === undefined
+      ? Math.round(Math.min(1.5 * width, Math.max(160, mapWidth * aspect(projection, extent))))
+      : Math.max(40, height - below - 2 * pad);
+  return { mapWidth, mapHeight, height: height ?? mapHeight + 2 * pad + below };
 }
 
 /**

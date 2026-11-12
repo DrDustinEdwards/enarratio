@@ -8,14 +8,7 @@ import {
   readNumber,
 } from "../render/data.js";
 import { categoryRange, valueRange } from "../render/describe.js";
-import {
-  type AxisUnits,
-  figure,
-  type FigureOptions,
-  type SeriesColor,
-  unitLabel,
-  validateFigure,
-} from "../render/figure.js";
+import { type AxesOptions, figure, unitLabel, validateFigure } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "../render/size.js";
@@ -23,8 +16,7 @@ import { signed, stringsFor, valueFormat } from "../render/text.js";
 import { type Annotated, drawAnnotations, withNotes } from "./annotate.js";
 
 /** Options for {@link divergingBarChart}. */
-export interface DivergingBarChartOptions<T extends object>
-  extends FigureOptions, AxisUnits, Annotated {
+export interface DivergingBarChartOptions<T extends object> extends AxesOptions, Annotated {
   readonly data: readonly T[];
   /** The category field: one bar per category. */
   readonly x: KeysOfType<T, string | number>;
@@ -37,11 +29,7 @@ export interface DivergingBarChartOptions<T extends object>
   /** The legend names of the two sides (default "Above zero" and "Below zero"). */
   readonly positiveLabel?: string;
   readonly negativeLabel?: string;
-  readonly colors?: Readonly<Record<string, SeriesColor>>;
   readonly xDomain?: readonly (string | number)[];
-  readonly xLabel?: string | null;
-  readonly yLabel?: string | null;
-  readonly formatValue?: (value: number) => string;
 }
 
 interface Signed {
@@ -64,8 +52,7 @@ const KIND = "divergingBarChart";
 export function divergingBarChart<T extends object>(given: DivergingBarChartOptions<T>): string {
   const options = withNotes(given);
   const { data, x, y } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const format = valueFormat(options);
   const { terms } = stringsFor(options.strings);
   const positive = options.positiveLabel ?? terms.aboveZero;

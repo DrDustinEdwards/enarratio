@@ -11,7 +11,7 @@ import {
   validateFigure,
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
-import { planSeries } from "../render/series.js";
+import { planSeries, seriesLegend } from "../render/series.js";
 import { charWidth, DEFAULT_WIDTH, wrapTwo } from "../render/size.js";
 import { numberFormat, stringsFor, valueFormat } from "../render/text.js";
 import { fitLogistic, type LogisticFit, type LogisticParameters, logistic } from "./logistic.js";
@@ -62,8 +62,7 @@ const KIND = "doseResponse";
  */
 export function doseResponse<T extends object>(options: DoseResponseOptions<T>): string {
   const { data, dose, response, group } = options;
-  validateFigure(KIND, options);
-  if (data.length === 0) throw new Error(`${KIND}: data is empty`);
+  validateFigure(KIND, options, data);
   const format = valueFormat(options);
   const strings = stringsFor(options.strings);
   const locale = options.locale ? { locale: options.locale } : {};
@@ -297,9 +296,7 @@ export function doseResponse<T extends object>(options: DoseResponseOptions<T>):
           .map((p) => ({ at: `${doseLabel ?? dose} ${format(p.dose)}`, value: p.response })),
       })),
     },
-    legend: multi ? plan.legend : [],
-    ...(multi && group ? { seriesField: group } : {}),
-    slotColors: plan.slotColors,
+    ...seriesLegend(plan, multi, group),
     table: {
       columns: [
         ...(multi ? [group] : []),

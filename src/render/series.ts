@@ -13,6 +13,18 @@ export interface SeriesPlan {
   slot(name: string): number;
 }
 
+/**
+ * The legend parts a figure takes from its plan: the legend when `shown`, the data field the
+ * series come from (which legend filters report) when shown and known, and the slot colors.
+ */
+export function seriesLegend(plan: SeriesPlan, shown: boolean, field: string | undefined) {
+  return {
+    legend: shown ? plan.legend : [],
+    ...(shown && field ? { seriesField: field } : {}),
+    slotColors: plan.slotColors,
+  };
+}
+
 /** A CSS reference to a palette slot. */
 function slotColor(slot: number): string {
   return `var(--enarratio-series-${slot})`;
