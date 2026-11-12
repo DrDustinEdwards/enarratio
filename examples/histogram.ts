@@ -2,6 +2,7 @@
 import { histogram } from "enarratio/plot";
 
 // A fixed sample, so the gallery draws the same chart every time.
+// jscpd:ignore-start: each example is a snippet the gallery shows whole, so each keeps its own seeded sample
 let seed = 7;
 const random = (): number => {
   seed = (seed * 16807) % 2147483647;
@@ -9,6 +10,7 @@ const random = (): number => {
 };
 const normal = (mean: number, sd: number): number =>
   mean + sd * Math.sqrt(-2 * Math.log(random())) * Math.cos(2 * Math.PI * random());
+// jscpd:ignore-end
 const cells = Array.from({ length: 240 }, () => ({
   diameter: Math.round(normal(12.4, 1.8) * 10) / 10,
 }));
