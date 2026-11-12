@@ -7,6 +7,8 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+- devkit is v0.43.0: the no-bloat check also measures unread files and fails on a duplicate of shared code. Not in the package.
+
 - **`validateFigure` takes the chart's rows.** An optional third argument, `data`, makes it throw "kind: data is empty" on no rows, the check every chart of rows now makes through it. Existing calls are unchanged.
 - **The chart builders share their setup instead of copying it.** Options shared by several charts are one interface each (flow diagrams, treemap and sunburst, parallel coordinates and radar, charts on x and y axes), and the steps they repeated are one helper each: the share format, the legend parts, the circle with names at its rim, a map's size, the five-step ramp's legend, a line or area chart's margins and a hierarchy chart's setup. Every chart's markup is byte-identical to 0.13.1's for the 51 gallery examples at five sizes, and each refuses empty data with the same message. The documentation of a few inherited options now reads the same across charts. jscpd finds 1 clone (from 32). devkit-no-bloat is a failing check (devkit 0.37.1).
 - **The gallery enforces Trusted Types.** site-runtime 0.132.0 (dev dependency) makes the gallery's registry entry enforce `require-trusted-types-for 'script'`, so `_headers` and the Worker's responses carry it in the enforced Content-Security-Policy instead of the Report-Only one. The charts' parser already goes through its `enarratio` policy. Not part of the package.
