@@ -7,6 +7,7 @@
 import { describe, expect, it, vi } from "vitest";
 import * as lite from "../src/lite/index.js";
 import * as plot from "../src/plot/index.js";
+import { sparkline } from "../src/index.js";
 import { parse } from "./helpers.js";
 
 /** A figure as comparable lines: each element with its attributes sorted, and text. */
@@ -644,5 +645,52 @@ describe("light lineChart and areaChart", () => {
     expect(() => lite.areaChart({ data: numeric, x: "dose", y: "v", alt: "Dose" })).toThrow(
       "stacked areas need values of zero or more",
     );
+  });
+});
+
+describe("light sparkline", () => {
+  const cases: [string, Parameters<typeof sparkline>[0]][] = [
+    ["a label", { values: [2, 5, 3, 8], label: "Entries per year" }],
+    [
+      "Foxhound's drawing",
+      {
+        values: [0, 3, 1, 0, 4],
+        label: "Card declined failures per day",
+        width: 60,
+        height: 24,
+        endDot: false,
+      },
+    ],
+    ["a gap, area and color", { values: [1, 2, null, 3, 4], area: true, color: "#123456" }],
+    ["a light and dark color", { values: [1, 3], color: { light: "#111111", dark: "#eeeeee" } }],
+    ["one value", { values: [7] }],
+    ["constant values and a given alt", { values: [4, 4, 4], alt: "Flat <b>" }],
+    ["a locale and format", { values: [1200.5, 3400], label: "Sales", locale: "de-DE" }],
+    ["formatValue", { values: [1, 2, 3], formatValue: (v) => `${v}%` }],
+  ];
+
+  it.each(cases)("is sparkline({ inline: true })'s drawing: %s", (_, options) => {
+    expect(lite.sparkline(options)).toBe(sparkline({ ...options, inline: true }));
+  });
+
+  it("refuses what the sparkline refuses", () => {
+    for (const options of [
+      { values: [] },
+      { values: [null] },
+      { values: [1, Number.POSITIVE_INFINITY] },
+      { values: [1], width: 0 },
+    ]) {
+      const message = (draw: () => string): string | undefined => {
+        try {
+          draw();
+        } catch (error) {
+          return (error as Error).message;
+        }
+        return undefined;
+      };
+      const expected = message(() => sparkline({ ...options, inline: true }));
+      expect(expected).toBeDefined();
+      expect(message(() => lite.sparkline(options))).toBe(expected);
+    }
   });
 });

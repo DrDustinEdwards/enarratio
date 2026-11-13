@@ -83,7 +83,7 @@ it draws:
 | `enarratio/plot`     | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` and the charts below                                                       | `@observablehq/plot linkedom`          |
 | `enarratio/science`  | `genomeTrack`, `titerPlot`, `doseResponse`, `survivalPlot`, `forestPlot`, `phylogeneticTree`, `networkChart`, and their statistics        | `@observablehq/plot d3-force linkedom` |
 | `enarratio/map`      | `dotMap` and `choroplethMap`, drawn from your own GeoJSON                                                                                 | Nothing                                |
-| `enarratio/lite`     | `barChart`, `lineChart`, `areaChart` without Observable Plot, for the browser; also `enarratio/lite/bar`, `/line`, `/area`                | Nothing                                |
+| `enarratio/lite`     | `barChart`, `lineChart`, `areaChart` without Observable Plot, for the browser; also `enarratio/lite/bar`, `/line`, `/area`, `/sparkline` | Nothing                                |
 | `enarratio/enhance`  | Browser interaction                                                                                                                       | Nothing                                |
 | `enarratio/redraw`   | Redraws a server's chart to its frame's width; `enarratio/redraw/narrow` holds `narrowChart`, the swap to a server's narrow drawing alone | Nothing                                |
 | `enarratio/themes`   | `defaultTheme`                                                                                                                            | Nothing                                |

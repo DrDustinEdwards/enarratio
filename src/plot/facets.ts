@@ -3,13 +3,8 @@ import { finishBars } from "../render/bar-marks.js";
 import { BAR_MAX, type BarChartOptions, type BarPoint, barModel } from "../render/bar-model.js";
 import { domainOf, type KeysOfType, markKey, readCategory, readLabel } from "../render/data.js";
 import { type ChartDescription, categoryRange, valueRange } from "../render/describe.js";
-import {
-  type AxisUnits,
-  type FigureOptions,
-  figure,
-  slotStyle,
-  validateFigure,
-} from "../render/figure.js";
+import { type AxisUnits, type FigureOptions, figure, validateFigure } from "../render/figure.js";
+import { slotStyle } from "../render/slot-style.js";
 import { type LineChartOptions, lineModel, type Point } from "../render/line-model.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries, seriesLegend } from "../render/series.js";

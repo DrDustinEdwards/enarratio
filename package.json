@@ -1,6 +1,6 @@
 {
   "name": "enarratio",
-  "version": "0.13.1",
+  "version": "0.15.0",
   "description": "Accessible, server-rendered charts and scientific figures for the web",
   "keywords": [
     "accessibility",
@@ -86,6 +86,10 @@
     "./lite/area": {
       "types": "./dist/lite/area.d.ts",
       "default": "./dist/lite/area.js"
+    },
+    "./lite/sparkline": {
+      "types": "./dist/lite/sparkline.d.ts",
+      "default": "./dist/lite/sparkline.js"
     },
     "./package.json": "./package.json"
   },

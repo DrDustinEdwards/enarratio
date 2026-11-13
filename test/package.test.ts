@@ -30,7 +30,7 @@ function reach(entry: string, seen = new Set<string>()): Set<string> {
 }
 
 describe("package entries", () => {
-  it("has the thirteen subpaths and no others", () => {
+  it("has the fourteen subpaths and no others", () => {
     expect(Object.keys(pkg.exports).sort()).toEqual(
       [
         ".",
@@ -40,6 +40,7 @@ describe("package entries", () => {
         "./lite/area",
         "./lite/bar",
         "./lite/line",
+        "./lite/sparkline",
         "./map",
         "./package.json",
         "./plot",
@@ -87,7 +88,7 @@ describe("package entries", () => {
 
   it("keeps Plot, linkedom, d3-force and any DOM document out of the light charts", () => {
     // Every import is a file of this package: no peer, and not the #document switch.
-    for (const entry of ["index", "bar", "line", "area"]) {
+    for (const entry of ["index", "bar", "line", "area", "sparkline"]) {
       for (const file of reach(resolve(root, "src", "lite", `${entry}.ts`))) {
         const specifiers = [...readFileSync(file, "utf8").matchAll(/from\s*["']([^"']+)["']/g)];
         for (const [, specifier] of specifiers) expect(specifier, file).toMatch(/^\.\.?\//);
@@ -177,11 +178,12 @@ describe.skipIf(!built)("the built package", () => {
       ].sort(),
     );
     expect(Object.keys(await load("lite/index.js")).sort()).toEqual(
-      ["areaChart", "barChart", "lineChart"].sort(),
+      ["areaChart", "barChart", "lineChart", "sparkline"].sort(),
     );
     expect(Object.keys(await load("lite/bar.js"))).toEqual(["barChart"]);
     expect(Object.keys(await load("lite/line.js"))).toEqual(["lineChart"]);
     expect(Object.keys(await load("lite/area.js"))).toEqual(["areaChart"]);
+    expect(Object.keys(await load("lite/sparkline.js"))).toEqual(["sparkline"]);
   });
 
   it("writes base.css identical to baseStylesheet()", async () => {

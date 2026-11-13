@@ -4,6 +4,8 @@
  * formats, a reading-grade measure, and the CSV a figure links to.
  */
 
+import { englishSparklineSentence, type SparklineSentence } from "./sparkline.js";
+
 export {
   dateFormat,
   defaultFormat,
@@ -285,14 +287,7 @@ export interface Strings {
   /** A dot map's landmarks: how many, what they are, and the one highlighted. */
   readonly landmarks: (count: string, name: string, highlighted?: string) => string;
   /** The primitives' generated text alternatives; `subject` is the label, or "". */
-  readonly sparklineSummary: (sparkline: {
-    readonly subject: string;
-    readonly values: string;
-    readonly first: string;
-    readonly last: string;
-    readonly lowest: string;
-    readonly highest: string;
-  }) => string;
+  readonly sparklineSummary: (sparkline: SparklineSentence) => string;
   readonly heatStripSummary: (strip: {
     readonly subject: string;
     readonly cells: string;
@@ -496,8 +491,7 @@ export const ENGLISH: Strings = {
       .join(" "),
   landmarks: (count, name, highlighted) =>
     `${count === "1" ? "A square marks a landmark" : `${count} squares mark landmarks`} (${name})${highlighted ? `; the filled square is ${highlighted}` : ""}.`,
-  sparklineSummary: (s) =>
-    `${s.subject ? `${s.subject}: ` : ""}${s.values} values, from ${s.first} to ${s.last}; lowest ${s.lowest}, highest ${s.highest}.`,
+  sparklineSummary: englishSparklineSentence,
   heatStripSummary: (s) =>
     `${s.subject ? `${s.subject}: ` : ""}${s.cells} cells, from ${s.first} to ${s.last}; lowest ${s.lowest}, highest ${s.highest}${s.missing ? `; ${s.missing} with no data` : ""}.`,
   uptimeSummary: (s) =>
