@@ -15,6 +15,7 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- **Home and End work in the Download menu.** The menu's key handler stepped to the first or last item and then returned before focusing it, so both keys did nothing. The bar-marks walk reads a tag's match without a cast, and a dead reset is gone. No chart's markup changes.
 - devkit is v0.43.0 (workflow pins, dev dependency and no-bloat baseline). Not in the package.
 
 - **`validateFigure` takes the chart's rows.** An optional third argument, `data`, makes it throw "kind: data is empty" on no rows, the check every chart of rows now makes through it. Existing calls are unchanged.
