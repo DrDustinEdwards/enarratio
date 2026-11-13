@@ -208,7 +208,7 @@ function step(list: HTMLElement[], at: number, key: string, back: string, on: st
 
 /**
  * The Download menu: "Download CSV" (the figure's own link, moved in) and the export buttons, in
- * a popover. Up and Down move between its items, Down on the closed button opens it at the first
+ * a popover. Up and Down move between its items (Home and End to the first and last), Down on the closed button opens it at the first
  * one, and choosing an item closes it with focus back on its button.
  */
 export function downloadMenu(
@@ -235,7 +235,7 @@ export function downloadMenu(
         : key === "ArrowDown"
           ? items[0]
           : undefined;
-    if (!next || key === "Home" || key === "End") return;
+    if (!next) return;
     e.preventDefault();
     menu.open = true;
     next.focus();
