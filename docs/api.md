@@ -3,17 +3,17 @@
 Enarratio is one npm package with several entry points, so a site installs and
 ships only what it uses.
 
-| Import               | Holds                                                                                                                                                            | Needs                                                                       |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `enarratio`          | Core: HTML helpers, theme types, `defineTheme`, `stylesheet`, `baseStylesheet`, `checkTheme`, color math, figure and data-table assembly, the primitives         | Nothing. No runtime dependencies.                                           |
-| `enarratio/base.css` | The theme-free base rules as a stylesheet file                                                                                                                   | Nothing                                                                     |
-| `enarratio/plot`     | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap`                                                                                                   | Peers `@observablehq/plot`, and `linkedom` outside a browser                |
-| `enarratio/science`  | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart`                                                                                                   | Peers `@observablehq/plot` and `d3-force`, and `linkedom` outside a browser |
-| `enarratio/map`      | `dotMap`, `choroplethMap`, drawn from the caller's GeoJSON                                                                                                       | Nothing                                                                     |
-| `enarratio/lite`     | `barChart`, `lineChart`, `areaChart` drawn without Observable Plot; also one entry per chart: `enarratio/lite/bar`, `enarratio/lite/line`, `enarratio/lite/area` | Nothing                                                                     |
-| `enarratio/enhance`  | Interaction for charts already on the page; runs in the browser                                                                                                  | Nothing                                                                     |
-| `enarratio/redraw`   | Draws a server's chart again at its frame's width in the browser, then enhances it                                                                               | Nothing                                                                     |
-| `enarratio/themes`   | The themes that ship with the package                                                                                                                            | Nothing                                                                     |
+| Import               | Holds                                                                                                                                                                                                         | Needs                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `enarratio`          | Core: HTML helpers, theme types, `defineTheme`, `stylesheet`, `baseStylesheet`, `checkTheme`, color math, figure and data-table assembly, the primitives                                                      | Nothing. No runtime dependencies.                                           |
+| `enarratio/base.css` | The theme-free base rules as a stylesheet file                                                                                                                                                                | Nothing                                                                     |
+| `enarratio/plot`     | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap`                                                                                                                                                | Peers `@observablehq/plot`, and `linkedom` outside a browser                |
+| `enarratio/science`  | `genomeTrack`, `titerPlot`, `geometricSummary`, `networkChart`                                                                                                                                                | Peers `@observablehq/plot` and `d3-force`, and `linkedom` outside a browser |
+| `enarratio/map`      | `dotMap`, `choroplethMap`, drawn from the caller's GeoJSON                                                                                                                                                    | Nothing                                                                     |
+| `enarratio/lite`     | `barChart`, `lineChart`, `areaChart` drawn without Observable Plot, and `sparkline`; also one entry per chart: `enarratio/lite/bar`, `enarratio/lite/line`, `enarratio/lite/area`, `enarratio/lite/sparkline` | Nothing                                                                     |
+| `enarratio/enhance`  | Interaction for charts already on the page; runs in the browser                                                                                                                                               | Nothing                                                                     |
+| `enarratio/redraw`   | Draws a server's chart again at its frame's width in the browser, then enhances it                                                                                                                            | Nothing                                                                     |
+| `enarratio/themes`   | The themes that ship with the package                                                                                                                                                                         | Nothing                                                                     |
 
 `@observablehq/plot`, `d3-force` and `linkedom` are optional peer dependencies:
 npm 7 and later does not install them for a site that imports only the core.
@@ -1242,12 +1242,16 @@ alternative; `label` names what is measured and is used to generate one when
 ### `sparkline`
 
 `sparkline(options: SparklineOptions): string`. A word-sized trend. Its text
-alternative is generated from the data unless `alt` is given.
+alternative is generated from the data unless `alt` is given. `enarratio/lite/sparkline`
+draws the same bare SVG as `sparkline({ inline: true })` in about 2 kB bundled, minified and
+gzipped (the figure and strings table are about 9.5 kB); it generates the English sentence, so
+give `alt` for another language. It takes the options below except the figure's (`inline` is
+always on).
 
 ### `SparklineOptions`
 
 `values` (numbers or `null` for gaps), `label`, `alt`, `width`, `height`,
-`area`, `endDot`, `color`, `formatValue`.
+`area`, `endDot`, `color`, `formatValue`, `locale`.
 
 ### `progressRing`
 

@@ -26,10 +26,10 @@ import {
   type ScaleDescription,
   type SeriesAxesOptions,
   type SeriesColor,
-  slotStyle,
   unitLabel,
   validateFigure,
 } from "./figure.js";
+import { slotStyle } from "./slot-style.js";
 import { planSeries, type SeriesPlan, seriesLegend } from "./series.js";
 import { charWidth, DEFAULT_HEIGHT, DEFAULT_WIDTH } from "./size.js";
 import {

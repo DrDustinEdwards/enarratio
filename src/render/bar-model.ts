@@ -25,10 +25,10 @@ import {
   figure,
   type SeriesAxesOptions,
   type SeriesColor,
-  slotStyle,
   unitLabel,
   validateFigure,
 } from "./figure.js";
+import { slotStyle } from "./slot-style.js";
 import { type Bounds, type IntervalFields, intervalText, readInterval } from "./interval.js";
 import { planSeries, type SeriesPlan, seriesLegend } from "./series.js";
 import { charWidth, DEFAULT_HEIGHT, DEFAULT_WIDTH, fitTicks } from "./size.js";

@@ -1,5 +1,6 @@
 import { element, escapeHtml } from "../html.js";
-import { type SeriesColor, slotStyle } from "../render/figure.js";
+import type { SeriesColor } from "../render/figure.js";
+import { slotStyle } from "../render/slot-style.js";
 import {
   type PrimitiveFigureOptions,
   type PrimitiveTable,

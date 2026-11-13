@@ -7,6 +7,14 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-13
+
+### Added
+
+- `enarratio/lite/sparkline` (also `sparkline` from `enarratio/lite`) draws the bare SVG of `sparkline({ inline: true })`, byte for byte, in about 2 kB bundled, minified and gzipped instead of the 9.5 kB the core entry weighs ([record 0042](docs/design/0042-lite-sparkline.md)). It takes the options that shape the drawing (including `locale` for the numbers) and generates the same English sentence unless `alt` is given; `strings` stays with the core entry.
+
+### Changed
+
 - **Home and End work in the Download menu.** The menu's key handler stepped to the first or last item and then returned before focusing it, so both keys did nothing. The bar-marks walk reads a tag's match without a cast, and a dead reset is gone. No chart's markup changes.
 - devkit is v0.43.0 (workflow pins, dev dependency and no-bloat baseline). Not in the package.
 

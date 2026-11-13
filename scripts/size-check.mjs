@@ -21,6 +21,12 @@ import { rolldown } from "rolldown";
 
 /** The most a light chart entry may weigh, bundled, minified and gzipped (40 kB). */
 const LITE_LIMIT = 40_000;
+/**
+ * The most `enarratio/lite/sparkline` may weigh, bundled, minified and gzipped (4 kB): it exists
+ * for pages that draw a word-sized trend and nothing else, so it must stay free of the figure and
+ * the strings table (about 2 kB measured; `sparkline` in `enarratio` is about 9.5 kB).
+ */
+const SPARKLINE_LIMIT = 4_000;
 /** The most the enhancement layer may weigh, bundled, minified and gzipped (D6, records 0035 and 0036). */
 const ENHANCE_LIMIT = 12_000;
 
@@ -110,6 +116,11 @@ for (const [name, target] of Object.entries(pkg.exports)) {
   if (!name.startsWith("./lite")) continue;
   const bytes = await bundled(resolve(root, target.default));
   lite.push([name, bytes]);
+  if (name === "./lite/sparkline" && bytes > SPARKLINE_LIMIT) {
+    failures.push(
+      `${name} is ${bytes} bytes bundled, minified and gzipped; the limit is ${SPARKLINE_LIMIT}`,
+    );
+  }
   if (bytes > LITE_LIMIT) {
     failures.push(
       `${name} is ${bytes} bytes bundled, minified and gzipped; the limit is ${LITE_LIMIT}`,

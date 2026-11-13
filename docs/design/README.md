@@ -57,6 +57,7 @@ Each record says where a decision came from:
 | [0039](0039-inline-toolbar-icons.md)                    | Toolbar icons are inline SVG, not CSS data URLs, so `img-src 'self'` pages show them            |
 | [0040](0040-narrow-bars-keep-their-plot.md)             | A narrow bar chart keeps its plot: names beside the bars only when they leave it room           |
 | [0041](0041-phone-width-drawings.md)                    | Every chart fits a phone's drawing: titles, ticks, names and labels move to where there is room |
+| [0042](0042-lite-sparkline.md)                          | A light sparkline entry: the bare drawing in about 2 kB, without the figure and strings table   |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

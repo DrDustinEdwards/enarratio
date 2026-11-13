@@ -52,9 +52,9 @@ export {
   type ScaleDescription,
   type SeriesColor,
   type Source,
-  slotStyle,
   validateFigure,
 } from "./render/figure.js";
+export { slotStyle } from "./render/slot-style.js";
 export {
   type DateFormatOptions,
   dateFormat,
