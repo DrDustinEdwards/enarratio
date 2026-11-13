@@ -27,10 +27,11 @@ import { sitemapDocument } from "@drdustinedwards/site-helpers/sitemap";
 import { integrityHash } from "@dustinedwards/site-runtime/csp";
 import { securityTxt } from "@dustinedwards/site-runtime/security-txt";
 import { enarratio } from "@dustinedwards/site-runtime/sites";
+import { inlineCss } from "capsomer/build";
 import { familyFooterHtml } from "capsomer/behavior/family-footer";
 import { letterheadHtml } from "capsomer/behavior/site-header";
 import { capsomerMoreTheme, capsomerTheme } from "capsomer/enarratio-theme";
-import { baseStylesheet, checkTheme, stylesheet, type Theme } from "enarratio";
+import { checkTheme, stylesheet, type Theme } from "enarratio";
 import { ENHANCE_STRINGS } from "enarratio/enhance";
 import { barChart } from "enarratio/lite";
 import { defaultTheme, highContrastTheme } from "enarratio/themes";
@@ -321,22 +322,6 @@ function frameOf(markup: string): string | undefined {
 
 const packageFile = createRequire(import.meta.url).resolve;
 const capsomerDir = dirname(dirname(packageFile("capsomer/tokens.css")));
-
-/** A stylesheet with its `@import`s written in place, each in the layer it names. */
-function inlineCss(file: string): string {
-  return readFileSync(file, "utf8").replace(
-    /@import\s+"([^"]+)"(?:\s+layer\(([\w.-]+)\))?\s*;/g,
-    (_, path: string, layer?: string) => {
-      // enarratio/base.css is this package's own, built into dist/ by `npm run build`; the gallery
-      // runs from source, so it takes the same rules from baseStylesheet(), which writes that file.
-      const inner =
-        path === "enarratio/base.css"
-          ? baseStylesheet()
-          : inlineCss(path.startsWith(".") ? join(dirname(file), path) : packageFile(path));
-      return layer ? `@layer ${layer} {\n${inner}\n}` : inner;
-    },
-  );
-}
 
 /**
  * The Capsomer components the page uses, in the order their CSS loads: then the NASA manual theme
