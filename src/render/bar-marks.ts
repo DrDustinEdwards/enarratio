@@ -129,15 +129,13 @@ function shapeBars(
   tags.lastIndex = open;
   let out = "";
   let from = 0;
-  let closeAs: string[] = [];
+  const closeAs: string[] = [];
   for (let m = tags.exec(svg); m; m = tags.exec(svg)) {
-    const [whole, closing, name, attrs, selfClosing] = m as unknown as [
-      string,
-      string,
-      string,
-      string,
-      string,
-    ];
+    const whole = m[0];
+    const closing = m[1] ?? "";
+    const name = m[2] ?? "";
+    const attrs = m[3] ?? "";
+    const selfClosing = m[4] ?? "";
     if (name === "g") {
       if (closing) {
         offsets.pop();
@@ -160,9 +158,10 @@ function shapeBars(
     }
     const values = readAttributes(attrs);
     const key = values.get("data-enarratio-key");
-    const point = key === undefined ? undefined : byKey.get(unescapeHtml(key));
     if (!selfClosing) closeAs.push("rect");
-    if (!point || key === undefined) continue;
+    if (key === undefined) continue;
+    const point = byKey.get(unescapeHtml(key));
+    if (!point) continue;
     const [dx, dy] = offsets.at(-1) ?? [0, 0];
     const box = {
       x: Number(values.get("x")),
@@ -178,7 +177,6 @@ function shapeBars(
     from = m.index + whole.length;
     if (!selfClosing) closeAs[closeAs.length - 1] = "path";
   }
-  closeAs = [];
   return { svg: out + svg.slice(from), drawn };
 }
 
