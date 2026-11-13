@@ -13,7 +13,7 @@
 import { copyFileSync, cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire, registerHooks } from "node:module";
 import { basename, dirname, join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   ACCESSIBILITY_PATH,
   accessibilityStatement,
@@ -27,10 +27,11 @@ import { sitemapDocument } from "@drdustinedwards/site-helpers/sitemap";
 import { integrityHash } from "@dustinedwards/site-runtime/csp";
 import { securityTxt } from "@dustinedwards/site-runtime/security-txt";
 import { enarratio } from "@dustinedwards/site-runtime/sites";
+import { inlineCss } from "capsomer/build";
 import { familyFooterHtml } from "capsomer/behavior/family-footer";
 import { letterheadHtml } from "capsomer/behavior/site-header";
 import { capsomerMoreTheme, capsomerTheme } from "capsomer/enarratio-theme";
-import { baseStylesheet, checkTheme, stylesheet, type Theme } from "enarratio";
+import { checkTheme, stylesheet, type Theme } from "enarratio";
 import { ENHANCE_STRINGS } from "enarratio/enhance";
 import { barChart } from "enarratio/lite";
 import { defaultTheme, highContrastTheme } from "enarratio/themes";
@@ -49,7 +50,7 @@ const self = (specifier: string): string => {
   if (specifier !== "enarratio" && !specifier.startsWith("enarratio/")) return specifier;
   const entry = selfExports[`.${specifier.slice("enarratio".length)}`];
   const file = typeof entry === "string" ? entry : entry?.default;
-  return file ? new URL(`../${file}`, import.meta.url).href : specifier;
+  return file ? fileURLToPath(new URL(`../${file}`, import.meta.url)) : specifier;
 };
 /**
  * The width each example is drawn at again for a phone: the frame's on a 320 px screen (the page's
@@ -321,22 +322,6 @@ function frameOf(markup: string): string | undefined {
 
 const packageFile = createRequire(import.meta.url).resolve;
 const capsomerDir = dirname(dirname(packageFile("capsomer/tokens.css")));
-
-/** A stylesheet with its `@import`s written in place, each in the layer it names. */
-function inlineCss(file: string): string {
-  return readFileSync(file, "utf8").replace(
-    /@import\s+"([^"]+)"(?:\s+layer\(([\w.-]+)\))?\s*;/g,
-    (_, path: string, layer?: string) => {
-      // enarratio/base.css is this package's own, built into dist/ by `npm run build`; the gallery
-      // runs from source, so it takes the same rules from baseStylesheet(), which writes that file.
-      const inner =
-        path === "enarratio/base.css"
-          ? baseStylesheet()
-          : inlineCss(path.startsWith(".") ? join(dirname(file), path) : packageFile(path));
-      return layer ? `@layer ${layer} {\n${inner}\n}` : inner;
-    },
-  );
-}
 
 /**
  * The Capsomer components the page uses, in the order their CSS loads: then the NASA manual theme
