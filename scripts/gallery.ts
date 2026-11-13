@@ -13,7 +13,7 @@
 import { copyFileSync, cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire, registerHooks } from "node:module";
 import { basename, dirname, join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   ACCESSIBILITY_PATH,
   accessibilityStatement,
@@ -50,7 +50,7 @@ const self = (specifier: string): string => {
   if (specifier !== "enarratio" && !specifier.startsWith("enarratio/")) return specifier;
   const entry = selfExports[`.${specifier.slice("enarratio".length)}`];
   const file = typeof entry === "string" ? entry : entry?.default;
-  return file ? new URL(`../${file}`, import.meta.url).href : specifier;
+  return file ? fileURLToPath(new URL(`../${file}`, import.meta.url)) : specifier;
 };
 /**
  * The width each example is drawn at again for a phone: the frame's on a 320 px screen (the page's
