@@ -353,6 +353,8 @@ const FAMILY = "rose";
  * drawn at the width its stored images were taken at.
  */
 const GALLERY_CSS = `
+/* Capsomer's base (css/base.css) sets text-wrap: pretty on running text. A chart's captions and notes keep the wrapping their stored snapshots (test/browser/__snapshots__) show until Dustin accepts the new line breaks. */
+section.example :is(p, li, dd, figcaption) { text-wrap: wrap; }
 .gallery { padding-block-start: var(--space-6); }
 .gallery-head h1 { margin: 0 0 var(--space-3); font-size: clamp(2rem, 1.5rem + 2vw, 3rem); line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance; }
 .gallery-head .cap-form-boxes { margin-block: var(--space-5) 0; }
