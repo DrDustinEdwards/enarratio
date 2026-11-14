@@ -605,7 +605,12 @@ ${galleryScript("gallery.js")}
 `;
 }
 
-/** Bundles a script of site/ for the browser, leaving the enhancement layer as the file it is. */
+/**
+ * Bundles a script of site/ for the browser, leaving the enhancement layer as the file it is. Capsomer's
+ * lazy parts (the site header's search, the shortcuts sheet, the dialog drag) are inlined with
+ * `codeSplitting: false`, so each page script stays one file with one integrity hash: an import()
+ * carries none, and Integrity-Policy would refuse it.
+ */
 async function bundle(file: string, format: "esm" | "iife"): Promise<string> {
   const built = await rolldown({
     input: join(root, "site", file),
@@ -621,7 +626,7 @@ async function bundle(file: string, format: "esm" | "iife"): Promise<string> {
     ],
     logLevel: "silent",
   });
-  const { output } = await built.generate({ format, minify: true });
+  const { output } = await built.generate({ format, minify: true, codeSplitting: false });
   await built.close();
   const [chunk] = output;
   if (output.length !== 1 || chunk?.type !== "chunk")

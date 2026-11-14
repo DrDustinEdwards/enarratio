@@ -10,6 +10,7 @@ change the public API; every such change is listed here.
 ### Changed
 
 - The gallery is on site-runtime v0.158.0, whose registry entry drops cloudflareinsights.com from connect-src: the gallery's beacon is the automatic one and reports to its own /cdn-cgi/rum, so `connect-src 'self'` covers it. Not in the package.
+- The gallery is on Capsomer v0.152.1, Prelum v0.61.0, site-runtime v0.159.0 and devkit v0.50.1 (hast-util-from-html 2.1.0, the floor Prelum's markdown copy asks for). Capsomer's site header now loads its search, shortcuts sheet and dialog drag on demand; the gallery inlines them into gallery.js (`codeSplitting: false`), so each page script stays one file with one integrity hash. Not in the package.
 
 ## [0.15.0] - 2026-11-13
 
