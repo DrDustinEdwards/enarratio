@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Changed
+
+- The gallery is on site-runtime v0.158.0, whose registry entry drops cloudflareinsights.com from connect-src: the gallery's beacon is the automatic one and reports to its own /cdn-cgi/rum, so `connect-src 'self'` covers it. Not in the package.
+
 ## [0.15.0] - 2026-11-13
 
 ### Added
