@@ -141,7 +141,7 @@
     "puppeteer": "25.16.0",
     "rolldown": "1.2.16",
     "typescript": "5.9.3",
-    "vitest": "4.1.12"
+    "vitest": "5.1.0"
   },
   "peerDependencies": {
     "@observablehq/plot": "0.6.17",
