@@ -18,6 +18,11 @@ const entries = [
   ...Array.from({ length: 2 }, () => ({ year: 2024, type: "Talks" })),
 ];
 
+// The busiest year, counted from the rows so the finding cannot drift from the data.
+const perYear = new Map<number, number>();
+for (const e of entries) perYear.set(e.year, (perYear.get(e.year) ?? 0) + 1);
+const [busiest, busiestCount] = [...perYear].reduce((a, b) => (b[1] > a[1] ? b : a));
+
 export default barChart({
   id: "entries-by-year",
   data: entries,
@@ -28,7 +33,7 @@ export default barChart({
   xLabel: "Year",
   yLabel: "Entries",
   title: "Entries per year",
-  alt: "Stacked bars of CV entries per year from 2019 to 2024. Publications lead every year except 2023, when talks matched them; 2024 is the busiest year with 10 entries.",
+  alt: `Stacked bars of CV entries per year from 2019 to 2024. Publications lead every year except 2023, when talks matched them; ${busiest} is the busiest year with ${busiestCount} entries.`,
   caption: "Illustrative data.",
   source: "Sample CV",
   byline: "Sample Lab",

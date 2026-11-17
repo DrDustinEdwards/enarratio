@@ -7,8 +7,14 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **A bar chart's summary states the axis it draws.** A counted bar chart (no `y`, or `wholeNumbers`) draws its value axis to the last whole-number tick, past the tallest stack, but its screen-reader overview named the tallest stack: "Y axis, Entries: 0 to 11" over an axis that ends at 12. The overview now ends at the last tick. Only counted bars change, and only when the tallest stack is not itself a tick.
+- The gallery's stacked-bar example said 2024 was the busiest year with 10 entries; its data makes 2022 the busiest with 11. The example now counts the busiest year from its rows. Not in the package.
+
 ### Changed
 
+- The gallery is on Capsomer v0.155.2, so names in the gallery index wrap between words on a phone instead of mid-word, and a long fact drops to its own line. Not in the package.
 - The gallery is on site-runtime v0.158.0, whose registry entry drops cloudflareinsights.com from connect-src: the gallery's beacon is the automatic one and reports to its own /cdn-cgi/rum, so `connect-src 'self'` covers it. Not in the package.
 - The gallery is on Capsomer v0.152.1, Prelum v0.61.0, site-runtime v0.159.0 and devkit v0.50.1 (hast-util-from-html 2.1.0, the floor Prelum's markdown copy asks for). Capsomer's site header now loads its search, shortcuts sheet and dialog drag on demand; the gallery inlines them into gallery.js (`codeSplitting: false`), so each page script stays one file with one integrity hash. Not in the package.
 
