@@ -13,6 +13,17 @@ const entries = [
 ];
 
 describe("barChart", () => {
+  it("states the drawn end of a counted axis, the last tick, not the tallest stack", () => {
+    // A stack of 11 draws an axis of 0, 2, ... 12: the summary must say what the axis shows.
+    const rows = Array.from({ length: 11 }, () => ({ year: 2022 }));
+    const fig = parse(barChart({ data: rows, x: "year", alt: "Entries" }));
+    expect(fig.querySelector(".enarratio-overview")?.textContent).toContain("0 to 12.");
+    const ticks = [...fig.querySelectorAll('[data-enarratio-mark="y-axis tick label"] text')].map(
+      (t) => t.textContent,
+    );
+    expect(ticks.at(-1)).toBe("12");
+  });
+
   it("counts rows per category and series when y is omitted", () => {
     const fig = parse(
       barChart({ data: entries, x: "year", series: "type", alt: "Entries by year" }),

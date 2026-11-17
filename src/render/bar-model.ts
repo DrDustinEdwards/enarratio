@@ -596,6 +596,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     const b = p ? bounds?.get(p) : undefined;
     return b ? { lower: b.lower, upper: b.upper } : {};
   };
+  const ticks = y === undefined || options.wholeNumbers ? countTicks(points, grouped) : undefined;
   const axes = [
     {
       position: horizontal ? "y" : "x",
@@ -607,7 +608,8 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
       position: horizontal ? "x" : "y",
       label: valueLabel ?? "",
       from: format(minOf(ends)),
-      to: format(maxOf(ends)),
+      // With whole-number ticks the drawn axis ends at the last tick, past the tallest bar; the summary states that end.
+      to: format(ticks ? (ticks.at(-1) ?? 0) : maxOf(ends)),
     },
   ] as const;
 
@@ -637,7 +639,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     thinned,
     tickLabel,
     valueAxis: valueAxis(ends, options.locale),
-    countTicks: y === undefined || options.wholeNumbers ? countTicks(points, grouped) : undefined,
+    countTicks: ticks,
     describe,
     datum,
     link: linkOf ? (p) => safeHref(KIND, linkOf(p.x)) : undefined,
