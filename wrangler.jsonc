@@ -9,6 +9,7 @@
   // deploy a second Worker.
   "name": "enarratio",
   "compatibility_date": "2026-09-28",
+  "compatibility_flags": ["enable_request_signal"],
   // A minified bundle with its source maps uploaded, so stack traces in the logs still read.
   "minify": true,
   "upload_source_maps": true,
