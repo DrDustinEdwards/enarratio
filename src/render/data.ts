@@ -1,6 +1,7 @@
 /** Helpers for reading caller data by key, with errors that name the chart, row and field. */
 
 import type { FigureOptions, RampItem, SeriesColor } from "./figure.js";
+import { dateFormat } from "./format.js";
 import type { Strings } from "./text.js";
 
 /** The keys of `T` whose values are assignable to `V`. */
@@ -258,3 +259,24 @@ function hasUserinfo(compact: string, scheme: string | undefined): boolean {
  */
 export const isYears = (values: readonly number[]): boolean =>
   values.length > 0 && values.every((v) => Number.isInteger(v) && v >= 1000 && v <= 2999);
+
+/** How a chart writes the dates it draws: for readers, and as stable keys. */
+export interface DateText {
+  /** Whether any date has a time of day, so dates are instants rather than calendar days. */
+  readonly subDaily: boolean;
+  /** The date as a reader sees it: "June 9, 2026", with the time when `subDaily`. */
+  readonly text: (date: Date) => string;
+  /** The date as a key and for the CSV: `2026-06-09`, or an instant in UTC when `subDaily`. */
+  readonly key: (date: Date) => string;
+}
+
+/** The writers for a chart's dates, as the line chart writes its time axis. */
+export function dateText(dates: readonly Date[], locale: string | undefined): DateText {
+  const subDaily = dates.some((d) => d.getTime() % DAY !== 0);
+  const written = dateFormat({ ...(locale ? { locale } : {}), time: subDaily });
+  return {
+    subDaily,
+    text: written,
+    key: (d) => (subDaily ? formatInstant(d) : d.toISOString().slice(0, 10)),
+  };
+}

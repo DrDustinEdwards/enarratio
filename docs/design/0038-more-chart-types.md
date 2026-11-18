@@ -110,6 +110,30 @@ Rules taken from the sources, by type:
    radar, streamgraph) say in their API docs which chart compares better. They are not refused,
    since the choice is the author's.
 
+## Step 3 as built (0.14.0)
+
+Choices made while building the last six, where the rules above leave room:
+
+- **Range.** The Gantt chart, candlestick chart, streamgraph and ridgeline plot draw through
+  Observable Plot on a continuous x scale, so the toolbar offers Range. The violin plot's x is its
+  groups and the calendar's x is weeks, so they do not.
+- **Gantt.** Milestones are rows with no end, or an end equal to the start. Groups are named only
+  in the legend, so grouped bars take their textures (point 4).
+- **Candlestick.** Rising is hollow in series 1, falling solid in series 2, and the legend's swatch
+  for rising is hollow too (`data-enarratio-legend="hollow"`), so the legend matches without
+  color (B57).
+- **Calendar.** When the weeks leave cells under 11 units (a year at a phone's 228), the calendar
+  turns: weekdays across, weeks down. A first-to-last trend misreads a weekly cycle, so the summary
+  names only the highest and lowest days.
+- **Streamgraph.** Our layout matches d3's wiggle and inside-out order, then centers the stream on
+  zero (test/parts.test.ts checks it against d3-shape's numbers). A layer is named where its name
+  fits inside it over the name's whole width.
+- **Violin.** "The width is density" holds within each violin, but every violin is scaled to the
+  same widest width: with one shared scale a tight group (rapid tests, in the gallery) flattens
+  every other into a line. Shapes compare across groups; widths do not, and the docs say so.
+- **Ridgeline.** The ridges share one density scale, so heights compare across rows; the tallest
+  rises `overlap` rows (default 0.5) into the row above. The summary gives each row's median.
+
 ## Sources
 
 - Bruls, Huizing and van Wijk, "Squarified Treemaps" (2000): https://vanwijk.win.tue.nl/stm.pdf

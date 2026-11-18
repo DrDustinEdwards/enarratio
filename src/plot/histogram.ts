@@ -191,7 +191,7 @@ const TABLE_POINTS = 15;
  * can be 1e-22, which as plain digits is 21 zeros that a screen reader reads one by one in the
  * table, the hover details and the summary (WCAG 2.2 SC 1.1.1, 1.3.1).
  */
-function densityDigits(locale: string | undefined): (value: number) => string {
+export function densityDigits(locale: string | undefined): (value: number) => string {
   const plain = numberFormat({ ...(locale ? { locale } : {}), maximumSignificantDigits: 3 });
   const scientific = new Intl.NumberFormat(locale ?? "en-US", {
     notation: "scientific",
@@ -199,6 +199,26 @@ function densityDigits(locale: string | undefined): (value: number) => string {
   });
   return (value) =>
     value !== 0 && Math.abs(value) < 0.001 ? scientific.format(value) : plain(value);
+}
+
+/** Each curve's density at evenly spaced x values across all the values, for the data table. */
+export function densitySamples(
+  values: readonly number[],
+  groups: readonly (readonly number[])[],
+  bandwidths: readonly number[],
+): { at: number[]; sampled: number[][] } {
+  const at = grid(minOf(values), maxOf(values), TABLE_POINTS);
+  return { at, sampled: groups.map((g, k) => kernelDensity(g, bandwidths[k] as number, at)) };
+}
+
+/** The density table's rows: an x value, then each curve's density there. */
+export function densityRows(
+  at: readonly number[],
+  sampled: readonly (readonly number[])[],
+  format: (value: number) => string,
+  digits: (value: number) => string,
+): string[][] {
+  return at.map((xv, i) => [format(xv), ...sampled.map((curve) => digits(curve[i] as number))]);
 }
 
 /**
@@ -247,8 +267,7 @@ export function densityPlot<T extends object>(given: DensityPlotOptions<T>): str
   const hi = maxOf(values) + pad;
   const xs = grid(lo, hi, 160);
   const curves = groups.map((g, k) => kernelDensity(g, bandwidths[k] as number, xs));
-  const at = grid(minOf(values), maxOf(values), TABLE_POINTS);
-  const sampled = groups.map((g, k) => kernelDensity(g, bandwidths[k] as number, at));
+  const { at, sampled } = densitySamples(values, groups, bandwidths);
   const digits = densityDigits(options.locale);
 
   const marks: Plot.Markish[] = names.map((name, k) =>
@@ -382,10 +401,7 @@ export function densityPlot<T extends object>(given: DensityPlotOptions<T>): str
           names.length > 1 ? `${n} ${terms.density.toLowerCase()}` : terms.density,
         ),
       ],
-      rows: at.map((xv, i) => [
-        format(xv),
-        ...names.map((_, k) => digits((sampled[k] as number[])[i] as number)),
-      ]),
+      rows: densityRows(at, sampled, format, digits),
     },
   });
 }
