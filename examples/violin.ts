@@ -35,6 +35,7 @@ const rows = tests.flatMap((t, k) => {
 export default violinPlot({
   data: rows,
   x: "test",
+  xLabel: "Test",
   y: "hours",
   yLabel: "Hours to result",
   colorByGroup: true,
