@@ -7,6 +7,19 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-11-18
+
+### Added
+
+- Six chart types for time and distributions, in `enarratio/plot`: step 3 of [record 0038](docs/design/0038-more-chart-types.md). Each is a full figure: toolbar (with Range on its time or value axis where it has one), hidden data table, generated overview and summary, keyboard reading, the one-card tooltip and the quiet look, and each has a phone drawing checked at 360 px in light and dark.
+  - `ganttChart`: tasks as bars from start to end on a time axis, milestones (no end) as diamonds, and a dashed line for `today`. Names sit beside the bars, or above them on a narrow drawing. `group` colors teams or phases, with their textures, since groups are named only in the legend.
+  - `candlestickChart`: open, high, low and close per period. Rising candles are hollow in the first series color and falling ones solid in the second, so they differ by fill as well as hue; the legend's rising swatch is hollow to match. A row whose open or close lies outside its low and high throws.
+  - `calendarHeatmap`: one cell per day, weeks by weekdays, on the sequential ramp, months named above. A day with no value is outlined dashed, never colored as zero. Weeks start on the locale's first day, Monday when no locale is given. When the weeks are too many for usable cells (a year on a phone) the calendar turns upright.
+  - `streamgraph`: series as layers on Byron and Wattenberg's wiggle baseline in inside-out order (d3's `stackOffsetWiggle` and `stackOrderInsideOut`, in `src/render/stream.ts`), with no value axis. Each layer is named where it is thickest, if its name fits; one that cannot be named takes its texture.
+  - `violinPlot`: each group's kernel density mirrored and trimmed to its range, with a quartile bar and a median dot inside. Each violin is as wide as the others at its widest. Groups with fewer than 30 values also show their points, and group names wrap to fit their column.
+  - `ridgelinePlot`: one density per row on a shared x and a shared density scale, overlapping by `overlap` rows (default 0.5), in the order given. The summary gives each row's median.
+- The terms `task`, `milestone`, `today`, `durationDays`, `days`, `open`, `high`, `low`, `close`, `weekOf` and `bandwidth` in `strings.terms`.
+
 ### Fixed
 
 - **A bar chart's summary states the axis it draws.** A counted bar chart (no `y`, or `wholeNumbers`) draws its value axis to the last whole-number tick, past the tallest stack, but its screen-reader overview named the tallest stack: "Y axis, Entries: 0 to 11" over an axis that ends at 12. The overview now ends at the last tick. Only counted bars change, and only when the tallest stack is not itself a tick.

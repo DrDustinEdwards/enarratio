@@ -242,6 +242,11 @@ svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; 
   border-radius: 0;
 }
 .enarratio-legend[data-enarratio-legend="symbol"] .enarratio-swatch { border-radius: 0; }
+/* A candlestick chart's rising candles are hollow, and so is their swatch. */
+.enarratio-legend[data-enarratio-legend="hollow"] [data-slot="1"] .enarratio-swatch {
+  background: transparent;
+  box-shadow: inset 0 0 0 0.15em var(--enarratio-series-1);
+}
 ${SYMBOL_CLIPS.map(
   (clip, i) =>
     `.enarratio-legend[data-enarratio-legend="symbol"] [data-slot="${i + 1}"] .enarratio-swatch { clip-path: ${clip}; }`,
