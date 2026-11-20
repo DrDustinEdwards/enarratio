@@ -204,3 +204,19 @@ describe.skipIf(!built)("the built package", () => {
     expect(readFileSync(file, "utf8")).not.toMatch(IMPORTS_LINKEDOM);
   });
 });
+
+describe("exact peer versions", () => {
+  // Renovate moves dev dependencies and never peers, so an exact peer drifts from the version the tests run against,
+  // and a site on the newer version then fails npm's peer check when it refreshes its lockfile.
+  it("equal the dev dependencies", () => {
+    const dev = (
+      JSON.parse(readFileSync(resolve(root, "package.json"), "utf8")) as {
+        devDependencies: Record<string, string>;
+      }
+    ).devDependencies;
+    const drift = Object.entries(pkg.peerDependencies)
+      .filter(([name, range]) => /^\d/.test(range) && dev[name] && dev[name] !== range)
+      .map(([name, range]) => `${name}: peer ${range}, dev ${dev[name]}`);
+    expect(drift).toEqual([]);
+  });
+});
