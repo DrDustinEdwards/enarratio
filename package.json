@@ -113,9 +113,9 @@
     "bloat": "devkit-no-bloat"
   },
   "devDependencies": {
-    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.63.2",
-    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.53.1",
-    "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.169.2",
+    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.63.3",
+    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.53.2",
+    "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.169.3",
     "@guidepup/guidepup": "0.40.0",
     "@guidepup/playwright": "0.21.0",
     "@guidepup/setup": "0.29.3",
@@ -126,27 +126,27 @@
     "@types/pngjs": "6.0.5",
     "@vitest/coverage-v8": "4.1.12",
     "axe-core": "4.14.0",
-    "capsomer": "github:DrDustinEdwards/capsomer#v0.159.1",
+    "capsomer": "github:DrDustinEdwards/capsomer#v0.161.0",
     "d3-force": "3.0.0",
     "hast-util-from-html": "2.1.0",
-    "hast-util-to-mdast": "10.1.2",
-    "linkedom": "0.18.14",
+    "hast-util-to-mdast": "10.1.3",
+    "linkedom": "0.18.15",
     "mdast-util-gfm": "3.1.0",
-    "mdast-util-to-markdown": "2.2.0",
+    "mdast-util-to-markdown": "2.2.3",
     "oxfmt": "0.77.0",
     "oxlint": "1.92.0",
     "oxlint-tsgolint": "7.0.2006",
     "pixelmatch": "7.2.0",
     "pngjs": "7.0.0",
     "puppeteer": "25.16.0",
-    "rolldown": "1.2.16",
+    "rolldown": "1.3.2",
     "typescript": "5.9.3",
     "vitest": "4.1.12"
   },
   "peerDependencies": {
     "@observablehq/plot": "0.6.17",
     "d3-force": "3.0.0",
-    "linkedom": "0.18.14"
+    "linkedom": "0.18.15"
   },
   "peerDependenciesMeta": {
     "@observablehq/plot": {
@@ -157,6 +157,11 @@
     },
     "linkedom": {
       "optional": true
+    }
+  },
+  "overrides": {
+    "@drdustinedwards/site-helpers": {
+      "puppeteer": "$puppeteer"
     }
   },
   "engines": {

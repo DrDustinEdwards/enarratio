@@ -9,6 +9,7 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- The exact peer versions match the dev versions the tests run against (linkedom 0.18.15). The weekly update had moved the dev versions only, so a site on the newer ones could not refresh its lockfile. A test now fails when they differ.
 - The category axis label helper `slotLabel` is now `axisLabel` (internal), so it no longer shares a name with Capsomer's schedule `slotLabel`, which does a different job.
 
 ### Added
