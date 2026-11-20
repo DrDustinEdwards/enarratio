@@ -7,6 +7,14 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Changed
+
+- The category axis label helper `slotLabel` is now `axisLabel` (internal), so it no longer shares a name with Capsomer's schedule `slotLabel`, which does a different job.
+
+### Added
+
+- A browser test draws each of the six newest charts at 360 px, in light and dark, and checks that every text stays inside the drawing, draws at 12 px or more and clears the other text.
+
 ## [0.16.0] - 2026-11-18
 
 ### Added

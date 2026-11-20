@@ -4,7 +4,7 @@ import { categoryRange, valueRange } from "../render/describe.js";
 import { type AxesOptions, figure, unitLabel, validateFigure } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
-import { charWidth, cutText, DEFAULT_HEIGHT, DEFAULT_WIDTH, slotLabel } from "../render/size.js";
+import { charWidth, cutText, DEFAULT_HEIGHT, DEFAULT_WIDTH, axisLabel } from "../render/size.js";
 import { stringsFor, valueFormat, signed as withSign } from "../render/text.js";
 import { type Annotated, drawAnnotations, withNotes } from "./annotate.js";
 import { named } from "./marks.js";
@@ -111,7 +111,7 @@ export function waterfallChart<T extends object>(given: WaterfallChartOptions<T>
   // drawing instead, each on its own row with its name beside it and its value past its end, as
   // horizontal bars are drawn (record 0041).
   const slot = (width - 52 - 20) / steps.length;
-  // Upright, a step's name wraps onto up to three lines of its slot (slotLabel); a word longer
+  // Upright, a step's name wraps onto up to three lines of its slot (axisLabel); a word longer
   // than the slot, or a value wider than it, turns the steps across.
   const room = Math.floor((slot - 4) / char);
   const longestWord = Math.max(...names.flatMap((n) => n.split(" ").map((w) => w.length)));
@@ -210,7 +210,7 @@ export function waterfallChart<T extends object>(given: WaterfallChartOptions<T>
             domain: names,
             label: categoryLabel,
             padding: 0.25,
-            tickFormat: (name: string) => slotLabel(name, slot, width),
+            tickFormat: (name: string) => axisLabel(name, slot, width),
           },
           y: {
             label: valueLabel,
