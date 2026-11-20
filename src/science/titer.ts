@@ -11,7 +11,7 @@ import {
 } from "../render/figure.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries } from "../render/series.js";
-import { DEFAULT_WIDTH, slotLabel } from "../render/size.js";
+import { DEFAULT_WIDTH, axisLabel } from "../render/size.js";
 import { numberFormat, stringsFor } from "../render/text.js";
 import { type GeometricSummary, geometricSummary } from "./stats.js";
 
@@ -243,7 +243,7 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
         ticks: groups.map((_, i) => i),
         // A name wider than its group's slot wraps (record 0041).
         tickFormat: (i: number) =>
-          slotLabel(groups[i] ?? "", (width - 56 - 20) / Math.max(1, groups.length), width),
+          axisLabel(groups[i] ?? "", (width - 56 - 20) / Math.max(1, groups.length), width),
         label: groupLabel,
       },
       y: {

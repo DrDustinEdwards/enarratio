@@ -151,7 +151,7 @@ export function wrapTwo(value: string, room: number): string[] {
  * while it fits its slot, else filled word by word onto up to three lines, the last cut short if
  * the name still runs over. Plot and the light charts write a label with line breaks as lines.
  */
-export function slotLabel(name: string, slot: number, width: number): string {
+export function axisLabel(name: string, slot: number, width: number): string {
   const room = Math.max(3, Math.floor((slot - 4) / charWidth(width)));
   if (name.length <= room) return name;
   const lines: string[] = [];
