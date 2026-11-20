@@ -7,6 +7,8 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-11-20
+
 ### Changed
 
 - The exact peer versions match the dev versions the tests run against (linkedom 0.18.15). The weekly update had moved the dev versions only, so a site on the newer ones could not refresh its lockfile. A test now fails when they differ.
