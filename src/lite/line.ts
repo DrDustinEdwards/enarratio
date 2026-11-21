@@ -136,7 +136,6 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
       : "",
   ];
   if (model.directLabels) {
-    // Each series named at its last point.
     const last = bySeries(present).map((group) => group[group.length - 1] as Point);
     const ys = spreadLabels(
       last.map((p) => y(p.value ?? 0)),

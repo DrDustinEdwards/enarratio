@@ -434,7 +434,6 @@ describe("enhance: update and destroy", () => {
       };
     });
     expect(result.announced).toBe("Chart updated");
-    // It starts from the old shape and tweens to the new one.
     expect(result.during).toBe(result.before);
     expect(result.after).toBe(result.target);
     expect(result.role).toBe("img");

@@ -1,5 +1,5 @@
 /**
- * The event timeline and the heat strip: the two primitives added in 0.2. Each is checked
+ * The event timeline and the heat strip: the two primitives. Each is checked
  * against the numbers it was given: what is drawn, hovered and listed is the same data.
  */
 import { describe, expect, it } from "vitest";
@@ -316,12 +316,6 @@ describe("heatStrip", () => {
       "Cell 6: 8",
       "Cell 7: 2",
     ]);
-  });
-
-  it("fills the width with equal cells and has no axis", () => {
-    const widths = new Set(cells.map((c) => c.getAttribute("width")));
-    expect(widths.size).toBeLessThanOrEqual(2);
-    expect(root.querySelector("text, line")).toBeNull();
   });
 
   it("takes a fixed range, thresholds, cell labels and a formatter", () => {

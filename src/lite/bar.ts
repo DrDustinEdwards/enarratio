@@ -268,7 +268,6 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
     if (!grouped) categoryAxis("x");
   }
 
-  // The bars, each its stack's extent across its slot.
   const boxes = new Map(
     points.map((p) => {
       const [a, b] = extents.get(p) as [number, number];
@@ -315,7 +314,6 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
     ),
   );
 
-  // The rule at zero, across the frame (in each drawn facet).
   const zero = value(0);
   const rule = horizontal
     ? el("line", { x1: zero, x2: zero, y1: inner.marginTop, y2: inner.height - inner.marginBottom })
@@ -328,7 +326,6 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
     ),
   );
 
-  // Each bar's error bar, a rule across its value at the middle of its slot.
   if (model.bounds) {
     const offset = category.bandwidth / 2;
     const barsOf = (list: readonly BarPoint[]): string =>

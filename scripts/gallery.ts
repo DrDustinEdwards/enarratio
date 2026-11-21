@@ -61,10 +61,7 @@ const self = (specifier: string): string => {
 const NARROW_WIDTH = 228;
 /** 30rem at the default 16 px rem: a wide drawing keeps this width in a narrower column (A13). */
 const WIDE_PX = 480;
-/**
- * A drawing's viewBox size: the svg in its frame, not the toolbar's 16-unit icons ahead of it
- * (an icon's box once made every phone drawing 944 units tall).
- */
+/** A drawing's viewBox size: the svg in its frame, not the toolbar's 16-unit icons ahead of it. */
 function viewBox(markup: string): { width: number; height: number } | undefined {
   const frame = markup.indexOf('class="enarratio-frame');
   const box = /<svg[^>]*\sviewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(
@@ -750,10 +747,7 @@ const astroData = graph(
   ),
 );
 
-/**
- * The accessibility statement (devkit-a11y S6): Prelum's, with this site's facts. devkit-a11y's run of 2026-11-01 found
- * one limitation, the 404 page's sideways scroll at 320 px, which Capsomer 0.62.0 fixed.
- */
+/** The accessibility statement (devkit-a11y S6): Prelum's, with this site's facts. */
 const STATEMENT = accessibilityStatement({
   siteName: "The Enarratio gallery",
   contact: {
