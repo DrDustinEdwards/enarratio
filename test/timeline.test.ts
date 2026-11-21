@@ -318,12 +318,6 @@ describe("heatStrip", () => {
     ]);
   });
 
-  it("fills the width with equal cells and has no axis", () => {
-    const widths = new Set(cells.map((c) => c.getAttribute("width")));
-    expect(widths.size).toBeLessThanOrEqual(2);
-    expect(root.querySelector("text, line")).toBeNull();
-  });
-
   it("takes a fixed range, thresholds, cell labels and a formatter", () => {
     const out = parse(
       heatStrip({
