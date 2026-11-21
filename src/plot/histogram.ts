@@ -282,7 +282,6 @@ export function densityPlot<T extends object>(given: DensityPlotOptions<T>): str
       },
     ),
   );
-  // Hover points where the table samples each curve.
   const samples = names.flatMap((name, k) =>
     at.map((xv, i) => ({ name, k, i, x: xv, y: (sampled[k] as number[])[i] as number })),
   );

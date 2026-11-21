@@ -121,7 +121,6 @@ export function divergingBarChart<T extends object>(given: DivergingBarChartOpti
     label: valueLabel,
     grid: true,
     nice: true,
-    // Room beyond the longest bars for their labels.
     inset: 36,
   } as const;
   const categoryScale = {

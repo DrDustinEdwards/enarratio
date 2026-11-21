@@ -1,6 +1,5 @@
 /**
- * Browser regression tests for review findings (A* and F*, from the two reviews of PR #1). Each test
- * names the finding it guards.
+ * Browser regression tests for review findings (A* and F*). Each test names the finding it guards.
  */
 import type { Page } from "puppeteer";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";

@@ -1,5 +1,5 @@
 /**
- * Regression tests for the findings of the two reviews of PR #1 (A1 to A17 and F1 to F23). Each test names the finding it guards. Browser-only findings are in
+ * Regression tests for the review findings (A1 to A17 and F1 to F23). Each test names the finding it guards. Browser-only findings are in
  * test/browser/review.test.ts.
  */
 import { afterEach, describe, expect, it } from "vitest";
