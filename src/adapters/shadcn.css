@@ -1,0 +1,35 @@
+/* Enarratio adapter: shadcn/ui. Maps shadcn/ui's theme variables (https://ui.shadcn.com/docs/theming)
+   onto Enarratio's color properties. Link it after enarratio/base.css; it brings labels.css. Unmeasured: the site owns the
+   contrast of its own theme (docs/adapters.md). */
+@import "./labels.css";
+:where(.enarratio, .enarratio-tooltip) {
+  --enarratio-background: var(--background);
+  --enarratio-text: var(--foreground);
+  --enarratio-text-muted: var(--muted-foreground);
+  --enarratio-grid: var(--border);
+  --enarratio-focus: var(--ring);
+
+  /* shadcn/ui defines five chart colors; six to eight mix three of them with the text color, so they
+     differ from the five in lightness (darker in light mode, lighter in dark mode) */
+  --enarratio-series-1: var(--chart-1);
+  --enarratio-series-2: var(--chart-2);
+  --enarratio-series-3: var(--chart-3);
+  --enarratio-series-4: var(--chart-4);
+  --enarratio-series-5: var(--chart-5);
+  --enarratio-series-6: color-mix(in oklab, var(--chart-1) 50%, var(--foreground));
+  --enarratio-series-7: color-mix(in oklab, var(--chart-2) 30%, var(--foreground));
+  --enarratio-series-8: color-mix(in oklab, var(--chart-4) 30%, var(--foreground));
+
+  /* the ramp: the first chart color, from faint to full */
+  --enarratio-sequential-1: color-mix(in oklab, var(--chart-1) 15%, var(--background));
+  --enarratio-sequential-2: color-mix(in oklab, var(--chart-1) 35%, var(--background));
+  --enarratio-sequential-3: color-mix(in oklab, var(--chart-1) 55%, var(--background));
+  --enarratio-sequential-4: color-mix(in oklab, var(--chart-1) 80%, var(--background));
+  --enarratio-sequential-5: var(--chart-1);
+
+  /* shadcn/ui has no success or warning color */
+  --enarratio-status-good: color-mix(in oklab, oklch(0.6 0.15 150) 75%, var(--foreground));
+  --enarratio-status-warning: color-mix(in oklab, oklch(0.7 0.16 70) 75%, var(--foreground));
+  --enarratio-status-bad: var(--destructive);
+  --enarratio-status-unknown: var(--muted-foreground);
+}

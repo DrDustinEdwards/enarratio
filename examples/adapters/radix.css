@@ -1,0 +1,23 @@
+/* Radix Colors 3.0.0 (@radix-ui/colors), the steps the adapter reads, light and dark: the values a site
+   importing those scales has. Dark here follows the gallery theme switch through light-dark(). */
+:root {
+  --gray-1: light-dark(#fcfcfc, #111111);
+  --gray-6: light-dark(#d9d9d9, #3a3a3a);
+  --gray-11: light-dark(#646464, #b4b4b4);
+  --gray-12: light-dark(#202020, #eeeeee);
+  --blue-3: light-dark(#e6f4fe, #0d2847);
+  --blue-5: light-dark(#c2e5ff, #004074);
+  --blue-7: light-dark(#8ec8f6, #205d9e);
+  --blue-9: light-dark(#0090ff, #0090ff);
+  --blue-11: light-dark(#0d74ce, #70b8ff);
+  --orange-10: light-dark(#ef5f00, #ff801f);
+  --orange-11: light-dark(#cc4e00, #ffa057);
+  --jade-9: light-dark(#29a383, #29a383);
+  --pink-11: light-dark(#c2298a, #ff8dcc);
+  --violet-9: light-dark(#6e56cf, #6e56cf);
+  --brown-9: light-dark(#ad7f58, #ad7f58);
+  --teal-12: light-dark(#0d3d38, #adf0dd);
+  --amber-12: light-dark(#4f3422, #ffe7b3);
+  --green-11: light-dark(#218358, #3dd68c);
+  --red-11: light-dark(#ce2c31, #ff9592);
+}

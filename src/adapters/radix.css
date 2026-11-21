@@ -1,0 +1,48 @@
+/* Enarratio adapter: Radix Colors (https://www.radix-ui.com/colors). Maps Radix's scales onto
+   Enarratio's color properties. Link it after enarratio/base.css and the scales it reads, each with its
+   dark file: gray, blue, orange, jade, pink, violet, brown, teal, amber, green and red. Unmeasured: the
+   site owns contrast (docs/adapters.md). Steps follow Radix's own uses: 1 the background, 6 borders,
+   9 and 10 solid fills, 11 and 12 text, so the focus ring is step 11, which reaches 3:1. */
+:where(.enarratio, .enarratio-tooltip) {
+  --enarratio-background: var(--gray-1);
+  --enarratio-text: var(--gray-12);
+  --enarratio-text-muted: var(--gray-11);
+  --enarratio-grid: var(--gray-6);
+  --enarratio-focus: var(--blue-11);
+
+  /* eight hues, and steps that differ in lightness, so neighbours stay apart for every color vision */
+  --enarratio-series-1: var(--blue-9);
+  --enarratio-series-2: var(--orange-10);
+  --enarratio-series-3: var(--jade-9);
+  --enarratio-series-4: var(--pink-11);
+  --enarratio-series-5: var(--violet-9);
+  --enarratio-series-6: var(--brown-9);
+  --enarratio-series-7: var(--teal-12);
+  --enarratio-series-8: var(--amber-12);
+  /* white on steps 9 and 10, as Radix designs them; step 1 on steps 11 and 12, which flip with the theme */
+  --enarratio-series-text-1: white;
+  --enarratio-series-text-2: white;
+  --enarratio-series-text-3: white;
+  --enarratio-series-text-4: var(--gray-1);
+  --enarratio-series-text-5: white;
+  --enarratio-series-text-6: white;
+  --enarratio-series-text-7: var(--gray-1);
+  --enarratio-series-text-8: var(--gray-1);
+
+  --enarratio-sequential-1: var(--blue-3);
+  --enarratio-sequential-2: var(--blue-5);
+  --enarratio-sequential-3: var(--blue-7);
+  --enarratio-sequential-4: var(--blue-9);
+  --enarratio-sequential-5: var(--blue-11);
+  --enarratio-sequential-text-1: var(--gray-12);
+  --enarratio-sequential-text-2: var(--gray-12);
+  --enarratio-sequential-text-3: var(--gray-12);
+  --enarratio-sequential-text-4: white;
+  --enarratio-sequential-text-5: var(--gray-1);
+
+  /* Radix's pairings: green for success, orange for warning, red for errors */
+  --enarratio-status-good: var(--green-11);
+  --enarratio-status-warning: var(--orange-11);
+  --enarratio-status-bad: var(--red-11);
+  --enarratio-status-unknown: var(--gray-11);
+}

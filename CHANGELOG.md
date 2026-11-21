@@ -17,6 +17,7 @@ change the public API; every such change is listed here.
 
 ### Added
 
+- Adapters for other design systems: `enarratio/adapters/shadcn.css`, `radix.css` and `material.css` set every color property from shadcn/ui's, Radix Colors' or Material Design 3's own variables, so charts follow that system's theme, light and dark, with no `Theme` object. `enarratio/adapters/labels.css` picks the label on each fill for an adapter of your own. They are unmeasured mappings, like `base.css`; [docs/adapters.md](docs/adapters.md) says what each maps, how each system's defaults measure, and how to write one (record 0043). The gallery has a page for each.
 - The gallery reports its errors to Sentry (site-runtime `./sentry`) when the `SENTRY_DSN` secret is set. The Sentry SDK takes the gallery Worker from 36 to about 231 KiB (78 KiB gzipped), so its size budget is set to that. The npm package is unchanged.
 
 ## [0.16.1] - 2026-11-20

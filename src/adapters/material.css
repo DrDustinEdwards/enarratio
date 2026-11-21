@@ -1,0 +1,65 @@
+/* Enarratio adapter: Material Design 3. Maps the --md-sys-color-* roles and the plain typeface
+   (https://material-web.dev/theming/color/) onto Enarratio's color and font properties. Link it after
+   enarratio/base.css; it brings labels.css. Unmeasured: the site owns contrast (docs/adapters.md). */
+@import "./labels.css";
+:where(.enarratio, .enarratio-tooltip) {
+  --enarratio-background: var(--md-sys-color-surface);
+  --enarratio-text: var(--md-sys-color-on-surface);
+  --enarratio-text-muted: var(--md-sys-color-on-surface-variant);
+  --enarratio-grid: var(--md-sys-color-outline-variant);
+  /* Material's focus ring color */
+  --enarratio-focus: var(--md-sys-color-secondary);
+
+  /* Material's two accent roles, then six fixed hues mixed with the text color (a tenth, 7 half): a
+     generated scheme's roles share a hue family (secondary is primary, muted), too close for eight
+     series to stay apart */
+  --enarratio-series-1: var(--md-sys-color-primary);
+  --enarratio-series-2: var(--md-sys-color-tertiary);
+  --enarratio-series-3: color-mix(in oklab, #4b8efe 90%, var(--md-sys-color-on-surface));
+  --enarratio-series-4: color-mix(in oklab, #d96a7e 90%, var(--md-sys-color-on-surface));
+  --enarratio-series-5: color-mix(in oklab, #b57baf 90%, var(--md-sys-color-on-surface));
+  --enarratio-series-6: color-mix(in oklab, #2ca02c 90%, var(--md-sys-color-on-surface));
+  --enarratio-series-7: color-mix(in oklab, #2ca02c 50%, var(--md-sys-color-on-surface));
+  --enarratio-series-8: color-mix(in oklab, #a06f30 90%, var(--md-sys-color-on-surface));
+  --enarratio-series-text-1: var(--md-sys-color-on-primary);
+  --enarratio-series-text-2: var(--md-sys-color-on-tertiary);
+
+  --enarratio-sequential-1: color-mix(
+    in oklab,
+    var(--md-sys-color-primary) 15%,
+    var(--md-sys-color-surface)
+  );
+  --enarratio-sequential-2: color-mix(
+    in oklab,
+    var(--md-sys-color-primary) 35%,
+    var(--md-sys-color-surface)
+  );
+  --enarratio-sequential-3: color-mix(
+    in oklab,
+    var(--md-sys-color-primary) 55%,
+    var(--md-sys-color-surface)
+  );
+  --enarratio-sequential-4: color-mix(
+    in oklab,
+    var(--md-sys-color-primary) 80%,
+    var(--md-sys-color-surface)
+  );
+  --enarratio-sequential-5: var(--md-sys-color-primary);
+
+  /* Material has an error role and no success or warning role */
+  --enarratio-status-good: color-mix(
+    in oklab,
+    oklch(0.6 0.15 150) 75%,
+    var(--md-sys-color-on-surface)
+  );
+  --enarratio-status-warning: color-mix(
+    in oklab,
+    oklch(0.7 0.16 70) 75%,
+    var(--md-sys-color-on-surface)
+  );
+  --enarratio-status-bad: var(--md-sys-color-error);
+  --enarratio-status-unknown: var(--md-sys-color-outline);
+
+  --enarratio-font: var(--md-ref-typeface-plain);
+  --enarratio-font-numeric: var(--md-ref-typeface-plain);
+}

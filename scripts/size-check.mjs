@@ -14,8 +14,8 @@
  *
  *   node scripts/size-check.mjs
  */
-import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { readdirSync, readFileSync } from "node:fs";
+import { basename, dirname, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
 import { rolldown } from "rolldown";
 
@@ -74,7 +74,12 @@ for (const [name, target] of Object.entries(pkg.exports)) {
   if (!file.endsWith(".js") && !file.endsWith(".css")) continue;
   const path = resolve(root, file);
   if (file.endsWith(".css")) {
-    rows.push([name, gzipped(new Set([path])), "-"]);
+    // A pattern export (the adapters) is one row per file it names.
+    const [dir, suffix] = path.split("*");
+    const paths = suffix === undefined ? [path] : readdirSync(dir).map((f) => `${dir}${f}`);
+    for (const each of paths) {
+      rows.push([name.replace("*", basename(each, suffix ?? "")), gzipped(new Set([each])), "-"]);
+    }
     continue;
   }
   const variants = name === "./plot" || name === "./science" ? ["default", "browser"] : ["default"];
