@@ -9,7 +9,7 @@ change the public API; every such change is listed here.
 
 ### Added
 
-- The gallery reports its errors to Sentry (site-runtime `./sentry`) when the `SENTRY_DSN` secret is set. The npm package is unchanged.
+- The gallery reports its errors to Sentry (site-runtime `./sentry`) when the `SENTRY_DSN` secret is set. The Sentry SDK takes the gallery Worker from 36 to about 231 KiB (78 KiB gzipped), so its size budget is set to that. The npm package is unchanged.
 
 ## [0.16.1] - 2026-11-20
 
