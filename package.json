@@ -114,7 +114,7 @@
   },
   "devDependencies": {
     "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.63.3",
-    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.53.3",
+    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.55.1",
     "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.170.0",
     "@guidepup/guidepup": "0.40.0",
     "@guidepup/playwright": "0.21.0",
@@ -126,7 +126,7 @@
     "@types/pngjs": "6.0.5",
     "@vitest/coverage-v8": "4.1.12",
     "axe-core": "4.14.1",
-    "capsomer": "github:DrDustinEdwards/capsomer#v0.161.0",
+    "capsomer": "github:DrDustinEdwards/capsomer#v0.163.0",
     "d3-force": "3.0.1",
     "hast-util-from-html": "2.1.0",
     "hast-util-to-mdast": "10.1.3",
