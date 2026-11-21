@@ -9,6 +9,7 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- Puppeteer, which the visual tests drive, moves from 25.16.0 to 25.18.1 (Chrome 157); the Linux visual baselines are re-rendered in CI's Chromium. Charts are unchanged.
 - The exact peer version of `d3-force` follows the dev dependency, 3.0.1.
 
 ### Fixed
