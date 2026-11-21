@@ -60,7 +60,7 @@ each property (2026-11-21):
   ramp's darkest step), dark `--chart-1` and `--chart-4` too close for protanopia, and the light focus ring `--ring` at 2.6:1. One is the
   adapter's: series 6 and 8 too close for protanopia in light mode.
 - **Material Design 3** (the baseline scheme): five findings, between series 6, 7 and 8 and their
-  neighbours, under protanopia, deuteranopia or tritanopia.
+  neighbors, under protanopia, deuteranopia or tritanopia.
 
 ## What an adapter maps
 
@@ -71,7 +71,7 @@ and amber mixed a quarter with the text color, which keeps them readable in eith
 
 Radix Colors uses its scales' own steps: 1 for the background, 6 for gridlines, 11 and 12 for text
 and the focus ring, 9 to 12 for the series. The eight series take a different hue each, at steps
-chosen to differ in lightness too, so neighbours stay apart under every color vision deficiency
+chosen to differ in lightness too, so neighbors stay apart under every color vision deficiency
 (the combination was searched with `checkTheme` on Radix's light and dark values). Labels on a
 series are white on steps 9 and 10, as Radix designs them, and step 1 on steps 11 and 12. Status
 colors follow Radix's own pairings: green, orange and red.

@@ -10,7 +10,7 @@
   --enarratio-grid: var(--gray-6);
   --enarratio-focus: var(--blue-11);
 
-  /* eight hues, and steps that differ in lightness, so neighbours stay apart for every color vision */
+  /* eight hues, and steps that differ in lightness, so neighbors stay apart for every color vision */
   --enarratio-series-1: var(--blue-9);
   --enarratio-series-2: var(--orange-10);
   --enarratio-series-3: var(--jade-9);

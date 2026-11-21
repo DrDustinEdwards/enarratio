@@ -1,7 +1,7 @@
 /* shadcn/ui's default theme (https://ui.shadcn.com/docs/theming, neutral), the variables the adapter reads,
-   light and dark. Dark here follows the gallery theme switch through light-dark(); a shadcn/ui site sets it
-   with the .dark class. */
-:root {
+   light and dark. Dark here follows the gallery theme switch through light-dark() (a shadcn/ui site uses the
+   .dark class); set on the charts, so the page around them keeps Capsomer's own --ring. */
+:where(.enarratio, .enarratio-tooltip) {
   --background: light-dark(oklch(1 0 0), oklch(0.145 0 0));
   --foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
   --muted-foreground: light-dark(oklch(0.556 0 0), oklch(0.708 0 0));

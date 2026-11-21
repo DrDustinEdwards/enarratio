@@ -1,6 +1,7 @@
 /* Radix Colors 3.0.0 (@radix-ui/colors), the steps the adapter reads, light and dark: the values a site
-   importing those scales has. Dark here follows the gallery theme switch through light-dark(). */
-:root {
+   importing those scales has. Dark here follows the gallery theme switch through light-dark(); they are set on the charts, so
+   the gallery page around them keeps Capsomer's own tokens. */
+:where(.enarratio, .enarratio-tooltip) {
   --gray-1: light-dark(#fcfcfc, #111111);
   --gray-6: light-dark(#d9d9d9, #3a3a3a);
   --gray-11: light-dark(#646464, #b4b4b4);
