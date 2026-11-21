@@ -7,6 +7,8 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.17.1] - 2026-11-21
+
 ### Fixed
 
 - The label on a fill in `labels.css` switches between black and white at the lightness where both reach the same contrast (0.56), not at 0.65, where white on a mid-tone fill read about 3:1. The Radix Colors adapter now uses it in place of white on steps 9 and 10, which reached 2.5 to 3.3:1 on its brighter hues.

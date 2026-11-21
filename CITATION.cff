@@ -17,7 +17,7 @@ authors:
 repository-code: "https://github.com/DrDustinEdwards/enarratio"
 url: "https://enarratio.dustinedwards.info"
 license: MIT
-version: 0.17.0
+version: 0.17.1
 date-released: "2026-11-21"
 keywords:
   - data visualization
