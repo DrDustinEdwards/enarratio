@@ -9,7 +9,7 @@ change the public API; every such change is listed here.
 
 ### Changed
 
-- The exact peer versions of `@observablehq/plot` and `d3-force` follow the dev dependencies, 0.6.19 and 3.0.1.
+- The exact peer version of `d3-force` follows the dev dependency, 3.0.1.
 
 ### Added
 

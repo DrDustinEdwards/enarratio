@@ -119,7 +119,7 @@
     "@guidepup/guidepup": "0.40.0",
     "@guidepup/playwright": "0.21.0",
     "@guidepup/setup": "0.29.3",
-    "@observablehq/plot": "0.6.19",
+    "@observablehq/plot": "0.6.17",
     "@playwright/test": "1.65.1",
     "@types/d3-force": "3.0.10",
     "@types/node": "26.6.6",
@@ -144,7 +144,7 @@
     "vitest": "4.1.12"
   },
   "peerDependencies": {
-    "@observablehq/plot": "0.6.19",
+    "@observablehq/plot": "0.6.17",
     "d3-force": "3.0.1",
     "linkedom": "0.18.15"
   },
