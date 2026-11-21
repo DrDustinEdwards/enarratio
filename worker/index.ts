@@ -16,6 +16,7 @@ import { serveMarkdownCopies } from "@drdustinedwards/site-helpers/llms";
 import { TDM_RESERVATION_HEADERS } from "@drdustinedwards/site-helpers/robots";
 import { preloads, withPreloadHeader } from "@dustinedwards/site-runtime/preload";
 import { enarratio } from "@dustinedwards/site-runtime/sites";
+import { withSiteSentry } from "@dustinedwards/site-runtime/sentry";
 import { staticSite } from "@dustinedwards/site-runtime/static-site";
 
 /** Capsomer's stylesheet and the headings' and text's Inter: every page paints with them. */
@@ -60,4 +61,5 @@ const pages = async (
 
 // Each page's Markdown copy (/astro.md, or Accept: text/markdown) and llms-full.txt are files `npm run gallery` writes with
 // prelum-markdown; serveMarkdownCopies answers them.
-export default { fetch: serveMarkdownCopies(pages, { origin: enarratio.origin }) };
+// Errors go to the Sentry project when the SENTRY_DSN secret is set (site-runtime ./sentry).
+export default withSiteSentry({ fetch: serveMarkdownCopies(pages, { origin: enarratio.origin }) });
