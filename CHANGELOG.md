@@ -9,6 +9,7 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- Puppeteer, which the visual tests drive, moves from 25.16.0 to 25.18.1 (Chrome 157); the Linux visual baselines are re-rendered in CI's Chromium. Charts are unchanged.
 - Observable Plot moves from 0.6.17 to 0.6.19, in the dev dependency and the peer range. Plot 0.6.18 keeps a missing value as a gap in a stacked area, so that series' band and edge break there while the bands above still stack as if it added nothing; `enarratio/lite` draws the same, and its stacked area charts match `enarratio/plot` again.
 - The exact peer version of `d3-force` follows the dev dependency, 3.0.1.
 
