@@ -111,11 +111,7 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
       "line",
       { fill: "none", "stroke-width": "2", "stroke-linejoin": "round", "stroke-linecap": "round" },
       bySeries(points).map((group) => ({
-        d: linePath(
-          group,
-          isValue,
-          (p) => [x(p.at), y(span(p)[1])],
-        ),
+        d: linePath(group, isValue, (p) => [x(p.at), y(span(p)[1])]),
         attrs: { stroke: color(group[0] as Point) },
       })),
     ),
