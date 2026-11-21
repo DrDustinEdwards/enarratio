@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Changed
+
+- The exact peer version of `d3-force` follows the dev dependency, 3.0.1.
+
 ### Fixed
 
 - `CITATION.cff` named 0.7.0; it now names 0.16.1, and the release steps say to update it with each version.
