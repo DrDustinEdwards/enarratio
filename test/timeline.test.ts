@@ -1,5 +1,5 @@
 /**
- * The event timeline and the heat strip: the two primitives added in 0.2. Each is checked
+ * The event timeline and the heat strip: the two primitives. Each is checked
  * against the numbers it was given: what is drawn, hovered and listed is the same data.
  */
 import { describe, expect, it } from "vitest";
