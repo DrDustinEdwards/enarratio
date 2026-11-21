@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Fixed
+
+- `CITATION.cff` named 0.7.0; it now names 0.16.1, and the release steps say to update it with each version.
+
 ### Added
 
 - The gallery reports its errors to Sentry (site-runtime `./sentry`) when the `SENTRY_DSN` secret is set. The Sentry SDK takes the gallery Worker from 36 to about 231 KiB (78 KiB gzipped), so its size budget is set to that. The npm package is unchanged.
