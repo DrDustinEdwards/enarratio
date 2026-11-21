@@ -1,20 +1,9 @@
 # Security policy
 
-Enarratio turns data into HTML, so the kind of problem most likely to matter is
-markup injection: caller data that escapes its attribute or text and becomes
-markup or script in the page. Every caller-supplied string is escaped, and the
-rendering tests check that no example output contains scripts or event
-handler attributes.
+## Reporting a vulnerability
+
+Report it privately on GitHub: open this repository's Security tab and choose Report a vulnerability. Or email security@dustinedwards.info with what you found, the version or commit, and steps to reproduce it. Please do not open a public issue for a vulnerability. The same contact is published at https://dustinedwards.info/.well-known/security.txt (RFC 9116).
 
 ## Supported versions
 
-Security fixes are made on the latest release, published under the npm `latest` tag
-(`npm install enarratio`).
-
-## Reporting a vulnerability
-
-Please report privately through GitHub's
-[private vulnerability reporting](https://github.com/DrDustinEdwards/enarratio/security/advisories/new)
-rather than a public issue. Include the chart function, the options that
-cause the problem and what they produce. You can expect an acknowledgment
-within a week, and a fix or a plan within thirty days.
+Only the latest release is supported. Fixes ship as a new release.
