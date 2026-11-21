@@ -28,4 +28,5 @@ export default barChart({
   title: "Analysis runs per day, by site",
   alt: "Analysis runs per day at three sites, 9 to 28 June 2026. Most days have six runs, two from each site. There are none on 13 and 14 June, and one run on each of 20, 21, 27 and 28 June.",
   caption: "Illustrative data. Every day between the first and last run has a bar slot.",
+  source: "Illustrative data made up for this gallery",
 });

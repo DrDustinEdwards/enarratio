@@ -21,4 +21,5 @@ export default areaChart({
   title: "Influenza detections by subtype",
   alt: "Share of influenza detections by subtype, January to June 2025: H1N1pdm09 falls from 52% to 20%, H3N2 stays near 40%, and B/Victoria rises from 10% to half of detections.",
   caption: "Illustrative data. Each month adds to 100%.",
+  source: "Illustrative data made up for this gallery",
 });

@@ -23,4 +23,5 @@ export default sunburst({
   title: "Classified reads in one stool sample",
   alt: "Sunburst of 100,000 classified reads: bacteria make up 88%, led by Bacillota (41%) and Bacteroidota (29%); viruses 5.5%, archaea 3.5% and eukaryotes 2.6%.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

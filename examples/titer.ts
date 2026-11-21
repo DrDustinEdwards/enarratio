@@ -22,4 +22,5 @@ export default titerPlot({
   alt: "HAI titers for 12 participants at four timepoints. The geometric mean titer rises from about 12 at day 0 to about 270 at day 28, then wanes to about 67 by day 180. Two day 0 samples were below the 1:10 limit of detection.",
   caption:
     "Illustrative data. Bars are geometric mean titers with 95% confidence intervals; hollow points are below the limit of detection, plotted at half the limit.",
+  source: "Illustrative data made up for this gallery",
 });

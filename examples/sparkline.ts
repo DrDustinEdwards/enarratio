@@ -5,4 +5,5 @@ export default sparkline({
   values: [4, 5, 7, 11, 8, 10],
   label: "Entries per year, 2019 to 2024",
   area: true,
+  source: "Illustrative data made up for this gallery",
 });

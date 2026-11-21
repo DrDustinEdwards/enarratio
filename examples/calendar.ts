@@ -27,4 +27,5 @@ export default calendarHeatmap({
   title: "Samples received each day, January to June 2026",
   alt: "Calendar heatmap of samples received each day from January to June 2026: weekdays bring 40 to 84 samples and weekends about 6 to 9. January and February are the busiest, with weekdays mostly above 60. New Year's Day had none, and 13 to 15 April have no record.",
   caption: "Illustrative data. Weeks start on Monday.",
+  source: "Illustrative data made up for this gallery",
 });

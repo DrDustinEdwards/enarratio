@@ -24,4 +24,5 @@ export default barChart({
   alt: "Stacked bars of CV entries per year from 2005 to 2026, by type. Every year has between 3 and 12 entries, peaking at 12 every fifth year: 2007, 2012, 2017 and 2022.",
   caption:
     "Illustrative data. Clicking a bar selects its year; with scripts off, each bar links to that year.",
+  source: "Illustrative data made up for this gallery",
 });

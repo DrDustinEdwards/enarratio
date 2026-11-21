@@ -31,4 +31,5 @@ export default doseResponse({
   title: "Inhibition of viral polymerase activity",
   alt: "Dose-response curves for two antivirals, three replicates at eight concentrations: activity falls from about 100% to near 0 for both, baloxavir at about a fourteenth the concentration of oseltamivir, with IC50s near 0.09 µM and 1.2 µM.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

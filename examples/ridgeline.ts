@@ -26,4 +26,5 @@ export default ridgelinePlot({
   title: "Daily highs by month",
   alt: "Ridgeline plot of daily high temperatures for each month: highs center near 17 °C in January, rise to about 36 °C in July and August, and fall back to 18 °C in December. Winter months spread over about 20 degrees, while summer months are tightly bunched.",
   caption: "Illustrative data: 30 days a month.",
+  source: "Illustrative data made up for this gallery",
 });

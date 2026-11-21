@@ -23,4 +23,5 @@ export default densityPlot({
   title: "Ct values by virus",
   alt: "Density of Ct values for three viruses, 80 samples each: wild type peaks near Ct 24, PA-X null near 27 and spreads widest, and ΔNS1 peaks latest, near 32.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

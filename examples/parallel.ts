@@ -30,4 +30,5 @@ export default parallelCoordinates({
   title: "Twelve yeast strains on four traits",
   alt: "Parallel coordinates of 12 yeast strains: growth and yield rise together, and both fall as heat tolerance rises. B2 grows fastest (0.61 per hour) and yields most but tolerates least heat; C1 is the reverse.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

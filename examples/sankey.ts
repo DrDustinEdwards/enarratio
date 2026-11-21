@@ -21,4 +21,5 @@ export default sankeyDiagram({
   title: "Where clinic patients went in one quarter",
   alt: "Sankey diagram of 1,270 patients: 1,130 were seen in clinic (820 referred, 310 walk-ins) and 140 referrals did not attend. Of those seen, 760 were treated as outpatients, 290 admitted and 80 referred on; 240 of the admitted went home.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

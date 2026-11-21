@@ -24,4 +24,5 @@ export default divergingBarChart({
   title: "Vaccination rate change, 2024 to 2025",
   alt: "Change in vaccination rate by county from 2024 to 2025: five counties rose, led by Ashe at +4.2 points, and three fell, the most Haywood at −3.4 points.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

@@ -22,4 +22,5 @@ export default barChart({
   title: "Viral titer with and without antiviral",
   alt: "Mean viral titer for three strains, control against antiviral, with 95% confidence intervals: the antiviral lowers titer by about 2.3 log10 for PR8 and WSN, with intervals far apart, and by 0.7 for Cal09, where the intervals overlap.",
   caption: "Illustrative data. Error bars are 95% confidence intervals of the mean, n = 6.",
+  source: "Illustrative data made up for this gallery",
 });

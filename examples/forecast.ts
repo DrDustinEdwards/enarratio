@@ -29,4 +29,5 @@ export default lineChart({
   title: "Daily visits and a one-week forecast",
   alt: "Daily visits from 3 February to 2 March 2026, rising from about 120 to about 207. From 24 February the line is a forecast: it continues the rise to about 207 by 2 March, with a 95% interval that widens from plus or minus 10 to plus or minus 34.",
   caption: "Illustrative data. The forecast and its interval were computed outside Enarratio.",
+  source: "Illustrative data made up for this gallery",
 });

@@ -24,4 +24,5 @@ export default dotPlot({
   title: "Influenza vaccination by state",
   alt: "Dot plot of adult influenza vaccination in five states, 2015 and 2025: every state rose, Oregon the most, from 39% to 55%, and Vermont stays highest at 58%.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

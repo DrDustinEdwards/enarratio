@@ -23,4 +23,5 @@ export default scatterPlot({
   title: "Wastewater signal and test positivity by site",
   alt: "Bubble chart of seven sites: test positivity rises with wastewater signal, from 5.2% at Boone (signal 18, 45 samples) to 12.6% at Raleigh (signal 88, 380 samples); larger sites sit to the upper right.",
   caption: "Illustrative data. Bubble area shows the number of samples.",
+  source: "Illustrative data made up for this gallery",
 });

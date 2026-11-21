@@ -21,4 +21,5 @@ export default radarChart({
   title: "Two diagnostic tests, scored out of 100",
   alt: "Radar chart scoring PCR and an antigen test out of 100: PCR leads on sensitivity (98 to 72), both are near 100 on specificity, and the antigen test leads on speed, cost and ease of use, each by 45 to 55 points.",
   caption: "Illustrative scores.",
+  source: "Illustrative data made up for this gallery",
 });

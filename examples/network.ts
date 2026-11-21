@@ -36,4 +36,5 @@ export default networkChart({
   title: "Co-authorship network",
   alt: "Network of ten co-authors in four fields. Rivera and Ramos are the hubs, with four co-authors each. Rivera links the virus team to statistics and epidemiology. Ramos links epidemiology to public health.",
   caption: "Illustrative data. Links are co-authored papers.",
+  source: "Illustrative data made up for this gallery",
 });

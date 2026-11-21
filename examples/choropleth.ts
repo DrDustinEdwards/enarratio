@@ -47,4 +47,5 @@ export default choroplethMap({
   title: "Cases per 10,000 by ward",
   alt: "Map of nine sample wards: Ward 6, in the east, has the highest rate at 44 per 10,000 and Ward 4 the lowest at 9; Ward 9 has no data.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

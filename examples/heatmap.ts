@@ -23,4 +23,5 @@ export default heatmap({
   title: "Retention by cohort",
   alt: "Retention heatmap for five monthly cohorts: every cohort starts at 100% and falls about 18 points a month, reaching 45% at month four for the January cohort.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

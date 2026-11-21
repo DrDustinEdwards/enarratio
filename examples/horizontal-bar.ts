@@ -18,4 +18,5 @@ export default barChart({
   yLabel: "Views",
   title: "Most viewed pages",
   alt: "Horizontal bars ranking five pages by views: Teaching and mentoring leads with 1,840, then Publications 1,320, surveillance notes 960, the CV 720 and Contact 310.",
+  source: "Illustrative data made up for this gallery",
 });

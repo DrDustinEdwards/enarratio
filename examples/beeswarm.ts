@@ -25,4 +25,5 @@ export default stripPlot({
   title: "Vaccine knowledge scores by age",
   alt: "Beeswarm of knowledge scores for 30 people in each of three age groups: scores rise with age, centered near 62 for 18 to 49, 70 for 50 to 64 and 78 for 65 and over, with the youngest group the most spread.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

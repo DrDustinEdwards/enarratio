@@ -21,4 +21,5 @@ export default bulletChart({
   title: "Laboratory performance this month",
   alt: "Bullet chart of three lab measures: 1,840 samples processed against a goal of 2,000, 91% same-day results against 95%, and 78% of results within 24 hours against 90%. Each misses its target; same-day results are in the good band, the other two in the fair band.",
   caption: "Illustrative data. Bands are fixed shares of each scale.",
+  source: "Illustrative data made up for this gallery",
 });

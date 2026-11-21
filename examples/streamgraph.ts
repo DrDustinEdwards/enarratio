@@ -26,4 +26,5 @@ export default streamgraph({
   title: "Positive tests by virus, October 2025 to March 2026",
   alt: "Streamgraph of weekly positive tests for five respiratory viruses over 26 weeks: rhinovirus and SARS-CoV-2 lead in October and November, RSV peaks in early December, influenza A forms the largest wave in January, and influenza B peaks last, in late February.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

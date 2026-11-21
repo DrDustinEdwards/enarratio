@@ -26,4 +26,5 @@ export default treemap({
   title: "Where a monthly budget of $4,750 goes",
   alt: "Treemap of a $4,750 monthly household budget: housing takes $1,870 (39%), mostly rent; food $900, transport $790, other spending $690 (of which $400 is savings) and health $500.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

@@ -62,6 +62,9 @@ each property (2026-11-21):
 - **Material Design 3** (the baseline scheme): five findings, between series 6, 7 and 8 and their
   neighbors, under protanopia, deuteranopia or tritanopia.
 
+The gallery's shadcn/ui page draws on a copy of that neutral theme with its chart colors and muted text
+adjusted to pass; the adapter's mapping is the same.
+
 ## What an adapter maps
 
 shadcn/ui has five chart colors. Series 6 to 8 mix the first, second and fourth with the text
@@ -73,7 +76,7 @@ Radix Colors uses its scales' own steps: 1 for the background, 6 for gridlines, 
 and the focus ring, 9 to 12 for the series. The eight series take a different hue each, at steps
 chosen to differ in lightness too, so neighbors stay apart under every color vision deficiency
 (the combination was searched with `checkTheme` on Radix's light and dark values). Labels on a
-series are white on steps 9 and 10, as Radix designs them, and step 1 on steps 11 and 12. Status
+series are black or white by the fill's lightness (labels.css), since white on steps 9 and 10 reaches only 2.5 to 3.3:1 on the bright ones. Status
 colors follow Radix's own pairings: green, orange and red.
 
 Material Design 3 builds every role from one seed color, so primary, secondary and tertiary

@@ -24,7 +24,7 @@
   --enarratio-sequential-1: color-mix(in oklab, var(--chart-1) 15%, var(--background));
   --enarratio-sequential-2: color-mix(in oklab, var(--chart-1) 35%, var(--background));
   --enarratio-sequential-3: color-mix(in oklab, var(--chart-1) 55%, var(--background));
-  --enarratio-sequential-4: color-mix(in oklab, var(--chart-1) 80%, var(--background));
+  --enarratio-sequential-4: color-mix(in oklab, var(--chart-1) 90%, var(--background));
   --enarratio-sequential-5: var(--chart-1);
 
   /* shadcn/ui has no success or warning color */

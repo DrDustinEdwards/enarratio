@@ -54,4 +54,5 @@ export default dotMap({
   title: "Cases by address",
   alt: "Dot map of 24 sample addresses: the largest dots, up to 9 cases, sit round the Market well, and fewer cases lie farther from it.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

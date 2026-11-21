@@ -39,4 +39,5 @@ export default tableChart({
   title: "Testing by site this week",
   alt: "Testing at five sites this week: Charlotte runs the most tests, 5,120, and has the highest positivity, 11.6%, up 2.9 points; Wilmington has the lowest, 4.9%; positivity fell at Durham and Greensboro.",
   caption: "Illustrative data. Every cell prints its value; bars and colors repeat it.",
+  source: "Illustrative data made up for this gallery",
 });

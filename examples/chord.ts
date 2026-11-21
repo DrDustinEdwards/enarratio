@@ -23,4 +23,5 @@ export default chordDiagram({
   title: "Moves between US regions in one year",
   alt: "Chord diagram of moves between four US regions: the South gains most, receiving 865,000 people and sending 548,000. The largest single flow is 310,000 from the Northeast to the South.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

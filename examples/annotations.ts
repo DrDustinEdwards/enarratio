@@ -18,4 +18,5 @@ export default lineChart({
   title: "Influenza-like illness visits, fall 2025",
   alt: "Weekly influenza-like illness visits from October 2025 to January 2026 rise from 12 to a peak of 104 in the week of 1 December, then fall to 21.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

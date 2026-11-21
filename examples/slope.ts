@@ -20,4 +20,5 @@ export default slopeChart({
   title: "Enrolled majors, 2020 and 2025",
   alt: "Slope chart of majors in six programs between 2020 and 2025: five grew, Biology most, from 412 to 486, then Public health from 196 to 263, while Physics fell from 164 to 142.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });
