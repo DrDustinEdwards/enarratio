@@ -94,7 +94,7 @@ export function ridgelinePlot<T extends object>(options: RidgelinePlotOptions<T>
   const pad = 3 * maxOf(bandwidths);
   const lo = minOf(values) - pad;
   const hi = maxOf(values) + pad;
-  const xs = grid(lo, hi, 100);
+  const xs = grid(lo, hi, 80);
   const curves = groups.map((g, k) => kernelDensity(g, bandwidths[k] as number, xs));
   const { at, sampled } = densitySamples(values, groups, bandwidths);
   const tallest = maxOf(curves.flat()) || 1;

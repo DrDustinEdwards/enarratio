@@ -19,4 +19,5 @@ export default phylogeneticTree({
   title: "H5N1 hemagglutinin phylogeny",
   alt: "Rectangular phylogenetic tree of eight H5N1 hemagglutinin sequences: the three 2024 B3.13 viruses from a duck, a chicken and a cow cluster together with 98 and 87 support, beside two 2023 New England viruses; two 2022 Japanese viruses group with the 1996 Guangdong goose virus on the longest branch.",
   caption: "Illustrative tree and branch lengths.",
+  source: "Illustrative data made up for this gallery",
 });

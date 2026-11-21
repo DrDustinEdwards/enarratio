@@ -19,4 +19,5 @@ export default funnelChart({
   title: "From invitation to enrollment in a vaccine trial",
   alt: "Funnel of trial recruitment: of 12,000 people invited, 1,105 (9.2%) enrolled. The largest drop is from opening the invitation to screening, where 42% carried on; 89% of those who consented enrolled.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

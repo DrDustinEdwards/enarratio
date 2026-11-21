@@ -18,4 +18,5 @@ export default pieChart({
   title: "Confidence in vaccine safety",
   alt: "Donut chart of 1,284 survey replies: 74% are very or somewhat confident in vaccine safety (32% and 42%), 16% not very confident, 7% not at all, and 4% not sure.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

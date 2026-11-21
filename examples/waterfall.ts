@@ -21,4 +21,5 @@ export default waterfallChart({
   title: "Lab budget, 2025 to 2026",
   alt: "Waterfall from the 2025 lab budget of $1,200k to the 2026 budget of $1,130k: a new grant adds $340k and indirect costs $85k, while an ended award removes $260k, equipment $140k and salaries $95k.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

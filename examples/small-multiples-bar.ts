@@ -32,4 +32,5 @@ export default smallMultiples({
   title: "Clinic visits by quarter",
   alt: "Three panels of quarterly visits on a shared scale: Central is busiest, about 250 a quarter, nearly all in person; North grows from 160 to 220 with video rising; South grows from 152 to 225, with video overtaking in-person visits in the fourth quarter.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

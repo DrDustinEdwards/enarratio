@@ -42,4 +42,5 @@ export default violinPlot({
   title: "How long results take, by test",
   alt: "Violin plot of hours to result for three tests: rapid antigen results cluster at 2 to 4 hours, PCR results come in two waves around 8 and 20 hours, and culture results spread from about 30 to 65 hours, centered near 46.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

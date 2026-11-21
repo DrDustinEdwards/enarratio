@@ -17,4 +17,5 @@ export default gaugeChart({
   title: "Hospital bed occupancy today",
   alt: "Gauge: 87% of beds are occupied, in the busy band, above the 85% target.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

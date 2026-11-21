@@ -31,4 +31,5 @@ export default candlestickChart({
   title: "A reagent supplier's share price, November 2026",
   alt: "Candlestick chart of 20 trading days in November 2026: the price rises from 40.80 to 47.40 dollars, with 13 days closing up and 7 closing down, and two-day dips on 9 and 10 and on 23 and 24 November.",
   caption: "Illustrative prices.",
+  source: "Illustrative data made up for this gallery",
 });

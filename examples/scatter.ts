@@ -26,4 +26,5 @@ export default scatterPlot({
   title: "Ct value against infectious titer",
   alt: "Scatter plot of nine isolates from two clades: infectious titer falls about tenfold for every 3.3 Ct cycles in both clades, from about 5 million PFU/mL at Ct 18 to about 700 at Ct 31.",
   caption: "Illustrative data. Each series has its own symbol as well as its own color.",
+  source: "Illustrative data made up for this gallery",
 });

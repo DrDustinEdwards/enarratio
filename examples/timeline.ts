@@ -56,4 +56,5 @@ export default timeline({
       at: "2026-06-09T11:00:00Z",
     },
   ],
+  source: "Illustrative data made up for this gallery",
 });

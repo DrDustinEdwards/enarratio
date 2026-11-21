@@ -13,6 +13,7 @@ ${heatStrip({
   values: hours,
   label: "Requests per hour, 7 and 8 June",
   width: 480,
+  source: "Illustrative data made up for this gallery",
   cellLabels: hours.map(
     (_, i) => `${i < 24 ? "7" : "8"} June ${String(i % 24).padStart(2, "0")}:00`,
   ),

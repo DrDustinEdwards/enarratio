@@ -24,4 +24,5 @@ export default histogram({
   title: "Cell diameters",
   alt: "Histogram of 240 cell diameters: one peak near 12.5 µm, roughly symmetric, with nearly all cells between 8 and 17 µm.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

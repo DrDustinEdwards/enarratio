@@ -21,4 +21,5 @@ export default barChart({
   title: "Time to result by assay",
   alt: "Grouped bars of hours to result for three assays. Automation saves a day on plaque assays (72 to 48 hours) and TCID50 (120 to 96), and two hours on qPCR (6 to 4).",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

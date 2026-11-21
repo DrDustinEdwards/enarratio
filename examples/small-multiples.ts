@@ -24,4 +24,5 @@ export default smallMultiples({
   title: "Influenza positivity by region",
   alt: "Six panels of weekly influenza positivity on shared scales: the Southeast peaks first, at 21% in week 4, the Northeast at 22% in week 5, the Midwest at 23% in week 6, and the West and Northwest last, near weeks 7 and 8; the Southwest stays flat near 10%.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

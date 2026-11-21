@@ -25,4 +25,5 @@ export default areaChart({
   title: "Where the week goes",
   alt: "Stacked areas of weekly hours by activity from September 2025 to February 2026. Research is the largest share throughout, rising to 26 hours in January; teaching peaks at 16 hours in November; service stays near 6.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

@@ -23,4 +23,5 @@ export default forestPlot({
   title: "Vaccination and hospitalization, six trials",
   alt: "Forest plot of six trials: five odds ratios fall below 1, two of their intervals clear of it, and one, Diallo 2022, sits just above 1; the pooled random-effects odds ratio is about 0.79, with an interval below 1.",
   caption: "Illustrative data.",
+  source: "Illustrative data made up for this gallery",
 });

@@ -20,4 +20,5 @@ export default rangePlot({
   title: "Central 95% of values in the cohort",
   alt: "Range of the central 95% of values for five blood analytes, with medians: hemoglobin 11.8 to 16.4 g/dL, white cells 4.1 to 10.9, platelets 15.2 to 39.6, glucose 3.9 to 7.2 mmol/L and creatinine 0.6 to 1.3 mg/dL.",
   caption: "Illustrative data. The tick marks the median.",
+  source: "Illustrative data made up for this gallery",
 });

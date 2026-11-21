@@ -21,4 +21,5 @@ export default boxPlot({
   alt: "Box plots of body weight for three diets, ten mice each: chow has a median of 24.8 g, high fat 30.9 g with one heavy mouse at 38.2 g, and high fat with the drug 27.0 g with one light mouse at 22.1 g.",
   caption:
     "Illustrative data. Boxes span the quartiles; whiskers reach the furthest value within 1.5 IQR.",
+  source: "Illustrative data made up for this gallery",
 });

@@ -682,6 +682,7 @@ series: status
 layout: grouped
 title: Tickets by team
 alt: Support has the most open tickets; Platform has closed the most.
+source: Illustrative data made up for this gallery
 ---
 team,status,tickets
 Support,Open,14
@@ -711,6 +712,7 @@ const drawSample = (size: { width?: number; height?: number } = {}): string =>
     layout: "grouped",
     title: "Tickets by team",
     alt: "Support has the most open tickets; Platform has closed the most.",
+    source: "Illustrative data made up for this gallery",
   });
 const sampleChart = withExpand(drawSample());
 /** Its drawing for a phone, swapped in under 30rem as the gallery's examples are (C12, D5). */
@@ -905,7 +907,11 @@ const pages: [Theme, string, string, Theme][] = [
  * (examples/adapters/<name>.css), with the base rules.
  */
 const adapters: Adapter[] = [
-  { name: "shadcn/ui", file: "shadcn.css", values: "theme" },
+  {
+    name: "shadcn/ui",
+    file: "shadcn.css",
+    values: "theme, its chart colors adjusted for contrast",
+  },
   { name: "Radix Colors", file: "radix.css", values: "scales" },
   { name: "Material Design 3", file: "material.css", values: "baseline scheme" },
 ];
@@ -953,6 +959,8 @@ for (const adapter of adapters) {
       inlineCss(join(examplesDir, "adapters", adapter.file)),
       readFileSync(join(root, "dist", "base.css"), "utf8"),
       inlineCss(join(root, "dist", "adapters", adapter.file)),
+      // A chart sits on its design system's own background, which its default colors are chosen against.
+      ":where(.enarratio) { background: var(--enarratio-background); }",
     ].join("\n"),
   );
   writeFileSync(join(outDir, file), page({ adapter }, file, css, examples, links(file)));

@@ -1,7 +1,7 @@
 /* Enarratio adapter part: the label on each series color and ramp step (a genome feature's name, a
    heatmap cell's value), for an adapter whose design system has no matching "on" color. Black or white,
    whichever the fill's OKLCH lightness calls for; the text color where relative colors do not work.
-   Imported by the shadcn/ui and Material adapters; an adapter of your own can import it too. */
+   Imported by the shadcn/ui, Radix and Material adapters; an adapter of your own can import it too. */
 :where(.enarratio, .enarratio-tooltip) {
   --enarratio-series-text-1: var(--enarratio-text);
   --enarratio-series-text-2: var(--enarratio-text);
@@ -20,43 +20,43 @@
 @supports (color: oklch(from red l c h)) {
   :where(.enarratio, .enarratio-tooltip) {
     --enarratio-series-text-1: oklch(
-      from var(--enarratio-series-1) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-series-1) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
     --enarratio-series-text-2: oklch(
-      from var(--enarratio-series-2) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-series-2) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
     --enarratio-series-text-3: oklch(
-      from var(--enarratio-series-3) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-series-3) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
     --enarratio-series-text-4: oklch(
-      from var(--enarratio-series-4) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-series-4) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
     --enarratio-series-text-5: oklch(
-      from var(--enarratio-series-5) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-series-5) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
     --enarratio-series-text-6: oklch(
-      from var(--enarratio-series-6) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-series-6) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
     --enarratio-series-text-7: oklch(
-      from var(--enarratio-series-7) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-series-7) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
     --enarratio-series-text-8: oklch(
-      from var(--enarratio-series-8) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-series-8) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
     --enarratio-sequential-text-1: oklch(
-      from var(--enarratio-sequential-1) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-sequential-1) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
     --enarratio-sequential-text-2: oklch(
-      from var(--enarratio-sequential-2) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-sequential-2) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
     --enarratio-sequential-text-3: oklch(
-      from var(--enarratio-sequential-3) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-sequential-3) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
     --enarratio-sequential-text-4: oklch(
-      from var(--enarratio-sequential-4) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-sequential-4) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
     --enarratio-sequential-text-5: oklch(
-      from var(--enarratio-sequential-5) clamp(0, (0.65 - l) * 1000, 1) 0 0
+      from var(--enarratio-sequential-5) clamp(0, (0.56 - l) * 1000, 1) 0 0
     );
   }
 }

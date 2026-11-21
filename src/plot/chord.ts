@@ -201,7 +201,7 @@ export function chordDiagram<T extends object>(options: ChordDiagramOptions<T>):
       options.alt,
       "img",
       [
-        el("g", { "data-enarratio-mark": "ribbon", "fill-opacity": 0.55 }, ribbons.join("")),
+        el("g", { "data-enarratio-mark": "ribbon", "fill-opacity": 0.97 }, ribbons.join("")),
         el(
           "g",
           {

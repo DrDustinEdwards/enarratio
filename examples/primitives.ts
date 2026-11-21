@@ -10,5 +10,5 @@ const hours = Array.from({ length: 48 }, (_, i): UptimeStatus => {
 export default `<div class="primitives">
 ${progressRing({ value: 7, max: 12, label: "Chapters drafted", inline: true })}
 ${progressRing({ value: 0.92, label: "Tests passing", size: 56, inline: true })}
-${uptimeStrip({ slots: hours, label: "Site, last 48 hours" })}
+${uptimeStrip({ slots: hours, label: "Site, last 48 hours", source: "Illustrative data made up for this gallery" })}
 </div>`;

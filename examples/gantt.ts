@@ -21,4 +21,5 @@ export default ganttChart({
   title: "Trial plan for 2026",
   alt: "Gantt chart of a 2026 trial plan: protocol approval and site training run January to February, enrollment from March to June with sample testing to July, data cleaning in June and July, and database lock on August 3. Today, April 15, is during enrollment.",
   caption: "Illustrative plan.",
+  source: "Illustrative data made up for this gallery",
 });
