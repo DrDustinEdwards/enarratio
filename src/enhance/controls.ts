@@ -176,7 +176,6 @@ export function popover(
       details.open = false;
     }
   });
-  // One panel open at a time.
   listen(details, "toggle", () => {
     if (!details.open) return;
     for (const other of details.parentElement?.querySelectorAll("details[open]") ?? []) {

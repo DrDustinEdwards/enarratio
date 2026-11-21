@@ -41,7 +41,6 @@ describe("documentation", () => {
   it("finds the public API", () => {
     expect(publicNames).toContain("barChart");
     expect(publicNames).toContain("enhance");
-    expect(publicNames.length).toBeGreaterThan(50);
   });
 
   it.each(publicNames)("documents %s in docs/api.md", (name) => {

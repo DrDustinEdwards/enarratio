@@ -142,7 +142,6 @@ export function dotMap<T extends object>(options: DotMapOptions<T>): string {
   const top = maxOf(points.map((p) => p.value));
   const radius = (v: number): number => (top > 0 ? maxRadius * Math.sqrt(v / top) : 0);
 
-  // The key, under the map: reference dots, then the landmarks' squares.
   const ch = charWidth(width);
   const line = 12 * textGrowth(width);
   const references =

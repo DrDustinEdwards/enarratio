@@ -65,6 +65,9 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
       total += v;
     }
   }
+  // A missing value breaks its own band and edge, as Plot 0.6.18 and later draw it; the bands
+  // above still stack as if it added nothing.
+  const isValue = (p: Point): boolean => p.value !== null;
   const span = (p: Point): [number, number] => extents.get(p) as [number, number];
 
   const ys: number[] = [0];
@@ -96,7 +99,7 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
       bySeries(points).map((group) => ({
         d: areaPath(
           group,
-          () => true,
+          isValue,
           (p) => [x(p.at), y(span(p)[1])],
           (p) => [x(p.at), y(span(p)[0])],
         ),
@@ -108,11 +111,7 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
       "line",
       { fill: "none", "stroke-width": "2", "stroke-linejoin": "round", "stroke-linecap": "round" },
       bySeries(points).map((group) => ({
-        d: linePath(
-          group,
-          () => true,
-          (p) => [x(p.at), y(span(p)[1])],
-        ),
+        d: linePath(group, isValue, (p) => [x(p.at), y(span(p)[1])]),
         attrs: { stroke: color(group[0] as Point) },
       })),
     ),

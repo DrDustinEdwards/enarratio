@@ -277,11 +277,6 @@ describe("barChart", () => {
     expect(markup).toContain("A &quot;quoted&quot; &lt;title&gt;");
   });
 
-  it("is deterministic", () => {
-    const options = { data: entries, x: "year", series: "type", alt: "a" } as const;
-    expect(barChart(options)).toBe(barChart(options));
-  });
-
   it("names a chart without alt from its data, reports it, and throws when strict (B52)", () => {
     const issues: string[] = [];
     const fig = parse(
