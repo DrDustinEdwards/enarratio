@@ -77,17 +77,18 @@ runtime dependencies. The charts are separate entry points, each with the
 packages it needs as optional peer dependencies, so a site installs only what
 it draws:
 
-| Import               | Holds                                                                                                                                     | Also install                           |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `enarratio`          | Core, primitives and `tableChart`                                                                                                         | Nothing                                |
-| `enarratio/plot`     | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` and the charts below                                                       | `@observablehq/plot linkedom`          |
-| `enarratio/science`  | `genomeTrack`, `titerPlot`, `doseResponse`, `survivalPlot`, `forestPlot`, `phylogeneticTree`, `networkChart`, and their statistics        | `@observablehq/plot d3-force linkedom` |
-| `enarratio/map`      | `dotMap` and `choroplethMap`, drawn from your own GeoJSON                                                                                 | Nothing                                |
-| `enarratio/lite`     | `barChart`, `lineChart`, `areaChart` without Observable Plot, for the browser; also `enarratio/lite/bar`, `/line`, `/area`, `/sparkline`  | Nothing                                |
-| `enarratio/enhance`  | Browser interaction                                                                                                                       | Nothing                                |
-| `enarratio/redraw`   | Redraws a server's chart to its frame's width; `enarratio/redraw/narrow` holds `narrowChart`, the swap to a server's narrow drawing alone | Nothing                                |
-| `enarratio/themes`   | `defaultTheme`                                                                                                                            | Nothing                                |
-| `enarratio/base.css` | The theme-free stylesheet                                                                                                                 | Nothing                                |
+| Import                     | Holds                                                                                                                                     | Also install                           |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `enarratio`                | Core, primitives and `tableChart`                                                                                                         | Nothing                                |
+| `enarratio/plot`           | `lineChart`, `areaChart`, `barChart`, `scatterPlot`, `heatmap` and the charts below                                                       | `@observablehq/plot linkedom`          |
+| `enarratio/science`        | `genomeTrack`, `titerPlot`, `doseResponse`, `survivalPlot`, `forestPlot`, `phylogeneticTree`, `networkChart`, and their statistics        | `@observablehq/plot d3-force linkedom` |
+| `enarratio/map`            | `dotMap` and `choroplethMap`, drawn from your own GeoJSON                                                                                 | Nothing                                |
+| `enarratio/lite`           | `barChart`, `lineChart`, `areaChart` without Observable Plot, for the browser; also `enarratio/lite/bar`, `/line`, `/area`, `/sparkline`  | Nothing                                |
+| `enarratio/enhance`        | Browser interaction                                                                                                                       | Nothing                                |
+| `enarratio/redraw`         | Redraws a server's chart to its frame's width; `enarratio/redraw/narrow` holds `narrowChart`, the swap to a server's narrow drawing alone | Nothing                                |
+| `enarratio/themes`         | `defaultTheme`                                                                                                                            | Nothing                                |
+| `enarratio/base.css`       | The theme-free stylesheet                                                                                                                 | Nothing                                |
+| `enarratio/adapters/*.css` | Charts in shadcn/ui, Radix Colors or Material Design 3 colors                                                                             | `enarratio/base.css`                   |
 
 (`linkedom` is dropped from browser bundles, which use the browser's own
 document.) To draw bar, line and area charts in the browser, import them from
@@ -329,6 +330,14 @@ timing the same way, for example `--enarratio-font-size-mark` or
 `--enarratio-duration-grow`. Every property has today's value as its fallback, so
 setting none changes nothing. The full list is in the
 [API reference](docs/api.md#custom-properties).
+
+A site built on shadcn/ui, Radix Colors or Material Design 3 can load an
+adapter instead of writing those properties: `enarratio/base.css`, then
+`enarratio/adapters/shadcn.css`, `radix.css` or `material.css`. The charts
+follow the design system's own theme, light and dark. Adapters map names, not
+measured colors, so the site checks its own contrast; the
+[adapters guide](docs/adapters.md) has what each one maps, how the defaults
+measure, and how to write one for another system.
 
 Any chart can override a series color with `colors: { Talks: "#8a4a1b" }` or a
 light and dark pair. The chart carries it in a data attribute, never a `style`

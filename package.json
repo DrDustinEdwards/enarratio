@@ -43,6 +43,7 @@
       "default": "./dist/index.js"
     },
     "./base.css": "./dist/base.css",
+    "./adapters/*.css": "./dist/adapters/*.css",
     "./plot": {
       "types": "./dist/plot/index.d.ts",
       "default": "./dist/plot/index.js"

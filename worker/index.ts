@@ -38,6 +38,9 @@ export const PAGE_PRELOADS: Readonly<Record<string, ReturnType<typeof preloads>>
   "/": own("/index.css"),
   "/example": own("/example.css"),
   "/capsomer": own("/capsomer-theme.css"),
+  "/shadcn": own("/shadcn-adapter.css"),
+  "/radix": own("/radix-adapter.css"),
+  "/material": own("/material-adapter.css"),
   "/astro": own("/index.css"),
   "/accessibility": own("/index.css"),
 };

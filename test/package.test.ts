@@ -2,7 +2,7 @@
  * The package's shape: which entry holds what, that core stays free of dependencies, and that the
  * built package works through its own export map, the way a reader's install would.
  */
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -30,10 +30,11 @@ function reach(entry: string, seen = new Set<string>()): Set<string> {
 }
 
 describe("package entries", () => {
-  it("has the fourteen subpaths and no others", () => {
+  it("has the fifteen subpaths and no others", () => {
     expect(Object.keys(pkg.exports).sort()).toEqual(
       [
         ".",
+        "./adapters/*.css",
         "./base.css",
         "./enhance",
         "./lite",
@@ -117,7 +118,15 @@ describe.skipIf(!built)("the built package", () => {
   it("points every export at a file that exists", () => {
     for (const target of Object.values(pkg.exports)) {
       const files = typeof target === "string" ? [target] : [target.types, target.default];
-      for (const file of files) expect(existsSync(resolve(root, file)), file).toBe(true);
+      // A pattern export (the adapters) names one file per source file.
+      const named = files.flatMap((file) =>
+        file.includes("*")
+          ? readdirSync(resolve(root, "src", "adapters")).map((name) =>
+              file.replace("*", name.replace(/\.css$/, "")),
+            )
+          : [file],
+      );
+      for (const file of named) expect(existsSync(resolve(root, file)), file).toBe(true);
     }
     for (const file of Object.values(pkg.imports["#document"] as Record<string, string>)) {
       expect(existsSync(resolve(root, file)), file).toBe(true);

@@ -1,0 +1,18 @@
+/* Material Design 3 baseline scheme (@material/web 2.5.0 tokens, v0_192), the roles the adapter reads, light
+   and dark. Dark here follows the gallery theme switch through light-dark(); they are set on the charts, so
+   the gallery page around them keeps Capsomer's own tokens. */
+:where(.enarratio, .enarratio-tooltip) {
+  --md-sys-color-surface: light-dark(#fef7ff, #141218);
+  --md-sys-color-on-surface: light-dark(#1d1b20, #e6e0e9);
+  --md-sys-color-on-surface-variant: light-dark(#49454f, #cac4d0);
+  --md-sys-color-outline: light-dark(#79747e, #938f99);
+  --md-sys-color-outline-variant: light-dark(#cac4d0, #49454f);
+  --md-sys-color-primary: light-dark(#6750a4, #d0bcff);
+  --md-sys-color-on-primary: light-dark(#ffffff, #381e72);
+  --md-sys-color-secondary: light-dark(#625b71, #ccc2dc);
+  --md-sys-color-on-secondary: light-dark(#ffffff, #332d41);
+  --md-sys-color-tertiary: light-dark(#7d5260, #efb8c8);
+  --md-sys-color-on-tertiary: light-dark(#ffffff, #492532);
+  --md-sys-color-error: light-dark(#b3261e, #f2b8b5);
+  --md-ref-typeface-plain: Roboto, system-ui, sans-serif;
+}

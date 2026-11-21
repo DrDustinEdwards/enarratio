@@ -58,6 +58,7 @@ Each record says where a decision came from:
 | [0040](0040-narrow-bars-keep-their-plot.md)             | A narrow bar chart keeps its plot: names beside the bars only when they leave it room           |
 | [0041](0041-phone-width-drawings.md)                    | Every chart fits a phone's drawing: titles, ticks, names and labels move to where there is room |
 | [0042](0042-lite-sparkline.md)                          | A light sparkline entry: the bare drawing in about 2 kB, without the figure and strings table   |
+| [0043](0043-design-system-adapters.md)                  | Adapters map shadcn/ui, Radix Colors and Material onto the chart properties                     |
 
 A new record is added when a decision changes; an old one is not rewritten
 except to link to the record that supersedes it.

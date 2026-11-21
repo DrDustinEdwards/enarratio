@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { exampleTheme } from "../examples/themes/example.js";
@@ -196,5 +196,36 @@ describe("the CSS custom property contract", () => {
       /--enarratio-(?:series|sequential|status)-\d*[a-z-]*:/,
     );
     expect(base).not.toMatch(/#[0-9a-f]{3,6}\b/i);
+  });
+});
+
+describe("the adapters", () => {
+  const dir = resolve(import.meta.dirname, "..", "src", "adapters");
+  // The color properties a theme defines, but for the two the base rules derive when unset (the
+  // series' label shades and the ramp's edges). Undefined, a rule using one is dropped, so a mark
+  // that needs it is not drawn.
+  const required = [
+    ...new Set(
+      [
+        ...(stylesheet(defaultTheme).split("/* Enarratio base rules */")[0] ?? "").matchAll(
+          /(--enarratio-[a-z-]+\d*):/g,
+        ),
+      ]
+        .map((m) => m[1] as string)
+        .filter((name) => !/font|label|edge/.test(name)),
+    ),
+  ];
+  const adapters = readdirSync(dir).filter((file) => file !== "labels.css");
+
+  it.each(adapters)("%s defines every color property", (file) => {
+    const css = readFileSync(resolve(dir, file), "utf8");
+    const imported = [...css.matchAll(/@import "\.\/([a-z-]+\.css)"/g)]
+      .map((m) => readFileSync(resolve(dir, m[1] as string), "utf8"))
+      .join("\n");
+    const defined = new Set(
+      [...`${imported}\n${css}`.matchAll(/(--enarratio-[a-z-]+\d*):/g)].map((m) => m[1]),
+    );
+    expect(required.length).toBe(35);
+    expect(required.filter((name) => !defined.has(name))).toEqual([]);
   });
 });

@@ -407,6 +407,19 @@ function capsomerCss(fontDir: string, examples: readonly Example[]): string {
   ].join("\n\n");
 }
 
+/** One of the package's adapters, as its gallery page shows it. */
+interface Adapter {
+  /** The design system's name. */
+  readonly name: string;
+  /** Its file in enarratio/adapters and in examples/adapters. */
+  readonly file: string;
+  /** What the design system calls the default values the page draws on. */
+  readonly values: string;
+}
+
+/** What a gallery page draws its charts in: a theme, or a design system through an adapter. */
+type View = { readonly theme: Theme } | { readonly adapter: Adapter };
+
 /** A link in the header: the theme pages, then the code. */
 interface Link {
   readonly label: string;
@@ -529,7 +542,7 @@ function siteFooter(): string {
   const center = `<div class="cap-family-footer-center">
 <div><p class="cap-family-footer-center-name">Enarratio</p><p class="cap-family-footer-about">Accessible charts and scientific figures, drawn on the server into the HTML. Open source, MIT licensed.</p></div>
 <div class="cap-family-footer-columns">
-<ul class="cap-family-footer-links"><li><a href="/">Default theme</a></li><li><a href="/example">Example theme</a></li><li><a href="/capsomer">Capsomer theme</a></li><li><a href="/astro">Astro and EmDash</a></li></ul>
+<ul class="cap-family-footer-links"><li><a href="/">Default theme</a></li><li><a href="/example">Example theme</a></li><li><a href="/capsomer">Capsomer theme</a></li>${adapters.map((a) => `<li><a href="${pathOf(adapterPage(a))}">${escapeText(a.name)} adapter</a></li>`).join("")}<li><a href="/astro">Astro and EmDash</a></li></ul>
 <ul class="cap-family-footer-links"><li><a href="https://github.com/DrDustinEdwards/enarratio" rel="external">Source</a></li><li><a href="https://www.npmjs.com/package/enarratio" rel="external">npm</a></li><li><a href="https://github.com/DrDustinEdwards/enarratio/blob/main/CHANGELOG.md" rel="external">Changes</a></li></ul>
 </div>
 <p class="cap-family-footer-stamp"><span>Release ${escapeText(VERSION)}</span></p>
@@ -542,17 +555,27 @@ function siteFooter(): string {
  * Content-Security-Policy can allow scripts and style sheets from its own origin only.
  */
 function page(
-  theme: Theme,
+  view: View,
   file: string,
   css: string,
   examples: readonly Example[],
   links: readonly Link[],
 ): string {
-  const report = checkTheme(theme);
-  const findings =
-    report.issues.length === 0
+  const report = "theme" in view ? checkTheme(view.theme) : undefined;
+  const findings = !report
+    ? ""
+    : report.issues.length === 0
       ? "<p>No findings.</p>"
       : `<ul>${report.issues.map((i) => `<li>${escapeText(i.severity)}: ${escapeText(i.message)}</li>`).join("")}</ul>`;
+  const name =
+    "theme" in view ? `the ${view.theme.name} theme` : `the ${view.adapter.name} adapter`;
+  const intro =
+    "theme" in view
+      ? `Every Enarratio chart in the ${escapeText(view.theme.name)} theme.`
+      : `Every Enarratio chart through <code>enarratio/adapters/${view.adapter.file}</code>, on ${escapeText(view.adapter.name)}'s default ${escapeText(view.adapter.values)}. The adapter maps names, not measured colors: a site using it checks its own contrast (<a href="https://github.com/DrDustinEdwards/enarratio/blob/main/docs/adapters.md" rel="external">adapters guide</a>). The other adapters: ${adapters
+          .filter((a) => a !== view.adapter)
+          .map((a) => `<a href="${cleanAddress(adapterPage(a))}">${escapeText(a.name)}</a>`)
+          .join(", ")}.`;
   const index = examples
     .map(
       (e, i) =>
@@ -562,18 +585,18 @@ function page(
   return `<!doctype html>
 <html lang="en" data-family="${FAMILY}">
 <head>
-${head(`Enarratio gallery: ${theme.name} theme`, `Every Enarratio chart in the ${theme.name} theme, drawn on the server and readable without scripts, each with its source.`, css, pathOf(file), [libraryData])}
+${head(`Enarratio gallery: ${"theme" in view ? `${view.theme.name} theme` : `${view.adapter.name} adapter`}`, `Every Enarratio chart in ${name}, drawn on the server and readable without scripts, each with its source.`, css, pathOf(file), [libraryData])}
 </head>
 <body>
 ${siteHeader(links)}
 <main class="cap-page gallery" id="main" tabindex="-1">
 <header class="gallery-head">
 <h1>Enarratio gallery</h1>
-<p class="gallery-intro">Every Enarratio chart in the ${escapeText(theme.name)} theme. Each was drawn on the server and reads without scripts; the enhancement layer adds hover details, keyboard navigation, filters and brushing.</p>
+<p class="gallery-intro">${intro} Each was drawn on the server and reads without scripts; the enhancement layer adds hover details, keyboard navigation, filters and brushing.</p>
 <dl class="cap-form-boxes" data-variant="readings">
 <div class="cap-form-boxes-box"><dt>Release</dt><dd>${escapeText(VERSION)}</dd></div>
 <div class="cap-form-boxes-box"><dt>Charts</dt><dd>${examples.length}</dd></div>
-<div class="cap-form-boxes-box"><dt>Theme check</dt><dd>${report.ok ? "Passes" : "Fails"}</dd></div>
+${"theme" in view ? `<div class="cap-form-boxes-box"><dt>Theme check</dt><dd>${report?.ok ? "Passes" : "Fails"}</dd></div>` : `<div class="cap-form-boxes-box"><dt>Adapter</dt><dd>${escapeText(view.adapter.name)}</dd></div>`}
 <div class="cap-form-boxes-box"><dt>License</dt><dd>MIT</dd></div>
 </dl>
 </header>
@@ -585,7 +608,7 @@ ${index}
 </ol>
 </nav>
 <div class="gallery-main">
-<details class="cap-disclosure report"><summary>Theme check: ${report.ok ? "passes" : "fails"} with ${report.issues.length} finding${report.issues.length === 1 ? "" : "s"}</summary><div class="cap-disclosure-body">${findings}</div></details>
+${report ? `<details class="cap-disclosure report"><summary>Theme check: ${report.ok ? "passes" : "fails"} with ${report.issues.length} finding${report.issues.length === 1 ? "" : "s"}</summary><div class="cap-disclosure-body">${findings}</div></details>` : ""}
 ${examples
   .map(
     (
@@ -877,6 +900,17 @@ const pages: [Theme, string, string, Theme][] = [
   [capsomerTheme, "capsomer.html", "capsomer-theme.css", capsomerMoreTheme],
 ];
 /**
+ * The adapter pages: each draws every example through one of the package's adapters
+ * (enarratio/adapters/<name>.css), on that design system's own default values
+ * (examples/adapters/<name>.css), with the base rules.
+ */
+const adapters: Adapter[] = [
+  { name: "shadcn/ui", file: "shadcn.css", values: "theme" },
+  { name: "Radix Colors", file: "radix.css", values: "scales" },
+  { name: "Material Design 3", file: "material.css", values: "baseline scheme" },
+];
+const adapterPage = (a: Adapter): string => a.file.replace(/\.css$/, ".html");
+/**
  * The address a page is linked at: the host (Cloudflare static assets) serves index.html at the
  * directory and other pages without their extension, and redirects the .html form there.
  */
@@ -891,6 +925,11 @@ const links = (current: string): Link[] => [
     href: cleanAddress(f),
     current: f === current,
   })),
+  {
+    label: "Adapters",
+    href: cleanAddress(adapterPage(adapters[0] as Adapter)),
+    current: adapters.some((a) => adapterPage(a) === current),
+  },
   { label: "Astro and EmDash", href: "astro", current: current === ASTRO_PAGE },
   { label: "Code", href: "https://github.com/DrDustinEdwards/enarratio", current: false },
 ];
@@ -903,12 +942,26 @@ for (const [theme, file, css, highContrast] of pages) {
       ? inlineCss(packageFile("capsomer/enarratio.css"))
       : stylesheet(theme, { highContrast });
   writeFileSync(join(outDir, css), themeCss);
-  writeFileSync(join(outDir, file), page(theme, file, css, examples, links(file)));
+  writeFileSync(join(outDir, file), page({ theme }, file, css, examples, links(file)));
+}
+for (const adapter of adapters) {
+  const file = adapterPage(adapter);
+  const css = `${adapter.file.replace(/\.css$/, "")}-adapter.css`;
+  writeFileSync(
+    join(outDir, css),
+    [
+      inlineCss(join(examplesDir, "adapters", adapter.file)),
+      readFileSync(join(root, "dist", "base.css"), "utf8"),
+      inlineCss(join(root, "dist", "adapters", adapter.file)),
+    ].join("\n"),
+  );
+  writeFileSync(join(outDir, file), page({ adapter }, file, css, examples, links(file)));
 }
 writeFileSync(join(outDir, ASTRO_PAGE), astroPage());
 writeFileSync(join(outDir, STATEMENT_PAGE), statementPage());
 const addresses = [
   ...pages.map(([, file]) => pathOf(file)),
+  ...adapters.map((a) => pathOf(adapterPage(a))),
   pathOf(ASTRO_PAGE),
   pathOf(STATEMENT_PAGE),
 ];
@@ -973,6 +1026,11 @@ writeFileSync(
             url: `${SITE}/capsomer`,
             description: "the same charts in Capsomer's theme, as the family's sites draw them",
           },
+          ...adapters.map((a) => ({
+            title: `Gallery, ${a.name} adapter`,
+            url: `${SITE}${pathOf(adapterPage(a))}`,
+            description: `the same charts through enarratio/adapters/${a.file}, on ${a.name}'s default ${a.values}`,
+          })),
           {
             title: "Charts for Astro and EmDash",
             url: `${SITE}/astro`,
@@ -1061,5 +1119,5 @@ for (const [address, { links: preloadLinks }] of Object.entries(PAGE_PRELOADS)) 
     throw new Error(`gallery: PAGE_PRELOADS for ${address} leaves out ${unlisted.join(", ")}`);
 }
 console.log(
-  `gallery: ${examples.length} examples, ${pages.length} themes, the Astro page -> ${outDir}`,
+  `gallery: ${examples.length} examples, ${pages.length} themes, ${adapters.length} adapters, the Astro page -> ${outDir}`,
 );
