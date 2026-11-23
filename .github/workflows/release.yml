@@ -4,7 +4,8 @@ name: Release
 # tag yet, the tag job tags that commit and publishes a GitHub release with the version's CHANGELOG
 # section, and the stage job then stages it on npm. A v* tag pushed by hand still stages too. Run it
 # by hand (Actions > Release > Run workflow) for a version that merged untagged, or for one that was
-# tagged but never reached npm (a failed stage): that run stages the tagged commit again.
+# tagged but never reached npm (a failed stage): that run stages the tagged commit again. A push
+# for a version that is already tagged does nothing.
 #
 # The stage job stays in this file rather than following its own tag: a tag made with the
 # workflow's token starts no other workflow (GitHub's rule against loops), and npm accepts the
@@ -56,8 +57,11 @@ jobs:
           tag="v$version"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
-            if npm view "enarratio@$version" version >/dev/null 2>&1; then
-              echo "$tag already exists and is on npm; nothing to release."
+            # A push to main that touches package.json without a new version (a dependency bump)
+            # finds the tag of a version that may still be staged, which npm cannot show before
+            # approval: only a run by hand stages a tagged version again.
+            if [ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ] || npm view "enarratio@$version" version >/dev/null 2>&1; then
+              echo "$tag already exists; nothing to release."
               echo "created=false" >> "$GITHUB_OUTPUT"
             else
               # Tagged but never staged (a failed stage job): the stage job stages the tag again.
