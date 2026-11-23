@@ -4,6 +4,7 @@ import {
   type KeysOfType,
   markKey,
   maxOf,
+  minOf,
   readLabel,
   readNumber,
   readNumberOrNull,
@@ -217,7 +218,7 @@ export function forestPlot<T extends object>(options: ForestPlotOptions<T>): str
       stroke: "var(--enarratio-series-1)",
       title: describe,
       render: keyed(rows, (r) => ({
-        key: markKey(r.name),
+        key: markKey(r.index),
         filter: { field: label, value: r.name },
         x: r.name,
         column: r.index,
@@ -324,7 +325,7 @@ export function forestPlot<T extends object>(options: ForestPlotOptions<T>): str
         (favors ? 16 : 0),
       x: {
         type: log ? "log" : "linear",
-        domain: [Math.min(...allX), Math.max(...allX)],
+        domain: [minOf(allX), maxOf(allX)],
         nice: true,
         label: estimateLabel,
         ...(log ? { ticks: stacked ? 3 : 5, tickFormat: plain } : {}),

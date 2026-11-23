@@ -3,14 +3,13 @@ import base from "./vitest.config.ts";
 
 /**
  * The unit suite as StrykerJS runs it (stryker.config.mjs). Same aliases and timeout as
- * vitest.config.ts. Tests that read source files as text are left out: Stryker's rewriting changes
- * that text, so they would fail on every mutant for the wrong reason.
+ * vitest.config.ts, without the browser suite.
  */
 export default mergeConfig(
   base,
   defineConfig({
     test: {
-      exclude: ["test/browser/**", ...(process.env["STRYKER_EXCLUDE"]?.split(",") ?? [])],
+      exclude: ["test/browser/**"],
     },
   }),
 );

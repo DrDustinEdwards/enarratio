@@ -459,7 +459,7 @@ export function dumbbellPlot<T extends object>(given: DumbbellPlotOptions<T>): s
     from: readNumber(kind, row, from, i),
     to: readNumber(kind, row, to, i),
   }));
-  let names = r.names;
+  let names = r.names.filter((n) => r.raw.includes(n));
   if (options.sort === "change") {
     const change = new Map(pairs.map((p) => [p.item, p.to - p.from]));
     names = [...names].sort((a, b) => (change.get(b) ?? 0) - (change.get(a) ?? 0));
@@ -510,7 +510,7 @@ export function dumbbellPlot<T extends object>(given: DumbbellPlotOptions<T>): s
     svg,
     description: {
       axes: itemAxes(
-        r,
+        { ...r, names },
         pairs.flatMap((p) => [p.from, p.to]),
       ),
       format: r.format,

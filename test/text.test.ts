@@ -143,6 +143,12 @@ describe("CSV", () => {
     );
   });
 
+  it("defuses a formula that starts with a sign and a digit, or a space before =", () => {
+    expect(toCsv([["+1+cmd|' /c calc'!A0", "-2+3", " =1+1", "-5%", "+1,5"]])).toBe(
+      `'+1+cmd|' /c calc'!A0,'-2+3,' =1+1,-5%,"+1,5"`,
+    );
+  });
+
   it("links the table as a download, or reports one too large to inline", () => {
     const fig = parse(barChart({ data: [{ k: "a", v: 1 }], x: "k", y: "v", alt: "a", title: "T" }));
     const href = fig.querySelector(".enarratio-csv")?.getAttribute("href") ?? "";

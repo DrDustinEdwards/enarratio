@@ -1911,6 +1911,13 @@ labels of its buttons and form. `{name}` is filled in.
 The English `EnhanceStrings`. A page passes only those it translates:
 `enhance(document, { strings: { sound: "Ton" } })`.
 
+### `sanitize`
+
+`sanitize(root: Element): void`. Removes from `root` and everything under it
+what the server never writes: other elements, event handlers, unsafe links,
+styles. `update()` and `enarratio/redraw` run it on markup from a page's own
+attributes; a page that adopts such markup itself can too.
+
 ### `EnhancedChart`
 
 `{ figure; options; update(markup); setFilter(filter); clear(); destroy() }`.

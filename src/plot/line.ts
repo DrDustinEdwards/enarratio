@@ -25,6 +25,7 @@ import { keyed, renderPlot } from "../render/plot.js";
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH, monthTicks } from "../render/size.js";
 import { named } from "./marks.js";
 import { drawAnnotations } from "./annotate.js";
+import { maxOf, minOf } from "../render/data.js";
 
 export type {
   AreaChartOptions,
@@ -388,10 +389,9 @@ export function streamgraph<T extends object>(options: StreamgraphOptions<T>): s
   const growth = textGrowth(width);
   const char = charWidth(width);
   const margin = Math.ceil(3 * char);
-  const top = 12;
-  const bottom = 44;
-  const lo = Math.min(...layout.lower.flat());
-  const hi = Math.max(...layout.upper.flat());
+  const [top, bottom] = [12, 44];
+  const lo = minOf(layout.lower.flat());
+  const hi = maxOf(layout.upper.flat());
   // Each layer named where it is thickest, if its name fits inside it there; a layer that cannot
   // be named takes its texture (record 0036).
   const plotWidth = width - 2 * margin;

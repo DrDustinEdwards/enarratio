@@ -133,13 +133,15 @@ export function violinPlot<T extends object>(given: ViolinPlotOptions<T>): strin
   if (showPoints) {
     // A fixed spread inside the violin's width at each value: the golden-ratio sequence, the same
     // on every render.
+    const index = new Map(r.values.map((v, i) => [v, i]));
     const at = (v: Value): number => {
       const g = groups[v.groupIndex] as Group;
       const k = Math.round(
         ((v.value - g.stats.min) / (g.stats.max - g.stats.min || 1)) * (g.ys.length - 1),
       );
       return (
-        v.groupIndex + ((((r.values.indexOf(v) + 1) * 0.618034) % 1) * 2 - 1) * half(g, k) * 0.8
+        v.groupIndex +
+        (((((index.get(v) as number) + 1) * 0.618034) % 1) * 2 - 1) * half(g, k) * 0.8
       );
     };
     const order = new Map(

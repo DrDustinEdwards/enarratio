@@ -2,6 +2,7 @@ import * as Plot from "@observablehq/plot";
 import { niceLinear } from "../lite/scale.js";
 import {
   domainOf,
+  requireRows,
   type KeysOfType,
   markKey,
   maxOf,
@@ -100,6 +101,7 @@ export function read<T extends object>(
   const strings = stringsFor(options.strings);
   const raw = data.map((row, i) => readLabel(kind, row, x, i));
   const groups = domainOf(kind, x, raw, options.xDomain?.map(String));
+  requireRows(kind, x, groups, raw);
   const values = data.map((row, i): Value => {
     const g = raw[i] as string;
     return {

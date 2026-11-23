@@ -1,4 +1,6 @@
 /** The size every chart draws at unless its options say otherwise, in CSS pixels. */
+
+import { maxOf, minOf } from "./data.js";
 export const DEFAULT_WIDTH = 640;
 export const DEFAULT_HEIGHT = 320;
 /** Drawings this wide or wider scroll in their frame rather than shrink below 30rem (A13). */
@@ -213,8 +215,8 @@ export function monthTicks(
   max?: number,
 ): number[] | null {
   if (plotWidth >= 240 || ats.length === 0) return null;
-  const lo = new Date(Math.min(...ats));
-  const hi = new Date(Math.max(...ats));
+  const lo = new Date(minOf(ats));
+  const hi = new Date(maxOf(ats));
   const span =
     (hi.getUTCFullYear() - lo.getUTCFullYear()) * 12 + hi.getUTCMonth() - lo.getUTCMonth();
   if (span < 2) return null;

@@ -12,6 +12,7 @@
 
 import { ENHANCE_STRINGS } from "../controls.js";
 import { Chart, enhanced } from "./chart.js";
+import { sanitize } from "./sanitize.js";
 import type { EnhancedChart, EnhanceOptions, ResolvedOptions } from "./types.js";
 
 export type {
@@ -22,7 +23,7 @@ export type {
   ResolvedOptions,
   SelectDetail,
 } from "./types.js";
-export { ENHANCE_STRINGS };
+export { ENHANCE_STRINGS, sanitize };
 
 /**
  * Enhances every Enarratio figure under `root` (the whole document by default) and returns them.

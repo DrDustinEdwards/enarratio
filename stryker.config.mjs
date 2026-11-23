@@ -3,7 +3,7 @@
 // (10.0.0 has a Babel 8 parser bug), then run one chunk at a time:
 //   CHUNK=plot npx stryker run stryker.config.mjs
 
-/** Each chunk mutates one part of src, so a restart loses at most one chunk. */
+/** Each chunk mutates one part of src, so a restart loses at most one chunk. The loop in code-map.yml names these keys too. */
 const CHUNKS = {
   enhance: ["src/enhance/**/*.ts"],
   plot: ["src/plot/**/*.ts"],

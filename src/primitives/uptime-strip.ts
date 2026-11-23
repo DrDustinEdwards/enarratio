@@ -152,9 +152,9 @@ export function uptimeStrip(options: UptimeStripOptions): string {
         ? {
             ...common,
             x: round(i * step + 0.5),
-            width: round(step - gap - 1),
+            width: round(Math.max(0, step - gap - 1)),
             y: 0.5,
-            height: height - 1,
+            height: Math.max(0, height - 1),
             fill: "none",
             stroke: spec.color,
             "stroke-dasharray": "2,2",

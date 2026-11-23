@@ -4,7 +4,7 @@
     "jscpd": "jscpd@5.4.0"
   },
   "baseline": {
-    "measured_at": "d5ad8d1",
+    "measured_at": "146c9f8",
     "knip": {},
     "jscpd": {
       "clones": 1,
@@ -24,7 +24,7 @@
       "src/plot/dot.ts": 535,
       "src/plot/line.ts": 514,
       "src/primitives/timeline.ts": 523,
-      "src/render/bar-model.ts": 700,
+      "src/render/bar-model.ts": 696,
       "src/render/figure.ts": 655,
       "src/render/line-model.ts": 736,
       "src/render/text.ts": 727,
@@ -32,12 +32,12 @@
     },
     "tests": {
       "files": 30,
-      "cases": 301
+      "cases": 306
     },
     "comments": {
-      "lines": 4467,
-      "code": 30924,
-      "percentage": 12.62
+      "lines": 4474,
+      "code": 31019,
+      "percentage": 12.61
     }
   }
 }

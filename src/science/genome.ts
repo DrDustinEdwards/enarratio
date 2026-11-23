@@ -146,7 +146,7 @@ export function genomeTrack(options: GenomeTrackOptions): string {
 
   const lanes = packLanes(features, trackOf);
   const placed: Placed[] = features.map((f, i) => ({
-    key: markKey(trackOf(f), f.name, f.start),
+    key: markKey(trackOf(f), f.name, f.start, i),
     lane: lanes[i] ?? 0,
     feature: f,
     type: typeOf(f),

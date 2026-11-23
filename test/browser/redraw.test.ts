@@ -84,6 +84,24 @@ describe("enarratio/redraw", () => {
     });
   });
 
+  it("sanitizes a narrow drawing taken from the page's own attribute before adopting it", async () => {
+    const spec = JSON.stringify({
+      narrow:
+        '<div class="enarratio-frame"><img src="x" onerror="window.pwned=1"><p>narrow</p></div>',
+    }).replace(/"/g, "&quot;");
+    await page.evaluate((html) => {
+      (document.querySelector("main") as HTMLElement).innerHTML = html;
+    }, `<div style="width:200px"><div id="evil" data-enarratio-redraw="${spec}"><div class="enarratio-frame"><p>wide</p></div></div></div>`);
+    await page.evaluate(() =>
+      (
+        window as unknown as { EnarratioRedraw: { redrawCharts(): unknown[] } }
+      ).EnarratioRedraw.redrawCharts(),
+    );
+    expect(await page.$eval("#evil", (el) => el.textContent)).toContain("narrow");
+    expect(await page.$("#evil img")).toBeNull();
+    expect(await page.evaluate(() => "pwned" in window)).toBe(false);
+  });
+
   it("enhances every frame the page names except one that opts out", async () => {
     const bars = lite.barChart({
       data: [{ lab: "A", n: 1 }],

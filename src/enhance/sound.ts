@@ -16,7 +16,11 @@ const GAP = 0.04;
 const PAUSE = 0.7;
 const VOLUME = 0.2;
 
-/** The element holding a mark's geometry: the mark, or the shape inside a linked mark. */
+/**
+ * The element holding a mark's geometry: the mark, or the shape inside a linked mark. A copy of
+ * `shape` in marks.ts on purpose: importing it would make rolldown emit a fourth file beside
+ * index.js, image.js and sound.js, and scripts/bundle-enhance.mjs allows only those three.
+ */
 const shapeOf = (mark: Element): Element =>
   mark.hasAttribute("x") || mark.hasAttribute("cx") || !mark.firstElementChild
     ? mark

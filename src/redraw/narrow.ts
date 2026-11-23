@@ -5,7 +5,7 @@
  * that scrolls (C12); each drawing is enhanced. `enarratio/redraw` is built on it.
  */
 
-import { enhance } from "../enhance/index.js";
+import { enhance, sanitize } from "../enhance/index.js";
 import { parseMarkup } from "../parse.js";
 import type { EnhancedChart, EnhanceOptions } from "../enhance/types.js";
 
@@ -53,6 +53,7 @@ export function followWidth(
     if (key === drawn) return;
     const next = parseMarkup(markup).body.querySelector(".enarratio-frame");
     if (!next) return;
+    sanitize(next);
     for (const chart of charts) chart.destroy();
     frame.replaceWith(document.adoptNode(next));
     drawn = key;
