@@ -732,5 +732,5 @@ export function areaModel<T extends object>(given: AreaChartOptions<T>): SeriesM
     : given;
   const read = prepare(AREA, options);
   const prepared = options.percent ? asShares(read) : read;
-  return seriesModel(AREA, "area", options, prepared, () => checkStackable(AREA, prepared));
+  return seriesModel(AREA, "area", options, prepared, () => checkStackable(AREA, read));
 }

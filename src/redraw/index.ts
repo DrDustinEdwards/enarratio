@@ -69,15 +69,25 @@ export function redrawCharts(
   const out: RedrawnChart[] = [];
   for (const host of hosts) {
     if (!(host instanceof HTMLElement) || isStarted(host)) continue;
-    let spec: RedrawSpec | null = null;
+    let spec: unknown = null;
     try {
       spec = JSON.parse(host.getAttribute(REDRAW_ATTRIBUTE) ?? "null");
     } catch {
       spec = null;
     }
-    if (spec) out.push(redrawChart(host, spec, options));
+    if (isSpec(spec)) out.push(redrawChart(host, spec, options));
   }
   return out;
+}
+
+/** Whether a parsed attribute has the shape of a spec: a narrow drawing, or a chart with options. */
+function isSpec(spec: unknown): spec is RedrawSpec {
+  if (typeof spec !== "object" || spec === null) return false;
+  const s = spec as Record<string, unknown>;
+  if (typeof s["narrow"] === "string") return true;
+  return (
+    typeof s["chart"] === "string" && typeof s["options"] === "object" && s["options"] !== null
+  );
 }
 
 /** Enhances the chart in `host` and draws it again from `spec` whenever its width changes. */

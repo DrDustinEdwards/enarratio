@@ -7,6 +7,23 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Fixed
+
+- A CSV cell that starts with `+` or `-` and is not wholly a number, or a space before `=`, gets the leading apostrophe, so a downloaded file cannot run a formula such as `+1+cmd|...`.
+- `enarratio/redraw` sanitizes a narrow drawing from the page's `data-enarratio-redraw` attribute before adopting it, as `update()` does for its markup, and ignores an attribute whose JSON is not a spec instead of stopping every later chart.
+- The enhancement layer's sanitizer keeps a timeline's `ol` and `strong`, so `update()` no longer drops the event list.
+- A box, density or small-multiples chart whose domain names a value no row has throws an error naming it, and a dumbbell leaves it out, not a TypeError.
+- A heatmap with `"a|b"` and `"a"` category labels no longer reports a false duplicate cell; its thresholds must be four finite numbers.
+- An uptime or heat strip with more slots than pixels draws its unknown cells with a width of zero at the least, not a negative one.
+- An area chart with `percent: true` refuses negative values whose x total is not positive.
+- Forest rows with the same label and genome features with the same name and start no longer share a key.
+- Large charts (scatter, streamgraph, area, time ticks, logistic fit, GeoJSON bounds) no longer overflow the stack with 125,000 or more values.
+- The gallery's survival and genome examples cite their sources instead of calling the data made up, the radar alt text says 50 to 55 points, and a malformed `#` in a shared link no longer stops the gallery script.
+
+### Added
+
+- `sanitize` is exported from `enarratio/enhance`.
+
 ## [0.17.1] - 2026-11-21
 
 ### Fixed

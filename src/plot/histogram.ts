@@ -1,6 +1,7 @@
 import * as Plot from "@observablehq/plot";
 import {
   domainOf,
+  requireRows,
   type KeysOfType,
   markKey,
   maxOf,
@@ -253,12 +254,9 @@ export function densityPlot<T extends object>(given: DensityPlotOptions<T>): str
   const sole = xLabel ?? x;
   const seriesOf = (row: T, i: number): string =>
     series === undefined ? sole : readLabel(DENSITY, row, series, i);
-  const names = domainOf(
-    DENSITY,
-    series ?? "series",
-    data.map((row, i) => seriesOf(row, i)),
-    options.seriesDomain,
-  );
+  const seriesValues = data.map((row, i) => seriesOf(row, i));
+  const names = domainOf(DENSITY, series ?? "series", seriesValues, options.seriesDomain);
+  requireRows(DENSITY, series ?? "series", names, seriesValues);
   const plan = planSeries(DENSITY, names, options.colors);
   const groups = names.map((name) => values.filter((_, i) => seriesOf(data[i] as T, i) === name));
   const bandwidths = groups.map((g) => options.bandwidth ?? silvermanBandwidth(g));

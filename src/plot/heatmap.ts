@@ -74,7 +74,7 @@ export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
 
   const seen = new Set<string>();
   data.forEach((_, i) => {
-    const id = `${xs[i]}|${ys[i]}`;
+    const id = markKey(xs[i] as string, ys[i] as string);
     if (seen.has(id)) throw new Error(`${KIND}: two rows for cell ${xs[i]}, ${ys[i]}`);
     seen.add(id);
   });
@@ -165,7 +165,7 @@ export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
   );
 
   const ramp = rampLegend([min, ...thresholds, max], format, strings);
-  const cellOf = new Map(cells.map((c) => [`${c.x}|${c.y}`, c]));
+  const cellOf = new Map(cells.map((c) => [markKey(c.x, c.y), c]));
 
   return figure(options, {
     kind: "heatmap",
@@ -196,7 +196,7 @@ export function heatmap<T extends object>(options: HeatmapOptions<T>): string {
       rows: yNames.map((yn) => [
         yn,
         ...xNames.map((xn) => {
-          const c = cellOf.get(`${xn}|${yn}`);
+          const c = cellOf.get(markKey(xn, yn));
           return c?.value === null || c === undefined ? "" : format(c.value);
         }),
       ]),

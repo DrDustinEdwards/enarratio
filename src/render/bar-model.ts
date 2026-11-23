@@ -234,14 +234,10 @@ function timeAxis<T extends object>(
   return { starts: periods, names, byRow: starts.map(label) };
 }
 
-/** Every nth category, when there are more than `max`, or undefined to print them all. */
-function thinTicks(names: readonly string[], max: number | undefined): string[] | undefined {
-  if (max === undefined) return undefined;
-  if (!Number.isInteger(max) || max < 1)
+/** Throws unless `maxXTicks`, when given, is a whole number of 1 or more. */
+function requireMaxXTicks(max: number | undefined): void {
+  if (max !== undefined && !(Number.isInteger(max) && max >= 1))
     throw new Error(`${KIND}: maxXTicks must be a whole number of 1 or more`);
-  if (names.length <= max) return undefined;
-  const step = Math.ceil(names.length / max);
-  return names.filter((_, i) => i % step === 0);
 }
 
 const STEPS = [1, 2, 5];
@@ -467,7 +463,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   // phone's drawing thins further than the wide one asked for. Beside horizontal bars each label
   // has its own row, so only maxXTicks thins them. The table, hover details and each bar's name
   // keep every one.
-  thinTicks(xNames, options.maxXTicks);
+  requireMaxXTicks(options.maxXTicks);
   // The room the labels share is the plot's: 80 px less than the drawing, or less where the
   // right margin holds series names or values.
   const plot = horizontal ? width - 80 : Math.min(width - 80, width - 44 - baseRight);

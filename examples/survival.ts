@@ -20,5 +20,5 @@ export default survivalPlot({
   title: "Remission in childhood leukemia",
   alt: "Kaplan-Meier curves of remission for 21 patients on 6-MP and 21 on placebo: every placebo patient relapsed by week 23, with half by week 8, while on 6-MP 12 were censored and the estimate stays at 0.45 from week 23.",
   caption: "Freireich et al. (1963) as tabulated by Gehan (1965).",
-  source: "Illustrative data made up for this gallery",
+  source: "Freireich et al. 1963; Gehan 1965",
 });

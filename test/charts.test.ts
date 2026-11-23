@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { heatmap, scatterPlot } from "../src/plot/index.js";
+import { boxPlot, dumbbellPlot, heatmap, scatterPlot } from "../src/plot/index.js";
 import { networkChart } from "../src/science/index.js";
 import { keyedMarks, parse } from "./helpers.js";
 
@@ -89,8 +89,39 @@ describe("heatmap", () => {
       heatmap({ data: cells, x: "c", y: "r", value: "v", thresholds: [1, 3, 2, 4], alt: "a" }),
     ).toThrow(/ascend/);
     expect(() =>
+      heatmap({
+        data: cells,
+        x: "c",
+        y: "r",
+        value: "v",
+        thresholds: [1, 2, 3] as never,
+        alt: "a",
+      }),
+    ).toThrow(/four finite numbers/);
+    expect(() =>
       heatmap({ data: [cells[0], cells[0]] as typeof cells, x: "c", y: "r", value: "v", alt: "a" }),
     ).toThrow(/two rows for cell/);
+  });
+
+  it("tells cells apart when a label holds the old key separator", () => {
+    const data = [
+      { c: "a|b", r: "c", v: 1 },
+      { c: "a", r: "b|c", v: 2 },
+    ];
+    expect(() => heatmap({ data, x: "c", y: "r", value: "v", alt: "a" })).not.toThrow();
+  });
+});
+
+describe("a domain naming a group with no rows", () => {
+  it("is refused with the field named (dumbbell skips it), not a TypeError", () => {
+    const data = [{ s: "A", a: 1, b: 2 }];
+    const fig = parse(
+      dumbbellPlot({ data, y: "s", from: "a", to: "b", yDomain: ["A", "Spare"], alt: "a" }),
+    );
+    expect(fig.textContent).not.toContain("Spare");
+    expect(() =>
+      boxPlot({ data: [{ g: "A", v: 1 }], x: "g", y: "v", xDomain: ["A", "B"], alt: "a" }),
+    ).toThrow(/"B" has no rows/);
   });
 });
 

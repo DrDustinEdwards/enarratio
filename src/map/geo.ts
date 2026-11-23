@@ -5,6 +5,7 @@
  */
 
 import { num } from "../lite/svg.js";
+import { maxOf, minOf } from "../render/data.js";
 
 /** A GeoJSON position: longitude, then latitude (any third value is ignored). */
 export type GeoPosition = readonly number[];
@@ -241,7 +242,7 @@ function planarBox(
     xs.push(x);
     ys.push(y);
   }
-  return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+  return { x0: minOf(xs), x1: maxOf(xs), y0: minOf(ys), y1: maxOf(ys) };
 }
 
 /** The height over width of an extent once projected, for a map whose height is not given. */

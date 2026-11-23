@@ -1,6 +1,6 @@
 import * as Plot from "@observablehq/plot";
 import { ticks } from "../lite/scale.js";
-import { domainOf, type KeysOfType, readLabel, readNumber } from "../render/data.js";
+import { domainOf, type KeysOfType, maxOf, minOf, readLabel, readNumber } from "../render/data.js";
 import { correlation, valueRange } from "../render/describe.js";
 import { figure, type SeriesAxesOptions, unitLabel, validateFigure } from "../render/figure.js";
 import {
@@ -60,8 +60,8 @@ function padded(
   values: readonly number[],
 ): { domain?: [number, number] } {
   if ((type ?? "linear") !== "linear" || values.length === 0) return {};
-  const lo = Math.min(...values);
-  const hi = Math.max(...values);
+  const lo = minOf(values);
+  const hi = maxOf(values);
   const pad = (hi - lo || Math.abs(hi) || 1) / 20;
   return {
     domain: [
@@ -352,7 +352,7 @@ function sizeLegend(
   return (svg) => {
     const scale = (svg as unknown as Plot.Plot).scale("r");
     if (!scale) return;
-    const top = Math.max(...sizes);
+    const top = maxOf(sizes);
     const values = ticks(0, top, 3)
       .filter((v) => v > 0)
       .slice(-3);

@@ -59,9 +59,7 @@ for (const host of narrowHosts) {
   swapped.set(host, frame);
 }
 
-const waiting = new Set(
-  document.querySelectorAll(`${FIGURES}, [${REDRAW_ATTRIBUTE}] figure.enarratio`),
-);
+const waiting = new Set(document.querySelectorAll(FIGURES));
 /** @type {{ figure: Element, distance: number }[]} */
 const queue = [];
 let draining = false;
@@ -104,10 +102,13 @@ const observer =
 
 // A figure a shared link filters or brushes, and the one a #hash names, do not wait for a scroll.
 const params = new URLSearchParams(location.search);
-const named =
-  location.hash.length > 1
-    ? document.getElementById(decodeURIComponent(location.hash.slice(1)))
-    : null;
+let hash = location.hash.slice(1);
+try {
+  hash = decodeURIComponent(hash);
+} catch {
+  // A malformed escape in a shared link: use the text as it is.
+}
+const named = hash ? document.getElementById(hash) : null;
 for (const figure of waiting) {
   const wanted =
     (figure.id && (params.has(figure.id) || params.has(`${figure.id}-range`))) ||

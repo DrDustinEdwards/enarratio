@@ -1,7 +1,14 @@
 import * as Plot from "@observablehq/plot";
 import { finishBars } from "../render/bar-marks.js";
 import { BAR_MAX, type BarChartOptions, type BarPoint, barModel } from "../render/bar-model.js";
-import { domainOf, type KeysOfType, markKey, readCategory, readLabel } from "../render/data.js";
+import {
+  domainOf,
+  type KeysOfType,
+  markKey,
+  readCategory,
+  readLabel,
+  requireRows,
+} from "../render/data.js";
 import { type ChartDescription, categoryRange, valueRange } from "../render/describe.js";
 import { type AxisUnits, type FigureOptions, figure, validateFigure } from "../render/figure.js";
 import { slotStyle } from "../render/slot-style.js";
@@ -80,6 +87,7 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
   validateFigure(KIND, options, data);
   const raw = data.map((row, i) => readLabel(KIND, row, facet, i));
   const names = domainOf(KIND, facet, raw, options.facetDomain?.map(String));
+  requireRows(KIND, facet, names, raw);
   if (names.length > 24) throw new Error(`${KIND}: ${names.length} panels are too many to compare`);
   const asked = Math.min(options.columns ?? 3, names.length);
   if (!(Number.isInteger(asked) && asked >= 1)) {

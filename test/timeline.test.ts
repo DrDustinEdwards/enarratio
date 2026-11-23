@@ -4,6 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { heatStrip, type TimelineOptions, timeline } from "../src/index.js";
+import { sanitize } from "../src/enhance/sanitize.js";
 import { parse } from "./helpers.js";
 
 const events: TimelineOptions["events"] = [
@@ -45,6 +46,12 @@ describe("timeline", () => {
       "Agent runs: 5 events in 3 lanes, 2026-06-09 00:00 UTC to 2026-06-09 08:00 UTC; 2 ok, 1 warning, 1 error, 1 unknown.",
     );
     expect(root.querySelectorAll("ol.enarratio-timeline-list li")).toHaveLength(5);
+  });
+
+  it("keeps its list and lane names through the enhancer's sanitizer", () => {
+    const clean = parse(timeline({ ...options, inline: true }));
+    sanitize(clean);
+    expect(clean.querySelectorAll("ol.enarratio-timeline-list li strong")).toHaveLength(5);
   });
 
   it("lists every event in time order with its lane, status and time", () => {

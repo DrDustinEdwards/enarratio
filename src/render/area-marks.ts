@@ -9,6 +9,7 @@ import { num } from "../lite/svg.js";
 import { spreadLabels } from "./direct-labels.js";
 import type { Prepared } from "./line-model.js";
 import type { SeriesPlan } from "./series.js";
+import { maxOf } from "./data.js";
 
 /** How far past the last point a band's name starts, in user units. */
 const OFFSET = 6;
@@ -31,7 +32,7 @@ export function finishAreas(
   const points = [...svg.matchAll(/<circle\b([^>]*)>/g)]
     .map((m) => readAttributes(m[1] ?? ""))
     .filter((a) => a.has("data-enarratio-key") && a.has("data-enarratio-col"));
-  const last = Math.max(...points.map((a) => Number(a.get("data-enarratio-col"))));
+  const last = maxOf(points.map((a) => Number(a.get("data-enarratio-col"))));
   const ends = points
     .filter((a) => Number(a.get("data-enarratio-col")) === last)
     .map((a) => ({
@@ -45,7 +46,7 @@ export function finishAreas(
   // line for the first) and is named where it has thickness at the last x.
   const zero = /<g data-enarratio-mark="rule"[^>]*><line\b[^>]*\sy1="([-\d.e]+)"/.exec(svg);
   if (!zero || ends.length === 0) return { svg, labeled: false };
-  const lastAt = Math.max(...prepared.points.map((p) => p.at));
+  const lastAt = maxOf(prepared.points.map((p) => p.at));
   const filled = new Set(
     prepared.points
       .filter((p) => p.at === lastAt && p.value !== null && p.value > 0)

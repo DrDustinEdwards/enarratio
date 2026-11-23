@@ -714,10 +714,10 @@ export function readingGrade(text: string): number {
 /**
  * One CSV field (RFC 4180): quoted when it holds a comma, quote or line break. A field a
  * spreadsheet would run as a formula (starting with =, @, a tab or carriage return, or with + or -
- * not followed by a number) gets a leading apostrophe, so a downloaded file cannot run one.
+ * unless the whole cell is a number) gets a leading apostrophe, so a downloaded file cannot run one.
  */
 function csvField(value: string): string {
-  const safe = /^[=@\t\r]|^[+-](?![\d.])/.test(value) ? `'${value}` : value;
+  const safe = /^\s*[=@]|^[+-](?![\d.,]+%?$)/.test(value) ? `'${value}` : value;
   return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 

@@ -6,6 +6,7 @@
 
 import { LINE_DASHES } from "../theme/dashes.js";
 
+// Declared here, not imported from marks.ts, for the same reason as `shapeOf` in sound.ts.
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 /** The properties that carry the theme into a standalone SVG, written as presentation attributes. */

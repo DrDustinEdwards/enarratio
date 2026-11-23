@@ -126,6 +126,19 @@ export function markKey(...parts: readonly (string | number)[]): string {
   return JSON.stringify(parts);
 }
 
+/** Throws when a domain names a value no row has, for charts that cannot draw an empty group. */
+export function requireRows(
+  kind: string,
+  field: string,
+  names: readonly string[],
+  values: readonly (string | number)[],
+): void {
+  const used = new Set(values.map(String));
+  for (const n of names) {
+    if (!used.has(n)) throw new Error(`${kind}: ${field} "${n}" has no rows`);
+  }
+}
+
 /** The smallest of many numbers, without spreading them onto the stack (F15). */
 export function minOf(values: Iterable<number>): number {
   let min = Number.POSITIVE_INFINITY;
@@ -204,6 +217,9 @@ export function rampThresholds(
 ): readonly number[] {
   const span = max - min || 1;
   const thresholds = given ?? [1, 2, 3, 4].map((k) => min + (span * k) / 5);
+  if (thresholds.length !== 4 || !thresholds.every(Number.isFinite)) {
+    throw new Error(`${kind}: thresholds must be four finite numbers`);
+  }
   for (let i = 1; i < thresholds.length; i += 1) {
     if ((thresholds[i] as number) <= (thresholds[i - 1] as number)) {
       throw new Error(`${kind}: thresholds must ascend`);

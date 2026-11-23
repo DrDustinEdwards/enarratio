@@ -4,6 +4,8 @@
  * moves to keep their slopes small, then centered on zero.
  */
 
+import { maxOf } from "./data.js";
+
 /** Each layer's lower and upper edge at each x, and the order layers stack in, bottom first. */
 export interface StreamLayout {
   readonly order: readonly number[];
@@ -16,7 +18,7 @@ export interface StreamLayout {
  * middle is lighter so far, so the earliest peaks sit in the middle and later ones outside.
  */
 function insideOut(values: readonly (readonly number[])[]): number[] {
-  const peak = values.map((v) => v.indexOf(Math.max(...v)));
+  const peak = values.map((v) => v.indexOf(maxOf(v)));
   const sum = values.map((v) => v.reduce((a, b) => a + b, 0));
   const byPeak = values.map((_, i) => i).sort((a, b) => (peak[a] as number) - (peak[b] as number));
   const tops: number[] = [];

@@ -1,40 +1,11 @@
 /** Keeps only what Enarratio's server emits in markup handed to update() (F11). */
 
 /** The elements Enarratio's server markup is made of; update() keeps only these (F11). */
-const ALLOWED_ELEMENTS = new Set([
-  "figure",
-  "p",
-  "ul",
-  "li",
-  "span",
-  "div",
-  "figcaption",
-  "details",
-  "summary",
-  "table",
-  "caption",
-  "thead",
-  "tbody",
-  "tr",
-  "th",
-  "td",
-  "svg",
-  "g",
-  "rect",
-  "circle",
-  "ellipse",
-  "path",
-  "line",
-  "polyline",
-  "polygon",
-  "text",
-  "tspan",
-  "title",
-  "a",
-  "defs",
-  "clippath",
-  "pattern",
-]);
+const ALLOWED_ELEMENTS = new Set(
+  "figure p ul ol li strong span div figcaption details summary table caption thead tbody tr th td svg g rect circle ellipse path line polyline polygon text tspan title a defs clippath pattern".split(
+    " ",
+  ),
+);
 const LINK_ATTRIBUTES = new Set(["href", "xlink:href", "data-enarratio-href"]);
 
 /** Relative and http(s) links only, with no user or password before the host, as the server allows (A11). */
@@ -75,12 +46,8 @@ export function sanitize(root: Element): void {
       const value = el.getAttribute(name) ?? "";
       const lower = name.toLowerCase();
       if (
-        lower.startsWith("on") ||
-        (LINK_ATTRIBUTES.has(lower) && !safeLink(value) && !csvData(el, lower, value)) ||
-        lower === "style" ||
-        lower === "srcdoc" ||
-        lower === "ping" ||
-        lower.startsWith("form")
+        /^(on|form)|^(style|srcdoc|ping)$/.test(lower) ||
+        (LINK_ATTRIBUTES.has(lower) && !safeLink(value) && !csvData(el, lower, value))
       ) {
         el.removeAttribute(name);
       }

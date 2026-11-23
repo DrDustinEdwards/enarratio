@@ -4,6 +4,7 @@
  * published fits.
  */
 
+import { maxOf, minOf } from "../render/data.js";
 import { tCritical95 } from "./stats.js";
 
 /** The four parameters of a logistic dose-response curve. */
@@ -160,8 +161,8 @@ export function fitLogistic(doses: readonly number[], responses: readonly number
   if (positive.length < 4) {
     throw new Error("fitLogistic: needs at least four distinct positive doses");
   }
-  const lo = Math.min(...responses);
-  const hi = Math.max(...responses);
+  const lo = minOf(responses);
+  const hi = maxOf(responses);
   const logs = doses.map((d) => (d > 0 ? Math.log(d) : Math.log(positive[0] as number) - 2));
   const meanLog = logs.reduce((a, b) => a + b, 0) / n;
   const meanY = responses.reduce((a, b) => a + b, 0) / n;
