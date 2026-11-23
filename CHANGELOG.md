@@ -7,6 +7,10 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.17.2] - 2026-11-23
+
+Also carries 0.17.1, which was never approved on npm: its changes are listed below it.
+
 ### Fixed
 
 - A CSV cell that starts with `+` or `-` and is not wholly a number, or a space before `=`, gets the leading apostrophe, so a downloaded file cannot run a formula such as `+1+cmd|...`.
