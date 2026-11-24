@@ -2023,7 +2023,7 @@ with, or `{ narrow }`, the frame markup of a drawing about 240 wide.
 
 ### `redrawAttribute`
 
-`redrawAttribute(spec)` returns the attribute, escaped, for the element around the figure.
+`redrawAttribute(spec)` returns the attribute, single-quoted and escaped, for the element around the figure.
 
 ### `redrawCharts`
 
