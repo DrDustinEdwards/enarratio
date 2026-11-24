@@ -106,7 +106,7 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "test": "vitest run",
-    "gallery": "node scripts/gallery.ts && prelum-markdown --dir site/dist --origin https://enarratio.dustinedwards.info && site-runtime-headers --site enarratio --out site/dist/_headers --header \"tdm-reservation: 1\"",
+    "gallery": "node scripts/gallery.ts && prelum-markdown --dir site/dist --origin https://enarratio.dustinedwards.info && site-runtime-headers --site enarratio --out site/dist/_headers --header \"tdm-reservation: 1\" && node scripts/html-limit.mjs",
     "deploy:gallery": "npm run build && npm run gallery && npx --yes wrangler@4.143.0 deploy",
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "prepare": "npm run build",

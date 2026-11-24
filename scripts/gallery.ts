@@ -967,13 +967,6 @@ for (const adapter of adapters) {
   writeFileSync(join(outDir, file), page({ adapter }, file, css, examples, links(file)));
 }
 writeFileSync(join(outDir, ASTRO_PAGE), astroPage());
-// Googlebot reads the first 2 MB of a page's HTML and drops the rest (Google's Googlebot documentation), so a page
-// that grows past it loses its last charts from search; fail the build before it ships.
-const HTML_LIMIT = 2 * 1024 * 1024;
-for (const name of readdirSync(outDir).filter((n) => n.endsWith(".html"))) {
-  const bytes = readFileSync(join(outDir, name)).length;
-  if (bytes > HTML_LIMIT) throw new Error(`${name} is ${bytes} bytes, over Googlebot's 2 MB`);
-}
 writeFileSync(join(outDir, STATEMENT_PAGE), statementPage());
 const addresses = [
   ...pages.map(([, file]) => pathOf(file)),
