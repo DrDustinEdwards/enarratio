@@ -14,5 +14,6 @@ const over = readdirSync(dir)
   .filter((name) => name.endsWith(".html"))
   .map((name) => [name, statSync(join(dir, name)).size])
   .filter(([, bytes]) => bytes > LIMIT);
-for (const [name, bytes] of over) console.error(`${name} is ${bytes} bytes, over 2,000,000, Googlebot's 2 MB`);
+for (const [name, bytes] of over)
+  console.error(`${name} is ${bytes} bytes, over 2,000,000, Googlebot's 2 MB`);
 if (over.length) process.exit(1);
