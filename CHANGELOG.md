@@ -9,7 +9,7 @@ change the public API; every such change is listed here.
 
 ### Fixed
 
-- `redrawAttribute` writes the spec in single quotes, so the JSON's quotes and `<` are not turned into `&quot;` and `&lt;`: a page of 51 charts with phone drawings shrank by 250 KB (2.25 MB to 2.0 MB of HTML), back under the 2 MB Googlebot reads. `npm run gallery` now fails if a page passes 2 MiB (scripts/html-limit.mjs).
+- `redrawAttribute` writes the spec in single quotes, so the JSON's quotes and `<` are not turned into `&quot;` and `&lt;`: a page of 51 charts with phone drawings shrank by 250 KB (2.25 MB to 2.0 MB of HTML), back under the 2 MB Googlebot reads. The gallery's streamgraph example samples every two weeks instead of weekly, taking each page to 1.93 MB. `npm run gallery` now fails if a page passes 2,000,000 bytes (scripts/html-limit.mjs).
 
 ## [0.17.2] - 2026-11-23
 
