@@ -47,11 +47,11 @@ const LABELS_MIN_WIDTH = 400;
  * `<div class="cap-chart" ${redrawAttribute(spec)}>`.
  */
 export function redrawAttribute(spec: RedrawSpec): string {
-  const json = JSON.stringify(spec)
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;");
-  return `${REDRAW_ATTRIBUTE}="${json}"`;
+  // Single quotes, so the JSON's own double quotes stay as they are and `<` is valid in the value: a narrow
+  // drawing carried as `&quot;` and `&lt;` was a third larger, which pushed a page of charts past the 2 MB
+  // of HTML that Googlebot reads (Google's crawler documentation).
+  const json = JSON.stringify(spec).replace(/&/g, "&amp;").replace(/'/g, "&#39;");
+  return `${REDRAW_ATTRIBUTE}='${json}'`;
 }
 
 /**
