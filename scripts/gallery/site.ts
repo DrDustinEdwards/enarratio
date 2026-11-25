@@ -140,7 +140,7 @@ export function siteFooter(): string {
   const center = `<div class="cap-family-footer-center">
 <div><p class="cap-family-footer-center-name">Enarratio</p><p class="cap-family-footer-about">Accessible charts and scientific figures, drawn on the server into the HTML. Open source, MIT licensed.</p></div>
 <div class="cap-family-footer-columns">
-<ul class="cap-family-footer-links"><li><a href="/">Default theme</a></li><li><a href="/example">Example theme</a></li><li><a href="/capsomer">Capsomer theme</a></li>${adapters.map((a) => `<li><a href="${pathOf(adapterPage(a))}">${escapeText(a.name)} adapter</a></li>`).join("")}<li><a href="/astro">Astro and EmDash</a></li></ul>
+<ul class="cap-family-footer-links"><li><a href="/">Default theme</a></li><li><a href="/example">Example theme</a></li><li><a href="/capsomer">Capsomer theme</a></li>${adapters.map((a) => `<li><a href="${galleryPath(adapterPage(a))}">${escapeText(a.name)} adapter</a></li>`).join("")}<li><a href="/astro">Astro and EmDash</a></li></ul>
 <ul class="cap-family-footer-links"><li><a href="https://github.com/DrDustinEdwards/enarratio" rel="external">Source</a></li><li><a href="https://www.npmjs.com/package/enarratio" rel="external">npm</a></li><li><a href="https://github.com/DrDustinEdwards/enarratio/blob/main/CHANGELOG.md" rel="external">Changes</a></li></ul>
 </div>
 <p class="cap-family-footer-stamp"><span>Release ${escapeText(VERSION)}</span></p>
@@ -227,7 +227,7 @@ export const adapterPage = (a: Adapter): string => a.file.replace(/\.css$/, ".ht
 export const cleanAddress = (file: string): string =>
   file === "index.html" ? "./" : file.replace(/\.html$/, "");
 /** The same address from the site's root, for canonical links and the sitemap. */
-export const pathOf = (file: string): string =>
+export const galleryPath = (file: string): string =>
   file === "index.html" ? "/" : `/${file.replace(/\.html$/, "")}`;
 export const links = (current: string): Link[] => [
   ...pages.map(([t, f]) => ({

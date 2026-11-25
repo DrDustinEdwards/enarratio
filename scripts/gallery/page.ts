@@ -10,7 +10,7 @@ import {
   NARROW_WIDTH,
   frameHtml,
   frameOf,
-  shownHeight,
+  galleryShownHeight,
   withExpand,
 } from "./examples.ts";
 import { FAMILY } from "./css.ts";
@@ -28,7 +28,7 @@ import {
   head,
   libraryData,
   links,
-  pathOf,
+  galleryPath,
   siteFooter,
   siteHeader,
 } from "./site.ts";
@@ -65,7 +65,7 @@ export function page(
   return `<!doctype html>
 <html lang="en" data-family="${FAMILY}">
 <head>
-${head(`Enarratio gallery: ${"theme" in view ? `${view.theme.name} theme` : `${view.adapter.name} adapter`}`, `Every Enarratio chart in ${name}, drawn on the server and readable without scripts, each with its source.`, css, pathOf(file), [libraryData])}
+${head(`Enarratio gallery: ${"theme" in view ? `${view.theme.name} theme` : `${view.adapter.name} adapter`}`, `Every Enarratio chart in ${name}, drawn on the server and readable without scripts, each with its source.`, css, galleryPath(file), [libraryData])}
 </head>
 <body>
 ${siteHeader(links)}
@@ -165,7 +165,7 @@ const drawSample = (size: { width?: number; height?: number } = {}): string =>
   });
 const sampleChart = withExpand(drawSample());
 /** Its drawing for a phone, swapped in under 30rem as the gallery's examples are. */
-const sampleShown = shownHeight(sampleChart);
+const sampleShown = galleryShownHeight(sampleChart);
 const sampleNarrow = frameOf(
   drawSample({
     width: NARROW_WIDTH,
@@ -236,7 +236,7 @@ export function astroPage(): string {
   return `<!doctype html>
 <html lang="en" data-family="${FAMILY}">
 <head>
-${head(`${ASTRO_TITLE}: Enarratio`, ASTRO_DESCRIPTION, "index.css", pathOf(ASTRO_PAGE), [astroData])}
+${head(`${ASTRO_TITLE}: Enarratio`, ASTRO_DESCRIPTION, "index.css", galleryPath(ASTRO_PAGE), [astroData])}
 </head>
 <body>
 ${siteHeader(links(ASTRO_PAGE))}
