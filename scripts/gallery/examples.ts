@@ -37,7 +37,7 @@ function viewBox(markup: string): { width: number; height: number } | undefined 
  * The height the server's drawing shows in a phone's column: a wide drawing keeps 30rem and
  * scrolls, so it shows H * 480 / W; a narrower one scales to the column.
  */
-export function shownHeight(markup: string): number | undefined {
+export function galleryShownHeight(markup: string): number | undefined {
   const box = viewBox(markup);
   if (!box) return undefined;
   const shown = markup.includes("enarratio-frame-wide") ? WIDE_PX : NARROW_WIDTH;
@@ -83,7 +83,7 @@ const narrowDraw =
   (options: O): string => {
     const at = (height?: number) =>
       draw({ ...options, width: NARROW_WIDTH, ...(height === undefined ? {} : { height }) });
-    const target = KEEP_HEIGHT.has(id) || MAPS.has(id) ? undefined : shownHeight(draw(options));
+    const target = KEEP_HEIGHT.has(id) || MAPS.has(id) ? undefined : galleryShownHeight(draw(options));
     const first = at(target);
     if (target === undefined) return first;
     const extra = (viewBox(first)?.height ?? target) - target;
@@ -214,7 +214,7 @@ export async function loadExamples(): Promise<Example[]> {
           )
         : undefined;
     const narrowBox = narrow ? viewBox(narrow) : undefined;
-    const shown = shownHeight(module.default) ?? 0;
+    const shown = galleryShownHeight(module.default) ?? 0;
     examples.push({
       id,
       reserve:

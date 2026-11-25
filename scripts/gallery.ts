@@ -29,7 +29,7 @@ import {
   head,
   links,
   pages,
-  pathOf,
+  galleryPath,
   root,
   scriptFiles,
   siteFooter,
@@ -79,10 +79,10 @@ for (const adapter of adapters) {
 writeFileSync(join(outDir, ASTRO_PAGE), astroPage());
 writeFileSync(join(outDir, STATEMENT_PAGE), statementPage());
 const addresses = [
-  ...pages.map(([, file]) => pathOf(file)),
-  ...adapters.map((a) => pathOf(adapterPage(a))),
-  pathOf(ASTRO_PAGE),
-  pathOf(STATEMENT_PAGE),
+  ...pages.map(([, file]) => galleryPath(file)),
+  ...adapters.map((a) => galleryPath(adapterPage(a))),
+  galleryPath(ASTRO_PAGE),
+  galleryPath(STATEMENT_PAGE),
 ];
 // For search engines and language models, from Prelum: sitemap, robots.txt, ai.txt (citation welcome, training reserved), llms.txt, security.txt and the IndexNow key file.
 mkdirSync(join(outDir, ".well-known"), { recursive: true });
@@ -144,7 +144,7 @@ writeFileSync(
           },
           ...adapters.map((a) => ({
             title: `Gallery, ${a.name} adapter`,
-            url: `${SITE}${pathOf(adapterPage(a))}`,
+            url: `${SITE}${galleryPath(adapterPage(a))}`,
             description: `the same charts through enarratio/adapters/${a.file}, on ${a.name}'s default ${a.values}`,
           })),
           {
