@@ -7,31 +7,25 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+## [0.17.3] - 2026-11-25
+
 ### Fixed
 
 - `update()` and the phone redraw drop a `fill`, `stroke`, `filter`, `clip-path`, `mask`, `cursor` or marker value whose `url()` points outside the document.
 - CSV export prefixes a cell that starts with a tab or carriage return, or a space before a signed formula.
 - The shadcn/ui, Radix and Material label colors pick black or white by contrast, not OKLCH lightness, so a saturated fill near lightness 0.56 gets white text.
 - The gallery pages no longer open with a restating intro or a caption under each chart name; the accessibility test covers every gallery page.
+- `redrawAttribute` writes the spec in single quotes, so the JSON's quotes and `<` are not turned into `&quot;` and `&lt;`: a page of 51 charts with phone drawings shrank by 250 KB (2.25 MB to 2.0 MB of HTML), back under the 2 MB Googlebot reads. The gallery's streamgraph example samples every two weeks instead of weekly, taking each page to 1.93 MB. `npm run gallery` now fails if a page passes 2,000,000 bytes (scripts/html-limit.mjs).
 
 ### Changed
 
-- Large source files split into smaller modules (gallery script, text, base stylesheet, line, bar and figure models, timeline, dot, line plot). No behavior change: the built gallery and `base.css` are byte-identical.
-
-### Changed
-
-- Shorter source comments and doc comments (comment lines 4,474 to 3,867), and 19 tests removed that pinned design or repeated other tests. No behavior change.
-- The enhancement layer's chart class (`src/enhance/chart.ts`, 1,110 lines) is split into modules for the points and keyboard, range brush, tooltip, toolbar and plot wiring. No behavior change; the layer stays under its 12 kB limit.
+- Large source files split into smaller modules (gallery script, text, base stylesheet, line, bar and figure models, timeline, dot, line plot), and the enhancement layer's chart class (`src/enhance/chart.ts`, 1,110 lines) into modules for the points and keyboard, range brush, tooltip, toolbar and plot wiring. No behavior change; the layer stays under its 12 kB limit.
+- Shorter source comments and doc comments (comment lines 4,474 to 3,867), and 19 tests removed that pinned design or repeated other tests, plus 5 light chart parity cases in `test/lite.test.ts`. No behavior change.
 - `base.css` no longer carries the explanatory comments from its source (the stylesheet is about 5.8 kB smaller). Rules are unchanged.
-- 5 light chart parity cases removed from `test/lite.test.ts` that repeated the shape of another case.
 
 ### Removed
 
 - `scripts/screenshots.ts`, a manual review script nothing ran. No change to the package.
-
-### Fixed
-
-- `redrawAttribute` writes the spec in single quotes, so the JSON's quotes and `<` are not turned into `&quot;` and `&lt;`: a page of 51 charts with phone drawings shrank by 250 KB (2.25 MB to 2.0 MB of HTML), back under the 2 MB Googlebot reads. The gallery's streamgraph example samples every two weeks instead of weekly, taking each page to 1.93 MB. `npm run gallery` now fails if a page passes 2,000,000 bytes (scripts/html-limit.mjs).
 
 ## [0.17.2] - 2026-11-23
 
