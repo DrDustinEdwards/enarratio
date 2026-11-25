@@ -36,6 +36,7 @@ jobs:
     uses: DrDustinEdwards/devkit/.github/workflows/pr.yml@1f148951b94eb9c495dc94c1f7d5bb79fd5db7b1 # v0.61.0
     with:
       review: true
+      install: PUPPETEER_SKIP_DOWNLOAD=true npm ci
       # The gallery Worker serves site/dist, so the bundle is measured after the package and the gallery are built.
       worker-size-prepare: npm run build && npm run gallery
       # The no-bloat ratchet runs in ci.yml's check job (`npm run bloat`).
