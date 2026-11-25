@@ -36,7 +36,6 @@ export function readAttributes(markup: string): Map<string, string> {
 /** An attribute value; `false` and `undefined` omit the attribute, `true` writes it bare. */
 export type AttributeValue = string | number | boolean | undefined;
 
-/** Serializes attributes in the order given, skipping omitted ones. */
 function attributes(attrs: Readonly<Record<string, AttributeValue>>): string {
   let out = "";
   for (const [name, value] of Object.entries(attrs)) {

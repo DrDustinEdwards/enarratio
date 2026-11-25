@@ -49,10 +49,7 @@ export interface GroupedValuesOptions<T extends object>
 export interface StripPlotOptions<T extends object> extends GroupedValuesOptions<T> {
   /** A field naming each value, for hover details and the data table. */
   readonly label?: KeysOfType<T, string | number>;
-  /**
-   * How points in a group are spread so none hides another: `"beeswarm"` (default) packs them
-   * side by side, `"jitter"` scatters them by a fixed pattern (the same every render).
-   */
+  /** How points in a group are spread so none hides another: `"beeswarm"` (default) packs them side by side, `"jitter"` scatters them by a fixed pattern. */
   readonly layout?: "beeswarm" | "jitter";
 }
 
@@ -157,9 +154,9 @@ export function describeValues(r: Read, extra?: Partial<ChartDescription>): Char
 }
 
 /**
- * Spreads each group's points sideways so that none overlaps another: each point, lowest value
- * first, takes the offset nearest the center line where it clears every point already placed.
- * Offsets are in group widths; a group too crowded to fit is squeezed to its width.
+ * Spreads each group's points sideways so none overlaps another: each point, lowest value first,
+ * takes the offset nearest the center line where it clears every point placed. Offsets are in
+ * group widths; a group too crowded to fit is squeezed to its width.
  */
 function beeswarm(r: Read, pxPerValue: number, pxPerGroup: number): void {
   const gap = 2 * RADIUS + 1;
@@ -192,7 +189,6 @@ function beeswarm(r: Read, pxPerValue: number, pxPerGroup: number): void {
   }
 }
 
-/** A fixed jitter: the golden-ratio sequence, the same on every render. */
 function jitter(r: Read): void {
   for (const g of r.groups) {
     r.values
@@ -215,7 +211,6 @@ export function quartileCells(r: Read, s: BoxStats): string[] {
   return [r.count(s.n), f(s.min), f(s.q1), f(s.median), f(s.q3), f(s.max)];
 }
 
-/** Pixels per value unit and per group, from the drawing's size and margins. */
 function pixels(r: Read): { perValue: number; perGroup: number } {
   const [lo, hi] = r.domain;
   return {
@@ -236,7 +231,7 @@ export function frame(r: Read): Plot.PlotOptions {
       type: "linear",
       domain: [-0.5, r.groups.length - 0.5],
       ticks: r.groups.map((_, i) => i),
-      // A name wider than its group's slot wraps (record 0041).
+      // A name wider than its group's slot wraps.
       tickFormat: (i: number) => axisLabel(r.groups[i] ?? "", pixels(r).perGroup, r.width),
       label: r.xLabel,
     },
@@ -280,10 +275,8 @@ function pointMark<T extends object>(
 }
 
 /**
- * Every value as a point, one column per group, spread in a beeswarm (or a fixed jitter) so that
- * none hides another and the shape of each group shows. Each point is keyed and named, and the
- * data table lists every value.
- *
+ * Every value as a point, one column per group, spread in a beeswarm (or a fixed jitter) so none
+ * hides another. Each point is keyed and named, and the data table lists every value.
  * @example
  * stripPlot({ data: mice, x: "diet", y: "weight", label: "mouse", alt: "..." });
  */
@@ -325,10 +318,9 @@ export function stripPlot<T extends object>(given: StripPlotOptions<T>): string 
 
 /**
  * Box plots, one per group: the box spans the quartiles with a line at the median, whiskers reach
- * the most extreme values within 1.5 interquartile ranges, and values beyond are drawn as points
- * (Tukey 1977; quartiles by linear interpolation, R's default). With `points`, every value is
- * drawn beside its box. The data table gives each group's n, quartiles, whiskers and outliers.
- *
+ * the most extreme values within 1.5 interquartile ranges, and values beyond are points (Tukey
+ * 1977; quartiles by linear interpolation, R's default). With `points`, every value is drawn
+ * beside its box. The data table gives each group's n, quartiles, whiskers and outliers.
  * @example
  * boxPlot({ data: mice, x: "diet", y: "weight", points: true, alt: "..." });
  */

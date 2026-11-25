@@ -63,11 +63,10 @@ interface Sample {
 const KIND = "titerPlot";
 
 /**
- * Antibody or viral titers by group on a log dilution axis: every sample as a point, the
- * geometric mean titer (GMT) with its 95% confidence interval, and the assay's limit of
- * detection. Identical titers are spread side by side rather than drawn on top of each other,
- * so the number of samples at each dilution is visible. The GMT counts a value below the limit
- * of detection as half the limit, the usual convention, and the data table says how many there were.
+ * Antibody or viral titers by group on a log dilution axis: every sample as a point, the geometric
+ * mean titer (GMT) with its 95% confidence interval, and the assay's limit of detection. Identical
+ * titers are spread side by side so the number of samples at each dilution is visible. A value below
+ * the limit counts as half the limit in the GMT, the usual convention, and the table says how many.
  *
  * @example
  * titerPlot({
@@ -161,7 +160,7 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
   const ticks: number[] = [];
   for (let v = dilution.start; v <= top * dilution.factor; v *= dilution.factor) {
     ticks.push(v);
-    // A step this fine is not a dilution series, and would draw thousands of ticks (F15).
+    // A step this fine is not a dilution series, and would draw thousands of ticks.
     if (ticks.length > 40) {
       throw new Error(
         `${KIND}: dilution factor ${dilution.factor} needs over 40 steps from ${dilution.start} to ${top}`,
@@ -241,7 +240,7 @@ export function titerPlot<T extends object>(options: TiterPlotOptions<T>): strin
         type: "linear",
         domain: [-0.5, groups.length - 0.5],
         ticks: groups.map((_, i) => i),
-        // A name wider than its group's slot wraps (record 0041).
+        // A name wider than its group's slot wraps.
         tickFormat: (i: number) =>
           axisLabel(groups[i] ?? "", (width - 56 - 20) / Math.max(1, groups.length), width),
         label: groupLabel,

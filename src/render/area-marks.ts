@@ -1,5 +1,5 @@
 /**
- * The finish both area renderers share (record 0036): each stacked band named at its right end,
+ * The finish both area renderers share: each stacked band named at its right end,
  * read from the finished SVG's points so `enarratio/plot` and `enarratio/lite` agree by
  * construction, as {@link texture} does for patterns.
  */

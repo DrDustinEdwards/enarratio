@@ -42,9 +42,9 @@ const KIND = "divergingBarChart";
 
 /**
  * Bars for signed values about zero: changes, differences from a baseline, net balances. Bars run
- * from a visible zero line, positive values one way and negative the other, in two colors, and
- * every bar is labeled with its signed value, so the sign reads from position and text as well as
- * color.
+ * from a visible zero line in two colors, and every bar is labeled with its signed value, so the
+ * sign reads from position and text as well as color.
+ *
  *
  * @example
  * divergingBarChart({ data: changes, x: "county", y: "change", sort: "descending", alt: "..." });

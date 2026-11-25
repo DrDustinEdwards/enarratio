@@ -66,10 +66,10 @@ const KIND = "forestPlot";
 
 /**
  * A forest plot: each study's estimate as a square sized by its weight, with its 95% confidence
- * interval, against a line of no effect, and the pooled estimate as a diamond spanning its
- * interval. Each estimate and interval is printed in a column to the right, so the figure reads
- * as numbers as well as shapes. Pooling is inverse-variance, fixed or random effects
- * (DerSimonian and Laird 1986), and the caption states the method and heterogeneity (Q, I², τ²).
+ * interval, against a line of no effect, and the pooled estimate as a diamond. Estimates and
+ * intervals are also printed in a column, so the figure reads as numbers as well as shapes. Pooling
+ * is inverse-variance, fixed or random effects (DerSimonian and Laird 1986); the caption states the
+ * method and heterogeneity (Q, I², τ²).
  *
  * @example
  * forestPlot({ data: trials, label: "trial", estimate: "or", lower: "lo", upper: "hi", log: true, pooled: "random", alt: "..." });
@@ -136,17 +136,15 @@ export function forestPlot<T extends object>(options: ForestPlotOptions<T>): str
   const width = options.width ?? DEFAULT_WIDTH;
   const char = charWidth(width);
   const favors = options.favors;
-  // Names on the left, intervals in the middle and estimates on the right need about 120 units of
-  // plot between them. A narrower drawing (a phone's) stacks each row instead: its name and
-  // estimate on a line above its interval, which then spans the drawing (record 0041).
+  // Names on the left, intervals in the middle and estimates on the right need about 120 units of plot
+  // between them; a narrower drawing stacks each row: name and estimate on a line above the interval.
   const marginLeft = Math.min(240, longest * 7 + 20);
   const stacked = width - marginLeft - 150 < 120;
   const estimates = [
     ...rows.map((r) => ci(r.estimate, r.lower, r.upper)),
     ...(pooled ? [ci(pooled.estimate, pooled.lower, pooled.upper)] : []),
   ];
-  // Stacked, the name and estimate share a line while both fit with a gap between them; else the
-  // estimate takes a second line under the name.
+  // Stacked, name and estimate share a line while both fit with a gap; else the estimate takes a second line.
   const textLines = names.every(
     (n, i) => (n.length + (estimates[i]?.length ?? 0) + 2) * char <= width - 32,
   )
@@ -172,8 +170,7 @@ export function forestPlot<T extends object>(options: ForestPlotOptions<T>): str
       y: (d: Item) => d.y,
       dy: -pitch / 2 + 4 + 15 * n,
       lineAnchor: "top" as const,
-      // A halo, so the no-effect line under the text does not cut through it (with a stroke,
-      // Plot leaves the fill unset unless given).
+      // A halo, so the no-effect line under the text does not cut through it.
       fill: "var(--enarratio-text)",
       stroke: "var(--enarratio-background)",
       strokeWidth: 3,
@@ -288,8 +285,7 @@ export function forestPlot<T extends object>(options: ForestPlotOptions<T>): str
     );
   }
   if (favors) {
-    // Each side's words start at the no-effect line; on a stacked drawing, at the plot's edges,
-    // where the null line may leave no room for one of them.
+    // Each side's words start at the no-effect line; stacked, at the plot's edges, where the null line may leave no room.
     marks.push(
       Plot.text([favors[0]], {
         ...(stacked

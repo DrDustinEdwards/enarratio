@@ -34,18 +34,7 @@ export type {
 } from "../render/line-model.js";
 
 /**
- * A line chart over time or any continuous x, drawn without Observable Plot: the same options and
- * output as `lineChart` from `enarratio/plot`, in a bundle small enough for a browser.
- *
- * @example
- * lineChart({
- *   data: weekly,
- *   x: "week",
- *   y: "cases",
- *   series: "county",
- *   references: [{ y: 50, label: "Alert threshold" }],
- *   alt: "Weekly cases in three counties ...",
- * });
+ * A line chart without Observable Plot: the same options and output as `lineChart` from `enarratio/plot`.
  */
 export function lineChart<T extends object>(options: LineChartOptions<T>): string {
   const model = lineModel(options);

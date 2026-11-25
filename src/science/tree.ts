@@ -49,11 +49,10 @@ const KIND = "phylogeneticTree";
 const ROW = 20;
 
 /**
- * A phylogenetic tree in the rectangular layout: branches as right angles, lengths to scale along
- * a distance axis (or tips aligned, as a cladogram), tips named at their ends and colored and
- * shaped by group, and internal node labels such as support values printed at their nodes. Each
- * tip is keyed, top to bottom. The data table lists every node with its parent, branch length,
- * distance from the root and group, so the topology reads as text.
+ * A phylogenetic tree in the rectangular layout: right-angle branches, lengths to scale along a
+ * distance axis (or tips aligned, as a cladogram), tips named and colored and shaped by group, and
+ * internal node labels such as support values at their nodes. Each tip is keyed, top to bottom. The
+ * table lists every node with its parent, branch length, distance from the root and group.
  *
  * @example
  * phylogeneticTree({ tree: "((A:0.1,B:0.2):0.05,C:0.3);", alt: "..." });
@@ -191,7 +190,7 @@ export function phylogeneticTree(options: PhylogeneticTreeOptions): string {
   const width = options.width ?? DEFAULT_WIDTH;
   const marginRight = Math.min(260, longest * 7 + 24);
   // Where the branches have no room for two distance labels (a phone's drawing), the axis keeps
-  // one: the largest round distance, as a scale bar from the root (record 0041).
+  // one: the largest round distance, as a scale bar from the root.
   const top = scaleTop(maxOf(nodes.map((n) => n.x)));
   const one = scaled && width - 16 - marginRight < 2 * (at(top).length * charWidth(width) + 6);
   const { svg } = renderPlot(
@@ -258,7 +257,6 @@ export function phylogeneticTree(options: PhylogeneticTreeOptions): string {
   });
 }
 
-/** The largest of 1, 2 and 5 times a power of ten that is no more than `value`. */
 function scaleTop(value: number): number {
   if (!(value > 0)) return 1;
   const power = 10 ** Math.floor(Math.log10(value));

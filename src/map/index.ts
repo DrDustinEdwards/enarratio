@@ -1,5 +1,5 @@
 /**
- * `enarratio/map`: maps drawn on the server from the caller's GeoJSON (design record 0028). A dot
+ * `enarratio/map`: maps drawn on the server from the caller's GeoJSON (design). A dot
  * map sizes points by value over a quiet basemap; a choropleth shades regions in five labeled
  * steps. Enarratio ships no boundaries. No dependencies.
  *

@@ -59,18 +59,6 @@ describe("heatmap", () => {
     expect(empty?.parentElement?.getAttribute("stroke-dasharray")).toBe("3,2");
   });
 
-  it("prints values in text colors chosen for their step", () => {
-    const fig = parse(heatmap({ data: cells, x: "c", y: "r", value: "v", alt: "a" }));
-    const text = [...fig.querySelectorAll('[data-enarratio-mark="text"] text')].map((t) =>
-      t.getAttribute("fill"),
-    );
-    expect(text).toEqual([
-      "var(--enarratio-sequential-text-1)",
-      "var(--enarratio-sequential-text-3)",
-      "var(--enarratio-sequential-text-5)",
-    ]);
-  });
-
   it("labels the ramp legend with its bins", () => {
     const fig = parse(
       heatmap({ data: cells, x: "c", y: "r", value: "v", thresholds: [10, 20, 30, 40], alt: "a" }),

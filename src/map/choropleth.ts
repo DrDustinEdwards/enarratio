@@ -70,14 +70,14 @@ interface Region {
 }
 
 /**
- * A map of regions shaded by value in five labeled steps of the theme's sequential ramp: rates
- * by district, counts by county. Color is never the only way in: each region prints its value
- * where it fits, the ramp's steps are labeled, a region with no data is outlined dashed rather
- * than shaded as zero, and the data table lists every region. With `enarratio/enhance` the
- * regions are walked by keyboard in reading order, north to south and west to east.
+ * A map of regions shaded by value in five labeled steps of the theme's sequential ramp. Color is
+ * never the only way in: each region prints its value where it fits, the steps are labeled, a
+ * region with no data is outlined dashed rather than shaded as zero, and the table lists every
+ * region. With `enarratio/enhance` the regions are walked by keyboard, north to south and west to
+ * east.
  *
- * Enarratio ships no boundaries: pass the regions as GeoJSON in longitude and latitude, and
- * name the property that matches the data.
+ * Enarratio ships no boundaries: pass the regions as GeoJSON and name the property that matches
+ * the data.
  *
  * @example
  * choroplethMap({ regions: districts, regionKey: "name", data: rates, region: "district",

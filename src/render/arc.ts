@@ -40,7 +40,6 @@ export function arcPath(
   return `${start}L${n2(ix1)},${n2(iy1)}A${n2(inner)},${n2(inner)} 0 ${large} 0 ${n2(ix0)},${n2(iy0)}Z`;
 }
 
-/** A label's box: left, top, right, bottom. */
 type Box = [number, number, number, number];
 
 /** Where a name set at the rim of a radial chart sits. */
@@ -52,11 +51,10 @@ export interface RimLabel {
 }
 
 /**
- * The largest radius at which names set just past the rim, at the given angles, all stay inside
- * the drawing, and where each sits. Names go beside the rim (left of it on the left, right on the
- * right) or, when that leaves the circle much smaller, as on a phone, centered over their point:
- * above it on the upper half, below on the lower, lifted clear of the circle and of each other.
- * `cap` is the most the radius may be.
+ * The largest radius at which names set just past the rim, at the given angles, all stay inside the
+ * drawing, and where each sits: beside the rim, or, when that leaves the circle much smaller (a
+ * phone), centered over their point, above it on the upper half and below on the lower, clear of
+ * the circle and each other. `cap` is the most the radius may be.
  */
 function rimAt(
   names: readonly string[],
@@ -161,11 +159,7 @@ function rimAt(
   return { radius: beside, labels };
 }
 
-/**
- * The circle a radial chart draws with names at its rim, at the given angles: its height, its
- * radius and where each name sits ({@link rimAt}). With no height given, the drawing is 400 tall,
- * or shorter where the names keep the circle small (a phone).
- */
+/** The circle a radial chart draws with names at its rim: its height, radius and where each name sits ({@link rimAt}). With no height given, 400 tall, or shorter where the names keep the circle small. */
 export function rimLabels(
   names: readonly string[],
   angles: readonly number[],

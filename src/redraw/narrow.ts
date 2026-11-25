@@ -1,8 +1,8 @@
 /**
  * `enarratio/redraw/narrow`: a chart that follows its frame's width with drawings the server made,
- * without the light renderers `enarratio/redraw` brings for drawing at any width. Under 30rem the
- * frame shows the server's narrow drawing, so a phone keeps 12 px text instead of a wide drawing
- * that scrolls (C12); each drawing is enhanced. `enarratio/redraw` is built on it.
+ * without the light renderers `enarratio/redraw` brings. Under 30rem the frame shows the server's
+ * narrow drawing, so a phone keeps 12 px text instead of a wide drawing that scrolls; each drawing is
+ * enhanced.
  */
 
 import { enhance, sanitize } from "../enhance/index.js";
@@ -21,7 +21,7 @@ export interface RedrawnChart {
 /** The frame markup for a width, and a key that is the same when the drawing would be. */
 export type Drawing = (width: number, original: string) => { markup: string; key: string };
 
-/** Under this many rems a wide frame scrolls (A13), so a narrow drawing is used. */
+/** Under this many rems a wide frame scrolls, so a narrow drawing is used. */
 export const WIDE_REM = 30;
 
 const started = new WeakSet<Element>();

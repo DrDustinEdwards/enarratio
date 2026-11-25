@@ -38,11 +38,11 @@ const DRAG_THRESHOLD = 3;
 const ENTRANCE_MS = 1000;
 /** How much of a chart must be on screen before it animates in. */
 const ENTRANCE_VISIBLE = 0.25;
-/** How long the tooltip waits for the pointer to reach it before hiding (WCAG 1.4.13, F6). */
+/** How long the tooltip waits for the pointer to reach it before hiding (WCAG 1.4.13). */
 const HIDE_DELAY_MS = 300;
 /** The tooltip's gap from its mark and from the viewport edge, in CSS pixels. */
 const TIP_GAP = 8;
-/** How many points Page Up and Page Down jump (B38). */
+/** How many points Page Up and Page Down jump. */
 const PAGE = 10;
 
 /** Numbers each hint, so its points can point at it with aria-describedby. */
@@ -72,7 +72,7 @@ export class Chart implements EnhancedChart {
   /** The series' index lists, in row order, for moving between series. */
   private seriesOrder: number[][] = [];
   private focusIndex = 0;
-  /** The point focused before the last move, which Backspace returns to (B32). */
+  /** The point focused before the last move, which Backspace returns to. */
   private lastIndex: number | null = null;
   private anchorIndex: number | null = null;
   private selected: { field: string; value: string } | null = null;
@@ -80,7 +80,7 @@ export class Chart implements EnhancedChart {
   private brushRect: SVGRectElement | null = null;
   private rangeInputs: HTMLInputElement[] = [];
   private expandButton: HTMLButtonElement | null = null;
-  /** Stops the sound playing, when it is (B54). */
+  /** Stops the sound playing, when it is. */
   private stopSound: (() => void) | null = null;
   /** Places the points over the marks again, after the drawing moved or resized. */
   private layout: () => void = () => {};
@@ -89,9 +89,9 @@ export class Chart implements EnhancedChart {
   /** A wide frame whose tab stop attach() removed, given back by destroy(). */
   private untabbedFrame: HTMLElement | null = null;
   private hideTimer: ReturnType<typeof setTimeout> | undefined;
-  /** The first end of a range picked by clicking twice (A4). */
+  /** The first end of a range picked by clicking twice. */
   private rangeStart: number | null = null;
-  /** Finds the column or mark nearest a pointer (record 0036). */
+  /** Finds the column or mark nearest a pointer. */
   private picker: Picker | null = null;
   /** Moves the crosshair of a line or area chart, or hides it. */
   private cross: ((picked: Picked | null) => void) | null = null;
@@ -148,8 +148,7 @@ export class Chart implements EnhancedChart {
       this.live.setAttribute("aria-live", "polite");
     }
     if (!this.live.isConnected) this.figure.append(this.live);
-    // A primitive (sparkline, uptime strip, heat strip, progress ring, timeline) has no points:
-    // it gets its toolbar, so its drawing downloads as any chart's does, and nothing else.
+    // A primitive has no points: it gets its toolbar, so its drawing downloads as any chart's does, and nothing else.
     if (this.figure.hasAttribute("data-enarratio-static")) {
       this.figure.removeAttribute("data-enarratio-interactive");
       this.attachControls();
@@ -174,7 +173,7 @@ export class Chart implements EnhancedChart {
       document.body.append(tip);
       this.tooltip = tip;
       // The pointer can move onto the tooltip without it vanishing, and Escape dismisses it
-      // wherever focus is (WCAG 1.4.13, F6, C7).
+      // wherever focus is (WCAG 1.4.13).
       this.listen(tip, "pointerenter", () => clearTimeout(this.hideTimer));
       this.listen(tip, "pointerleave", () => this.hideTip());
       this.listen(document, "keydown", (e) => {
@@ -212,12 +211,10 @@ export class Chart implements EnhancedChart {
   }
 
   /**
-   * Lays a native control over each mark (B26): a button when it filters, else a named image.
-   * They take no pointer events, so pointers keep using the marks and their targets; keyboards and
-   * screen readers use the controls. Their focus ring is the control's own outline, drawn above
-   * every mark (B13). They sit in an application, so screen readers switch to focus mode only once
-   * a point has focus and pass the arrow keys on; in browse mode the chart reads as its image,
-   * hint and table (B11).
+   * Lays a native control over each mark: a button when it filters, else a named image. They take
+   * no pointer events, so pointers keep using the marks; keyboards and screen readers use the
+   * controls. They sit in an application, so screen readers switch to focus mode only once a point
+   * has focus; in browse mode the chart reads as its image, hint and table.
    */
   private attachPoints(svg: SVGSVGElement, frame: HTMLElement | null): void {
     const s = this.strings;
@@ -261,7 +258,7 @@ export class Chart implements EnhancedChart {
         title.remove();
       }
       // A linked bar that filters stays a filter button (the page can follow data-enarratio-href
-      // on enarratio:select); one that does not is its link, outside the SVG (0026).
+      // on enarratio:select); one that does not is its link, outside the SVG.
       const href = mark.getAttribute("data-enarratio-href");
       const filterable = this.filters(mark);
       let point: HTMLElement;
@@ -292,8 +289,8 @@ export class Chart implements EnhancedChart {
     (frame ?? this.figure).append(layer);
     this.listen(layer, "keydown", (e) => this.onKey(e as KeyboardEvent));
 
-    // A focused point scrolls the frame into view itself, so the frame's own tab stop (A13) would
-    // be a second, empty stop before the data (B14).
+    // A focused point scrolls the frame into view itself, so the frame's own tab stop would
+    // be a second, empty stop before the data.
     if (frame?.getAttribute("tabindex") === "0") {
       frame.removeAttribute("tabindex");
       this.untabbedFrame = frame;
@@ -354,10 +351,9 @@ export class Chart implements EnhancedChart {
   }
 
   /**
-   * The whole drawing answers a pointer (record 0036): moving over it picks the nearest column of
-   * a bar, line or area chart, or the nearest mark within reach on others, and shows it as a
-   * keyboard focus would. A finger dragging across scrubs the same way (the drawing pans only
-   * vertically, CSS), and a tap shows what is under it; the card stays until a tap elsewhere.
+   * The whole drawing answers a pointer: moving over it picks the nearest column of a bar, line or
+   * area chart, or the nearest mark within reach on others. A finger dragging across scrubs the
+   * same way (the drawing pans only vertically), and a tap shows what is under it.
    */
   private attachPointer(svg: SVGSVGElement): void {
     const picker = new Picker(this.figure, this.marks);
@@ -397,10 +393,7 @@ export class Chart implements EnhancedChart {
     });
   }
 
-  /**
-   * Legend entries spotlight their series while pointed at or focused: every other series' marks,
-   * lines and names fade (record 0036). A click still filters, where the chart filters.
-   */
+  /** Legend entries spotlight their series while pointed at or focused: everything else fades. A click still filters, where the chart filters. */
   private attachSpotlight(): void {
     for (const item of this.figure.querySelectorAll<HTMLElement>(
       ".enarratio-legend li[data-slot]",
@@ -419,10 +412,9 @@ export class Chart implements EnhancedChart {
   }
 
   /**
-   * The toolbar above the drawing (record 0035): Sound, Range, Expand when asked for, and the
-   * Download menu, each an icon and a word on one row. It takes the place of the one the server
-   * wrote (figure.ts), so the page does not shift (D5, record 0033), and takes the figure's
-   * "Download CSV" link into its menu; destroy() puts both back.
+   * The toolbar above the drawing: Sound, Range, Expand when asked for, and the Download menu. It
+   * takes the place of the one the server wrote (figure.ts) and the figure's "Download CSV" link;
+   * destroy() puts both back.
    */
   private attachControls(): void {
     const s = this.strings;
@@ -476,10 +468,7 @@ export class Chart implements EnhancedChart {
     });
   }
 
-  /**
-   * Play (B54): sounds each series in turn, pitch rising with the value, while the tooltip follows
-   * the note. The sound module loads on the first press. Pressing again, or Escape, stops it.
-   */
+  /** Play: sounds each series in turn, pitch rising with the value, while the tooltip follows. Pressing again, or Escape, stops it. */
   private playButton(): HTMLButtonElement {
     const s = this.strings;
     // The name stays "Sound"; aria-pressed says it is playing (WAI-ARIA APG, toggle button).
@@ -517,10 +506,7 @@ export class Chart implements EnhancedChart {
     return toggle;
   }
 
-  /**
-   * The range as a form (B15): from and to, in data units, for readers who cannot drag. The Range
-   * button opens it in a panel under the toolbar.
-   */
+  /** The range as a form: from and to, in data units, for readers who cannot drag. */
   private rangeForm(scale: XScale): HTMLElement {
     const s = this.strings;
     const time = isTime(scale);
@@ -617,9 +603,8 @@ export class Chart implements EnhancedChart {
       const x = clampX(svgPoint(svg, event).x);
       if (!dragging) {
         if (Math.abs(x - start) < DRAG_THRESHOLD) return;
-        // Capture only once this is a drag: capturing on pointerdown sent every click to the
-        // SVG instead of the mark under the pointer, so marks on these charts could not be
-        // clicked (F1).
+        // Capture only once this is a drag: capturing on pointerdown sent every click to the SVG
+        // instead of the mark under the pointer.
         dragging = true;
         svg.setPointerCapture(event.pointerId);
       }
@@ -636,7 +621,7 @@ export class Chart implements EnhancedChart {
       this.drawBrush(from, end);
       this.emitBrush([invert(scale, Math.min(from, end)), invert(scale, Math.max(from, end))]);
     });
-    // A range without dragging (WCAG 2.2 SC 2.5.7, A4): click the plot once for one end and again
+    // A range without dragging (WCAG 2.2 SC 2.5.7): click the plot once for one end and again
     // for the other. Clicks on marks filter instead.
     this.listen(svg, "click", (e) => {
       const event = e as MouseEvent;
@@ -727,10 +712,7 @@ export class Chart implements EnhancedChart {
     this.cleanup.push(() => observer.disconnect());
   }
 
-  /**
-   * A mark with focus, or one the sound is playing: shows its column, as a pointer over it would,
-   * or the mark alone on charts without columns. Null when it leaves.
-   */
+  /** A mark with focus, or one the sound is playing: shows its column as a pointer over it would. Null when it leaves. */
   private hover(mark: SVGGraphicsElement | null): void {
     this.pointerX = null;
     const index = mark ? this.marks.indexOf(mark) : -1;
@@ -740,9 +722,8 @@ export class Chart implements EnhancedChart {
   }
 
   /**
-   * Shows what was picked (record 0036): one tooltip card for it; on bars the other columns fade,
-   * on lines and areas the crosshair moves to it, and on other charts the other series fade, while
-   * no filter is on (C9). Null hides it all.
+   * Shows what was picked: one tooltip card; on bars the other columns fade, on lines and areas
+   * the crosshair moves to it, on other charts the other series fade, while no filter is on.
    */
   private show(picked: Picked | null): void {
     const chosen = new Set(picked?.indexes ?? []);
@@ -783,8 +764,7 @@ export class Chart implements EnhancedChart {
     let left: number;
     let top: number;
     if (marks.length > 1) {
-      // A column: beside it and past the pointer, on the right where it fits, else the left,
-      // level with its top, so the card never covers what the pointer is reading.
+      // A column: beside it and past the pointer, right where it fits, else left, so the card never covers what is read.
       const px = this.pointerX;
       left = Math.max(box.right, px ?? box.right) + TIP_GAP;
       if (left + tipBox.width > page - TIP_GAP) {
@@ -812,11 +792,7 @@ export class Chart implements EnhancedChart {
     this.hideTimer = setTimeout(() => this.hideTip(), HIDE_DELAY_MS);
   }
 
-  /**
-   * The keys (B34, B38, B32, B33). Modified keys pass through untouched, as do keys the chart
-   * does not use, so screen reader and browser shortcuts keep working (B11). Enter and Space are
-   * the buttons' own.
-   */
+  /** The keys. Modified keys and keys the chart does not use pass through, so screen reader and browser shortcuts keep working. */
   private onKey(event: KeyboardEvent): void {
     if (event.altKey || event.ctrlKey || event.metaKey || this.marks.length === 0) return;
     const here = this.focusIndex;
@@ -849,7 +825,7 @@ export class Chart implements EnhancedChart {
         next = this.lastIndex;
         break;
       case "Escape":
-        // Dismisses the tooltip (WCAG 1.4.13, F6) and clears the filter and range. When there
+        // Dismisses the tooltip (WCAG 1.4.13) and clears the filter and range. When there
         // was nothing to clear, Escape goes on to close an expanded view.
         this.hideTip();
         if (this.selected || this.range || this.rangeStart !== null) {
@@ -876,10 +852,7 @@ export class Chart implements EnhancedChart {
     return mark ? place(mark).column : null;
   }
 
-  /**
-   * Up and down: the mark above or below in the same category (a stack or group). Where the
-   * category holds only this point, as in a scatter plot, the nearest point of the next series.
-   */
+  /** Up and down: the mark above or below in the same category; where the category holds only this point, the nearest point of the next series. */
   private across(step: 1 | -1): number {
     const here = this.focusIndex;
     const column = this.columnOf(here);
@@ -904,10 +877,7 @@ export class Chart implements EnhancedChart {
     if (focus) to.focus();
   }
 
-  /**
-   * The mark to carry the tab stop after an update: the same key if it still exists, else the
-   * first mark in the same category, else the mark at the nearest position in reading order.
-   */
+  /** The mark to carry the tab stop after an update: the same key, else the first in its category, else the nearest in reading order. */
   private successor(key: string, x: string | null, index: number): number {
     const same = this.marks.findIndex((m) => m.getAttribute("data-enarratio-key") === key);
     if (same !== -1) return same;
@@ -990,7 +960,7 @@ export class Chart implements EnhancedChart {
       this.live.textContent = this.live.textContent === message ? `${message} ` : message;
   }
 
-  /** Writes the filter and range into the address (B36), when the page asked for it. */
+  /** Writes the filter and range into the address, when the page asked for it. */
   private syncUrl(): void {
     const id = this.chartId;
     if (!this.options.url || !id) return;

@@ -1,17 +1,14 @@
 /**
- * Per-entry size check, run after `npm run build`. For every entry in package.json's `exports`
- * it follows the compiled file's imports and reports the gzipped size of everything the entry
- * brings with it from this package (compiled, not minified: a bundler's output is smaller), and
- * the outside packages it imports.
+ * Per-entry size check, run after `npm run build`. For every entry in package.json's `exports` it
+ * follows the compiled file's imports and reports the gzipped size of everything the entry brings
+ * with it from this package (compiled, not minified), and the outside packages it imports.
  *
- * The light chart entries (`enarratio/lite` and its subpaths) are also measured the way a browser
- * app ships them: bundled for the browser with everything they import, minified, then gzipped.
- * Each must stay under LITE_LIMIT and import nothing outside this package. The enhancement layer
- * (`enarratio/enhance`) is measured the same way and must stay under ENHANCE_LIMIT.
+ * The light chart entries (`enarratio/lite` and subpaths) are also measured as a browser app ships
+ * them: bundled, minified, gzipped. Each must stay under LITE_LIMIT and import nothing outside this
+ * package; the enhancement layer is measured the same way against ENHANCE_LIMIT.
  *
- * It fails when core gains a runtime dependency: if package.json lists any `dependencies`, or if
- * the core entry imports anything outside this package.
- *
+ * It fails when core gains a runtime dependency: any `dependencies` in package.json, or a core
+ * entry importing anything outside this package.
  *   node scripts/size-check.mjs
  */
 import { readdirSync, readFileSync } from "node:fs";
@@ -21,13 +18,9 @@ import { rolldown } from "rolldown";
 
 /** The most a light chart entry may weigh, bundled, minified and gzipped (40 kB). */
 const LITE_LIMIT = 40_000;
-/**
- * The most `enarratio/lite/sparkline` may weigh, bundled, minified and gzipped (4 kB): it exists
- * for pages that draw a word-sized trend and nothing else, so it must stay free of the figure and
- * the strings table (about 2 kB measured; `sparkline` in `enarratio` is about 9.5 kB).
- */
+/** The most `enarratio/lite/sparkline` may weigh (4 kB): it is for pages that draw a word-sized trend and nothing else, so it must stay free of the figure and the strings table (about 2 kB measured). */
 const SPARKLINE_LIMIT = 4_000;
-/** The most the enhancement layer may weigh, bundled, minified and gzipped (D6, records 0035 and 0036). */
+/** The most the enhancement layer may weigh, bundled, minified and gzipped. */
 const ENHANCE_LIMIT = 12_000;
 
 const root = resolve(import.meta.dirname, "..");
@@ -96,10 +89,7 @@ for (const [name, target] of Object.entries(pkg.exports)) {
   }
 }
 
-/**
- * An entry bundled for the browser with all it imports statically, minified, then gzipped: its
- * bytes, and each chunk it loads only on demand (the enhancement layer's sound and image files) by name.
- */
+/** An entry bundled for the browser with all it imports statically, minified, then gzipped: its bytes, and each chunk it loads only on demand by name. */
 async function bundled(path) {
   const bundle = await rolldown({ input: path, platform: "browser", logLevel: "silent" });
   const { output } = await bundle.generate({
@@ -134,10 +124,7 @@ for (const [name, target] of Object.entries(pkg.exports)) {
 }
 
 const enhanceBytes = await bundled(resolve(root, pkg.exports["./enhance"].default));
-/**
- * The most a module the layer loads on demand may weigh: the sound (B54), loaded on Play, and the
- * image files (C3, B55), loaded on the first download.
- */
+/** The most a module the layer loads on demand (sound, image files) may weigh. */
 const LAZY_LIMIT = 2_500;
 for (const [file, bytes] of enhanceBytes.lazy) {
   if (bytes > LAZY_LIMIT)

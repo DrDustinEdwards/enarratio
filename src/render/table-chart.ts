@@ -40,9 +40,9 @@ const BAR_WIDTH = 96;
 const BAR_HEIGHT = 12;
 
 /**
- * A bar to scale in a cell, from zero: right of a center line when the column has negatives,
- * from the left edge if not. An SVG of its own, so it needs no `style` attribute (D4), and hidden
- * from assistive technology: the cell prints its number.
+ * A bar to scale in a cell, from zero: right of a center line when the column has negatives, from
+ * the left edge if not. An SVG of its own (no `style` attribute), hidden from assistive technology:
+ * the cell prints its number.
  */
 function cellBar(value: number, reach: number, negative: boolean): string {
   const length = (Math.abs(value) / reach) * (negative ? BAR_WIDTH / 2 : BAR_WIDTH);
@@ -79,10 +79,9 @@ function cellBar(value: number, reach: number, negative: boolean): string {
 
 /**
  * A data table with inline graphics: a bar to scale beside each number, heat cells on the theme's
- * sequential ramp, and a sparkline per row, for comparing many rows at a glance. Every cell still
- * prints its number, so the table reads without color and without the graphics, and the table
- * is the figure's data table: assistive technology reads it as it is, the bars hidden and each
- * sparkline named, and `enhance()` makes it sortable, as every chart's table is.
+ * sequential ramp, and a sparkline per row. Every cell still prints its number, so the table reads
+ * without color or graphics. It is the figure's data table: assistive technology reads it with the
+ * bars hidden and each sparkline named, and `enhance()` makes it sortable.
  *
  * @example
  * tableChart({

@@ -45,19 +45,13 @@ export type TimelineEvent = TimelinePoint | TimelineSpan;
 export interface TimelineOptions extends PrimitiveFigureOptions {
   /** The events, in any order. */
   readonly events: readonly TimelineEvent[];
-  /**
-   * The lanes, top to bottom. Every event's lane must be among them. Without it, lanes are in
-   * first-seen order. A lane with no events is drawn empty.
-   */
+  /** The lanes, top to bottom; every event's lane must be among them. Default first-seen order. A lane with no events is drawn empty. */
   readonly lanes?: readonly string[];
   /** The start of the time window (default: the earliest event). */
   readonly start?: TimelineTime;
   /** The end of the time window (default: the latest event). */
   readonly end?: TimelineTime;
-  /**
-   * What the timeline shows, e.g. "Agent runs, 9 to 12 June"; it starts the generated text
-   * alternative. Required unless `alt` is given.
-   */
+  /** What the timeline shows, e.g. "Agent runs, 9 to 12 June"; it starts the generated text alternative. Required unless `alt` is given. */
   readonly label?: string;
   /** The text alternative, instead of the one generated from `label` and the events. */
   readonly alt?: string;
@@ -92,7 +86,6 @@ interface PreparedEvent {
   readonly when: string;
 }
 
-/** Everything the timeline, its text alternative and its companion table are computed from. */
 interface TimelineValues {
   readonly events: readonly PreparedEvent[];
   readonly lanes: readonly string[];
@@ -112,7 +105,6 @@ function readTime(what: string, value: unknown): number {
   return date.getTime();
 }
 
-/** Validates the options and computes the numbers every part of a timeline is made from. */
 function prepareTimeline(options: TimelineOptions): TimelineValues {
   const { events } = options;
   if (events.length === 0) throw new Error(`${KIND}: needs at least one event`);
@@ -234,7 +226,6 @@ const SPAN_HEIGHT = 8;
 const round = (n: number): number => Math.round(n * 100) / 100;
 const pad = (n: number): string => String(n).padStart(2, "0");
 
-/** Tick times (epoch milliseconds) and their labels, about six, aligned to UTC calendar units. */
 function ticks(start: number, end: number): { at: number; label: string }[] {
   const MINUTE = 60_000;
   const fixed = [1, 5, 15, 30, 60, 180, 360, 720, 1440, 2880, 10_080].map((m) => m * MINUTE);
@@ -313,14 +304,13 @@ function marker(status: TimelineStatus, cx: number, cy: number): string {
 }
 
 /**
- * An event timeline: one lane for each site, agent or service, with spans (things that lasted) and
- * point events over a time window. Status is carried by the theme's status colors and by shape (a
- * circle for ok, a triangle for warning, a square for error, a dashed hollow circle for unknown),
- * so it reads without hue. Events that overlap in a lane stack in rows.
+ * An event timeline: one lane for each site, agent or service, with spans and point events over a
+ * time window. Status is carried by the theme's status colors and by shape (circle ok, triangle
+ * warning, square error, dashed hollow circle unknown), so it reads without hue. Overlapping events
+ * in a lane stack in rows.
  *
  * The result is a container: the drawing, named by its text alternative, and a plain list of the
- * same events. With stylesheet or `enarratio/base.css`, the list is read by screen readers beside
- * the drawing, and replaces it when there is less than 30rem of room. Without CSS both show.
+ * same events, which with CSS is read beside the drawing and replaces it under 30rem of room.
  *
  * @example
  * timeline({
@@ -334,8 +324,7 @@ function marker(status: TimelineStatus, cx: number, cy: number): string {
 export function timeline(options: TimelineOptions): string {
   const p = prepareTimeline(options);
   const longest = Math.max(maxOf(p.lanes.map((l) => l.length)), 1);
-  // The text grows as the drawing shrinks toward 30rem, where the list takes its place, so it
-  // never renders under 12 px (B3); the lane labels and the axis make room for it.
+  // The text grows as the drawing shrinks toward 30rem, so it never renders under 12 px; lane labels and axis make room.
   const growth = textGrowth(p.width);
   const ch = charWidth(p.width) * 0.94;
   const left = Math.round(Math.min(180 * growth, Math.max(64, longest * ch + 20)));
@@ -375,7 +364,7 @@ export function timeline(options: TimelineOptions): string {
   for (const t of axis) {
     const x = xOf(t.at);
     // A label centered on a tick near the drawing's edge would run past it, so it ends (or starts)
-    // at its tick instead (record 0041).
+    // at its tick instead.
     const half = (t.label.length * ch) / 2;
     const anchor = x + half > p.width - 2 ? "end" : x - half < 2 ? "start" : "middle";
     parts.push(
@@ -493,9 +482,8 @@ export function timeline(options: TimelineOptions): string {
 }
 
 /**
- * A timeline's events as a table (event, lane, status, start and end, the end blank for a point
- * event) in time order, and a summary sentence with the counts, computed from the same events
- * as the drawing and its plain list so they cannot disagree. Takes the same options as
+ * A timeline's events as a table and a summary sentence with the counts, computed from the same
+ * events as the drawing and its plain list so they cannot disagree. Takes the same options as
  * {@link timeline}. Without `label` the summary is the given `alt`.
  *
  * @example

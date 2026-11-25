@@ -1,13 +1,12 @@
 /**
  * Draws a chart again at its frame's width in the browser, so a chart drawn on the server for a
- * wide page fits a 320 px phone instead of shrinking its text below the mark size or scrolling
- * (record 0027). Bar, line and area charts are drawn again by `enarratio/lite`, which draws the
- * same SVG as `enarratio/plot` at any width; any other chart may give a narrow drawing made on the
- * server, used once the frame is under 30rem. Each drawing is enhanced (`enarratio/enhance`).
+ * wide page fits a 320 px phone instead of shrinking its text or scrolling. Bar, line and area
+ * charts are drawn again by `enarratio/lite`, the same SVG as `enarratio/plot` at any width; any
+ * other chart may give a narrow drawing made on the server, used once the frame is under 30rem.
+ * Each drawing is enhanced (`enarratio/enhance`).
  *
  * The server writes the spec beside the chart with {@link redrawAttribute}; the page calls
- * {@link redrawCharts} once the document is parsed. Without the script the server's drawing
- * stands, with its table.
+ * {@link redrawCharts} once the document is parsed. Without the script the server's drawing stands.
  */
 
 import { enhance } from "../enhance/index.js";
@@ -47,9 +46,8 @@ const LABELS_MIN_WIDTH = 400;
  * `<div class="cap-chart" ${redrawAttribute(spec)}>`.
  */
 export function redrawAttribute(spec: RedrawSpec): string {
-  // Single quotes, so the JSON's own double quotes stay as they are and `<` is valid in the value: a narrow
-  // drawing carried as `&quot;` and `&lt;` was a third larger, which pushed a page of charts past the 2 MB
-  // of HTML that Googlebot reads (Google's crawler documentation).
+  // Single quotes, so the JSON's own double quotes stay and `<` is valid in the value: `&quot;` and `&lt;`
+  // made a narrow drawing a third larger, pushing a page of charts past the 2 MB of HTML Googlebot reads.
   const json = JSON.stringify(spec).replace(/&/g, "&amp;").replace(/'/g, "&#39;");
   return `${REDRAW_ATTRIBUTE}='${json}'`;
 }
@@ -80,7 +78,6 @@ export function redrawCharts(
   return out;
 }
 
-/** Whether a parsed attribute has the shape of a spec: a narrow drawing, or a chart with options. */
 function isSpec(spec: unknown): spec is RedrawSpec {
   if (typeof spec !== "object" || spec === null) return false;
   const s = spec as Record<string, unknown>;
@@ -100,11 +97,7 @@ export function redrawChart(
   return followWidth(host, (width, original) => drawing(spec, width, original), options);
 }
 
-/**
- * The height the server's drawing shows at in a frame `width` wide: its own shape, at the frame's
- * width, or at 30rem for a wide drawing that scrolls under that (the stylesheet's min-width).
- * The redraw draws at this height, so the page does not shift when it swaps in (D5, record 0033).
- */
+/** The height the server's drawing shows at in a frame `width` wide: its own shape at the frame's width, or at 30rem for a wide drawing that scrolls under that. The redraw uses it, so the page does not shift on the swap. */
 function shownHeight(original: string, width: number): number | undefined {
   const box = /<svg\b[^>]*?\sviewBox="[\d.]+ [\d.]+ ([\d.]+) ([\d.]+)"/.exec(original);
   const w = Number(box?.[1]);
@@ -149,10 +142,9 @@ function drawing(
 /** What {@link enhanceCharts} takes: the enhancement options, and which elements are charts. */
 export interface PageOptions extends EnhanceOptions {
   /**
-   * A CSS selector for the element around each chart, such as a design system's frame
-   * (`.cap-chart:not([data-enhance])`). A frame with a redraw spec is drawn again at its width;
-   * any other frame is enhanced as it is. Default: every Enarratio figure, and every element
-   * with a redraw spec.
+   * A CSS selector for the element around each chart, such as a design system's frame. A frame with
+   * a redraw spec is drawn again at its width; any other is enhanced as it is. Default: every
+   * Enarratio figure and every element with a redraw spec.
    */
   readonly frame?: string;
 }
@@ -166,10 +158,9 @@ const within = (root: ParentNode, selector: string): HTMLElement[] => [
 ];
 
 /**
- * Makes every chart under `root` (the document by default) interactive: a chart with a redraw
- * spec is enhanced and drawn again at its frame's width, any other is enhanced. Calling it again
- * is safe: a chart starts once. Without the script every chart reads, with its table, as the
- * server drew it.
+ * Makes every chart under `root` (the document by default) interactive: a chart with a redraw spec
+ * is enhanced and drawn again at its frame's width, any other is enhanced. Calling it again is
+ * safe: a chart starts once.
  */
 export function enhanceCharts(
   root: ParentNode = document,

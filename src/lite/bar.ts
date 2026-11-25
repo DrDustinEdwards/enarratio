@@ -70,16 +70,7 @@ function stack(model: BarModel): Map<BarPoint, [number, number]> {
 }
 
 /**
- * A bar chart, drawn without Observable Plot: one series, or several stacked or grouped. The same
- * options and output as `barChart` from `enarratio/plot`, in a bundle small enough for a browser.
- *
- * @example
- * barChart({
- *   data: [{ year: 2023, type: "Publications" }, { year: 2024, type: "Talks" }],
- *   x: "year",
- *   series: "type",
- *   alt: "Entries per year by type, 2023 to 2024.",
- * });
+ * A bar chart without Observable Plot: the same options and output as `barChart` from `enarratio/plot`.
  */
 export function barChart<T extends object>(options: BarChartOptions<T>): string {
   const model = barModel(options);
@@ -92,7 +83,7 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
   let frame: Frame = {
     width,
     height,
-    // Room above for the y axis title, as renderPlot makes for Plot's (record 0036).
+    // Room above for the y axis title, as renderPlot makes for Plot's.
     marginTop: topMargin(
       MARGIN_TOP,
       (horizontal ? model.categoryTitle : model.valueLabel) !== null,
@@ -287,7 +278,7 @@ function drawBars<T extends object>(model: BarModel, options: BarChartOptions<T>
         const keys = Object.fromEntries(datumAttributes(model.datum(p)));
         const shape = { ...box, fill: model.plan.range[rowOf.get(p.series) ?? 0] };
         const title = el("title", {}, text(model.describe(p)));
-        // As in the Plot chart: the link rides on the bar for enhance(), and is in the table (0026).
+        // As in the Plot chart: the link rides on the bar for enhance(), and is in the table.
         const link = model.link ? { "data-enarratio-href": model.link(p) } : {};
         return el("rect", { ...shape, ...keys, ...link }, title);
       })

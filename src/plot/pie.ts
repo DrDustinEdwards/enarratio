@@ -60,11 +60,10 @@ function separate(labels: { y: number }[], gap: number, top: number, bottom: num
 }
 
 /**
- * A pie or donut chart of the parts of one whole, for at most six parts: past that, angles are
- * too close to compare, so seven or eight slices are reported as an issue (thrown when
- * `strict`) and more than eight throw, suggesting a bar chart or an "Other" slice. Slices start
- * at 12 o'clock and run clockwise in data order, separated by a gap, and each is labeled outside
- * the pie with its name and share, so slices are told apart by text, not only by color.
+ * A pie or donut chart of the parts of one whole, for at most six parts: past that, angles are too
+ * close to compare, so seven or eight slices are reported as an issue and more than eight throw,
+ * suggesting a bar chart or an "Other" slice. Slices start at 12 o'clock and run clockwise in data
+ * order, each labeled outside with its name and share, so they are told apart by text, not only color.
  *
  * @example
  * pieChart({ data: replies, label: "answer", value: "count", donut: true, alt: "..." });
@@ -105,9 +104,8 @@ export function pieChart<T extends object>(options: PieChartOptions<T>): string 
   const labelText = (s: Slice): string => `${s.name} ${percent(s.share)}`;
   // Room beside the pie for the longest label, at about 7 pixels a character.
   const room = Math.max(...slices.map((s) => labelText(s).length)) * 7 + 36;
-  // Where the labels beside the pie would leave it under 40 units across (a phone's drawing), they
-  // are listed under it instead, each with a swatch of its slice's color, in the slices' clockwise
-  // order from 12 o'clock (record 0041).
+  // Where labels beside the pie would leave it under 40 units across (a phone), they are listed under
+  // it instead, each with a swatch, in the slices' clockwise order.
   const listed = width / 2 - room < 40;
   const line = 16 * textGrowth(width);
   const listHeight = listed ? slices.length * line + 12 : 0;
@@ -200,7 +198,7 @@ export function pieChart<T extends object>(options: PieChartOptions<T>): string 
         })
         .join("");
   // The center label sits on the hole, painted in the background color, with a halo of it where
-  // the label is wider than the hole, so it is read, and measured, against the background (B1).
+  // the label is wider than the hole, so it is read, and measured, against the background.
   const center =
     options.donut && options.centerLabel
       ? el("circle", {
@@ -250,7 +248,7 @@ export function pieChart<T extends object>(options: PieChartOptions<T>): string 
   return figure(options, {
     kind: "pie",
     svg,
-    // Slices are the points of one series; past six, the figure reports it (B21).
+    // Slices are the points of one series; past six, the figure reports it.
     limits: { points: MAX_SLICES, advice: ADVICE },
     description: {
       format: percent,

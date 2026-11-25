@@ -63,10 +63,7 @@ interface Point {
 
 const KIND = "dotMap";
 
-/**
- * The default largest radius: a dot a reader can compare, that hides few streets. 9 at the default
- * width, smaller on a narrow drawing so the dots do not merge, and never under 5.
- */
+/** The default largest radius: 9 at the default width, smaller on a narrow drawing so dots do not merge, never under 5. */
 const maxRadiusFor = (width: number): number => Math.max(5, Math.min(9, width / 70));
 
 function readCoordinate(row: object, key: string, i: number, limit: number): number {
@@ -78,12 +75,11 @@ function readCoordinate(row: object, key: string, i: number, limit: number): num
 }
 
 /**
- * A map of points sized by value, over the caller's own basemap (streets, coastlines, areas)
- * drawn quietly beneath them: cases by address, sites by count. Dots are sized by area, so the
- * value is read from size and never from color alone; a key gives three reference sizes, and the
- * data table lists every point with its value and position. Landmarks are squares, apart from
- * the dots, and one can be highlighted and labeled. With `enarratio/enhance` the dots are walked
- * by keyboard in reading order: north to south in bands, west to east within each.
+ * A map of points sized by value, over the caller's own basemap drawn quietly beneath them. Dots
+ * are sized by area, so the value is read from size and never from color alone; a key gives three
+ * reference sizes, and the table lists every point with its value and position. Landmarks are
+ * squares, and one can be highlighted and labeled. With `enarratio/enhance` the dots are walked by
+ * keyboard in reading order: north to south in bands, west to east within each.
  *
  * Enarratio ships no boundaries or streets: pass GeoJSON in longitude and latitude.
  *

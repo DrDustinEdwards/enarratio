@@ -1,7 +1,6 @@
 /**
- * The four-parameter logistic (4PL) dose-response model, and its least-squares fit by the
- * Levenberg-Marquardt method (Levenberg 1944, Marquardt 1963). Pure, and tested against
- * published fits.
+ * The four-parameter logistic (4PL) dose-response model and its least-squares fit by the
+ * Levenberg-Marquardt method (Levenberg 1944, Marquardt 1963). Pure, tested against published fits.
  */
 
 import { maxOf, minOf } from "../render/data.js";
@@ -38,7 +37,6 @@ export function logistic(p: LogisticParameters, dose: number): number {
 
 type Vector = [number, number, number, number];
 
-/** Solves a 4 by 4 linear system by Gaussian elimination with partial pivoting; null if singular. */
 function solve(a: number[][], b: number[]): number[] | null {
   const n = b.length;
   const m = a.map((row, i) => [...row, b[i] as number]);
@@ -141,12 +139,12 @@ function levenbergMarquardt(
 }
 
 /**
- * Fits a four-parameter logistic curve to doses and responses by least squares. Starts from
- * the data's extremes and the dose nearest the midpoint, tries both slope directions and a
- * steeper start, and keeps the best fit. The EC50's interval is the Wald interval on ln EC50:
- * ±t(0.975, n - 4) standard errors, from the covariance s²(JᵀJ)⁻¹ at the solution (Bates and
- * Watts 1988), as GraphPad Prism and R's drc report it. Doses must be zero or more, with at
- * least four distinct positive doses; the interval needs at least five points.
+ * Fits a four-parameter logistic curve to doses and responses by least squares: starts from the
+ * data's extremes and the dose nearest the midpoint, tries both slope directions and a steeper
+ * start, and keeps the best. The EC50's interval is the Wald interval on ln EC50, ±t(0.975, n - 4)
+ * standard errors from the covariance s²(JᵀJ)⁻¹ (Bates and Watts 1988), as GraphPad Prism and R's
+ * drc report it. Needs doses of zero or more, at least four distinct positive; the interval needs
+ * five points.
  */
 export function fitLogistic(doses: readonly number[], responses: readonly number[]): LogisticFit {
   const n = doses.length;

@@ -1,7 +1,6 @@
 /**
  * The words and numbers Enarratio writes for readers: the strings table every generated sentence
- * comes from (English by default, replaceable for another language), locale-aware number and date
- * formats, a reading-grade measure, and the CSV a figure links to.
+ * comes from, locale-aware number and date formats, a reading-grade measure, and the figure's CSV.
  */
 
 import { englishSparklineSentence, type SparklineSentence } from "./sparkline.js";
@@ -31,10 +30,7 @@ export interface At {
   readonly at: string;
 }
 
-/**
- * The words charts write into table headers, legends, axis labels and hover details when the
- * options name none. Every one can be translated through `strings.terms`.
- */
+/** The words charts write into table headers, legends, axis labels and hover details when the options name none. Translate through `strings.terms`. */
 export interface Terms {
   readonly value: string;
   readonly values: string;
@@ -691,7 +687,6 @@ export function stringsFor(strings: StringOverrides | undefined): Strings {
   };
 }
 
-/** Syllables in an English word, by vowel groups; good enough to grade a sentence. */
 function syllables(word: string): number {
   const w = word.toLowerCase().replace(/[^a-z]/g, "");
   if (w === "") return 1;
@@ -699,10 +694,7 @@ function syllables(word: string): number {
   return Math.max(1, groups?.length ?? 1);
 }
 
-/**
- * The Flesch-Kincaid grade level of English text: about the school year a reader needs. Numbers
- * count as one-syllable words. A measure a caller can use; no chart checks text against it.
- */
+/** The Flesch-Kincaid grade level of English text, with numbers as one-syllable words. A measure a caller can use; no chart checks text against it. */
 export function readingGrade(text: string): number {
   const words = text.split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w));
   if (words.length === 0) return 0;
@@ -713,8 +705,8 @@ export function readingGrade(text: string): number {
 
 /**
  * One CSV field (RFC 4180): quoted when it holds a comma, quote or line break. A field a
- * spreadsheet would run as a formula (starting with =, @, a tab or carriage return, or with + or -
- * unless the whole cell is a number) gets a leading apostrophe, so a downloaded file cannot run one.
+ * spreadsheet would run as a formula (starting with =, @, a tab or carriage return, or + or -
+ * unless the whole cell is a number) gets a leading apostrophe.
  */
 function csvField(value: string): string {
   const safe = /^\s*[=@]|^[+-](?![\d.,]+%?$)/.test(value) ? `'${value}` : value;

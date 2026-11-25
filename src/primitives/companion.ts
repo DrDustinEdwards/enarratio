@@ -12,7 +12,7 @@ export interface PrimitiveTable {
   readonly table: DataTable;
   /**
    * The table as markup, visually hidden for screen readers and AI agents, ready to put beside
-   * the primitive (record 0035).
+   * the primitive.
    */
   readonly markup: string;
 }
@@ -64,12 +64,12 @@ export interface PrimitiveFigureOptions extends Pick<
   | "strict"
   | "onIssue"
 > {
-  /** Return the bare drawing, without figure, summary or table (B30: default false). */
+  /** Return the bare drawing, without figure, summary or table (default false). */
   readonly inline?: boolean;
 }
 
 /**
- * A primitive as a whole figure (B30, B51): title (its label by default), finding, the drawing,
+ * A primitive as a whole figure: title (its label by default), finding, the drawing,
  * the companion's summary and table, and the CSV link; or the bare drawing when `inline`.
  */
 export function primitiveFigure(

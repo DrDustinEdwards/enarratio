@@ -54,10 +54,7 @@ export interface SeriesFrame {
   readonly xScale: ScaleDescription;
 }
 
-/**
- * Lays out a line or area chart: an x scale over every x the chart draws, without rounding (as
- * Plot leaves it), and a y scale made round, with zero unless told otherwise.
- */
+/** Lays out a line or area chart: an x scale over every x drawn, without rounding (as Plot leaves it), and a y scale made round, with zero unless told otherwise. */
 export function seriesFrame(
   model: SeriesModel,
   given: Frame,
@@ -85,7 +82,7 @@ export function seriesFrame(
       : 1;
   const asked: Frame = {
     ...given,
-    // Room above for the y axis title, as renderPlot makes for Plot's (record 0036).
+    // Room above for the y axis title, as renderPlot makes for Plot's.
     marginTop: topMargin(given.marginTop, prepared.yLabel !== null, given.width),
     marginBottom: bottomMargin(
       given.marginBottom,
@@ -170,17 +167,11 @@ export function seriesFrame(
   };
 }
 
-/**
- * A path point. d3-shape writes path coordinates to three decimals, and the Plot renderer then
- * rounds to two, so a path rounds twice: 123.3846 becomes 123.385, then 123.39.
- */
+/** A path point. d3-shape writes path coordinates to three decimals and the Plot renderer then rounds to two, so a path rounds twice: 123.3846 becomes 123.385, then 123.39. */
 const xy = (x: number, y: number): string =>
   `${num(Math.round(x * 1000) / 1000)},${num(Math.round(y * 1000) / 1000)}`;
 
-/**
- * Splits rows into runs of defined values, as Plot does for lines and areas: rows before the
- * first defined value are dropped, and an undefined value ends a run.
- */
+/** Splits rows into runs of defined values, as Plot does: rows before the first defined value are dropped, and an undefined value ends a run. */
 function runs<P>(rows: readonly P[], defined: (p: P) => boolean): P[][] {
   const out: P[][] = [];
   let current: P[] | undefined;
@@ -276,7 +267,7 @@ export function dots(
   );
 }
 
-/** The halo Plot draws under rule labels (plot/line.ts, record 0041). */
+/** The halo Plot draws under rule labels (plot/line.ts). */
 const HALO = {
   "paint-order": "stroke",
   "stroke-linejoin": "round",

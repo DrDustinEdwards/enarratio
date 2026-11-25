@@ -20,8 +20,7 @@ import { assertCssText, defineTheme } from "./define.js";
 
 /**
  * The legend's textures for series 2 to 8, matching the patterns in the drawing, under `scope`:
- * a chart that shows its textures, or any chart with patterns in a media query that asks for
- * them (record 0036).
+ * a chart that shows its textures, or any chart with patterns in a media query.
  */
 function textureRules(scope: string): string {
   const stripes = (deg: number): string =>
@@ -56,7 +55,7 @@ export interface StylesheetOptions {
   readonly colorScheme?: { readonly dark?: string; readonly light?: string };
   /**
    * A theme whose colors replace the main theme's when the reader asks for more contrast
-   * (`prefers-contrast: more`), e.g. `highContrastTheme` from `enarratio/themes` (B43, B49).
+   * (`prefers-contrast: more`), e.g. `highContrastTheme` from `enarratio/themes`.
    * Its fonts and gridlines are not used.
    */
   readonly highContrast?: Theme;
@@ -89,7 +88,7 @@ function colorVariables(light: ColorScheme, dark: ColorScheme): Variables {
       labelColor(color, light.text, light.background),
       labelColor(darkColor, dark.text, dark.background),
     ]);
-    // A series name written on the background (a direct label) takes a shade at 4.5:1 there (B1).
+    // A series name written on the background (a direct label) takes a shade at 4.5:1 there.
     pairs.push([`series-label-${i + 1}`, lightLabels[i] ?? color, darkLabels[i] ?? darkColor]);
   });
   light.sequential.forEach((color, i) => {
@@ -101,7 +100,7 @@ function colorVariables(light: ColorScheme, dark: ColorScheme): Variables {
       labelColor(color, light.text, light.background),
       labelColor(darkColor, dark.text, dark.background),
     ]);
-    // A step too pale to see on the background gets an edge at 3:1 (B1).
+    // A step too pale to see on the background gets an edge at 3:1.
     pairs.push([
       `sequential-edge-${i + 1}`,
       lightEdges[i] ?? "transparent",
@@ -750,15 +749,11 @@ ${textureRules(".enarratio:has(pattern)")}
 
 /**
  * The rules that do not depend on a theme: layout, legend, data table, tooltip, focus ring and
- * animation. They refer to the color and font custom properties (`--enarratio-text`,
- * `--enarratio-series-1` and the rest) without defining them, so a site that defines those itself
- * (or a generated theme) needs no theme object. Every size, weight, radius and timing is a
- * custom property whose fallback is Enarratio's own value, so setting none of them changes
- * nothing. The same rules ship as `enarratio/base.css`. The full contract is in docs/api.md.
- *
- * The one thing a theme adds beyond properties is hiding gridlines (see {@link stylesheet}); a
- * site using only the base rules hides them itself, e.g.
- * `.enarratio [data-enarratio-mark="x-grid"] { display: none; }`.
+ * animation. They refer to the color and font custom properties without defining them, so a site
+ * that defines those itself needs no theme object; every size, weight, radius and timing falls
+ * back to Enarratio's own value. Shipped as `enarratio/base.css`; the contract is in docs/api.md.
+ * A theme also hides gridlines (see {@link stylesheet}); a site using only these rules hides them
+ * itself: `.enarratio [data-enarratio-mark="x-grid"] { display: none; }`.
  */
 export function baseStylesheet(): string {
   return `/* Enarratio base rules */\n${BASE_RULES.trim()}`;
@@ -780,21 +775,18 @@ function declarations(entries: ReadonlyArray<readonly [string, string]>, indent 
 }
 
 /**
- * The CSS a page includes once to style every Enarratio chart with a theme. Charts contain no
- * colors of their own, only references to the custom properties defined here, so the same
- * server-rendered markup follows the theme and switches between light and dark without a re-render.
- *
- * Light or dark follows the page's `color-scheme` through CSS `light-dark()`; browsers without it
- * get the light scheme. Throws when a theme fails {@link checkTheme}, so a chart is never drawn in
- * colors some readers cannot tell apart.
+ * The CSS a page includes once to style every Enarratio chart with a theme. Charts hold references
+ * to the custom properties defined here, not colors, so the same markup follows the theme and
+ * switches between light and dark without a re-render. Light or dark follows the page's
+ * `color-scheme` through `light-dark()`; browsers without it get light. Throws when a theme fails
+ * {@link checkTheme}.
  */
 export function stylesheet(theme: Theme, options: StylesheetOptions = {}): string {
-  // Everything written into the CSS is checked first, so a theme from data cannot break out of
-  // the stylesheet (F10). The scheme selectors are the page's own, trusted, but still may not
-  // contain what would end a rule.
+  // Everything written into the CSS is checked first, so a theme from data cannot break out of the
+  // stylesheet; the scheme selectors are trusted but may not contain what would end a rule.
   for (const t of [theme, options.highContrast]) {
     if (!t) continue;
-    // A theme that fails the checks would draw charts some readers cannot read (B1, B7).
+    // A theme that fails the checks would draw charts some readers cannot read.
     const errors = checkTheme(defineTheme(t))
       .issues.filter((i) => i.severity === "error")
       .map((i) => i.message);
@@ -839,10 +831,9 @@ const COLOR_OVERRIDE =
   /^--enarratio-series-[1-8]: [#a-z0-9(),.%\s-]+(?:; --enarratio-series-[1-8]: [#a-z0-9(),.%\s-]+)*$/i;
 
 /**
- * The CSS for the per-chart color overrides (`colors`, `color`) in some chart markup: one rule per
- * distinct override. Charts carry overrides in a `data-enarratio-colors` attribute, never a
- * `style` attribute, so a page under a hash-based Content-Security-Policy adds these rules to its
- * own stylesheet, or to a `<style>` whose hash it allows (D4).
+ * The CSS for the per-chart color overrides (`colors`, `color`) in some chart markup, one rule per
+ * distinct override. Charts carry them in a `data-enarratio-colors` attribute, never `style`, so a
+ * page under a hash-based CSP adds these rules to its own stylesheet.
  *
  * @example
  * const html = barChart({ ..., colors: { Talks: "#8a4a1b" } });
@@ -854,8 +845,7 @@ export function colorStyles(markup: string): string {
     if (!COLOR_OVERRIDE.test(value) || /url\s*\(/i.test(value)) {
       throw new Error(`"${value}" is not a color override Enarratio writes`);
     }
-    // Series names written on the background follow the override, mixed toward the text color
-    // as the base rules do for a site that defines no label shades (B1).
+    // Series names written on the background follow the override, mixed toward the text color.
     const labels = [...value.matchAll(/--enarratio-series-([1-8]): ([^;]+)/g)].map(
       ([, n, color]) =>
         `--enarratio-series-label-${n}: color-mix(in srgb, ${color} 55%, var(--enarratio-text))`,

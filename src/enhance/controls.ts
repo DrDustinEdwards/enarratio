@@ -1,5 +1,5 @@
 /**
- * The controls the layer adds to a chart: the toolbar above the drawing (record 0035), its
+ * The controls the layer adds to a chart: the toolbar above the drawing, its
  * buttons and popovers, expand, and sorting a table chart's table.
  */
 
@@ -34,17 +34,13 @@ function compare(a: string, b: string): number {
   return a.localeCompare(b, undefined, { numeric: true });
 }
 
-/**
- * Makes a table chart's table sortable (B35): each column header becomes a button that sorts
- * by it, ascending then descending, with `aria-sort` on the header. Without script the table is
- * complete, in source order. Returns the undo.
- */
+/** Makes a table chart's table sortable: each column header becomes a button that sorts by it, with `aria-sort`. Without script the table is complete, in source order. Returns the undo. */
 export function sortTable(
   figure: HTMLElement,
   strings: EnhanceStrings,
   announce: (message: string) => void,
 ): () => void {
-  // Only a table people can see: a chart's own table is visually hidden (record 0035), and sort
+  // Only a table people can see: a chart's own table is visually hidden, and sort
   // buttons in it would be tab stops with nothing on screen (WCAG 2.2 SC 2.4.7).
   const table = figure.querySelector<HTMLTableElement>(
     ".enarratio-data:not(.enarratio-visually-hidden) table",
@@ -83,10 +79,9 @@ export function sortTable(
 }
 
 /**
- * The Expand toggle (C6): expands the figure to fill the window. Its name stays "Expand" and
- * `aria-pressed` says whether it is (WAI-ARIA APG, toggle button). Escape, the button again, or
- * focus leaving the figure closes it, so the expanded chart never hides focus elsewhere (WCAG
- * 2.4.11).
+ * The Expand toggle: expands the figure to fill the window. Its name stays "Expand" and
+ * `aria-pressed` says whether it is. Escape, the button again, or focus leaving the figure closes
+ * it, so the expanded chart never hides focus elsewhere (WCAG 2.4.11).
  */
 export function expander(
   figure: HTMLElement,
@@ -132,7 +127,7 @@ function face(el: HTMLElement, name: keyof typeof ICONS, text: string): void {
   el.append(icon(name), word);
 }
 
-/** A toolbar button: an icon and a word (record 0035). */
+/** A toolbar button: an icon and a word. */
 export function toolButton(
   name: keyof typeof ICONS,
   text: string,
@@ -143,11 +138,7 @@ export function toolButton(
   return el;
 }
 
-/**
- * A toolbar button that opens a panel under the toolbar: a native disclosure (`details`), so it
- * opens by click, Enter and Space with no script of its own. Escape closes it and puts focus back
- * on its button; so does a click outside it, or focus leaving it.
- */
+/** A toolbar button that opens a panel under it: a native `details`, so it opens by click, Enter and Space with no script. Escape, a click outside or focus leaving closes it and returns focus. */
 export function popover(
   cls: string,
   name: keyof typeof ICONS,
@@ -189,7 +180,6 @@ export function popover(
   return details;
 }
 
-/** Where a key moves in `list` from index `at`: `back` and `on` step round, Home and End go to the ends. */
 function step(list: HTMLElement[], at: number, key: string, back: string, on: string) {
   const n = list.length;
   const to =
@@ -205,11 +195,7 @@ function step(list: HTMLElement[], at: number, key: string, back: string, on: st
   return to < 0 ? undefined : list[to % n];
 }
 
-/**
- * The Download menu: "Download CSV" (the figure's own link, moved in) and the export buttons, in
- * a popover. Up and Down move between its items (Home and End to the first and last), Down on the closed button opens it at the first
- * one, and choosing an item closes it with focus back on its button.
- */
+/** The Download menu: "Download CSV" (the figure's own link, moved in) and the export buttons, in a popover. Up and Down move between items, Home and End to the ends; Down on the closed button opens it. */
 export function downloadMenu(
   items: readonly HTMLElement[],
   strings: EnhanceStrings,

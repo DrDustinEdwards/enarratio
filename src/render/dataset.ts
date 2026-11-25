@@ -1,5 +1,5 @@
 /**
- * A schema.org `Dataset` entry for a chart's data (C14), for a site that wants its numbers found
+ * A schema.org `Dataset` entry for a chart's data, for a site that wants its numbers found
  * by search engines and AI answers. Optional: the numbers are already in the HTML table.
  */
 

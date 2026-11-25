@@ -76,8 +76,8 @@ function readValues<T extends object>(kind: string, data: readonly T[], x: strin
 
 /**
  * A histogram: how often values fall in each bin, as touching bars with round edges, optionally
- * with a density curve. Every bin is a keyed bar that names its range and count, and the data
- * table lists every bin, empty ones too.
+ * with a density curve. Every bin is a keyed bar naming its range and count; the table lists every
+ * bin, empty ones too.
  *
  * @example
  * histogram({ data: patients, x: "age", thresholds: 10, alt: "..." });
@@ -189,8 +189,7 @@ const TABLE_POINTS = 15;
 
 /**
  * Density values to three significant digits, in scientific notation below 0.001: a curve's tail
- * can be 1e-22, which as plain digits is 21 zeros that a screen reader reads one by one in the
- * table, the hover details and the summary (WCAG 2.2 SC 1.1.1, 1.3.1).
+ * can be 1e-22, 21 zeros that a screen reader reads one by one (WCAG 2.2 SC 1.1.1, 1.3.1).
  */
 export function densityDigits(locale: string | undefined): (value: number) => string {
   const plain = numberFormat({ ...(locale ? { locale } : {}), maximumSignificantDigits: 3 });
@@ -225,8 +224,7 @@ export function densityRows(
 /**
  * Smoothed distributions of one measurement, one curve per series on shared axes: a Gaussian
  * kernel density estimate with Silverman's bandwidth unless one is given. Curves differ by color,
- * dash and a label at each curve's peak, and the data table gives each curve's density at evenly
- * spaced values with its n and bandwidth in the caption.
+ * dash and a label at the peak; the table gives each curve's density at evenly spaced values.
  *
  * @example
  * densityPlot({ data: cells, x: "diameter", series: "line", alt: "..." });
@@ -302,8 +300,7 @@ export function densityPlot<T extends object>(given: DensityPlotOptions<T>): str
     }),
   );
   if (names.length > 1) {
-    // Each name over its curve's peak. Names that would overlap (close peaks on a phone's
-    // drawing) are moved apart, upward, and every name is kept inside the plot (record 0041).
+    // Each name over its curve's peak; names that would overlap are moved apart, upward, and kept inside the plot.
     const width = options.width ?? DEFAULT_WIDTH;
     const height = options.height ?? DEFAULT_HEIGHT;
     const char = charWidth(width);

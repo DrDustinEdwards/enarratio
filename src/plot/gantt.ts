@@ -57,11 +57,10 @@ interface Task {
 }
 
 /**
- * A Gantt chart: tasks as rows and bars running from start to end on a time axis, milestones as
- * diamonds, and a labeled line for today. Each task is named beside its bar, or above it on a
- * narrow drawing, and groups (teams, phases) take colors with a legend. Every bar and milestone is
- * reached by hover, focus and the keys, and the data table gives each task's start, end and length
- * in days.
+ * A Gantt chart: tasks as rows and bars from start to end on a time axis, milestones as diamonds,
+ * and a labeled line for today. Each task is named beside its bar, or above it on a narrow
+ * drawing; groups take colors with a legend. The table gives each task's start, end and length in
+ * days.
  *
  * @example
  * ganttChart({ data: plan, task: "task", start: "from", end: "to", group: "team", alt: "..." });
@@ -176,8 +175,7 @@ export function ganttChart<T extends object>(options: GanttChartOptions<T>): str
         text: "name",
         frameAnchor: "left",
         textAnchor: "start",
-        // Bottom-anchored just above the bar's top edge (a band padded 0.55 leaves the bar under
-        // a quarter of the pitch either side of center), so a name never touches its bar.
+        // Bottom-anchored just above the bar's top edge, so a name never touches its bar.
         lineAnchor: "bottom",
         dy: -(pitch * 0.25 + 2),
         fill: "var(--enarratio-text)",
@@ -239,7 +237,7 @@ export function ganttChart<T extends object>(options: GanttChartOptions<T>): str
     },
     options.alt,
   );
-  // Groups are named only in the legend, so their bars take textures (record 0036).
+  // Groups are named only in the legend, so their bars take textures.
   const svg = multi ? texture(rendered.svg, slotStyle(plan.slotColors)) : rendered.svg;
   const first = dates.text(new Date(minOf(times.map(Number))));
   const last = dates.text(new Date(maxOf(times.map(Number))));

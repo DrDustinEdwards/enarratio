@@ -57,7 +57,6 @@ const RADIUS = 6;
 /** How many of the most connected nodes the summary names. */
 const HUBS = 3;
 
-/** How many separate parts a network falls into: nodes joined by any path are one part. */
 function components(
   nodes: readonly LaidOutNode[],
   edges: readonly { a: LaidOutNode; b: LaidOutNode }[],
@@ -75,8 +74,7 @@ function components(
 
 /**
  * A force-directed network, laid out on the server with d3-force so it needs no script and draws
- * the same every time: collaborators, co-authorship, transmission clusters. Groups are colored
- * as series; the data table lists every node with its connections.
+ * the same every time. Groups are colored as series; the table lists every node with its connections.
  *
  * @example
  * networkChart({
@@ -157,7 +155,7 @@ export function networkChart(options: NetworkChartOptions): string {
       y1: (e: (typeof edges)[number]) => e.a.y ?? 0,
       x2: (e: (typeof edges)[number]) => e.b.x ?? 0,
       y2: (e: (typeof edges)[number]) => e.b.y ?? 0,
-      // Full strength: the muted text color reaches 4.5:1, so a link always reaches 3:1 (B1).
+      // Full strength: the muted text color reaches 4.5:1, so a link always reaches 3:1.
       stroke: "var(--enarratio-text-muted)",
     }),
     Plot.dot(laidOut, {
@@ -165,7 +163,7 @@ export function networkChart(options: NetworkChartOptions): string {
       y: (n: LaidOutNode) => n.y ?? 0,
       r: RADIUS,
       fill: "group",
-      // Groups are told apart by symbol as well as color, so they survive forced colors (B57).
+      // Groups are told apart by symbol as well as color, so they survive forced colors.
       ...(grouped ? { symbol: "group" } : {}),
       stroke: "var(--enarratio-background)",
       strokeWidth: 1.5,

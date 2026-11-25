@@ -87,13 +87,11 @@ function fit(value: string, room: number): string {
 }
 
 /**
- * A treemap: parts of a whole as nested rectangles whose areas are their values, for wholes with
- * many parts or parts in levels (a budget by department and program, sales by region and
- * country). Tiles are squarified (Bruls, Huizing and van Wijk 2000) so their areas compare, sorted
- * largest first, and each names its part and value where it has room. On two or more levels each
- * top-level group takes a color and a header line with its name and total; on one level every
- * tile is one color and the labels tell them apart. The data table lists every part, with each
- * group's subtotal.
+ * A treemap: parts of a whole as nested rectangles whose areas are their values. Tiles are
+ * squarified (Bruls, Huizing and van Wijk 2000) and sorted largest first, each naming its part and
+ * value where it has room. On two or more levels each top-level group takes a color and a header
+ * with its name and total; on one level every tile is one color. The table lists every part with
+ * each group's subtotal.
  *
  * @example
  * treemap({ data: budget, path: ["department", "program"], value: "spend", alt: "..." });
@@ -149,9 +147,8 @@ export function treemap<T extends object>(options: TreemapOptions<T>): string {
     )
     .join("");
 
-  // Each tile's name, and its value below when there is room for two lines, in the color for
-  // text on its fill (B1); a tile too small for its name stays unlabeled, read by hover, focus
-  // and the table.
+  // Each tile's name, and its value below when there is room, in the color for text on its fill; a
+  // tile too small for its name stays unlabeled, read by hover, focus and the table.
   const labels = tiles
     .map((t) => {
       const room = Math.floor((t.rect.width - 8) / char);
@@ -195,7 +192,7 @@ export function treemap<T extends object>(options: TreemapOptions<T>): string {
           "g",
           {
             "data-enarratio-mark": "tile",
-            // A gap in the background color between tiles, so neighbors never merge (B6).
+            // A gap in the background color between tiles, so neighbors never merge.
             stroke: "var(--enarratio-background)",
             "stroke-width": GAP,
           },

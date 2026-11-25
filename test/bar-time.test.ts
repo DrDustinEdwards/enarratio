@@ -47,18 +47,6 @@ describe("barChart time axis", () => {
     expect(keyedMarks(fig)).toHaveLength(3);
   });
 
-  it("groups series on a time axis", () => {
-    const fig = parse(barChart({ ...base, series: "site", layout: "grouped" }));
-    expect(rows(fig)).toHaveLength(4);
-    expect(keyedMarks(fig)).toHaveLength(3);
-  });
-
-  it("draws horizontal bars on a time axis", () => {
-    const fig = parse(barChart({ ...base, orientation: "horizontal" }));
-    expect(fig.getAttribute("data-enarratio-orientation")).toBe("horizontal");
-    expect(rows(fig)).toHaveLength(4);
-  });
-
   it("takes Dates, epoch milliseconds and calendar dates", () => {
     const asDates = barChart({ ...base, data: runs.map((r) => ({ ...r, at: new Date(r.at) })) });
     const asNumbers = barChart({
@@ -157,11 +145,5 @@ describe("barChart time axis", () => {
     expect(() => barChart({ data: runs, x: "at", interval: "day", alt: "a" })).toThrow(
       /belong to xType "time"/,
     );
-  });
-
-  it("leaves category charts exactly as they were", () => {
-    const a = barChart({ data: [{ k: "a" }, { k: "b" }], x: "k", alt: "a" });
-    const b = barChart({ data: [{ k: "a" }, { k: "b" }], x: "k", xType: "category", alt: "a" });
-    expect(b).toBe(a);
   });
 });

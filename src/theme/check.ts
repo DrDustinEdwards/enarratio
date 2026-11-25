@@ -14,7 +14,7 @@ export interface CheckThresholds {
   /**
    * Minimum CIEDE2000 difference between any two series colors, with typical vision and under
    * each simulated color vision deficiency. Default 10: about ten just-noticeable differences,
-   * enough to tell two small marks apart at a glance (B7).
+   * enough to tell two small marks apart at a glance.
    */
   readonly seriesDifference: number;
 }
@@ -26,11 +26,7 @@ export const DEFAULT_THRESHOLDS: CheckThresholds = {
   seriesDifference: 10,
 };
 
-/**
- * One finding. `error` means the theme fails an accessibility minimum; every check reports
- * errors, including two series colors that some readers could confuse. `warning` is kept for
- * findings that do not fail a theme; none do today.
- */
+/** One finding. `error` means the theme fails an accessibility minimum; `warning` is kept for findings that do not fail a theme (none do today). */
 export interface CheckIssue {
   readonly severity: "error" | "warning";
   readonly scheme: "light" | "dark";
@@ -101,11 +97,11 @@ function checkScheme(
   contrast("status.good", scheme.status.good, t.graphics, "graphics-contrast");
   contrast("status.warning", scheme.status.warning, t.graphics, "graphics-contrast");
   contrast("status.bad", scheme.status.bad, t.graphics, "graphics-contrast");
-  // No data is drawn with a pattern too, but the mark must still be seen (B1).
+  // No data is drawn with a pattern too, but the mark must still be seen.
   contrast("status.unknown", scheme.status.unknown, t.graphics, "graphics-contrast");
   contrast("sequential step 5", scheme.sequential[4], t.graphics, "graphics-contrast");
 
-  // Series names written on the background (direct labels, curve labels) are text (B1).
+  // Series names written on the background (direct labels, curve labels) are text.
   seriesLabels(scheme).forEach((c, i) => {
     contrast(`series ${i + 1} label`, c, t.text, "series-label-contrast");
   });
@@ -131,7 +127,7 @@ function checkScheme(
   });
 
   // Text printed on marks (heatmap values, genome feature names, bar labels) takes the color
-  // labelColor picks for each fill; it must reach body-text contrast there (F8).
+  // labelColor picks for each fill; it must reach body-text contrast there.
   const fills: [string, ThemeColor][] = [
     ...scheme.series.map((c, i): [string, ThemeColor] => [`series ${i + 1}`, c]),
     ...scheme.sequential.map((c, i): [string, ThemeColor] => [`sequential step ${i + 1}`, c]),
@@ -196,14 +192,11 @@ function checkScheme(
 }
 
 /**
- * Measures a theme against accessibility minimums, in light and dark: text and mark contrast on
- * the background, series names written on the background (each series' label shade), every ramp
- * step by its fill or its edge, the order of the sequential ramp, and whether any two series colors could be
- * confused with typical vision or with protanopia, deuteranopia or tritanopia (simulated after
- * Machado et al. 2009, compared with CIEDE2000).
- *
- * It reports rather than throws; `stylesheet()` throws on any error, so a failing theme never
- * reaches a page.
+ * Measures a theme against accessibility minimums, in light and dark: text and mark contrast on the
+ * background, series label shades, ramp steps by fill or edge, the ramp's order, and whether any
+ * two series colors could be confused with typical vision or protanopia, deuteranopia or
+ * tritanopia (simulated after Machado et al. 2009, compared with CIEDE2000). It reports rather
+ * than throws; `stylesheet()` throws on any error.
  */
 export function checkTheme(theme: Theme, thresholds: Partial<CheckThresholds> = {}): CheckReport {
   const t: CheckThresholds = { ...DEFAULT_THRESHOLDS, ...thresholds };

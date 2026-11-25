@@ -4,7 +4,7 @@
     "jscpd": "jscpd@5.4.0"
   },
   "baseline": {
-    "measured_at": "146c9f8",
+    "measured_at": "9a631f0",
     "knip": {},
     "jscpd": {
       "clones": 1,
@@ -18,26 +18,25 @@
     },
     "legacy": {},
     "size": {
-      "scripts/gallery.ts": 1132,
-      "src/enhance/chart.ts": 1140,
-      "src/lite/scale.ts": 507,
-      "src/plot/dot.ts": 535,
-      "src/plot/line.ts": 514,
-      "src/primitives/timeline.ts": 523,
-      "src/render/bar-model.ts": 696,
-      "src/render/figure.ts": 655,
-      "src/render/line-model.ts": 736,
-      "src/render/text.ts": 727,
-      "src/theme/stylesheet.ts": 866
+      "scripts/gallery.ts": 1074,
+      "src/enhance/chart.ts": 1110,
+      "src/plot/dot.ts": 533,
+      "src/plot/line.ts": 504,
+      "src/primitives/timeline.ts": 511,
+      "src/render/bar-model.ts": 656,
+      "src/render/figure.ts": 629,
+      "src/render/line-model.ts": 700,
+      "src/render/text.ts": 719,
+      "src/theme/stylesheet.ts": 856
     },
     "tests": {
       "files": 30,
-      "cases": 306
+      "cases": 287
     },
     "comments": {
-      "lines": 4474,
-      "code": 31019,
-      "percentage": 12.61
+      "lines": 3867,
+      "code": 30789,
+      "percentage": 11.16
     }
   }
 }

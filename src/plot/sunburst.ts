@@ -77,13 +77,12 @@ function fitsAlong(arc: Arc, w: number, h: number): boolean {
 }
 
 /**
- * A sunburst: parts of a whole in levels as rings, the top level innermost and each part's arc
- * spanning its share of its parent's, for a hierarchy read from the center out (a budget by
- * department and program, a genome's reads by kingdom and phylum). Each top-level group takes a
- * color its parts keep, arcs are separated by a gap, and an arc is named where its name fits
- * inside it, level or along the arc; the hole holds the whole. Angles are harder to compare than the lengths or
- * areas of a treemap, so prefer a treemap when exact comparison matters; the data table lists
- * every part with each group's subtotal.
+ * A sunburst: parts of a whole in levels as rings, the top level innermost and each arc spanning its
+ * share of its parent's. Each top-level group takes a color its parts keep, arcs are separated by a
+ * gap, and an arc is named where its name fits inside it, level or along the arc; the hole holds the
+ * whole. Angles compare worse than a treemap's areas, so prefer a treemap when exact comparison
+ * matters. The table lists every part with each group's subtotal.
+ *
  *
  * @example
  * sunburst({ data: budget, path: ["department", "program"], value: "spend", alt: "..." });
@@ -208,7 +207,7 @@ export function sunburst<T extends object>(options: SunburstOptions<T>): string 
           "g",
           {
             "data-enarratio-mark": "arc",
-            // A gap in the background color between arcs, so neighbors never merge (B6).
+            // A gap in the background color between arcs, so neighbors never merge.
             stroke: "var(--enarratio-background)",
             "stroke-width": GAP,
             "stroke-linejoin": "round",

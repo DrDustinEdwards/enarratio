@@ -1,9 +1,9 @@
 /**
  * Bundles dist/enhance/index.js into one file with no static imports, so a page without a bundler
- * can serve it as a single script (README, "Without a bundler"), the sound module (B54) into
- * sound.js beside it, which index.js imports only when a reader presses Play, and the image files
- * (C3, B55) into image.js, imported on the first download. The source is split
- * into modules; the published files are not. Runs in `npm run build`, after tsc.
+ * can serve it as a single script (README, "Without a bundler"); the sound module goes into sound.js
+ * beside it, imported only on Play, and the image files into image.js, imported on the first
+ * download. The source is split into modules; the published files are not. Runs in `npm run build`,
+ * after tsc.
  */
 import { readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";

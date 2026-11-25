@@ -1,6 +1,6 @@
 /**
  * Pooling study estimates by inverse-variance weighting: the fixed-effect estimate, and the
- * random-effects estimate of DerSimonian and Laird (1986). Pure, for forest plots.
+ * random-effects estimate of DerSimonian and Laird. Pure, for forest plots.
  */
 
 /** One study's estimate with its 95% confidence interval. */

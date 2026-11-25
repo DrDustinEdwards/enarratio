@@ -1,7 +1,6 @@
 /**
- * Everything about a bar chart except the drawing: reading and checking the data, the layout
- * numbers and the data table. Shared by the Observable Plot renderer (`enarratio/plot`) and the
- * light one (`enarratio/lite`), so both draw the same chart from the same options.
+ * Everything about a bar chart except the drawing: the data, the layout numbers and the data
+ * table. Shared by `enarratio/plot` and `enarratio/lite`, so both draw the same chart.
  */
 
 import { type Annotated, withNotes } from "./annotation.js";
@@ -41,37 +40,32 @@ export interface BarChartOptions<T extends object> extends SeriesAxesOptions, An
   readonly data: readonly T[];
   /**
    * The field for categories along the bar axis: a label, or a number such as a year. With
-   * `xType: "time"` it is a time instead: a Date, an ISO 8601 string or epoch milliseconds.
+   * `xType: "time"` it is a time: a Date, an ISO 8601 string or epoch milliseconds.
    */
   readonly x: KeysOfType<T, string | number | Date>;
   /**
-   * `"time"` puts the bars on a time axis: each row falls in the `interval` that contains its
-   * time, one bar slot for every interval from the first to the last (empty ones too, so a gap
-   * in the data is a gap in the chart), labeled for you. A run per day needs no pre-formatted
-   * labels. Rows in the same interval and series are summed, or counted when `y` is omitted.
-   * Dates are instants in UTC, except that when every Date falls at local midnight they are
-   * read as calendar dates, as in `lineChart`. The default, `"category"`, treats `x` as labels.
+   * `"time"` puts the bars on a time axis: one bar slot for every `interval` from the first row to
+   * the last (empty ones too, so a gap in the data is a gap in the chart). Rows in the same
+   * interval and series are summed, or counted when `y` is omitted. Dates are instants in UTC,
+   * except that when every Date falls at local midnight they are read as calendar dates, as in
+   * `lineChart`. The default, `"category"`, treats `x` as labels.
    */
   readonly xType?: "category" | "time";
   /**
-   * With `xType: "time"`, the length of each bar's interval (default `"day"`). Intervals start
-   * at UTC midnight; weeks start on Monday. Each bar is labeled by its first moment: an hour
-   * as `2026-01-05 14:00 UTC`, a day or week as `2026-01-05`, a month as `2026-01`, a year as
-   * `2026`.
+   * With `xType: "time"`, the length of each bar's interval (default `"day"`), from UTC midnight;
+   * weeks start on Monday. Bars are labeled by their first moment, e.g. `2026-01-05 14:00 UTC`.
    */
   readonly interval?: "hour" | "day" | "week" | "month" | "year";
   /** With `xType: "time"`, formats each interval's start for labels, hover details and the data table. */
   readonly formatX?: (start: Date) => string;
   /**
    * The field for bar length. Omit it to count rows instead: `barChart({ data: entries, x:
-   * "year", series: "type" })` draws entries per year by type. Rows sharing a category and series
-   * are summed.
+   * "year", series: "type" })`. Rows sharing a category and series are summed.
    */
   readonly y?: KeysOfType<T, number>;
   /**
-   * With `y`, keeps the value axis on whole numbers, as counted bars do, for values that are
-   * counts you already totaled (books per month, votes per option). Values must be whole numbers
-   * of 0 or more. Counted bars (no `y`) always have whole-number ticks.
+   * With `y`, keeps the value axis on whole numbers, for values that are counts you already
+   * totaled. Values must be whole numbers of 0 or more. Counted bars always have whole-number ticks.
    */
   readonly wholeNumbers?: boolean;
   /** A field that splits each bar into series, stacked or grouped. */
@@ -81,54 +75,42 @@ export interface BarChartOptions<T extends object> extends SeriesAxesOptions, An
   /** Vertical bars (default), or horizontal bars for long category names and rankings. */
   readonly orientation?: "vertical" | "horizontal";
   /**
-   * Every category in display order. Without it, categories appear in data order, or ascending
-   * when all are numbers. Give it to show empty years or a fixed order. Not used with
-   * `xType: "time"`, which builds its own domain.
+   * Every category in display order. Without it, data order, or ascending when all are numbers.
+   * Not used with `xType: "time"`, which builds its own domain.
    */
   readonly xDomain?: readonly (string | number)[];
-  /**
-   * Color overrides by series name. A chart without `series` has one series, named by its value
-   * label (`yLabel`).
-   */
+  /** Color overrides by series name. A chart without `series` has one series, named by `yLabel`. */
   readonly colors?: Readonly<Record<string, SeriesColor>>;
   /**
    * The category axis label; defaults to the `x` field name; `null` hides it. A time axis or an
-   * axis of years draws no title, its labels saying what they are; the data table, hover details
-   * and summary still use it.
+   * axis of years draws no title, but the table, hover details and summary still use it.
    */
   readonly xLabel?: string | null;
   /** The value axis label; defaults to the `y` field name or "Count"; `null` hides it. */
   readonly yLabel?: string | null;
   /**
-   * What a click on a bar filters by, once enhanced: its series (default when there are series)
-   * or its category (`"x"`, e.g. "this year"). A chart without series always filters by category.
+   * What a click on a bar filters by once enhanced: its series (default when there are series) or
+   * its category (`"x"`). A chart without series always filters by category.
    */
   readonly filterBy?: "series" | "x";
   /**
-   * A link for each category (to a filtered page, say): each category in the data table is that
-   * link, and each bar carries it in `data-enarratio-href`, which `enhance()` follows on a click
-   * when the bar does not filter. Only relative, `http:` and `https:` links are allowed.
+   * A link for each category: each category in the data table is that link, and each bar carries
+   * it in `data-enarratio-href`, which `enhance()` follows on a click when the bar does not
+   * filter. Only relative, `http:` and `https:` links are allowed.
    */
   readonly href?: (x: string) => string;
-  /**
-   * The most category labels to print. With more categories than this, every nth label is
-   * printed, starting from the first, so labels stay legible when the chart is drawn small.
-   */
+  /** The most category labels to print; with more categories, every nth is printed, from the first. */
   readonly maxXTicks?: number;
   /**
-   * Name the series on the drawing (default true): beside the last stack of vertical stacked
-   * bars, or over the last group of two grouped series, so series are told apart by text as well
-   * as color (A1, record 0036). A chart whose series are not all named this way (horizontal or
-   * more than two grouped series, a series missing from the last stack, names wider than a
-   * quarter of the drawing (record 0040), or `false` here) fills
-   * series 2 to 8 with textures instead.
+   * Name the series on the drawing (default true): beside the last stack of vertical stacked bars,
+   * or over the last group of two grouped series. A chart whose series are not all named this way
+   * (horizontal, more than two grouped, a series missing from the last stack, names wider than a
+   * quarter of the drawing, or `false`) fills series 2 to 8 with textures instead.
    */
   readonly directLabels?: boolean;
   /**
-   * An error bar on each bar, from `lower` and `upper` fields (a confidence interval, ± one
-   * standard deviation), carried in the data table as a column per series and stated in the
-   * summary. Needs `y`, and the grouped layout when there are series: a stacked segment has no
-   * interval of its own.
+   * An error bar on each bar, from `lower` and `upper` fields, carried in the data table and stated
+   * in the summary. Needs `y`, and the grouped layout when there are series.
    */
   readonly errorBars?: IntervalFields<T>;
 }
@@ -146,7 +128,6 @@ type Interval = NonNullable<BarChartOptions<object>["interval"]>;
 
 const pad = (n: number): string => String(n).padStart(2, "0");
 
-/** The start of the interval containing `t` (UTC; weeks start on Monday), in epoch milliseconds. */
 function floorTo(t: number, interval: Interval): number {
   const d = new Date(t);
   switch (interval) {
@@ -183,7 +164,6 @@ function nextAfter(start: number, interval: Interval): number {
   }
 }
 
-/** The default label for an interval starting at `start`. */
 function labelFor(start: number, interval: Interval): string {
   const iso = new Date(start).toISOString();
   switch (interval) {
@@ -202,10 +182,6 @@ function labelFor(start: number, interval: Interval): string {
 /** The most bars a time axis will draw, so a typo in a date cannot ask for millions. */
 const MAX_PERIODS = 2000;
 
-/**
- * The time axis: each row's interval start, and the label of every interval from the first to
- * the last, in order.
- */
 function timeAxis<T extends object>(
   data: readonly T[],
   x: string,
@@ -242,7 +218,6 @@ function requireMaxXTicks(max: number | undefined): void {
 
 const STEPS = [1, 2, 5];
 
-/** Whole-number ticks from zero past the tallest bar or stack, about five of them. */
 function countTicks(points: readonly BarPoint[], grouped: boolean): number[] {
   const totals = new Map<string, number>();
   for (const p of points) {
@@ -281,10 +256,7 @@ export interface BarModel {
   /** Whether the series are named on the drawing where they can be (finishBars). */
   readonly directLabels: boolean;
   readonly categoryLabel: string | null;
-  /**
-   * The category axis title the drawing shows: none on a time axis or an axis of years, whose
-   * labels say what they are (record 0036). The table and text keep `categoryLabel`.
-   */
+  /** The category axis title the drawing shows: none on a time axis or an axis of years. The table and text keep `categoryLabel`. */
   readonly categoryTitle: string | null;
   readonly valueLabel: string | null;
   readonly format: (value: number) => string;
@@ -293,16 +265,13 @@ export interface BarModel {
   readonly marginLeft: number;
   /** Room on the right for the series names beside the last stack, or the values past the bars. */
   readonly marginRight: number;
-  /**
-   * The padding of the band the bars sit in (categories, or each group's series when grouped),
-   * as fractions of a step, wide enough that no bar is drawn wider than {@link BAR_MAX}.
-   */
+  /** The band padding the bars sit in, as fractions of a step, wide enough that no bar is wider than {@link BAR_MAX}. */
   readonly padding: { readonly inner: number; readonly outer: number };
   /** The category labels to print, when not all of them are. */
   readonly thinned: readonly string[] | undefined;
-  /** The value axis's tick format for huge values, and whether every value is zero (B41). */
+  /** The value axis's tick format for huge values, and whether every value is zero. */
   readonly valueAxis: ReturnType<typeof valueAxis>;
-  /** A category's axis label: shortened with an ellipsis when it would not fit (B41). */
+  /** A category's axis label: shortened with an ellipsis when it would not fit. */
   tickLabel(name: string): string;
   /** Whole-number value ticks for counted bars; undefined when values come from `y`. */
   readonly countTicks: readonly number[] | undefined;
@@ -427,10 +396,9 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   const char = charWidth(width);
   const longest = (names: Iterable<string>): number =>
     Math.max(0, ...[...names].map((n) => n.length));
-  // Series names beside the last stack (record 0036) need a leader and the longest name. They are
-  // written only while that room is at most a quarter of the drawing; on a narrower drawing (a
-  // phone) they would squeeze the bars into a sliver, so the legend names the series instead and
-  // the textures come back (record 0040).
+  // Series names beside the last stack need a leader and the longest name. They are written only
+  // while that room is at most a quarter of the drawing; on a narrower one (a phone) they would
+  // squeeze the bars, so the legend names the series and the textures come back.
   const stackNames = 14 + longest(seriesNames) * char + 4;
   const stackNamed =
     options.directLabels !== false &&
@@ -438,9 +406,8 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     !grouped &&
     !horizontal &&
     stackNames <= width / 4;
-  // Two grouped series are named over the last group, each name running half a group's step
-  // from its middle; where a name is longer than that (a phone's drawing) it would run over the
-  // next group's bars, so the legend names them and the textures come back (record 0041).
+  // Two grouped series are named over the last group, each name running half a group's step from
+  // its middle; a longer name would run over the next group's bars, so the legend names them.
   const groupNamed =
     options.directLabels !== false &&
     grouped &&
@@ -457,20 +424,17 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
       horizontal ? 6 + longest(points.map((p) => format(p.value))) * char + 4 : 0,
     ),
   );
-  // Category labels below the bars are thinned, as line charts' x ticks are (fitTicks), when
-  // they would come closer than the least gap at the width drawn ("Sun" on "Mon" at 254 px).
-  // maxXTicks, when given, caps the count lower still; it never prints more than fit, so a
-  // phone's drawing thins further than the wide one asked for. Beside horizontal bars each label
-  // has its own row, so only maxXTicks thins them. The table, hover details and each bar's name
-  // keep every one.
+  // Category labels below the bars are thinned, as line charts' x ticks are (fitTicks), when they
+  // would come closer than the least gap at the width drawn. maxXTicks caps the count lower still.
+  // Beside horizontal bars each label has its own row, so only maxXTicks thins them. The table,
+  // hover details and each bar's name keep every one.
   requireMaxXTicks(options.maxXTicks);
-  // The room the labels share is the plot's: 80 px less than the drawing, or less where the
-  // right margin holds series names or values.
+  // The room the labels share is the plot's: 80 px less than the drawing, or less where the right
+  // margin holds series names or values.
   const plot = horizontal ? width - 80 : Math.min(width - 80, width - 44 - baseRight);
   const across = horizontal ? Number.POSITIVE_INFINITY : plot;
-  // Below vertical bars, every category keeps its label while its slot holds four characters:
-  // a long one wraps onto a second line and is cut there, rather than a neighbor going unnamed
-  // ("Vega-Lite configuration" between two others in a 273 px column). Narrower slots thin.
+  // Below vertical bars, every category keeps its label while its slot holds four characters: a
+  // long one wraps onto a second line and is cut there, rather than a neighbor going unnamed.
   // Seven units a character is a capital's width, so lowercase text leaves a gap at the edges.
   const slotRoom = Math.floor(plot / Math.max(1, xNames.length) / 7);
   const named = !horizontal && !time && options.maxXTicks === undefined && slotRoom >= 4;
@@ -480,10 +444,9 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
       : fitTicks(xNames, (n) => n, width, across, options.maxXTicks);
   const thinned = fitted && fitted.length < xNames.length ? fitted : undefined;
 
-  // Category labels longer than their room are cut with an ellipsis; the table, hover details
-  // and each bar's name keep the whole text. Time labels are already sized to fit. Beside
-  // horizontal bars the labels take at most 220 px, and at most two fifths of a narrow drawing,
-  // so the bars keep the rest; a label longer than that wraps onto a second line at a space.
+  // Labels longer than their room are cut with an ellipsis; the table, hover details and each bar's
+  // name keep the whole text. Beside horizontal bars the labels take at most 220 px, and at most
+  // two fifths of a narrow drawing, so the bars keep the rest; a longer one wraps at a space.
   const labelMargin = Math.min(220, Math.max(72, Math.round(width * 0.4)));
   const room = horizontal
     ? Math.floor((labelMargin - 16) / 7)
@@ -511,15 +474,13 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
       )
     : 0;
 
-  // A row of horizontal bars is 28 tall, or 34 where a label wraps onto a second line, so two
-  // wrapped labels do not touch (record 0041).
+  // A row of horizontal bars is 28 tall, or 34 where a label wraps, so two wrapped labels do not touch.
   const wraps = horizontal && xNames.some((n) => tickLabel(n).includes("\n"));
   const height =
     options.height ??
     (horizontal ? Math.max(120, xNames.length * (wraps ? 34 : 28) + 60) : DEFAULT_HEIGHT);
-  // The last category's label is centered under its bar, half a step from the plot's edge; one
-  // wider than that step ("2026-06-28" under a phone's narrow bar) runs into the right margin,
-  // which grows to hold it (record 0041).
+  // The last category's label is centered under its bar; one wider than the half step left runs into
+  // the right margin, which grows to hold it.
   const lastName = xNames[xNames.length - 1];
   const lastShown =
     !horizontal && lastName !== undefined && (thinned ?? xNames).at(-1) === lastName;
@@ -536,8 +497,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
     : 0;
   const marginRight = Math.ceil(Math.max(baseRight, overhang));
 
-  // No bar wider than BAR_MAX (record 0036). The band's length is taken at the margins given;
-  // a margin widened later for the tick labels only narrows the bars further.
+  // No bar wider than BAR_MAX; a margin widened later for the tick labels only narrows the bars further.
   const marginLeft = horizontal ? Math.min(labelMargin, labelWidth * 7 + 16) : 44;
   const length = horizontal ? height - 20 - 44 : width - marginLeft - marginRight;
   const padding = grouped
@@ -670,7 +630,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
             ...intervalColumns,
           ],
           rows,
-          // The bars' links, which the image does not expose, are reached here (0026).
+          // The bars' links, which the image does not expose, are reached here.
           ...(linkOf ? { links: xNames.map((name) => safeHref(KIND, linkOf(name))) } : {}),
         },
       });
@@ -679,7 +639,7 @@ export function barModel<T extends object>(given: BarChartOptions<T>): BarModel 
   return model;
 }
 
-/** The widest a bar is drawn, in user units: wider ones read as blocks, not lengths (record 0036). */
+/** The widest a bar is drawn, in user units: wider ones read as blocks, not lengths. */
 export const BAR_MAX = 40;
 /** The padding between groups of grouped bars, each a facet. */
 export const FACET_PADDING = 0.15;

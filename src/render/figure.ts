@@ -1,11 +1,8 @@
 /**
- * The figure every chart is delivered in (design record 0023): a head (title, subtitle and the
- * finding in text), an overview for screen readers, a legend, the SVG named by its text
- * alternative, a summary computed from the data, the caption, notes and source line, and the
- * data table, visually hidden for screen readers and AI agents. A toolbar above the drawing holds
- * the CSV download (record 0035). All of it is in the HTML with scripts off. The accessible name
- * lives on the SVG and the figcaption, never on the figure, because `role="img"` hides its
- * descendants: naming the figure would hide the caption and table from the readers they exist for.
+ * The figure every chart is delivered in: head, overview for screen readers, legend, the SVG named
+ * by its text alternative, summary, caption, notes, source line, and the data table, visually
+ * hidden. All of it is in the HTML with scripts off. The accessible name lives on the SVG and the
+ * figcaption, never on the figure: `role="img"` would hide the caption and table from their readers.
  */
 
 import { BRUSH_SCALES, ENHANCE_STRINGS, ICONS } from "../controls.js";
@@ -37,8 +34,7 @@ export interface ChartIssue {
 export interface IssueOptions {
   /**
    * Throw on the first issue instead of reporting it, so a build fails on a chart a reader would
-   * struggle with: no `alt`, no title, an unlabeled axis, too many series or points, or a CSV too
-   * large to inline. Set it once in a site's shared options.
+   * struggle with. Set it once in a site's shared options.
    */
   readonly strict?: boolean;
   /** Receives each issue instead of `console.warn`, e.g. to collect them and fail a build. */
@@ -59,25 +55,24 @@ export interface FigureOptions extends IssueOptions {
   readonly alt?: string;
   /** A visible title above the chart. Every chart should have one; without it, an issue. */
   readonly title?: string;
-  /** A line under the title saying what the chart shows or how to read it (B17). */
+  /** A line under the title saying what the chart shows or how to read it. */
   readonly subtitle?: string;
   /** A visible caption below the chart: method, caveats. */
   readonly caption?: string;
-  /** Notes under the chart: definitions of the measures, exclusions (B23, C2). */
+  /** Notes under the chart: definitions of the measures, exclusions. */
   readonly notes?: string | readonly string[];
-  /** Where the data come from, linked when `href` is given (C2). */
+  /** Where the data come from, linked when `href` is given. */
   readonly source?: Source;
-  /** Who made the chart, in the source line (C2). */
+  /** Who made the chart, in the source line. */
   readonly byline?: string;
   /**
-   * The summary under the chart. By default it is computed from the data: each series' trend,
-   * the highest and lowest values, values far from the rest and the interval drawn (B39, B24).
-   * A string replaces it; `false` leaves it out.
+   * The summary under the chart, computed from the data by default. A string replaces it; `false`
+   * leaves it out.
    */
   readonly summary?: string | false;
   /**
-   * The "Download CSV" link: built from the data table as a `data:` URL (default), or `false` to
-   * leave it out. A table too large to inline gets no link and an issue; give `csvHref` then.
+   * The "Download CSV" link, a `data:` URL built from the table (default); `false` leaves it out. A
+   * table too large to inline gets no link and an issue; give `csvHref` then.
    */
   readonly csv?: boolean;
   /** A CSV file the site serves for this chart, linked instead of the inline one. */
@@ -87,10 +82,9 @@ export interface FigureOptions extends IssueOptions {
   /** Translations of the generated strings, kinds and terms; the rest stay English. */
   readonly strings?: StringOverrides;
   /**
-   * The language of the figure, a BCP 47 tag such as `"de"`, written as its `lang` attribute so a
-   * screen reader switches voice for the generated text, controls and table when it differs from
-   * the page's (WCAG 2.2 SC 3.1.2). Set it with `strings` and `locale` when they translate the
-   * figure; leave it out when the figure is in the page's language.
+   * The figure's language, a BCP 47 tag such as `"de"`, written as its `lang` attribute so a screen
+   * reader switches voice for the generated text when it differs from the page's (WCAG 2.2 SC
+   * 3.1.2). Set it with `strings` and `locale` when they translate the figure.
    */
   readonly lang?: string;
   /** An `id` for the figure, which enhancement events carry as `chartId`. */
@@ -100,26 +94,19 @@ export interface FigureOptions extends IssueOptions {
   /** The drawing's height in CSS pixels. */
   readonly height?: number;
   /**
-   * The browser's hover title on each mark (a `<title>` inside it), on by default. `false`
-   * leaves them out, for a site that shows no hover tooltips: each mark's details move to a
-   * `data-enarratio-label` attribute, which `enhance()` still names its points with, and the
-   * data stay in the table.
+   * The browser's hover title on each mark (a `<title>`), on by default. `false` moves each mark's
+   * details to a `data-enarratio-label` attribute, which `enhance()` still names its points with.
    */
   readonly hoverTitles?: boolean;
   /**
-   * The toolbar controls `enhance()` adds with its default options (Sound, Range and the Download
-   * menu's SVG, PNG, tactile SVG and Copy embed), written into the markup ahead of it, inert, so
-   * the page does not shift when the layer arrives (D5, records 0033, 0035). With scripts off they
-   * stay hidden. On by default; `false` leaves them out, for a page that never enhances or turns
-   * those controls off. "Download CSV" is a link and works without script, so it stays either way.
+   * The toolbar controls `enhance()` adds with its default options, written into the markup ahead
+   * of it, inert, so the page does not shift when the layer arrives; hidden with scripts off. On by
+   * default. "Download CSV" is a link and works without script, so it stays either way.
    */
   readonly controls?: boolean;
 }
 
-/**
- * The SVG without its marks' hover titles: each `<title>` becomes its mark's
- * `data-enarratio-label`, so the enhancement layer can still name the point.
- */
+/** The SVG without its marks' hover titles: each `<title>` becomes its `data-enarratio-label`. */
 function withoutTitles(svg: string): string {
   return svg
     .replace(
@@ -130,7 +117,7 @@ function withoutTitles(svg: string): string {
     .replace(/<title>[^<]*<\/title>/g, "");
 }
 
-/** Units for a chart's axes, added to the axis labels and table headers: "Weight (kg)" (B23). */
+/** Units for a chart's axes, added to the axis labels and table headers: "Weight (kg)". */
 export interface AxisUnits {
   readonly xUnit?: string;
   readonly yUnit?: string;
@@ -154,10 +141,7 @@ export interface SeriesAxesOptions extends AxesOptions {
   readonly seriesDomain?: readonly string[];
 }
 
-/**
- * A label with its unit, "Weight (kg)"; a hidden (null) label stays hidden, and a label that
- * already names its unit as a word ("Reads per sample", unit "reads") is not repeated.
- */
+/** A label with its unit, "Weight (kg)"; a hidden (null) label stays hidden, and a unit the label already names is not repeated. */
 export function withUnit(label: string | null, unit: string | undefined): string | null {
   const u = unit?.trim();
   if (label === null || !u) return label;
@@ -217,10 +201,7 @@ export interface FigureParts {
   /** The data field series come from, which legend filters report. */
   readonly seriesField?: string;
   readonly x?: ScaleDescription;
-  /**
-   * Whether the chart's filled series are not all named on the drawing, so its textures show
-   * (record 0036): otherwise they show only for readers who ask for them.
-   */
+  /** Whether the filled series are not all named on the drawing, so textures show; otherwise only for readers who ask. */
   readonly textured?: boolean;
   /** Which way bars run, for the entrance animation. */
   readonly orientation?: "vertical" | "horizontal";
@@ -231,8 +212,8 @@ export interface FigureParts {
   /** A drawing that keeps its own small size and never scrolls sideways (the primitives). */
   readonly fixed?: boolean;
   /**
-   * The most series and points before the figure reports an issue (defaults 6 and 1000), and
-   * what to do instead, when the chart knows better than the general advice.
+   * The most series and points before the figure reports an issue (defaults 6 and 1000), and what
+   * to do instead.
    */
   readonly limits?: {
     readonly series?: number;
@@ -242,9 +223,9 @@ export interface FigureParts {
   /** A sentence the chart writes about how it computed what it draws, shown with the caption. */
   readonly method?: string;
   /**
-   * The figure's table as markup, for a chart whose drawing is its table (`tableChart`), given
-   * the table's accessible caption: shown in place of the drawing and the data table, so there is
-   * one table, which `enhance()` sorts. `table` still gives the overview and CSV their rows.
+   * The figure's table as markup, for a chart whose drawing is its table (`tableChart`): shown in
+   * place of the drawing and the data table, so there is one table. `table` still gives the
+   * overview and CSV their rows.
    */
   readonly tableMarkup?: (caption: string) => string;
 }
@@ -257,9 +238,8 @@ function report(options: IssueOptions, issue: ChartIssue): void {
 }
 
 /**
- * Checks the options every chart shares before anything is drawn: a positive finite width and
- * height when given (A7, F15), and, when the chart passes its `data`, at least one row. A missing
- * `alt` is reported by {@link figure}, which can generate one.
+ * Checks the options every chart shares before drawing: a positive finite width and height when
+ * given, and at least one row when the chart passes its `data`.
  */
 export function validateFigure(
   kind: string,
@@ -308,9 +288,8 @@ function tableMarkup(table: DataTable, caption: string): string {
 }
 
 /**
- * A data table as the markup a figure carries: visually hidden, in the HTML right after the
- * drawing, for screen readers and AI agents (record 0035). Sighted readers get the values from
- * the hover and focus details, the summary and "Download CSV". `caption` names the table.
+ * A data table as the markup a figure carries: visually hidden, right after the drawing, for
+ * screen readers and AI agents. `caption` names the table.
  */
 export function dataTableBlock(table: DataTable, caption: string): string {
   return element(
@@ -340,11 +319,9 @@ function face(name: keyof typeof ICONS, text: string): string {
 }
 
 /**
- * The toolbar above the drawing (record 0035), as `enhance()` builds it with its default options
- * (chart.ts attachControls, export.ts): Sound when there are two or more marks, Range on a chart
- * with a continuous x scale, then the Download menu: "Download CSV", then the drawing's files and,
- * for a figure with an id, Copy embed. What only the layer can do is written inert and hidden
- * with scripts off; "Download CSV" is a link in a native disclosure, so it works without script.
+ * The toolbar above the drawing, as `enhance()` builds it with its default options: Sound with two
+ * or more marks, Range on a continuous x scale, then the Download menu. What only the layer can do
+ * is written inert and hidden with scripts off; "Download CSV" is a link in a native disclosure.
  * Returns "" when there is nothing to put in it.
  */
 function toolbarMarkup(
@@ -446,7 +423,7 @@ function csvLink(
   );
 }
 
-/** The checks a figure makes as it renders, each reported as an issue (B18, B19, B21, B25). */
+/** The checks a figure makes as it renders, each reported as an issue. */
 function checkFigure(options: FigureOptions, parts: FigureParts, title: string | undefined): void {
   const issue = (code: ChartIssue["code"], message: string): void =>
     report(options, { chart: parts.kind, code, message });
@@ -477,9 +454,8 @@ function checkFigure(options: FigureOptions, parts: FigureParts, title: string |
 }
 
 /**
- * Kinds whose series are lines, and kinds whose series are told apart by symbol: their legend
- * swatches are drawn as a line (dashed as the line is in forced colors) or as the symbol, so the
- * legend matches the marks without color (B57).
+ * Kinds whose series are lines, and kinds told apart by symbol: their legend swatches are drawn as
+ * a line (dashed in forced colors) or as the symbol, so the legend matches the marks without color.
  */
 const LINE_KINDS = new Set([
   "line",
@@ -569,7 +545,7 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
   const wide = !parts.fixed && (options.width ?? DEFAULT_WIDTH) >= WIDE_WIDTH;
   const name = title ?? alt;
   // The toolbar, with the controls enhance() will add written ahead of it so the page does not
-  // shift (D5, records 0033, 0035).
+  // shift.
   const controls = toolbarMarkup(
     options,
     parts,
@@ -620,12 +596,10 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
       // Record 0035: the toolbar above the drawing, under the head.
       controls,
       legend,
-      // A frame that scrolls sideways on narrow screens instead of shrinking the text (A13).
-      // Drawings 30rem or wider keep that width and scroll; narrower ones scale as usual. A wide
-      // frame is the one that can scroll, so a keyboard can reach it (tabindex), and the group
-      // role lets it carry a name. Markup cannot know whether it overflows, so every wide frame
-      // gets both; enhance() drops the tab stop once the marks take focus. The name is the title,
-      // not the alt, which the SVG inside already reads.
+      // A frame that scrolls sideways on narrow screens instead of shrinking the text. Drawings 30rem
+      // or wider keep that width and scroll, so a wide frame gets a tabindex (a keyboard can reach
+      // it) and a group role (it carries the title as its name, not the alt the SVG already reads).
+      // enhance() drops the tab stop once the marks take focus.
       parts.tableMarkup
         ? ""
         : element(
@@ -640,7 +614,7 @@ export function figure(options: FigureOptions, parts: FigureParts): string {
               : { class: "enarratio-frame" },
             svg,
           ),
-      // The data table, visually hidden, straight after the drawing it repeats (record 0035); a
+      // The data table, visually hidden, straight after the drawing it repeats; a
       // table chart's table is the chart, visible, after the source as before.
       parts.tableMarkup ? "" : tableBlock,
       summary && summary !== given ? muted("enarratio-summary", summary) : "",

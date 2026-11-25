@@ -35,7 +35,7 @@ export function center(mark: SVGGraphicsElement): { x: number; y: number } {
 /**
  * A mark's place in reading order: the column (category) and row (position within it) the server
  * wrote from the data. Geometry is the fallback for markup without them, measured on screen so
- * facets compare correctly (F9).
+ * facets compare correctly.
  */
 export function place(mark: Element): { column: number; row: number } {
   const column = mark.getAttribute("data-enarratio-col");

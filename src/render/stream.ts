@@ -38,10 +38,9 @@ function insideOut(values: readonly (readonly number[])[]): number[] {
 }
 
 /**
- * Stacks `values` (one row per layer, one column per x, zero or more) in inside-out order on the
- * wiggle baseline, which minimizes the weighted change in slope of every layer's edges between
- * neighboring x values (x assumed evenly spaced, as d3 assumes), then shifts the whole stream so
- * that its middle averages zero.
+ * Stacks `values` (one row per layer, one column per x) in inside-out order on the wiggle baseline,
+ * which minimizes the weighted change in slope of every layer's edges between neighboring x
+ * (evenly spaced, as d3 assumes), then shifts the whole stream so its middle averages zero.
  */
 export function streamLayout(values: readonly (readonly number[])[]): StreamLayout {
   const n = values.length;

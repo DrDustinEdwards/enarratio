@@ -13,16 +13,15 @@ export interface MarkDatum {
   /**
    * The mark's place for keyboard reading order: its category (column) and its position within
    * the category (row). Taken from the data, not the drawing, so order is right in facets and in
-   * charts enhanced while hidden (F9).
+   * charts enhanced while hidden.
    */
   readonly column?: number;
   readonly row?: number;
   /**
-   * The category or x value as a reader sees it, heading the tooltip card for the mark's column
-   * (record 0036).
+   * The category or x value as a reader sees it, heading the tooltip card for the mark's column.
    */
   readonly at?: string;
-  /** The mark's value as a reader sees it, first in its row of the tooltip card (record 0036). */
+  /** The mark's value as a reader sees it, first in its row of the tooltip card. */
   readonly shown?: string;
 }
 

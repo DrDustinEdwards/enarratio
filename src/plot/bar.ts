@@ -13,9 +13,9 @@ import { capErrorBars, named, steps } from "./marks.js";
 export type { BarChartOptions } from "../render/bar-model.js";
 
 /**
- * A bar chart, drawn on the server: one series, or several stacked or grouped. Negative values
- * stack below zero. Each bar carries hover details and, once enhanced, filters by its series (or
- * its category when there is one series).
+ * A bar chart, drawn on the server: one series, or several stacked or grouped. Negative values stack
+ * below zero. Each bar carries hover details and, once enhanced, filters by its series (or its
+ * category when there is one series).
  *
  * @example
  * barChart({
@@ -30,7 +30,7 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
   const { points, xNames, seriesNames, horizontal, grouped, thinned, categoryTitle } = model;
 
   // The SVG is one image, so a bar holds no link: its link rides on it for enhance(), and the
-  // data table carries the same links for keyboards and screen readers (0026).
+  // data table carries the same links for keyboards and screen readers.
   const link = model.link;
   const render = keyed(
     points,
@@ -73,7 +73,7 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
     grid: true,
     zero: true,
     // Counts are whole numbers, so their axis never shows 0.5, and the axis ends at the last
-    // tick so no tick is drawn past the plot (A2).
+    // tick so no tick is drawn past the plot.
     ...(ticks
       ? {
           ticks,
@@ -121,7 +121,6 @@ export function barChart<T extends object>(options: BarChartOptions<T>): string 
   return model.figure(svg);
 }
 
-/** Each bar's error bar, a rule across its value at the middle of the bar. */
 function errorMarks(model: ReturnType<typeof barModel>): Plot.Markish[] {
   const { bounds } = model;
   if (!bounds) return [];

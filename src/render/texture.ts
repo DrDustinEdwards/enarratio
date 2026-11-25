@@ -1,8 +1,8 @@
 /**
- * Pattern fills, so filled series are told apart by texture as well as hue (B5, B49): slot 1 stays
- * solid and slots 2 to 8 each lay a texture, in the color for text on that series, over its color.
- * In forced-colors mode every series is the same system color and the textures alone tell them
- * apart. Both renderers pass their finished SVG through {@link texture}, so they agree.
+ * Pattern fills, so filled series are told apart by texture as well as hue: slot 1 stays solid and
+ * slots 2 to 8 each lay a texture over their color. In forced-colors mode every series is the same
+ * system color and the textures alone tell them apart. Both renderers pass their SVG through
+ * {@link texture}, so they agree.
  */
 
 /** One 8-unit tile's strokes per slot: /, dots, -, |, \, +, x. */

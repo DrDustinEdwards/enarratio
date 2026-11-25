@@ -33,10 +33,10 @@ declare global {
 
 /**
  * Every string the layer writes, in English by default. `{name}` is filled in. A page passes the
- * ones it translates as `strings` (B56); the rest stay English.
+ * ones it translates as `strings`; the rest stay English.
  */
 export interface EnhanceStrings {
-  /** The keys, read as the points' description and shown while a point has focus (B10). */
+  /** The keys, read as the points' description and shown while a point has focus. */
   readonly hint: string;
   /** Added to the hint when points filter. */
   readonly hintFilter: string;
@@ -44,33 +44,33 @@ export interface EnhanceStrings {
   readonly hintRange: string;
   /** The name of the points when the chart has no title. */
   readonly chart: string;
-  /** A point's place in its series, after its label (B20). */
+  /** A point's place in its series, after its label. */
   readonly position: string;
   readonly filtered: string;
   readonly filterCleared: string;
   readonly rangeStart: string;
   readonly rangeSelected: string;
   readonly rangeCleared: string;
-  /** Announced after `update()` (C13). */
+  /** Announced after `update()`. */
   readonly updated: string;
   readonly sorted: string;
   readonly ascending: string;
   readonly descending: string;
-  /** The toolbar's name (record 0035). */
+  /** The toolbar's name. */
   readonly controls: string;
   /** The expand toggle; its name stays the same, open or closed (`aria-pressed` says which). */
   readonly expand: string;
-  /** The range button, and its form's fields and buttons (B15). */
+  /** The range button, and its form's fields and buttons. */
   readonly range: string;
   readonly from: string;
   readonly to: string;
   readonly apply: string;
   readonly clear: string;
-  /** The Download menu's button, and its items: the export buttons (C3) and the embed snippet's (C4). */
+  /** The Download menu's button, and its items: the export buttons and the embed snippet's. */
   readonly download: string;
   readonly downloadSvg: string;
   readonly downloadPng: string;
-  /** The tactile export (B55): a black-on-white SVG sized for an embosser or swell paper. */
+  /** The tactile export: a black-on-white SVG sized for an embosser or swell paper. */
   readonly downloadTactile: string;
   readonly copyEmbed: string;
   /** Announced when the snippet is on the clipboard. */
@@ -78,7 +78,7 @@ export interface EnhanceStrings {
   /** Announced when an image or the snippet could not be made. */
   readonly exportFailed: string;
   /**
-   * The sound toggle (B54): its name stays the same while it plays (`aria-pressed` says so), and
+   * The sound toggle: its name stays the same while it plays (`aria-pressed` says so), and
    * what the live region says as each series starts.
    */
   readonly sound: string;
@@ -98,34 +98,28 @@ export interface EnhanceOptions {
   readonly brush?: boolean;
   /** Animate charts in the first time they scroll into view. */
   readonly entrance?: boolean;
-  /**
-   * Make a table chart's table sortable. A chart's own data table is visually hidden, for screen
-   * readers and AI agents, so it is not given sort buttons nobody could see (record 0035).
-   */
+  /** Make a table chart's table sortable; a chart's own data table is visually hidden, so it gets no sort buttons. */
   readonly table?: boolean;
   /** Add an Expand toggle to the toolbar that expands the chart to fill the window. Off by default. */
   readonly expand?: boolean;
-  /**
-   * Keep each chart's filter and range in the address, so a link reproduces the view. Needs the
-   * figure's `id`. Off by default. A filter or range read from the address fires its event.
-   */
+  /** Keep each chart's filter and range in the address. Needs the figure's `id`. Off by default. A filter or range read from the address fires its event. */
   readonly url?: boolean;
-  /** Add "Download SVG" and "Download PNG" to the toolbar's Download menu, after "Download CSV" (C3). */
+  /** Add "Download SVG" and "Download PNG" to the toolbar's Download menu, after "Download CSV". */
   readonly download?: boolean;
   /**
    * Add "Download tactile SVG" after them: the drawing in black on white, gridlines left out,
    * lines thickened and labels horizontal, on an 11 by 11.5 inch page for a braille embosser or
-   * swell paper (B55). Needs `download`.
+   * swell paper. Needs `download`.
    */
   readonly tactile?: boolean;
   /**
    * Add "Copy embed", which copies a link to the chart (the page address with the figure's `id`)
-   * as HTML to paste elsewhere (C4). Needs the figure's `id`.
+   * as HTML to paste elsewhere. Needs the figure's `id`.
    */
   readonly embed?: boolean;
   /**
    * Add the Sound toggle to the toolbar, which plays each series in turn as notes that rise and
-   * fall with the values (B54). Its code loads only when pressed.
+   * fall with the values. Its code loads only when pressed.
    */
   readonly sound?: boolean;
   /** Translations of the strings the layer writes. */
@@ -144,25 +138,14 @@ export interface EnhancedChart {
   readonly options: ResolvedOptions;
   /**
    * Replaces the chart with new server-rendered markup for the same chart, animating marks that
-   * share a key from their old shape to their new one. The filter, the tab stop and keyboard
-   * focus stay on the mark with the same key, or the nearest one if it is gone. The live region
-   * says the chart was updated.
-   *
-   * The markup should come from Enarratio. It is parsed inertly and sanitized before it touches
-   * the page: only the elements and attributes Enarratio emits are kept, and event handlers,
-   * scripts and unsafe links are dropped (F11).
+   * share a key. The filter, tab stop and keyboard focus stay on the mark with the same key, or the
+   * nearest one. The markup should come from Enarratio: it is parsed inertly and sanitized, keeping
+   * only the elements and attributes Enarratio emits.
    */
   update(markup: string): void;
-  /**
-   * Shows a filter the page chose (from its own controls, or a URL) without firing
-   * `enarratio:select`: the page already knows. A filter on the series field emphasizes that
-   * series even where clicks filter by x. `null` clears it.
-   */
+  /** Shows a filter the page chose, without firing `enarratio:select`. A filter on the series field emphasizes that series even where clicks filter by x. `null` clears it. */
   setFilter(filter: { readonly field: string; readonly value: string } | null): void;
-  /**
-   * Clears any filter and range the page wants gone, without firing events. A reader pressing
-   * Escape clears them too, and that does fire events.
-   */
+  /** Clears any filter and range without firing events. A reader pressing Escape clears them too, and that does fire events. */
   clear(): void;
   /** Removes every listener and element the layer added, leaving the server markup. */
   destroy(): void;

@@ -233,10 +233,7 @@ export interface Band {
   at(i: number): number;
 }
 
-/**
- * Slots for `n` categories across `range`. Rounded to whole pixels when that wastes no more than
- * 30 pixels, as Plot does.
- */
+/** Slots for `n` categories across `range`, rounded to whole pixels when that wastes no more than 30, as Plot does. */
 export function band(n: number, range: Pair, paddingInner: number, paddingOuter: number): Band {
   const [r0, r1] = range;
   const length = Math.abs(r1 - r0);
@@ -269,10 +266,7 @@ interface Interval {
 
 const date = (t: number): Date => new Date(t);
 
-/**
- * Midnight UTC on the first of a month, for any year. Date.UTC reads years 0 to 99 as 1900 to
- * 1999, so the year is set on its own, as d3-time does.
- */
+/** Midnight UTC on the first of a month, for any year: Date.UTC reads years 0 to 99 as 1900 to 1999, so the year is set on its own, as d3-time does. */
 function utcStart(year: number, month: number): number {
   const d = new Date(0);
   d.setUTCFullYear(year, month, 1);
@@ -341,7 +335,6 @@ function yearsEvery(k: number): Interval {
   };
 }
 
-/** Every `k`th unit of an interval, counted by a calendar field (seconds, hours, months). */
 function fieldEvery(base: Interval, field: (t: number) => number, k: number): Interval {
   return k === 1 ? base : every(base, (t) => field(t) % k === 0);
 }
@@ -473,10 +466,7 @@ const FORMAT_INTERVALS: [string, Interval, number][] = [
   ["second", utcSecond, 30 * MINUTE],
 ];
 
-/**
- * The labels of time ticks on a bottom axis, each a line or two: the finest unit every tick is
- * aligned to, with the coarser unit beneath where it changes ("Jan" over "2026").
- */
+/** The labels of time ticks on a bottom axis: the finest unit every tick is aligned to, with the coarser unit beneath where it changes ("Jan" over "2026"). */
 export function timeTickLabels(ticks: readonly number[]): string[] {
   let step: number | undefined;
   for (let i = 1; i < ticks.length; i++) {

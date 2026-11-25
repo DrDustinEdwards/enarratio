@@ -24,7 +24,7 @@ export interface UptimeStripOptions extends PrimitiveFigureOptions {
    * text alternative. Required unless `alt` is given.
    */
   readonly label?: string;
-  /** The text alternative, instead of the one generated from `label` and the counts (F18). */
+  /** The text alternative, instead of the one generated from `label` and the counts. */
   readonly alt?: string;
   /** The strip's width in CSS pixels (default 240). */
   readonly width?: number;
@@ -43,7 +43,6 @@ const STATUS: Readonly<Record<UptimeStatus, { color: string; height: number; wor
 
 const round = (n: number): number => Math.round(n * 100) / 100;
 
-/** One period, checked, with the name it carries in hover details and the companion table. */
 interface PreparedSlot {
   readonly status: UptimeStatus;
   /** The slot's own label, or "Period 3". */
@@ -51,7 +50,6 @@ interface PreparedSlot {
   readonly word: string;
 }
 
-/** Everything the strip, its text alternative and its companion table are computed from. */
 interface UptimeStripValues {
   readonly slots: readonly PreparedSlot[];
   readonly counts: Readonly<Record<UptimeStatus, number>>;
@@ -63,7 +61,6 @@ interface UptimeStripValues {
   readonly subject: string;
 }
 
-/** Validates the options and computes the numbers every part of an uptime strip is made from. */
 function prepareUptimeStrip(options: UptimeStripOptions): UptimeStripValues {
   const { slots } = options;
   if (slots.length === 0) throw new Error("uptimeStrip: needs at least one slot");
@@ -85,7 +82,7 @@ function prepareUptimeStrip(options: UptimeStripOptions): UptimeStripValues {
   const counts: Record<UptimeStatus, number> = { up: 0, degraded: 0, down: 0, unknown: 0 };
   const prepared = slots.map((slot, i): PreparedSlot => {
     const status = typeof slot === "string" ? slot : slot.status;
-    // Own properties only: "constructor" or "toString" from JSON is not a status (F15).
+    // Own properties only: "constructor" or "toString" from JSON is not a status.
     if (typeof status !== "string" || !Object.hasOwn(STATUS, status)) {
       throw new Error(`uptimeStrip: slot ${i + 1} has unknown status "${String(status)}"`);
     }
@@ -184,9 +181,9 @@ export function uptimeStrip(options: UptimeStripOptions): string {
 }
 
 /**
- * An uptime strip's periods as a table (period and status) and a summary sentence with the counts
- * and availability, computed from the same slots as the drawing so the two cannot disagree. Takes
- * the same options as {@link uptimeStrip}. Without `label` the summary is the given `alt`.
+ * An uptime strip's periods as a table and a summary sentence with the counts and availability,
+ * from the same slots as the drawing. Takes the same options as {@link uptimeStrip}. Without
+ * `label` the summary is the given `alt`.
  *
  * @example
  * const { summary, table } = uptimeStripTable({ slots: ["up", "down"], label: "Site, last 2 hours" });

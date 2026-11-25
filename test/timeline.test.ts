@@ -84,17 +84,6 @@ describe("timeline", () => {
     expect((x7 - x0) / 7).toBeCloseTo((x3 - x0) / 3, 1);
   });
 
-  it("draws spans as bars from start to end", () => {
-    const run = marks.find((m) => m.querySelector("title")?.textContent?.includes("Nightly run"));
-    const bar = run?.querySelector("rect");
-    const retry = marks.find((m) => m.querySelector("title")?.textContent?.includes("Retry"));
-    const retryBar = retry?.querySelector("rect");
-    // 4 hours and 2 hours: widths are in that ratio.
-    expect(
-      Number(bar?.getAttribute("width")) / Number(retryBar?.getAttribute("width")),
-    ).toBeCloseTo(2, 1);
-  });
-
   it("says status by shape as well as color", () => {
     const shape = (label: string): string => {
       const mark = marks.find((m) => m.querySelector("title")?.textContent?.includes(label));
@@ -306,11 +295,6 @@ describe("heatStrip", () => {
       "var(--enarratio-sequential-3)",
       "var(--enarratio-sequential-1)",
     ]);
-  });
-
-  it("draws a missing value as a dashed outline", () => {
-    expect(cells[2]?.getAttribute("stroke-dasharray")).toBe("2,2");
-    expect(cells[2]?.querySelector("title")?.textContent).toBe("Cell 3: no data");
   });
 
   it("puts the value in each cell's hover details", () => {

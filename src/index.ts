@@ -1,11 +1,11 @@
 /**
  * Enarratio core: accessible, server-rendered charts and scientific figures for the web.
  *
- * The root import has no runtime dependencies. It holds the theme types and stylesheet, the
- * color checks, the HTML helpers and figure assembly that every chart is built from, and the
- * small primitives (sparkline, progress ring, uptime strip), which also run in the browser.
- * Charts live in `enarratio/plot` and `enarratio/science`, and the interaction layer in
- * `enarratio/enhance`. Include {@link stylesheet} (or `enarratio/base.css`) once per page.
+ * The root import has no runtime dependencies. It holds the theme types and stylesheet, the color
+ * checks, the HTML helpers and figure assembly every chart is built from, and the small primitives
+ * (sparkline, progress ring, uptime strip), which also run in the browser. Charts live in
+ * `enarratio/plot` and `enarratio/science`, the interaction layer in `enarratio/enhance`. Include
+ * {@link stylesheet} (or `enarratio/base.css`) once per page.
  *
  * @packageDocumentation
  */

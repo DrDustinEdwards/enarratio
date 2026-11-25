@@ -1,11 +1,9 @@
 /**
  * The enhancement layer: optional browser code that adds hover details, keyboard navigation,
  * click-to-filter events, a range brush, animated updates and an entrance animation to charts
- * Enarratio rendered on the server. Charts are complete without it.
- *
- * Every interaction works by pointer and by keyboard, is announced to screen readers, and
- * respects `prefers-reduced-motion`. It has no dependencies and imports nothing from the
- * server-side package, so a page ships only this module.
+ * rendered on the server. Charts are complete without it. Every interaction works by pointer and
+ * keyboard, is announced to screen readers, and respects `prefers-reduced-motion`. No dependencies,
+ * and nothing from the server-side package, so a page ships only this module.
  *
  * @packageDocumentation
  */
@@ -28,7 +26,7 @@ export { ENHANCE_STRINGS, sanitize };
 /**
  * Enhances every Enarratio figure under `root` (the whole document by default) and returns them.
  * Calling it again is safe: a figure is enhanced once, and calling it with different options
- * re-applies the chart with the new ones (F18).
+ * re-applies the chart with the new ones.
  *
  * @example
  * import { enhance } from "enarratio/enhance";

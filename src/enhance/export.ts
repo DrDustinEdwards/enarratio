@@ -1,6 +1,6 @@
 /**
- * Saving the drawing (C3, and tactile, B55) and copying a snippet that points at the chart (C4):
- * items in the toolbar's Download menu, after "Download CSV" (record 0035). The files are made by
+ * Saving the drawing (and tactile) and copying a snippet that points at the chart:
+ * items in the toolbar's Download menu, after "Download CSV". The files are made by
  * ./image.js, which loads on the first press.
  */
 

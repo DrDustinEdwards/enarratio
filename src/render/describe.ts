@@ -1,8 +1,7 @@
 /**
- * Sentences computed from a chart's data (B39, B24, B53): the overview read before the chart
- * (its type, axes and ranges, series and points) and the visible summary under it (each series'
- * trend, the extremes, values far from the rest and the interval at the end). Short sentences in
- * common words.
+ * Sentences computed from a chart's data: the overview read before the chart and the visible summary
+ * under it (each series' trend, the extremes, values far from the rest, the interval at the end).
+ * Short sentences in common words.
  */
 
 import { maxOf, minOf } from "./data.js";
@@ -72,10 +71,7 @@ export function categoryRange(
   return { position, label: label ?? "", from: names[0] ?? "", to: names.at(-1) ?? "" };
 }
 
-/**
- * Values far from the rest: beyond three interquartile ranges of the middle half (Tukey's far
- * out), so a smooth peak is not called unusual. Needs five values or more.
- */
+/** Values far from the rest: beyond three interquartile ranges of the middle half (Tukey's far out), so a smooth peak is not called unusual. Needs five values or more. */
 export function outliers<P extends { readonly value: number | null }>(
   points: readonly P[],
   scale: (value: number) => number = (v) => v,
@@ -180,7 +176,7 @@ export function summarize(d: ChartDescription, strings: Strings): string {
     .join(" ");
 }
 
-/** The overview read before the chart: its type, series and points, and each axis's range (B53). */
+/** The overview read before the chart: its type, series and points, and each axis's range. */
 export function overview(
   kind: string,
   d: ChartDescription | undefined,

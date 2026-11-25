@@ -1,10 +1,9 @@
 import type { Theme } from "../theme/types.js";
 
 /**
- * A high-contrast theme: black and white surfaces, text at 15:1 or more, gridlines at 3:1, and
- * series colors that each reach 4.5:1 on the background and stay at least 10 CIEDE2000 apart with
- * typical vision and under simulated protanopia, deuteranopia and tritanopia, in light and dark.
- * Use it as a site's theme, or under `prefers-contrast: more` with
+ * A high-contrast theme: black and white surfaces, text at 15:1 or more, gridlines at 3:1, and series
+ * colors that each reach 4.5:1 and stay 10 CIEDE2000 apart under typical vision and simulated color
+ * vision deficiencies. Use it as a site's theme, or under `prefers-contrast: more` with
  * `stylesheet(theme, { highContrast: highContrastTheme })`.
  */
 export const highContrastTheme: Theme = {

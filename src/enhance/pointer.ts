@@ -1,8 +1,7 @@
 /**
- * The plot-wide pointer (record 0036): the whole drawing answers a pointer, not only the marks.
- * On bars, lines and areas the nearest column is picked (a stack, a group, or every series at one
- * x); elsewhere the nearest mark within reach. The tooltip is one card for what is picked, value
- * first, and lines and areas draw a crosshair at the picked x.
+ * The plot-wide pointer: the whole drawing answers a pointer, not only the marks. On bars, lines
+ * and areas the nearest column is picked; elsewhere the nearest mark within reach. The tooltip is
+ * one card for what is picked, and lines and areas draw a crosshair at the picked x.
  */
 
 import { label, SVG_NS, shape } from "./marks.js";
@@ -20,7 +19,6 @@ export interface Picked {
   readonly column: boolean;
 }
 
-/** A mark's box in SVG user units and its middle. */
 interface Box {
   readonly x: number;
   readonly y: number;
@@ -121,7 +119,7 @@ export class Picker {
     }
     const reach = REACH / (scale || 1);
     // A mark whose shape holds the pointer wins: rings, ribbons and flows overlap each other's
-    // boxes (record 0038).
+    // boxes.
     const boxes = this.read();
     const inside = this.marks.findIndex((mark, i) => {
       const b = boxes[i];
@@ -158,18 +156,13 @@ const rect = (b: DOMRect): Omit<Box, "cx" | "cy"> => ({
   height: b.height,
 });
 
-/** The palette slot a mark is drawn in, from its fill: a series color or its pattern. */
 function slotOf(mark: Element): number | null {
   const paint = shape(mark).getAttribute("fill") ?? mark.getAttribute("fill") ?? "";
   const m = /--enarratio-series-(\d)\)/.exec(paint) ?? /^url\(#enarratio-[^)]*-(\d)\)$/.exec(paint);
   return m ? Number(m[1]) : null;
 }
 
-/**
- * Fills the tooltip with one card for the picked marks: the column's heading, then a row per mark
- * with its color, its value first and its series. A mark without the parts (a chart that does not
- * write them) shows its whole description instead.
- */
+/** Fills the tooltip with one card for the picked marks: the column's heading, then a row per mark with its color, value and series. A mark without those parts shows its whole description. */
 export function fillCard(
   tip: HTMLElement,
   figure: HTMLElement,
@@ -221,11 +214,7 @@ export function fillCard(
   tip.replaceChildren(head, ...rows);
 }
 
-/**
- * A crosshair at a column of a line or area chart: a rule from the top of the plot to its foot,
- * and a dot on each series there in the series' color. Returns a function that moves it, or hides
- * it when given null.
- */
+/** A crosshair at a column of a line or area chart: a rule from the top of the plot to its foot and a dot on each series. Returns a function that moves it, or hides it given null. */
 export function crosshair(
   svg: SVGSVGElement,
   picker: Picker,

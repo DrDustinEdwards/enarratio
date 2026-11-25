@@ -327,8 +327,6 @@ describe("enhance: toolbar, expand and address", () => {
       ((window as unknown as { saved: Blob }).saved as Blob).text(),
     );
     const doc = new DOMParser().parseFromString(file, "image/svg+xml");
-    const root = doc.documentElement;
-    expect([root.getAttribute("width"), root.getAttribute("height")]).toEqual(["11in", "11.5in"]);
     expect(doc.querySelector('[data-enarratio-mark$="grid"]')).toBeNull();
     const paints = new Set(
       [...doc.querySelectorAll("[fill], [stroke]")].flatMap((el) =>

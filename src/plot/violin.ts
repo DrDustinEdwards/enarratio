@@ -55,13 +55,11 @@ const HALF = 0.42;
 const FEW = 30;
 
 /**
- * Violin plots, one per group (Hintze and Nelson 1998): each group's kernel density mirrored
- * either side of its center, trimmed to the values' range, with a bar across the quartiles and a
- * dot at the median inside. Every violin is drawn on one density scale, so each has the same area.
- * Groups with few values also show every value as a point, since the shape alone can mislead.
- * Every violin (and point) is reached by hover, focus and the keys, and the data table gives each
- * group's n, quartiles and bandwidth. A box plot is simpler to read where the shape is not the
- * point.
+ * Violin plots, one per group (Hintze and Nelson 1998): each group's kernel density mirrored either
+ * side of its center, trimmed to the values' range, with a bar across the quartiles and a dot at the
+ * median. All violins share one density scale, so each has the same area. Groups with few values
+ * also show every value as a point, since the shape alone can mislead. The table gives each
+ * group's n, quartiles and bandwidth. A box plot is simpler where the shape is not the point.
  *
  * @example
  * violinPlot({ data: mice, x: "diet", y: "weight", alt: "..." });
@@ -131,8 +129,7 @@ export function violinPlot<T extends object>(given: ViolinPlotOptions<T>): strin
   );
   const showPoints = options.points ?? groups.some((g) => g.stats.n < FEW);
   if (showPoints) {
-    // A fixed spread inside the violin's width at each value: the golden-ratio sequence, the same
-    // on every render.
+    // A fixed spread inside the violin's width at each value: the golden-ratio sequence, the same on every render.
     const index = new Map(r.values.map((v, i) => [v, i]));
     const at = (v: Value): number => {
       const g = groups[v.groupIndex] as Group;
