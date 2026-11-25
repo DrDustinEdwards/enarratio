@@ -45,12 +45,8 @@ export const LAYOUT_RULES = `
   font-family: var(--enarratio-font);
   font-size: var(--enarratio-font-size, 1rem);
 }
-/* The frame is the container the SVG's own font-size measures, so text grows as it shrinks (B3). */
 .enarratio-frame { overflow-x: auto; container-type: inline-size; }
 .enarratio-frame-wide > svg { min-width: 30rem; }
-/* A wide drawing keeps its text size and scrolls in a column under 30rem (A13); a shadow at the
-   edge that has more shows that it does, without script. The covers move with the drawing and
-   hide each shadow at the end it has reached. */
 .enarratio-frame-wide {
   --enarratio-scroll-shadow: color-mix(in srgb, var(--enarratio-text) 30%, transparent);
   background:
@@ -68,8 +64,6 @@ export const LAYOUT_RULES = `
 }
 .enarratio svg:not([font-size]) { font-size: var(--enarratio-font-size-mark, 0.75rem); }
 svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; height: auto; }
-/* Tick labels in the numeric face with proportional figures: tabular figures widen the comma in
-   some faces ("1 , 600"), and end-anchored labels need no columns. Other numbers keep columns. */
 .enarratio [data-enarratio-mark$="tick label"] { font-family: var(--enarratio-font-numeric); }
 .enarratio .enarratio-numeric {
   font-family: var(--enarratio-font-numeric);
@@ -107,8 +101,6 @@ svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; 
   align-items: center;
   gap: var(--enarratio-gap-inline, 0.4em);
 }
-/* An entry has its button's box before enhance() wraps it in one, so the legend keeps its size
-   when the layer arrives (D5, record 0033). */
 .enarratio-legend li {
   box-sizing: border-box;
   min-height: 24px;
@@ -137,8 +129,6 @@ svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; 
   border-radius: var(--enarratio-radius-swatch, 0.15em);
   forced-color-adjust: none;
 }
-/* A legend matches its marks without color (B57): a line chart's swatch is a short line, and a
-   chart that tells series apart by symbol shows each series' symbol, in Plot's order. */
 .enarratio-legend[data-enarratio-legend="line"] .enarratio-swatch {
   width: 1.4em;
   height: 0.2em;
@@ -146,7 +136,6 @@ svg.enarratio { display: inline-block; vertical-align: middle; max-width: 100%; 
   border-radius: 0;
 }
 .enarratio-legend[data-enarratio-legend="symbol"] .enarratio-swatch { border-radius: 0; }
-/* A candlestick chart's rising candles are hollow, and so is their swatch. */
 .enarratio-legend[data-enarratio-legend="hollow"] [data-slot="1"] .enarratio-swatch {
   background: transparent;
   box-shadow: inset 0 0 0 0.15em var(--enarratio-series-1);
@@ -165,17 +154,11 @@ ${Array.from(
   (_, i) =>
     `.enarratio [data-step="${i + 1}"] { --enarratio-slot: var(--enarratio-sequential-${i + 1}); --enarratio-slot-ink: var(--enarratio-sequential-text-${i + 1}); }`,
 ).join("\n")}
-/* Series names written on the background (direct labels, curve labels, at-risk rows) take the
-   series' label shade, at 4.5:1 on the background (B1). A site defining only the series colors
-   gets a mix toward the text color instead; colorStyles() gives a chart's own override the same. */
 ${Array.from({ length: 8 }, (_, i) => {
   const n = i + 1;
   const mix = `color-mix(in srgb, var(--enarratio-series-${n}) 55%, var(--enarratio-text))`;
   return `.enarratio text[fill="var(--enarratio-series-${n})"], .enarratio g[fill="var(--enarratio-series-${n})"] > text { fill: var(--enarratio-series-label-${n}, ${mix}); }`;
 }).join("\n")}
-/* Each ramp step's cells and swatches carry an edge at 3:1 on the background where the step's own
-   fill is paler than that (B1); transparent where it is not. A site defining only the ramp gets
-   the muted text color round the three palest steps. */
 ${Array.from({ length: 5 }, (_, i) => {
   const n = i + 1;
   const edge = `var(--enarratio-sequential-edge-${n}, ${n <= 3 ? "var(--enarratio-text-muted)" : "transparent"})`;
@@ -185,28 +168,20 @@ ${Array.from({ length: 5 }, (_, i) => {
 .enarratio, .enarratio-tooltip { --enarratio-texture: none; --enarratio-slot-edge: transparent; }
 .enarratio-swatch { box-sizing: border-box; border: var(--enarratio-border-width, 1px) solid var(--enarratio-slot-edge); }
 .enarratio-swatch { background: var(--enarratio-texture), var(--enarratio-slot); }
-/* Filled series are solid. Series 2 to 8 carry a texture as well (B5), and the legend the same
-   ones, on a chart that does not name every series on the drawing (data-enarratio-textured), and
-   for readers who ask for more contrast, force colors or print (record 0036). */
 .enarratio-texture { stroke-opacity: 0; }
 .enarratio[data-enarratio-textured] .enarratio-texture {
   stroke-opacity: var(--enarratio-opacity-texture, 0.6);
 }
 ${textureRules(".enarratio[data-enarratio-textured]")}
-/* A background-colored gap between adjacent bars and stacked segments, so they never touch (B6,
-   record 0036). */
 .enarratio [data-enarratio-mark="bar"] [data-enarratio-key] {
   stroke: var(--enarratio-background);
   stroke-width: var(--enarratio-bar-gap, 2px);
 }
-/* Values and series names written beside the bars (record 0036). */
 .enarratio [data-enarratio-mark="bar label"] text { font-variant-numeric: tabular-nums; }
 .enarratio-data {
   margin: var(--enarratio-space, 0.5em) 0 0;
   font-size: var(--enarratio-font-size-small, 0.875em);
 }
-/* A table chart's wrapper is the one scroller (focusable, named); a host's table rule that makes the
-   table scroll itself is overridden so there is one scroll region, not two. */
 .enarratio .enarratio-data.enarratio-table-chart { overflow-x: auto; }
 .enarratio .enarratio-data.enarratio-table-chart > table { display: table; overflow: visible; max-inline-size: none; margin-top: 0; }
 .enarratio-data table { border-collapse: collapse; margin-top: var(--enarratio-space, 0.5em); }
@@ -216,7 +191,6 @@ ${textureRules(".enarratio[data-enarratio-textured]")}
   text-align: left;
 }
 .enarratio-data td { font-variant-numeric: tabular-nums; text-align: right; }
-/* tableChart's cells: heat on the ramp step, and a bar beside the number it repeats. */
 .enarratio-data .enarratio-heat { background: var(--enarratio-slot); color: var(--enarratio-slot-ink); }
 .enarratio .enarratio-cell-bar {
   display: inline-block;
@@ -236,12 +210,6 @@ ${textureRules(".enarratio[data-enarratio-textured]")}
   white-space: nowrap;
   border: 0;
 }
-/* The data table is for screen readers and AI agents (record 0035). A row header can be a link,
-   which a keyboard reaches: the table shows while focus is in it, so focus is never invisible
-   (WCAG 2.2 SC 2.4.7). */
-/* Hidden, the table never scrolls, whatever a host's table rule says: a 1-pixel box with a table
-   that scrolls inside it is a scroll region a keyboard cannot reach (axe
-   scrollable-region-focusable). */
 .enarratio-data.enarratio-visually-hidden > table {
   display: table;
   overflow: visible;
@@ -272,7 +240,6 @@ ${textureRules(".enarratio[data-enarratio-textured]")}
   box-shadow: var(--enarratio-tooltip-shadow, 0 2px 8px rgb(0 0 0 / 15%));
 }
 .enarratio-tooltip[hidden] { display: none; }
-/* The tooltip card (record 0036): what the column is, then a row per mark, value first. */
 .enarratio-tooltip p { margin: 0; }
 .enarratio-tip-at {
   margin-bottom: var(--enarratio-gap-row, 0.25em) !important;
@@ -300,14 +267,9 @@ ${textureRules(".enarratio[data-enarratio-textured]")}
 .enarratio svg :is([fill^="var(--enarratio-series-"], [stroke^="var(--enarratio-series-"], [fill^="url(#enarratio-"]) {
   transition: opacity var(--enarratio-duration-hover, 150ms) var(--enarratio-ease-out, ease-out);
 }
-/* A finger dragging across a drawing scrubs it (record 0036); the page still scrolls up and down.
-   A wide drawing that scrolls sideways in its frame keeps its sideways pan. */
 .enarratio[data-enarratio-enhanced] .enarratio-frame:not(.enarratio-frame-wide) > svg { touch-action: pan-y; }
-/* The crosshair at the picked x of a line or area chart. */
 .enarratio-crosshair line { stroke: var(--enarratio-text-muted); stroke-width: 1px; }
 .enarratio-crosshair circle { stroke: var(--enarratio-background); stroke-width: 2px; }
-/* A legend entry pointed at or focused spotlights its series: every mark, line and name in
-   another series' color fades (record 0036). */
 ${Array.from({ length: 8 }, (_, i) => {
   const n = i + 1;
   return `.enarratio[data-enarratio-spotlight="${n}"] svg :is([fill^="var(--enarratio-series-"], [stroke^="var(--enarratio-series-"], [fill^="url(#enarratio-"]):not([fill="var(--enarratio-series-${n})"], [stroke="var(--enarratio-series-${n})"], [fill$="-${n})"]) { opacity: var(--enarratio-opacity-dimmed, 0.25); }`;
@@ -316,10 +278,6 @@ ${Array.from({ length: 8 }, (_, i) => {
 .enarratio[data-enarratio-enhanced] [data-enarratio-href] { cursor: pointer; }
 .enarratio [data-enarratio-dimmed] { opacity: var(--enarratio-opacity-dimmed, 0.25); }
 .enarratio [data-enarratio-key]:focus { outline: none; }
-/* The enhancement layer's points: a native control over each mark, for keyboards and screen
-   readers (pointers use the marks). Focused, it draws a background-colored ring inside a
-   focus-colored one, so one of the two always contrasts with whatever is next to it, above
-   every mark. */
 .enarratio-frame, .enarratio[data-enarratio-enhanced] { position: relative; }
 .enarratio-points { position: absolute; pointer-events: none; }
 .enarratio-points > * {
@@ -337,7 +295,6 @@ ${Array.from({ length: 8 }, (_, i) => {
   box-shadow: 0 0 0 calc(var(--enarratio-focus-width-inner, 5px) / 2) var(--enarratio-background);
 }
 .enarratio [data-enarratio-faded] { opacity: var(--enarratio-opacity-faded, 0.35); }
-/* The keys, shown while a point has focus and read as the points' description otherwise. */
 .enarratio-frame:not(:focus-within) + .enarratio-hint {
   position: absolute;
   width: 1px;

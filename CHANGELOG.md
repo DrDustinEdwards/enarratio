@@ -21,6 +21,9 @@ change the public API; every such change is listed here.
 ### Changed
 
 - Shorter source comments and doc comments (comment lines 4,474 to 3,867), and 19 tests removed that pinned design or repeated other tests. No behavior change.
+- The enhancement layer's chart class (`src/enhance/chart.ts`, 1,110 lines) is split into modules for the points and keyboard, range brush, tooltip, toolbar and plot wiring. No behavior change; the layer stays under its 12 kB limit.
+- `base.css` no longer carries the explanatory comments from its source (the stylesheet is about 5.8 kB smaller). Rules are unchanged.
+- 5 light chart parity cases removed from `test/lite.test.ts` that repeated the shape of another case.
 
 ### Removed
 

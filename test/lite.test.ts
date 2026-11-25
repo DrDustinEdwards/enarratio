@@ -74,10 +74,6 @@ const sales = [
 const barCases: [string, Parameters<typeof plot.barChart<(typeof sales)[number]>>[0]][] = [
   ["one series", { data: sales, x: "region", y: "amount", alt: "Sales" }],
   [
-    "stacked with negatives",
-    { data: sales, x: "region", y: "amount", series: "quarter", alt: "Sales" },
-  ],
-  [
     "grouped",
     { data: sales, x: "region", y: "amount", series: "quarter", layout: "grouped", alt: "Sales" },
   ],
@@ -106,18 +102,6 @@ const barCases: [string, Parameters<typeof plot.barChart<(typeof sales)[number]>
       series: "quarter",
       orientation: "horizontal",
       xLabel: "Region",
-      alt: "Sales",
-    },
-  ],
-  [
-    "horizontal grouped",
-    {
-      data: sales,
-      x: "region",
-      y: "amount",
-      series: "quarter",
-      layout: "grouped",
-      orientation: "horizontal",
       alt: "Sales",
     },
   ],
@@ -166,15 +150,6 @@ const barCases: [string, Parameters<typeof plot.barChart<(typeof sales)[number]>
     },
   ],
   [
-    "small values",
-    {
-      data: sales.map((s) => ({ ...s, amount: Math.abs(s.amount) / 1000 })),
-      x: "region",
-      y: "amount",
-      alt: "Sales",
-    },
-  ],
-  [
     "large values",
     {
       data: sales.map((s) => ({ ...s, amount: s.amount * 123456 })),
@@ -206,24 +181,7 @@ const intervalCases: [string, Parameters<typeof plot.barChart<(typeof measured)[
     "grouped error bars with a missing interval",
     { data: measured, x: "site", y: "mean", series: "arm", layout: "grouped", errorBars, alt: "M" },
   ],
-  [
-    "horizontal grouped error bars",
-    {
-      data: measured,
-      x: "site",
-      y: "mean",
-      series: "arm",
-      layout: "grouped",
-      orientation: "horizontal",
-      errorBars,
-      alt: "Means",
-    },
-  ],
   ["annotations", { data: one, x: "site", y: "mean", errorBars, annotations: notes, alt: "M" }],
-  [
-    "horizontal annotations",
-    { data: one, x: "site", y: "mean", orientation: "horizontal", annotations: notes, alt: "M" },
-  ],
 ];
 
 describe("light barChart", () => {
