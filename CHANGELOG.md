@@ -7,6 +7,13 @@ change the public API; every such change is listed here.
 
 ## [Unreleased]
 
+### Fixed
+
+- `update()` and the phone redraw drop a `fill`, `stroke`, `filter`, `clip-path`, `mask`, `cursor` or marker value whose `url()` points outside the document.
+- CSV export prefixes a cell that starts with a tab or carriage return, or a space before a signed formula.
+- The shadcn/ui, Radix and Material label colors pick black or white by contrast, not OKLCH lightness, so a saturated fill near lightness 0.56 gets white text.
+- The gallery pages no longer open with a restating intro or a caption under each chart name; the accessibility test covers every gallery page.
+
 ### Changed
 
 - Large source files split into smaller modules (gallery script, text, base stylesheet, line, bar and figure models, timeline, dot, line plot). No behavior change: the built gallery and `base.css` are byte-identical.

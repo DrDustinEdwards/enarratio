@@ -6,6 +6,9 @@ const ALLOWED_ELEMENTS = new Set(
     " ",
   ),
 );
+/** Presentation attributes that fetch a `url()`: only a reference into the same document may stay. */
+const PAINT_REFERENCE = /^(fill|stroke|filter|clip-path|mask|cursor|marker-(start|mid|end))$/;
+const OUTSIDE_URL = /url\(\s*["']?\s*[^#"'\s]/i;
 const LINK_ATTRIBUTES = new Set(["href", "xlink:href", "data-enarratio-href"]);
 
 /** Relative and http(s) links only, with no user or password before the host, as the server allows. */
@@ -47,6 +50,7 @@ export function sanitize(root: Element): void {
       const lower = name.toLowerCase();
       if (
         /^(on|form)|^(style|srcdoc|ping)$/.test(lower) ||
+        (PAINT_REFERENCE.test(lower) && OUTSIDE_URL.test(value)) ||
         (LINK_ATTRIBUTES.has(lower) && !safeLink(value) && !csvData(el, lower, value))
       ) {
         el.removeAttribute(name);

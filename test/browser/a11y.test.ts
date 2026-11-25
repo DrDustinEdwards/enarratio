@@ -88,7 +88,16 @@ describe("narrow screens", () => {
   );
 });
 
-const pages = ["index.html", "example.html", "astro.html"];
+const pages = [
+  "index.html",
+  "example.html",
+  "capsomer.html",
+  "shadcn.html",
+  "radix.html",
+  "material.html",
+  "astro.html",
+  "accessibility.html",
+];
 const schemes = ["light", "dark"] as const;
 
 describe.each(pages)("%s", (file) => {
@@ -97,8 +106,10 @@ describe.each(pages)("%s", (file) => {
     // Open every source block, so its contents are audited too, then every toolbar panel.
     await openDisclosures(page);
     expect(await audit(page)).toEqual([]);
-    await openPanels(page);
-    expect(await audit(page, ".enarratio-panel")).toEqual([]);
+    if (await page.$(".enarratio-panel")) {
+      await openPanels(page);
+      expect(await audit(page, ".enarratio-panel")).toEqual([]);
+    }
     await page.close();
   });
 
@@ -106,6 +117,28 @@ describe.each(pages)("%s", (file) => {
     const page = await harness.open(file, scheme, { scripts: false });
     expect(await page.$("[data-enarratio-enhanced]")).toBeNull();
     expect(await audit(page)).toEqual([]);
+    await page.close();
+  });
+});
+
+describe("labels on a series color", () => {
+  // The adapters' labels.css picks black or white by contrast, not by OKLCH lightness: a saturated
+  // fill near lightness 0.56 reads better in white.
+  it.each([
+    ["#bc4472", "color(srgb-linear 1 1 1)"],
+    ["#cb2c71", "color(srgb-linear 1 1 1)"],
+    ["#717171", "color(srgb-linear 1 1 1)"],
+    ["#767676", "color(srgb-linear 0 0 0)"],
+    ["#ffd400", "color(srgb-linear 0 0 0)"],
+  ])("puts %s under %s text", async (fill, ink) => {
+    const page = await harness.open("shadcn.html", "light", { lazy: true });
+    const color = await page.evaluate((fill) => {
+      const host = document.querySelector(".enarratio") as HTMLElement;
+      host.style.setProperty("--enarratio-series-1", fill);
+      host.style.color = "var(--enarratio-series-text-1)";
+      return getComputedStyle(host).color;
+    }, fill);
+    expect(color).toBe(ink);
     await page.close();
   });
 });

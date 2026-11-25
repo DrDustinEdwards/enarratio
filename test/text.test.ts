@@ -149,6 +149,12 @@ describe("CSV", () => {
     );
   });
 
+  it("defuses a leading tab or carriage return, and a space before a signed formula", () => {
+    expect(toCsv([["\tcmd", "\rcmd", "\t+cmd", " +1+1", " +1"]])).toBe(
+      `'\tcmd,"'\rcmd",'\t+cmd,' +1+1, +1`,
+    );
+  });
+
   it("links the table as a download, or reports one too large to inline", () => {
     const fig = parse(barChart({ data: [{ k: "a", v: 1 }], x: "k", y: "v", alt: "a", title: "T" }));
     const href = fig.querySelector(".enarratio-csv")?.getAttribute("href") ?? "";

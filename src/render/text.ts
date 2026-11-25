@@ -399,7 +399,7 @@ export function readingGrade(text: string): number {
  * unless the whole cell is a number) gets a leading apostrophe.
  */
 function csvField(value: string): string {
-  const safe = /^\s*[=@]|^[+-](?![\d.,]+%?$)/.test(value) ? `'${value}` : value;
+  const safe = /^[\t\r]|^\s*[=@]|^\s*[+-](?![\d.,]+%?$)/.test(value) ? `'${value}` : value;
   return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 
