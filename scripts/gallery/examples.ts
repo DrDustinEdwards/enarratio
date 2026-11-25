@@ -83,7 +83,8 @@ const narrowDraw =
   (options: O): string => {
     const at = (height?: number) =>
       draw({ ...options, width: NARROW_WIDTH, ...(height === undefined ? {} : { height }) });
-    const target = KEEP_HEIGHT.has(id) || MAPS.has(id) ? undefined : galleryShownHeight(draw(options));
+    const target =
+      KEEP_HEIGHT.has(id) || MAPS.has(id) ? undefined : galleryShownHeight(draw(options));
     const first = at(target);
     if (target === undefined) return first;
     const extra = (viewBox(first)?.height ?? target) - target;
