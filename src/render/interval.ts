@@ -1,7 +1,8 @@
 /** Uncertainty intervals the caller computed (error bars, confidence intervals), read from rows. */
 
 import { type KeysOfType, readNumberOrNull } from "./data.js";
-import { ENGLISH, type Strings } from "./text.js";
+import { ENGLISH } from "./english.js";
+import type { Strings } from "./text.js";
 
 /**
  * An interval around each value, from two fields: error bars, a confidence interval, a range.

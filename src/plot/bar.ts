@@ -1,16 +1,12 @@
 import * as Plot from "@observablehq/plot";
-import {
-  type BarChartOptions,
-  type BarPoint,
-  barModel,
-  FACET_PADDING,
-} from "../render/bar-model.js";
+import { type BarChartOptions, type BarPoint } from "../render/bar-options.js";
+import { barModel, FACET_PADDING } from "../render/bar-model.js";
 import type { Bounds } from "../render/interval.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { drawAnnotations } from "./annotate.js";
 import { capErrorBars, named, steps } from "./marks.js";
 
-export type { BarChartOptions } from "../render/bar-model.js";
+export type { BarChartOptions } from "../render/bar-options.js";
 
 /**
  * A bar chart, drawn on the server: one series, or several stacked or grouped. Negative values stack

@@ -5,10 +5,11 @@
  * figcaption, never on the figure: `role="img"` would hide the caption and table from their readers.
  */
 
-import { BRUSH_SCALES, ENHANCE_STRINGS, ICONS } from "../controls.js";
 import { element, escapeHtml } from "../html.js";
 import { requireSize, safeHref } from "./data.js";
 import { type ChartDescription, overview, summarize } from "./describe.js";
+import { legendMarkup } from "./figure-legend.js";
+import { sourceLine, toolbarMarkup } from "./figure-toolbar.js";
 import { slotStyle } from "./slot-style.js";
 import { DEFAULT_WIDTH, WIDE_WIDTH } from "./size.js";
 import { numberFormat, type StringOverrides, type Strings, stringsFor, toCsv } from "./text.js";
@@ -299,94 +300,8 @@ export function dataTableBlock(table: DataTable, caption: string): string {
   );
 }
 
-/** Markup the enhancement layer replaces when it runs: inert until then, hidden with scripts off. */
-function pending(tag: string, attrs: Record<string, string | undefined>, content: string): string {
-  return element(tag, { ...attrs, "data-enarratio-pending": true, inert: true }, content);
-}
-
-/** A toolbar icon: an inline SVG stroked in the button's color, hidden from assistive technology. */
-function iconMarkup(name: keyof typeof ICONS): string {
-  return element(
-    "svg",
-    { class: "enarratio-icon", viewBox: "0 0 16 16", "aria-hidden": "true", focusable: "false" },
-    element("path", { d: ICONS[name] }),
-  );
-}
-
-/** A toolbar control's face: its icon and its word, which is also its name. */
-function face(name: keyof typeof ICONS, text: string): string {
-  return iconMarkup(name) + element("span", { class: "enarratio-label" }, escapeHtml(text));
-}
-
-/**
- * The toolbar above the drawing, as `enhance()` builds it with its default options: Sound with two
- * or more marks, Range on a continuous x scale, then the Download menu. What only the layer can do
- * is written inert and hidden with scripts off; "Download CSV" is a link in a native disclosure.
- * Returns "" when there is nothing to put in it.
- */
-function toolbarMarkup(
-  options: FigureOptions,
-  parts: FigureParts,
-  svg: string,
-  csv: string,
-): string {
-  const s = ENHANCE_STRINGS;
-  const layer = !parts.fixed && !parts.tableMarkup && options.controls !== false;
-  const bar: string[] = [];
-  if (layer && (svg.match(/\sdata-enarratio-key=/g) ?? []).length > 1) {
-    bar.push(
-      pending("button", { type: "button", "aria-pressed": "false" }, face("sound", s.sound)),
-    );
-  }
-  if (layer && parts.x && BRUSH_SCALES.includes(parts.x.type)) {
-    bar.push(
-      pending(
-        "details",
-        { class: "enarratio-range" },
-        element("summary", {}, face("range", s.range)),
-      ),
-    );
-  }
-  // A primitive (parts.fixed) has no Sound or Range, but its drawing saves as any chart's does.
-  const files = !parts.tableMarkup && options.controls !== false;
-  const exports = files
-    ? [s.downloadSvg, s.downloadPng, s.downloadTactile, ...(options.id ? [s.copyEmbed] : [])]
-    : [];
-  if (csv || exports.length > 0) {
-    const items =
-      csv + exports.map((text) => pending("button", { type: "button" }, escapeHtml(text))).join("");
-    const menu = `${element("summary", {}, face("download", s.download) + iconMarkup("chevron"))}${element("div", { class: "enarratio-panel enarratio-menu" }, items)}`;
-    // With no CSV link, nothing in the menu works without script, so the whole menu waits for it.
-    bar.push(
-      csv
-        ? element("details", { class: "enarratio-download" }, menu)
-        : pending("details", { class: "enarratio-download" }, menu),
-    );
-  }
-  return bar.length > 0
-    ? element(
-        "div",
-        { class: "enarratio-controls", role: "toolbar", "aria-label": s.controls },
-        bar.join(""),
-      )
-    : "";
-}
-
 /** The longest CSV, in characters of its `data:` URL, that a figure inlines. */
 const CSV_LIMIT = 100_000;
-
-/** The source line: source (linked) and byline, or "" when there is none. */
-function sourceLine(kind: string, options: FigureOptions, strings: Strings): string {
-  const parts: string[] = [];
-  const source = typeof options.source === "string" ? { name: options.source } : options.source;
-  if (source?.name.trim()) {
-    const name = escapeHtml(source.name.trim());
-    const linked = source.href ? element("a", { href: safeHref(kind, source.href) }, name) : name;
-    parts.push(`${escapeHtml(strings.source)}: ${linked}`);
-  }
-  if (options.byline?.trim()) parts.push(escapeHtml(strings.by(options.byline.trim())));
-  return parts.length > 0 ? element("p", { class: "enarratio-source" }, parts.join(" · ")) : "";
-}
 
 /** The "Download CSV" link, for the toolbar's Download menu, or "" when there is none. */
 function csvLink(
@@ -451,59 +366,6 @@ function checkFigure(options: FigureOptions, parts: FigureParts, title: string |
       `${points} points is more than ${limits.points}; ${limits.advice ?? "summarize the data first, or use small multiples or a table"}`,
     );
   }
-}
-
-/**
- * Kinds whose series are lines, and kinds told apart by symbol: their legend swatches are drawn as
- * a line (dashed in forced colors) or as the symbol, so the legend matches the marks without color.
- */
-const LINE_KINDS = new Set([
-  "line",
-  "density",
-  "survival",
-  "dose-response",
-  "slope",
-  "radar",
-  "parallel",
-]);
-const SYMBOL_KINDS = new Set(["scatter", "dot", "tree", "network"]);
-/** Charts whose first series is drawn hollow (a candlestick's rising candles). */
-const HOLLOW_KINDS = new Set(["candlestick"]);
-
-function legendMarkup(parts: FigureParts): string {
-  const swatch = element("span", { class: "enarratio-swatch", "aria-hidden": "true" });
-  if (parts.ramp && parts.ramp.length > 0) {
-    return element(
-      "ul",
-      { class: "enarratio-legend enarratio-ramp" },
-      parts.ramp
-        .map((item) =>
-          element("li", { "data-step": item.step }, `${swatch}${escapeHtml(item.label)}`),
-        )
-        .join(""),
-    );
-  }
-  if (!parts.legend || parts.legend.length === 0) return "";
-  const mark = LINE_KINDS.has(parts.kind)
-    ? "line"
-    : SYMBOL_KINDS.has(parts.kind)
-      ? "symbol"
-      : HOLLOW_KINDS.has(parts.kind)
-        ? "hollow"
-        : undefined;
-  return element(
-    "ul",
-    { class: "enarratio-legend", "data-enarratio-legend": mark },
-    parts.legend
-      .map((item) =>
-        element(
-          "li",
-          { "data-enarratio-series": item.label, "data-slot": item.slot },
-          `${swatch}${escapeHtml(item.label)}`,
-        ),
-      )
-      .join(""),
-  );
 }
 
 /** Assembles the figure markup for a chart. */

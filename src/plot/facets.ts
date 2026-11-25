@@ -1,6 +1,7 @@
 import * as Plot from "@observablehq/plot";
 import { finishBars } from "../render/bar-marks.js";
-import { BAR_MAX, type BarChartOptions, type BarPoint, barModel } from "../render/bar-model.js";
+import { BAR_MAX, barModel } from "../render/bar-model.js";
+import { type BarChartOptions, type BarPoint } from "../render/bar-options.js";
 import {
   domainOf,
   type KeysOfType,
@@ -12,7 +13,8 @@ import {
 import { type ChartDescription, categoryRange, valueRange } from "../render/describe.js";
 import { type AxisUnits, type FigureOptions, figure, validateFigure } from "../render/figure.js";
 import { slotStyle } from "../render/slot-style.js";
-import { type LineChartOptions, lineModel, type Point } from "../render/line-model.js";
+import { type LineChartOptions, type Point } from "../render/series-prepare.js";
+import { lineModel } from "../render/line-model.js";
 import { keyed, renderPlot } from "../render/plot.js";
 import { planSeries, seriesLegend } from "../render/series.js";
 import { charWidth, DEFAULT_WIDTH, fitTicks, textGrowth, topMargin } from "../render/size.js";

@@ -3,240 +3,29 @@
  * table. Shared by `enarratio/plot` and `enarratio/lite`, so both draw the same chart.
  */
 
-import { type Annotated, withNotes } from "./annotation.js";
+import { withNotes } from "./annotation.js";
 import {
-  calendarDates,
-  DAY,
   domainOf,
   isYears,
-  type KeysOfType,
   markKey,
   maxOf,
   minOf,
   readCategory,
-  readDate,
   readLabel,
   readNumber,
   safeHref,
 } from "./data.js";
 import type { MarkDatum } from "./datum.js";
-import {
-  figure,
-  type SeriesAxesOptions,
-  type SeriesColor,
-  unitLabel,
-  validateFigure,
-} from "./figure.js";
+import { figure, unitLabel, validateFigure } from "./figure.js";
 import { slotStyle } from "./slot-style.js";
-import { type Bounds, type IntervalFields, intervalText, readInterval } from "./interval.js";
+import { type Bounds, intervalText, readInterval } from "./interval.js";
 import { planSeries, type SeriesPlan, seriesLegend } from "./series.js";
 import { charWidth, DEFAULT_HEIGHT, DEFAULT_WIDTH, fitTicks } from "./size.js";
 import { stringsFor, valueAxis, valueFormat } from "./text.js";
+import { countTicks, requireMaxXTicks, timeAxis } from "./bar-axis.js";
 import { finishBars } from "./bar-marks.js";
+import { type BarChartOptions, type BarPoint, KIND } from "./bar-options.js";
 import { texture } from "./texture.js";
-
-/** Options for `barChart`, from `enarratio/plot` or `enarratio/lite`. */
-export interface BarChartOptions<T extends object> extends SeriesAxesOptions, Annotated {
-  readonly data: readonly T[];
-  /**
-   * The field for categories along the bar axis: a label, or a number such as a year. With
-   * `xType: "time"` it is a time: a Date, an ISO 8601 string or epoch milliseconds.
-   */
-  readonly x: KeysOfType<T, string | number | Date>;
-  /**
-   * `"time"` puts the bars on a time axis: one bar slot for every `interval` from the first row to
-   * the last (empty ones too, so a gap in the data is a gap in the chart). Rows in the same
-   * interval and series are summed, or counted when `y` is omitted. Dates are instants in UTC,
-   * except that when every Date falls at local midnight they are read as calendar dates, as in
-   * `lineChart`. The default, `"category"`, treats `x` as labels.
-   */
-  readonly xType?: "category" | "time";
-  /**
-   * With `xType: "time"`, the length of each bar's interval (default `"day"`), from UTC midnight;
-   * weeks start on Monday. Bars are labeled by their first moment, e.g. `2026-01-05 14:00 UTC`.
-   */
-  readonly interval?: "hour" | "day" | "week" | "month" | "year";
-  /** With `xType: "time"`, formats each interval's start for labels, hover details and the data table. */
-  readonly formatX?: (start: Date) => string;
-  /**
-   * The field for bar length. Omit it to count rows instead: `barChart({ data: entries, x:
-   * "year", series: "type" })`. Rows sharing a category and series are summed.
-   */
-  readonly y?: KeysOfType<T, number>;
-  /**
-   * With `y`, keeps the value axis on whole numbers, for values that are counts you already
-   * totaled. Values must be whole numbers of 0 or more. Counted bars always have whole-number ticks.
-   */
-  readonly wholeNumbers?: boolean;
-  /** A field that splits each bar into series, stacked or grouped. */
-  readonly series?: KeysOfType<T, string>;
-  /** How series share a category: stacked (default) or side by side. */
-  readonly layout?: "stacked" | "grouped";
-  /** Vertical bars (default), or horizontal bars for long category names and rankings. */
-  readonly orientation?: "vertical" | "horizontal";
-  /**
-   * Every category in display order. Without it, data order, or ascending when all are numbers.
-   * Not used with `xType: "time"`, which builds its own domain.
-   */
-  readonly xDomain?: readonly (string | number)[];
-  /** Color overrides by series name. A chart without `series` has one series, named by `yLabel`. */
-  readonly colors?: Readonly<Record<string, SeriesColor>>;
-  /**
-   * The category axis label; defaults to the `x` field name; `null` hides it. A time axis or an
-   * axis of years draws no title, but the table, hover details and summary still use it.
-   */
-  readonly xLabel?: string | null;
-  /** The value axis label; defaults to the `y` field name or "Count"; `null` hides it. */
-  readonly yLabel?: string | null;
-  /**
-   * What a click on a bar filters by once enhanced: its series (default when there are series) or
-   * its category (`"x"`). A chart without series always filters by category.
-   */
-  readonly filterBy?: "series" | "x";
-  /**
-   * A link for each category: each category in the data table is that link, and each bar carries
-   * it in `data-enarratio-href`, which `enhance()` follows on a click when the bar does not
-   * filter. Only relative, `http:` and `https:` links are allowed.
-   */
-  readonly href?: (x: string) => string;
-  /** The most category labels to print; with more categories, every nth is printed, from the first. */
-  readonly maxXTicks?: number;
-  /**
-   * Name the series on the drawing (default true): beside the last stack of vertical stacked bars,
-   * or over the last group of two grouped series. A chart whose series are not all named this way
-   * (horizontal, more than two grouped, a series missing from the last stack, names wider than a
-   * quarter of the drawing, or `false`) fills series 2 to 8 with textures instead.
-   */
-  readonly directLabels?: boolean;
-  /**
-   * An error bar on each bar, from `lower` and `upper` fields, carried in the data table and stated
-   * in the summary. Needs `y`, and the grouped layout when there are series.
-   */
-  readonly errorBars?: IntervalFields<T>;
-}
-
-/** One bar, or one series' segment of a bar: the rows sharing a category and series. */
-export interface BarPoint {
-  readonly x: string;
-  readonly series: string;
-  value: number;
-}
-
-const KIND = "barChart";
-
-type Interval = NonNullable<BarChartOptions<object>["interval"]>;
-
-const pad = (n: number): string => String(n).padStart(2, "0");
-
-function floorTo(t: number, interval: Interval): number {
-  const d = new Date(t);
-  switch (interval) {
-    case "hour":
-      return Math.floor(t / 3_600_000) * 3_600_000;
-    case "day":
-      return Math.floor(t / DAY) * DAY;
-    case "week": {
-      const day = Math.floor(t / DAY) * DAY;
-      const sinceMonday = (new Date(day).getUTCDay() + 6) % 7;
-      return day - sinceMonday * DAY;
-    }
-    case "month":
-      return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
-    case "year":
-      return Date.UTC(d.getUTCFullYear(), 0, 1);
-  }
-}
-
-/** The start of the interval after the one starting at `start`. */
-function nextAfter(start: number, interval: Interval): number {
-  const d = new Date(start);
-  switch (interval) {
-    case "hour":
-      return start + 3_600_000;
-    case "day":
-      return start + DAY;
-    case "week":
-      return start + 7 * DAY;
-    case "month":
-      return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1);
-    case "year":
-      return Date.UTC(d.getUTCFullYear() + 1, 0, 1);
-  }
-}
-
-function labelFor(start: number, interval: Interval): string {
-  const iso = new Date(start).toISOString();
-  switch (interval) {
-    case "hour":
-      return `${iso.slice(0, 10)} ${pad(new Date(start).getUTCHours())}:00 UTC`;
-    case "day":
-    case "week":
-      return iso.slice(0, 10);
-    case "month":
-      return iso.slice(0, 7);
-    case "year":
-      return iso.slice(0, 4);
-  }
-}
-
-/** The most bars a time axis will draw, so a typo in a date cannot ask for millions. */
-const MAX_PERIODS = 2000;
-
-function timeAxis<T extends object>(
-  data: readonly T[],
-  x: string,
-  options: BarChartOptions<T>,
-): { starts: number[]; names: string[]; byRow: string[] } {
-  const interval = options.interval ?? "day";
-  const rows = calendarDates(data.map((row, i) => readDate(KIND, row, x, i)));
-  const starts = rows.map((d) => floorTo(d.getTime(), interval));
-  const label = (start: number): string =>
-    options.formatX ? options.formatX(new Date(start)) : labelFor(start, interval);
-  const first = minOf(starts);
-  const last = maxOf(starts);
-  const periods: number[] = [];
-  for (let t = first; t <= last; t = nextAfter(t, interval)) {
-    periods.push(t);
-    if (periods.length > MAX_PERIODS) {
-      throw new Error(
-        `${KIND}: the time axis would need more than ${MAX_PERIODS} bars between the first and last row; use a longer interval`,
-      );
-    }
-  }
-  const names = periods.map(label);
-  if (new Set(names).size !== names.length) {
-    throw new Error(`${KIND}: formatX gives two intervals the same label`);
-  }
-  return { starts: periods, names, byRow: starts.map(label) };
-}
-
-/** Throws unless `maxXTicks`, when given, is a whole number of 1 or more. */
-function requireMaxXTicks(max: number | undefined): void {
-  if (max !== undefined && !(Number.isInteger(max) && max >= 1))
-    throw new Error(`${KIND}: maxXTicks must be a whole number of 1 or more`);
-}
-
-const STEPS = [1, 2, 5];
-
-function countTicks(points: readonly BarPoint[], grouped: boolean): number[] {
-  const totals = new Map<string, number>();
-  for (const p of points) {
-    const id = grouped ? markKey(p.x, p.series) : p.x;
-    totals.set(id, (totals.get(id) ?? 0) + p.value);
-  }
-  const max = Math.max(1, maxOf(totals.values()));
-  let step = 1;
-  for (let magnitude = 1; ; magnitude *= 10) {
-    const found = STEPS.map((s) => s * magnitude).find((s) => max / s <= 6);
-    if (found !== undefined) {
-      step = found;
-      break;
-    }
-  }
-  const ticks: number[] = [];
-  for (let t = 0; t < max + step; t += step) ticks.push(t);
-  return ticks;
-}
 
 /** A bar chart read from its options, ready for a renderer to draw. */
 export interface BarModel {

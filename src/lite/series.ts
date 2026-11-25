@@ -2,13 +2,8 @@
 
 import { datumAttributes } from "../render/datum.js";
 import type { ScaleDescription } from "../render/figure.js";
-import {
-  dayTicks,
-  fitTicks,
-  type Point,
-  type SeriesChartOptions,
-  type SeriesModel,
-} from "../render/line-model.js";
+import { dayTicks, type Point, type SeriesChartOptions } from "../render/series-prepare.js";
+import { fitTicks, type SeriesModel } from "../render/line-model.js";
 import { bottomMargin, leftMargin, monthTicks, titleLines, topMargin } from "../render/size.js";
 import { axisLabel, axisTickLabels, type Frame, grid, labelLines, type Tick } from "./axis.js";
 import {

@@ -9,6 +9,10 @@ change the public API; every such change is listed here.
 
 ### Changed
 
+- Large source files split into smaller modules (gallery script, text, base stylesheet, line, bar and figure models, timeline, dot, line plot). No behavior change: the built gallery and `base.css` are byte-identical.
+
+### Changed
+
 - Shorter source comments and doc comments (comment lines 4,474 to 3,867), and 19 tests removed that pinned design or repeated other tests. No behavior change.
 
 ### Removed

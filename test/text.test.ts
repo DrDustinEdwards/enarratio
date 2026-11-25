@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { dateFormat, heatStrip, numberFormat, sparkline, toCsv } from "../src/index.js";
 import { barChart, lineChart } from "../src/plot/index.js";
 import { outliers, summarize } from "../src/render/describe.js";
-import { ENGLISH } from "../src/render/text.js";
+import { ENGLISH } from "../src/render/english.js";
 import { parse } from "./helpers.js";
 
 const series = (name: string, values: (number | null)[]) => ({

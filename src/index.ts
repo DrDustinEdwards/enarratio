@@ -26,9 +26,8 @@ export {
   type TimelineSpan,
   type TimelineStatus,
   type TimelineTime,
-  timeline,
-  timelineTable,
-} from "./primitives/timeline.js";
+} from "./primitives/timeline-events.js";
+export { timeline, timelineTable } from "./primitives/timeline.js";
 export {
   type UptimeSlot,
   type UptimeStatus,
@@ -62,10 +61,10 @@ export {
   numberFormat,
 } from "./render/format.js";
 export { type TableChartOptions, type TableColumn, tableChart } from "./render/table-chart.js";
+export { ENGLISH } from "./render/english.js";
 export {
   type At,
   type AxisRange,
-  ENGLISH,
   readingGrade,
   type StringOverrides,
   type Strings,
