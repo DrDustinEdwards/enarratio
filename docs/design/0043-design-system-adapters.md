@@ -29,8 +29,8 @@ Enarratio fits an existing project.
 3. **Labels on a fill, shared.** shadcn/ui and Material's derived colors have no "on" color, so
    `enarratio/adapters/labels.css` picks black or white for each series and ramp step from its
    OKLCH lightness with relative color syntax (Baseline 2024), and falls back to the text color.
-   Both adapters import it, and a site's own adapter can. Radix's labels are static: Radix
-   documents white on steps 9 and 10, and step 1 reads on steps 11 and 12 in both themes.
+   Both adapters import it, and a site's own adapter can. Radix imports it too: Radix's static white on steps 9 and 10
+   reaches only 2.5 to 3.3:1 (docs/adapters.md), so the labels switch by the fill.
 4. **Eight series where a system has fewer.** shadcn/ui's six to eight mix three of its chart
    colors with the text color, so they differ in lightness. Material builds its
    roles from one seed, so its secondary is primary, muted: on the baseline scheme no set of its

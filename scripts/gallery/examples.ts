@@ -113,7 +113,6 @@ export interface Example {
   readonly name: string;
   /** The module it imports: enarratio, enarratio/plot, enarratio/science or enarratio/map. */
   readonly module: string;
-  readonly title: string;
   readonly source: string;
   readonly markup: string;
   /** The chart's drawing at NARROW_WIDTH (its `.enarratio-frame`), when the example is wider. */
@@ -204,7 +203,6 @@ export async function loadExamples(): Promise<Example[]> {
     const module = (await import(pathToFileURL(path).href)) as { default: unknown };
     if (typeof module.default !== "string") throw new Error(`${file} must export a string`);
     const source = readFileSync(path, "utf8");
-    const heading = /^\/\/ (.+)$/m.exec(source)?.[1] ?? file;
     const id = basename(file, ".ts");
     const from = /from "(enarratio[^"]*)"/.exec(source)?.[1] ?? "enarratio";
     const drawnWidth = viewBox(module.default)?.width ?? 0;
@@ -223,7 +221,6 @@ export async function loadExamples(): Promise<Example[]> {
       fit: narrowBox && MAPS.has(id) ? narrowBox.height : undefined,
       name: NAMES[id] ?? id,
       module: from,
-      title: heading,
       source,
       markup: withExpand(module.default),
       narrow,

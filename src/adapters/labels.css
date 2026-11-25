@@ -1,6 +1,6 @@
 /* Enarratio adapter part: the label on each series color and ramp step (a genome feature's name, a
    heatmap cell's value), for an adapter whose design system has no matching "on" color. Black or white,
-   whichever the fill's OKLCH lightness calls for; the text color where relative colors do not work.
+   whichever reads better on the fill (the one with the higher WCAG contrast, switching at relative luminance 0.179); the text color where relative colors do not work.
    Imported by the shadcn/ui, Radix and Material adapters; an adapter of your own can import it too. */
 :where(.enarratio, .enarratio-tooltip) {
   --enarratio-series-text-1: var(--enarratio-text);
@@ -17,46 +17,61 @@
   --enarratio-sequential-text-4: var(--enarratio-text);
   --enarratio-sequential-text-5: var(--enarratio-text);
 }
-@supports (color: oklch(from red l c h)) {
+@supports (color: color(from red srgb-linear r g b)) {
   :where(.enarratio, .enarratio-tooltip) {
-    --enarratio-series-text-1: oklch(
-      from var(--enarratio-series-1) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    /* 1 (white) when the fill's luminance is under 0.179, else 0 (black): the point where both reach the same contrast. */
+    --enarratio-on: clamp(0, (0.179 - (0.2126 * r + 0.7152 * g + 0.0722 * b)) * 1000, 1);
+    --enarratio-series-text-1: color(
+      from var(--enarratio-series-1) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
-    --enarratio-series-text-2: oklch(
-      from var(--enarratio-series-2) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    --enarratio-series-text-2: color(
+      from var(--enarratio-series-2) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
-    --enarratio-series-text-3: oklch(
-      from var(--enarratio-series-3) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    --enarratio-series-text-3: color(
+      from var(--enarratio-series-3) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
-    --enarratio-series-text-4: oklch(
-      from var(--enarratio-series-4) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    --enarratio-series-text-4: color(
+      from var(--enarratio-series-4) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
-    --enarratio-series-text-5: oklch(
-      from var(--enarratio-series-5) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    --enarratio-series-text-5: color(
+      from var(--enarratio-series-5) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
-    --enarratio-series-text-6: oklch(
-      from var(--enarratio-series-6) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    --enarratio-series-text-6: color(
+      from var(--enarratio-series-6) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
-    --enarratio-series-text-7: oklch(
-      from var(--enarratio-series-7) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    --enarratio-series-text-7: color(
+      from var(--enarratio-series-7) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
-    --enarratio-series-text-8: oklch(
-      from var(--enarratio-series-8) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    --enarratio-series-text-8: color(
+      from var(--enarratio-series-8) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
-    --enarratio-sequential-text-1: oklch(
-      from var(--enarratio-sequential-1) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    --enarratio-sequential-text-1: color(
+      from var(--enarratio-sequential-1) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
-    --enarratio-sequential-text-2: oklch(
-      from var(--enarratio-sequential-2) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    --enarratio-sequential-text-2: color(
+      from var(--enarratio-sequential-2) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
-    --enarratio-sequential-text-3: oklch(
-      from var(--enarratio-sequential-3) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    --enarratio-sequential-text-3: color(
+      from var(--enarratio-sequential-3) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
-    --enarratio-sequential-text-4: oklch(
-      from var(--enarratio-sequential-4) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    --enarratio-sequential-text-4: color(
+      from var(--enarratio-sequential-4) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
-    --enarratio-sequential-text-5: oklch(
-      from var(--enarratio-sequential-5) clamp(0, (0.56 - l) * 1000, 1) 0 0
+    --enarratio-sequential-text-5: color(
+      from var(--enarratio-sequential-5) srgb-linear var(--enarratio-on) var(--enarratio-on)
+        var(--enarratio-on)
     );
   }
 }

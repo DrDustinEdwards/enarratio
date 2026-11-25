@@ -51,8 +51,8 @@ export function page(
     "theme" in view ? `the ${view.theme.name} theme` : `the ${view.adapter.name} adapter`;
   const intro =
     "theme" in view
-      ? `Every Enarratio chart in the ${escapeText(view.theme.name)} theme.`
-      : `Every Enarratio chart through <code>enarratio/adapters/${view.adapter.file}</code>, on ${escapeText(view.adapter.name)}'s default ${escapeText(view.adapter.values)}. The adapter maps names, not measured colors: a site using it checks its own contrast (<a href="https://github.com/DrDustinEdwards/enarratio/blob/main/docs/adapters.md" rel="external">adapters guide</a>). The other adapters: ${adapters
+      ? ""
+      : `<code>enarratio/adapters/${view.adapter.file}</code> on ${escapeText(view.adapter.name)}'s default ${escapeText(view.adapter.values)}. The adapter maps names, not measured colors: a site using it checks its own contrast (<a href="https://github.com/DrDustinEdwards/enarratio/blob/main/docs/adapters.md" rel="external">adapters guide</a>). The other adapters: ${adapters
           .filter((a) => a !== view.adapter)
           .map((a) => `<a href="${cleanAddress(adapterPage(a))}">${escapeText(a.name)}</a>`)
           .join(", ")}.`;
@@ -72,7 +72,7 @@ ${siteHeader(links)}
 <main class="cap-page gallery" id="main" tabindex="-1">
 <header class="gallery-head">
 <h1>Enarratio gallery</h1>
-<p class="gallery-intro">${intro} Each was drawn on the server and reads without scripts; the enhancement layer adds hover details, keyboard navigation, filters and brushing.</p>
+${intro && `<p class="gallery-intro">${intro}</p>`}
 <dl class="cap-form-boxes" data-variant="readings">
 <div class="cap-form-boxes-box"><dt>Release</dt><dd>${escapeText(VERSION)}</dd></div>
 <div class="cap-form-boxes-box"><dt>Charts</dt><dd>${examples.length}</dd></div>
@@ -95,7 +95,7 @@ ${examples
       e,
       i,
     ) => `<section class="cap-panel example" id="${e.id}" data-example="${e.id}" aria-labelledby="${e.id}-title">
-<header class="cap-panel-head"><h2 id="${e.id}-title"><span class="cap-part-no">${i + 1}</span>${escapeText(e.name)}</h2><p>${escapeText(e.title)}</p></header>
+<header class="cap-panel-head"><h2 id="${e.id}-title"><span class="cap-part-no">${i + 1}</span>${escapeText(e.name)}</h2></header>
 <div class="cap-panel-body example-chart">
 ${frameHtml(e.markup, e.narrow ? { redraw: { narrow: e.narrow } } : {})}
 <p class="events" aria-live="polite"></p>
@@ -243,7 +243,6 @@ ${siteHeader(links(ASTRO_PAGE))}
 <main class="cap-page gallery guide" id="main" tabindex="-1">
 <header class="gallery-head">
 <h1>${ASTRO_TITLE}</h1>
-<p class="gallery-intro">Enarratio's charts in Astro pages, in Markdown, and as a block in the EmDash editor.</p>
 </header>
 <p>Two packages bring Enarratio to <a href="https://astro.build" rel="external">Astro</a> sites and to <a href="https://github.com/emdash-cms/emdash" rel="external">EmDash</a>, the CMS built on Astro. A chart arrives in the page as HTML and SVG, drawn on the server: complete before any script runs, with a written description and a data table for screen readers, numbers that search engines and language models can read, and light and dark themes. It draws bar, line, stacked area, scatter (with an optional regression line) and heatmap charts, and can add hover details, keyboard navigation and filtering where a page asks for them.</p>
 <ul>

@@ -6,13 +6,12 @@ const ALLOWED_ELEMENTS = new Set(
     " ",
   ),
 );
-const LINK_ATTRIBUTES = new Set(["href", "xlink:href", "data-enarratio-href"]);
+/** A `url()` that leaves the document (fill, filter, clip-path, cursor and the like): only `#id` may stay. */
+const OUTSIDE_URL = /url\((?!["'\s]*#)/i;
 
 /** Relative and http(s) links only, with no user or password before the host, as the server allows. */
 function safeLink(value: string): boolean {
-  const compact = Array.from(value)
-    .filter((ch) => ch.charCodeAt(0) > 0x20)
-    .join("");
+  const compact = value.replace(/[\0-\x20]/g, "");
   if (/^[/\\][/\\]/.test(compact)) return false;
   const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(compact)?.[1]?.toLowerCase();
   if (scheme === undefined) return true;
@@ -47,7 +46,8 @@ export function sanitize(root: Element): void {
       const lower = name.toLowerCase();
       if (
         /^(on|form)|^(style|srcdoc|ping)$/.test(lower) ||
-        (LINK_ATTRIBUTES.has(lower) && !safeLink(value) && !csvData(el, lower, value))
+        OUTSIDE_URL.test(value) ||
+        (lower.endsWith("href") && !safeLink(value) && !csvData(el, lower, value))
       ) {
         el.removeAttribute(name);
       }

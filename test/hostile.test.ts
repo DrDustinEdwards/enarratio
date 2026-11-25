@@ -7,6 +7,7 @@
 import { escapeHtml } from "@dustinedwards/site-runtime/html";
 import { parseHTML } from "linkedom";
 import { describe, expect, it } from "vitest";
+import { sanitize } from "../src/enhance/sanitize.js";
 import {
   heatStrip,
   heatStripTable,
@@ -258,4 +259,19 @@ describe("F12: hostile data cannot create markup", () => {
       assertInert(render(payload), payload);
     });
   }
+});
+
+describe("sanitize", () => {
+  it("drops a paint, filter, clip or cursor that reaches outside the document, keeps a local one", () => {
+    const { document } = parseHTML(
+      '<svg><rect fill="url(https://x.example/a)" filter="url( &quot;https://x.example/b&quot;)" clip-path="url(//x.example/c)" cursor="url(https://x.example/d), auto"></rect><rect fill="url(#local)" mask="url(#m)"></rect></svg>',
+    );
+    sanitize(document.documentElement);
+    const [outside, local] = document.querySelectorAll("rect");
+    for (const name of ["fill", "filter", "clip-path", "cursor"]) {
+      expect(outside?.hasAttribute(name), name).toBe(false);
+    }
+    expect(local?.getAttribute("fill")).toBe("url(#local)");
+    expect(local?.getAttribute("mask")).toBe("url(#m)");
+  });
 });
