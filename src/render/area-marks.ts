@@ -7,7 +7,7 @@
 import { escapeHtml, readAttributes, unescapeHtml } from "../html.js";
 import { num } from "../lite/svg.js";
 import { spreadLabels } from "./direct-labels.js";
-import type { Prepared } from "./line-model.js";
+import type { Prepared } from "./series-prepare.js";
 import type { SeriesPlan } from "./series.js";
 import { maxOf } from "./data.js";
 

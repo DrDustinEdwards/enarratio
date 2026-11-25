@@ -5,12 +5,8 @@
  * @packageDocumentation
  */
 
-import {
-  type LineChartOptions,
-  lineModel,
-  type Point,
-  seriesMargins,
-} from "../render/line-model.js";
+import { type LineChartOptions, type Point } from "../render/series-prepare.js";
+import { lineModel, seriesMargins } from "../render/line-model.js";
 import { spreadLabels } from "../render/direct-labels.js";
 import { annotationMarkup, continuousScale } from "./annotate.js";
 import {
@@ -31,7 +27,7 @@ export type {
   LineChartOptions,
   ReferenceLine,
   SeriesChartOptions,
-} from "../render/line-model.js";
+} from "../render/series-prepare.js";
 
 /**
  * A line chart without Observable Plot: the same options and output as `lineChart` from `enarratio/plot`.

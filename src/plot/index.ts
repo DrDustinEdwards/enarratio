@@ -43,9 +43,8 @@ export {
   lineChart,
   type ReferenceLine,
   type SeriesChartOptions,
-  type StreamgraphOptions,
-  streamgraph,
 } from "./line.js";
+export { type StreamgraphOptions, streamgraph } from "./stream.js";
 export { type ParallelCoordinatesOptions, parallelCoordinates } from "./parallel.js";
 export { type PieChartOptions, pieChart } from "./pie.js";
 export { type RadarChartOptions, radarChart } from "./radar.js";

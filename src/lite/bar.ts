@@ -5,13 +5,8 @@
  * @packageDocumentation
  */
 
-import {
-  type BarChartOptions,
-  type BarModel,
-  type BarPoint,
-  barModel,
-  FACET_PADDING,
-} from "../render/bar-model.js";
+import { type BarChartOptions, type BarPoint } from "../render/bar-options.js";
+import { type BarModel, barModel, FACET_PADDING } from "../render/bar-model.js";
 import { markKey } from "../render/data.js";
 import { datumAttributes } from "../render/datum.js";
 import { bottomMargin, leftMargin, titleLines, topMargin } from "../render/size.js";
@@ -43,7 +38,7 @@ interface Box {
   readonly height: number;
 }
 
-export type { BarChartOptions } from "../render/bar-model.js";
+export type { BarChartOptions } from "../render/bar-options.js";
 
 const MARGIN_TOP = 20;
 const MARGIN_BOTTOM = 44;

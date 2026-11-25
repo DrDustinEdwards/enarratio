@@ -6,7 +6,8 @@
 
 import { escapeHtml, readAttributes, unescapeHtml } from "../html.js";
 import { num } from "../lite/svg.js";
-import type { BarModel, BarPoint } from "./bar-model.js";
+import type { BarModel } from "./bar-model.js";
+import type { BarPoint } from "./bar-options.js";
 import { markKey } from "./data.js";
 import { spreadLabels } from "./direct-labels.js";
 import { charWidth, textGrowth } from "./size.js";

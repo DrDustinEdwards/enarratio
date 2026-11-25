@@ -5,13 +5,9 @@
  * @packageDocumentation
  */
 
-import {
-  AREA_OPACITY,
-  type AreaChartOptions,
-  areaModel,
-  type Point,
-  seriesMargins,
-} from "../render/line-model.js";
+import { AREA_OPACITY, type AreaChartOptions, areaModel } from "../render/area-model.js";
+import { type Point } from "../render/series-prepare.js";
+import { seriesMargins } from "../render/line-model.js";
 import { annotationMarkup, continuousScale } from "./annotate.js";
 import {
   annotations,
@@ -24,12 +20,8 @@ import {
 } from "./series.js";
 import { el, svgRoot } from "./svg.js";
 
-export type {
-  AreaChartOptions,
-  EventMarker,
-  ReferenceLine,
-  SeriesChartOptions,
-} from "../render/line-model.js";
+export type { AreaChartOptions } from "../render/area-model.js";
+export type { EventMarker, ReferenceLine, SeriesChartOptions } from "../render/series-prepare.js";
 
 /**
  * An area chart without Observable Plot: the same options and output as `areaChart` from `enarratio/plot`.
