@@ -64,7 +64,6 @@ export function keyed<T>(
   });
 }
 
-/** Writes a datum's keys onto an element. */
 function tag(el: Element, datum: MarkDatum): void {
   for (const [name, value] of datumAttributes(datum)) el.setAttribute(name, value);
 }
@@ -130,9 +129,8 @@ type Scale = { nice?: unknown; ticks?: unknown; type?: string } | undefined;
 /**
  * Rounds a `nice` linear y scale to the step of the ticks Plot will draw (one per 35 units of
  * height), not d3's default of ten, so the domain ends on a tick: data reaching 23 on a 0, 5, 10
- * axis end at 25, not at 24 above a top tick of 20. The light charts round the same way. Faceted
- * rows tick by their own height, so a chart with `fy` keeps Plot's rounding. The x scale keeps
- * d3's finer rounding: at a narrow width its few ticks would stretch data from 1 to 5 to 0 to 10.
+ * axis end at 25, not 24. The light charts round the same way. Faceted rows tick by their own
+ * height, so a chart with `fy` keeps Plot's rounding. The x scale keeps d3's finer rounding.
  */
 function niceToTicks(options: Plot.PlotOptions): Plot.PlotOptions {
   const margin = (value: unknown, fallback: number): number =>
@@ -155,10 +153,9 @@ function niceToTicks(options: Plot.PlotOptions): Plot.PlotOptions {
 }
 
 /**
- * Quiet axes on every chart (record 0036): no tick marks, since the labels and gridlines already
- * say where each value is (ONS, Apple's chart guidance), and the y axis title written across the
- * top of the tick labels, where it reads as the unit, rather than turned on its side. A chart can
- * still give a scale its own tick size or title place.
+ * Quiet axes on every chart: no tick marks, since labels and gridlines already say where each
+ * value is, and the y axis title across the top of the tick labels, where it reads as the unit. A
+ * chart can still give a scale its own tick size or title place.
  */
 function quietAxes(options: Plot.PlotOptions): Plot.PlotOptions {
   const quiet = (scale: unknown, anchor: "center" | "top"): Record<string, unknown> => ({
@@ -176,7 +173,6 @@ function quietAxes(options: Plot.PlotOptions): Plot.PlotOptions {
   } as Plot.PlotOptions;
 }
 
-/** The most lines in any x tick label: two on a time axis that names its month ("24" over "Oct"). */
 function tickLines(svg: Element): number {
   const labels = [...svg.querySelectorAll('[aria-label="x-axis tick label"] text')];
   return Math.max(1, ...labels.map((t) => t.querySelectorAll("tspan").length));
@@ -184,9 +180,8 @@ function tickLines(svg: Element): number {
 
 /**
  * Sets the x axis title a fixed number of ems below the tick labels' lines (TITLE_LINES), not at
- * the foot of the bottom margin. The margin is sized for the text a narrow column grows it to
- * (record 0022); measured from the foot, the title stood far below the ticks wherever the
- * drawing was shown at its own size. The light charts place it the same way.
+ * the foot of the bottom margin, which is sized for text a narrow column grows it to. The light
+ * charts place it the same way.
  */
 function placeXTitle(svg: Element): void {
   const group = svg.querySelector('[aria-label="x-axis label"]');
@@ -208,7 +203,7 @@ function placeXTitle(svg: Element): void {
 
 /**
  * One tick per 50 units asked of a numeric x axis on a plot under 200 across (a phone's), where
- * Plot's one per 80 pixels prints one or two (record 0041). A chart that sets its own ticks keeps them.
+ * Plot's one per 80 pixels prints one or two. A chart that sets its own ticks keeps them.
  */
 function narrowTicks(options: Plot.PlotOptions): Plot.PlotOptions {
   const x = options.x as Record<string, unknown> | undefined;
@@ -230,7 +225,7 @@ function xTitleText(svg: Element): Element | undefined {
 }
 
 /**
- * Fits the x axis title to the drawing (fitTitle, record 0041): moved toward the middle of the
+ * Fits the x axis title to the drawing (fitTitle): moved toward the middle of the
  * drawing, or wrapped onto `most` lines, the last cut short if it still does not fit.
  */
 function fitXTitle(svg: Element, width: number, most: number): void {
@@ -264,10 +259,7 @@ function fitXTitle(svg: Element, width: number, most: number): void {
   });
 }
 
-/**
- * Draws a Plot specification into SVG markup named by `alt`: one image (record 0027). Throws if Plot warns, because a warning means the chart shown would not be the
- * chart intended.
- */
+/** Draws a Plot specification into SVG markup named by `alt`: one image. Throws if Plot warns, since the chart shown would not be the one intended. */
 export function renderPlot(
   options: Plot.PlotOptions,
   alt: string | undefined,
@@ -292,7 +284,7 @@ export function renderPlot(
     fitted = { ...fitted, marginTop: top };
     svg = draw(fitted);
   }
-  // An x title too long for the drawing wraps onto a second line (record 0041), which the bottom
+  // An x title too long for the drawing wraps onto a second line, which the bottom
   // margin makes room for.
   const xLines = titleLines(xTitleText(svg)?.textContent, width);
   if (typeof options.marginBottom === "number") {
@@ -319,7 +311,7 @@ export function renderPlot(
   fitXTitle(svg, width, typeof options.marginBottom === "number" ? xLines : 1);
 
   // Plot's warning is its own node: a top-level <text> whose <title> counts the warnings. Found by
-  // that structure, not by the glyph, which data may contain (F13).
+  // that structure, not by the glyph, which data may contain.
   const warning = [...svg.children].find(
     (el) =>
       el.localName === "text" &&
@@ -347,7 +339,7 @@ export function renderPlot(
     group.setAttribute("data-enarratio-mark", group.getAttribute("aria-label") ?? "");
     group.removeAttribute("aria-label");
     // Axes repeat what the text alternative and the data table say; once enhanced, loose tick
-    // text would be read before the marks (A12).
+    // text would be read before the marks.
     if (/axis/.test(group.getAttribute("data-enarratio-mark") ?? "")) {
       group.setAttribute("aria-hidden", "true");
     }
@@ -356,7 +348,7 @@ export function renderPlot(
   for (const el of svg.querySelectorAll("[font-variant]")) el.removeAttribute("font-variant");
   after?.(svg);
   roundCoordinates(svg);
-  // Every drawing is one named image, enhanced or not; interaction lives outside it (0027).
+  // Every drawing is one named image, enhanced or not; interaction lives outside it.
   svg.setAttribute("role", role);
   svg.setAttribute("aria-label", alt ?? "");
 

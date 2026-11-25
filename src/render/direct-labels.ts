@@ -1,6 +1,5 @@
 /**
- * Direct labels: series named on the drawing beside their marks, as every renderer places them
- * (record 0036).
+ * Direct labels: series named on the drawing beside their marks, as every renderer places them.
  */
 
 import { textGrowth } from "./size.js";
@@ -9,12 +8,12 @@ import { textGrowth } from "./size.js";
 const LABEL_GAP = 16;
 
 /**
- * Moves direct labels apart so none overlaps the next (B8): labels closer than the gap form a
+ * Moves direct labels apart so none overlaps the next: labels closer than the gap form a
  * cluster, centered on where its labels would sit, and clusters that then touch merge. Order is
  * kept. Both renderers place their labels with it.
  */
 export function spreadLabels(ys: readonly number[], width: number): number[] {
-  // The gap grows with the text, which grows as the drawing shrinks (record 0022).
+  // The gap grows with the text, which grows as the drawing shrinks.
   const gap = LABEL_GAP * textGrowth(width);
   const at = (i: number): number => ys[i] as number;
   const clusters: { members: number[]; top: number }[] = [];

@@ -1,5 +1,5 @@
 /**
- * Parts of a whole in levels, for the treemap and the sunburst (record 0037): the tree built from
+ * Parts of a whole in levels, for the treemap and the sunburst: the tree built from
  * flat rows and a path of fields, the squarified layout, and the table both charts share.
  */
 
@@ -34,11 +34,7 @@ export interface HierarchyNode {
   readonly top: number;
 }
 
-/**
- * What the treemap and the sunburst read before they draw: the checked options, the tree
- * ({@link buildHierarchy}) and its whole, how values and shares are written, and the drawing's
- * size and text metrics (400 tall by default).
- */
+/** What the treemap and the sunburst read before they draw: the checked options, the tree, how values and shares are written, and the size and text metrics. */
 export function readHierarchy<T extends object>(kind: string, options: HierarchyOptions<T>) {
   validateFigure(kind, options);
   const format = valueFormat(options);
@@ -61,9 +57,9 @@ export function readHierarchy<T extends object>(kind: string, options: Hierarchy
 }
 
 /**
- * The tree of `data` by `path`, the fields from the outermost level to the innermost: each row is
- * a leaf, its value from `value`. Siblings are sorted largest first, as the squarified layout
- * needs and as readers compare them. Throws on a negative value, a repeated leaf or an empty whole.
+ * The tree of `data` by `path`, the fields from the outermost level to the innermost: each row is a
+ * leaf, its value from `value`. Siblings are sorted largest first, as the squarified layout needs.
+ * Throws on a negative value, a repeated leaf or an empty whole.
  */
 export function buildHierarchy(
   kind: string,
@@ -135,9 +131,8 @@ export interface Rect {
 
 /**
  * Squarified rectangles for `values` (largest first) filling `area` (Bruls, Huizing and van Wijk
- * 2000): rows are laid along the shorter side and a value joins the row while that does not worsen
- * the row's most elongated rectangle. Returns one rectangle per value, in order; a zero value gets
- * an empty one.
+ * 2000): a value joins the row while that does not worsen the row's most elongated rectangle. One
+ * rectangle per value, in order; a zero value gets an empty one.
  */
 export function squarify(values: readonly number[], area: Rect): Rect[] {
   const total = values.reduce((a, b) => a + b, 0);
@@ -188,11 +183,7 @@ export function squarify(values: readonly number[], area: Rect): Rect[] {
   return out;
 }
 
-/**
- * The table both hierarchy charts give their figure: one row per leaf, its path in the first
- * columns, then its value and share of the whole; on charts of two or more levels each group is
- * followed by its subtotal ("Total" in the levels below it), and the last row is the whole.
- */
+/** The table both hierarchy charts give their figure: one row per leaf with its path, value and share; with two or more levels each group is followed by its subtotal, and the last row is the whole. */
 export function hierarchyTable(
   tops: readonly HierarchyNode[],
   columns: readonly string[],

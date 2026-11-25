@@ -1,7 +1,6 @@
 /**
  * Locale-aware number and date formats, in a module of their own so a page that only formats a
- * number or a date (a site's own text, not a chart) bundles these few functions and not the
- * strings table in text.ts. text.ts re-exports all of them.
+ * number or date bundles these few functions and not the strings table in text.ts, which re-exports them.
  */
 
 /** A value with its sign always shown, and a true minus sign: "+3.2", "−1.5", "0". */
@@ -94,11 +93,7 @@ export function numberFormat(options: NumberFormatOptions = {}): (value: number)
   return (value) => intl.format(value);
 }
 
-/**
- * How a value axis labels its ticks, from every value it shows (B41): compact ("2.5M") once
- * values reach a million, so tick labels fit their margin; and whether every value is zero, when
- * the axis runs from 0 to 1 instead of collapsing to one tick.
- */
+/** How a value axis labels its ticks, from every value it shows: compact ("2.5M") once values reach a million, and whether every value is zero (the axis then runs 0 to 1). */
 export function valueAxis(
   values: Iterable<number>,
   locale: string | undefined,

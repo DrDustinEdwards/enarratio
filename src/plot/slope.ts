@@ -71,10 +71,9 @@ function spread(ys: readonly number[], top: number, bottom: number): number[] {
 }
 
 /**
- * A slope chart: each item's value at two time points joined by a line, labeled with its name
- * and both values at the ends, so items are told apart by text, not color. Rising and falling
- * lines differ in color and dash, and labels are moved apart where values are close.
- *
+ * A slope chart: each item's value at two time points joined by a line, labeled with its name and
+ * both values at the ends. Rising and falling lines differ in color and dash, and labels are moved
+ * apart where values are close.
  * @example
  * slopeChart({ data: rates, label: "county", from: "y2015", to: "y2025", fromLabel: "2015", toLabel: "2025", alt: "..." });
  */
@@ -109,9 +108,8 @@ export function slopeChart<T extends object>(options: SlopeChartOptions<T>): str
     ),
   );
   const side = Math.min(240, longest * 7 + 16);
-  // Names at both ends need two of these sides. Where they would leave the lines under 80 units
-  // (a phone's drawing), each name is written once, at the right end after its value, and the
-  // left end has only its value (record 0041); a name that still does not fit is cut.
+  // Names at both ends need two sides; where they would leave the lines under 80 units (a phone), each name is
+  // written once, at the right end after its value, and a name that still does not fit is cut.
   const char = charWidth(width);
   const compact = 2 * side > width - 80;
   const valueWidth = Math.max(...values.map((v) => format(v).length));

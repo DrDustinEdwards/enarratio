@@ -17,10 +17,7 @@ import {
   type Shape,
 } from "./geo.js";
 
-/**
- * A layer drawn quietly under the data, for context: streets, rivers, coastlines, parks. Its
- * lines are thin and its areas pale, so the data marks stay what the eye reads first.
- */
+/** A layer drawn quietly under the data, for context: streets, rivers, coastlines, parks. Thin lines and pale areas keep the data marks first. */
 export interface BasemapLayer {
   /** The layer's lines and polygons, in longitude and latitude. Points are not drawn. */
   readonly geometry: GeoJson;
@@ -31,7 +28,6 @@ export interface BasemapLayer {
   readonly labels?: string;
 }
 
-/** A box a label covers, to keep labels apart. */
 interface Box {
   readonly x0: number;
   readonly y0: number;
@@ -106,11 +102,7 @@ export interface DrawnBasemap {
   readonly labels: string;
 }
 
-/**
- * Draws the basemap layers (lines, then areas under them) and places their labels: along the
- * longest stretch of each named line inside the map, or at each named area's center, skipping a
- * label that would cover one already placed or leave the map.
- */
+/** Draws the basemap layers (lines, then areas under them) and places their labels: along the longest stretch of each named line inside the map, or at each named area's center, skipping one that would cover another or leave the map. */
 export function drawBasemap(
   kind: string,
   layers: readonly BasemapLayer[],
@@ -262,10 +254,7 @@ export function drawBasemap(
   };
 }
 
-/**
- * Wraps what is drawn on the map in a clip to its frame, so a basemap reaching past the extent
- * stops at the map's edge and never runs under the key.
- */
+/** Wraps what is drawn on the map in a clip to its frame, so a basemap past the extent stops at the edge and never runs under the key. */
 export function clipped(frame: Frame, content: string): string {
   if (!content) return "";
   const id = `enarratio-clip-${hash(`${num(frame.left)},${num(frame.top)},${num(frame.width)},${num(frame.height)}|${content.length}|${content.slice(0, 2000)}`)}`;

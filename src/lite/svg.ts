@@ -107,7 +107,7 @@ export function svgRoot(
       width,
       height,
       viewBox: `0 0 ${num(width)} ${num(height)}`,
-      // One named image, enhanced or not; interaction lives outside it (record 0027).
+      // One named image, enhanced or not; interaction lives outside it.
       role,
       "aria-label": alt ?? "",
     },

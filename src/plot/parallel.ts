@@ -37,12 +37,12 @@ const KIND = "parallel";
 const NAMED = 10;
 
 /**
- * Parallel coordinates: many items over several measures, one vertical axis per measure, each
- * from its lowest value to its highest, and each item a line across them, for patterns across
- * measures (cars by price, power and mileage; samples by marker levels). Lines that run parallel
- * between two neighbors show the measures rising together; lines that cross, the one falling as
- * the other rises. Groups take colors, `highlight` brings items forward and fades the rest, and up
- * to ten lines (or the highlighted ones) are named at the right. Every value is in the data table.
+ * Parallel coordinates: many items over several measures, one vertical axis per measure from its
+ * lowest value to its highest, each item a line across them, for patterns across measures. Lines
+ * that run parallel between neighbors show the measures rising together; lines that cross, one
+ * falling as the other rises. Groups take colors, `highlight` brings items forward and fades the
+ * rest, and up to ten lines (or the highlighted ones) are named at the right. Every value is in
+ * the data table.
  *
  * @example
  * parallelCoordinates({ data: cars, label: "model", axes: ["price", "power", "mpg"], alt: "..." });

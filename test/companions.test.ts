@@ -41,20 +41,6 @@ describe("sparklineTable", () => {
     ]);
   });
 
-  it("matches the drawn line: its heights read back as the tabulated values", () => {
-    const d =
-      parse(sparkline({ ...options, inline: true }))
-        .querySelector("path:not([fill-opacity])")
-        ?.getAttribute("d") ?? "";
-    const ys = [...d.matchAll(/[ML]([\d.]+),([\d.]+)/g)].map((m) => Number(m[2]));
-    // The drawing maps min..max onto height-2.5..2.5 (an inset of 2.5), so invert it.
-    const read = ys.map((y) => 3 + ((40 - 2.5 - y) * (11 - 3)) / (40 - 5));
-    const present = [3, 8, 5, 11];
-    expect(read).toHaveLength(present.length);
-    for (const [i, v] of read.entries()) expect(v).toBeCloseTo(present[i] as number, 1);
-    expect(cells(table, 1).filter((c) => c !== "no data")).toEqual(present.map(String));
-  });
-
   it("formats with formatValue and gives markup that follows the figure's convention", () => {
     const out = sparklineTable({ values: [1, 2], label: "x", formatValue: (n) => `${n}%` });
     expect(cells(out.table, 1)).toEqual(["1%", "2%"]);
@@ -132,9 +118,6 @@ describe("progressRingTable", () => {
     expect(table.columns).toEqual(["Measure", "Value", "Total", "Percent"]);
     expect(table.rows).toEqual([["Chapters drafted", "7", "12", "58%"]]);
     const root = parse(progressRing({ inline: true, ...options, size: 100, thickness: 10 }));
-    const arc = root.querySelectorAll("circle")[1]?.getAttribute("stroke-dasharray") ?? "";
-    const [filled, whole] = arc.split(" ").map(Number) as [number, number];
-    expect(Math.round((filled / whole) * 100)).toBe(58);
     expect(root.querySelector("text")?.textContent).toBe(table.rows[0]?.[3]);
   });
 

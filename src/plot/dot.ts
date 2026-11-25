@@ -170,10 +170,9 @@ interface Dot {
 }
 
 /**
- * A dot plot (Cleveland's): one row per item, a dot at each value, for comparing values that
- * need not start at zero. With `series`, each item has a dot per series, told apart by color and
- * symbol; with `errorBars`, each dot has its interval. Every dot is keyed and named.
- *
+ * A dot plot (Cleveland's): one row per item, a dot at each value, for values that need not start
+ * at zero. With `series`, each item has a dot per series; with `errorBars`, each dot has its
+ * interval. Every dot is keyed and named.
  * @example
  * dotPlot({ data: counties, y: "county", x: "rate", series: "year", alt: "..." });
  */
@@ -314,9 +313,8 @@ interface Range {
 }
 
 /**
- * A range plot: one row per item, a bar from its low to its high value (a daily temperature
- * range, a salary band, a reference interval), with an optional marked value inside. Each range
- * is keyed and named, and the data table gives every bound.
+ * A range plot: one row per item, a bar from its low to its high value, with an optional marked
+ * value inside. Each range is keyed and named, and the table gives every bound.
  *
  * @example
  * rangePlot({ data: assays, y: "analyte", low: "min", high: "max", value: "median", alt: "..." });
@@ -438,9 +436,9 @@ interface Pair {
 }
 
 /**
- * A dumbbell plot: one row per item, two values joined by a line (before and after, two groups,
- * a target and an actual). The ends differ by shape and fill as well as color, a hollow circle
- * for `from` and a filled one for `to`, and the data table gives both values and the change.
+ * A dumbbell plot: one row per item, two values joined by a line. The ends differ by shape and
+ * fill as well as color (hollow for `from`, filled for `to`), and the table gives both values and
+ * the change.
  *
  * @example
  * dumbbellPlot({ data: states, y: "state", from: "y2015", to: "y2025", fromLabel: "2015", toLabel: "2025", alt: "..." });

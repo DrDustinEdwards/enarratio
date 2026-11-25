@@ -1,9 +1,7 @@
 /**
- * `enarratio/lite`: the bar, line and area charts without Observable Plot, linkedom or a DOM.
- * The same options draw the same SVG as the charts in `enarratio/plot`, in a bundle small enough
- * to render charts in a browser; `sparkline` draws the bare SVG of `sparkline({ inline: true })`
- * from `enarratio`. Each has its own entry (`enarratio/lite/bar`, `enarratio/lite/line`,
- * `enarratio/lite/area`, `enarratio/lite/sparkline`) for the smallest bundles.
+ * `enarratio/lite`: the bar, line and area charts without Observable Plot, linkedom or a DOM, drawing the
+ * same SVG as `enarratio/plot` in a bundle small enough for a browser. Each has its own entry
+ * (`enarratio/lite/bar`, `/line`, `/area`, `/sparkline`) for the smallest bundles.
  *
  * @packageDocumentation
  */

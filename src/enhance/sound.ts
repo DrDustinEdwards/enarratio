@@ -1,10 +1,8 @@
 /**
- * Plays a chart as sound (B54): each series in turn, one note per mark in reading order, higher
- * as the mark's value is higher and panned from left to right with its place on the x axis. The
- * layer loads this module only when a reader presses Play, so pages that never play pay nothing.
- * It reads the drawing, not the data: the server maps values to positions, so a mark's far edge
- * (a bar's end away from its baseline, a point's center) orders and spaces the notes as the data
- * does. No dependency: Web Audio's oscillators.
+ * Plays a chart as sound: each series in turn, one note per mark in reading order, higher as the
+ * mark's value is higher and panned left to right with its place on the x axis. Loaded only when a
+ * reader presses Play. It reads the drawing, not the data: a mark's far edge (a bar's end away from
+ * its baseline, a point's center) orders and spaces the notes as the data does. Web Audio only.
  */
 
 /** The lowest note (A3) and how many octaves the values span above it. */
@@ -33,7 +31,6 @@ function mode(values: number[]): number {
   return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0;
 }
 
-/** Where each mark sits on the value axis, larger for a larger value, and where on the x axis. */
 function read(marks: SVGGraphicsElement[], horizontal: boolean): { value: number; x: number }[] {
   const boxes = marks.map((m) => ({ box: m.getBBox(), bar: shapeOf(m).localName === "rect" }));
   const ends = (b: DOMRect): [number, number] =>

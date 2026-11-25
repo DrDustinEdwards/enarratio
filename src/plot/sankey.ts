@@ -26,7 +26,6 @@ const KIND = "sankey";
 const NODE = 12;
 const PADDING = 14;
 
-/** A band from its source's right edge to its target's left edge, curving halfway. */
 function band(l: SankeyLink, x0: number, x1: number): string {
   const mx = (x0 + x1) / 2;
   const [s0, s1, t0, t1] = [l.sy, l.sy + l.width, l.ty, l.ty + l.width].map(n2) as [
@@ -39,12 +38,12 @@ function band(l: SankeyLink, x0: number, x1: number): string {
 }
 
 /**
- * A Sankey diagram: flows from stage to stage (energy from source to use, patients from diagnosis
- * to outcome, a budget from fund to program), each band as thick as what it carries and each node
- * as tall as the larger of what enters and leaves it. Nodes are placed in columns by their longest
- * path from a source and moved so bands cross as little as they can; a cycle cannot be drawn and
- * throws. Each first-column node takes a color the flows it feeds keep, every node is named with its
- * total, and the data table lists every flow.
+ * A Sankey diagram: flows from stage to stage, each band as thick as what it carries and each node
+ * as tall as the larger of what enters and leaves it. Nodes sit in columns by their longest path
+ * from a source and are moved so bands cross little; a cycle cannot be drawn and throws. Each
+ * first-column node takes a color the flows it feeds keep; every node is named with its total, and
+ * the table lists every flow.
+ *
  *
  * @example
  * sankeyDiagram({ data: energy, from: "source", to: "use", value: "twh", alt: "..." });
@@ -141,11 +140,10 @@ export function sankeyDiagram<T extends object>(options: SankeyDiagramOptions<T>
     )
     .join("");
 
-  // Each node's name and total beside it, toward the middle of the drawing, on a halo of the
-  // background so a band behind it does not lower its contrast (B1).
-  // Placed largest node first: the name and total on one line, else on two, else the name cut to
-  // fit; a label that would overlap one already placed is left out (hover, focus and the table
-  // still name the node). A label stays within the gap to the next column.
+  // Each node's name and total beside it, toward the middle of the drawing, on a halo of the background so a
+  // band behind it does not lower its contrast. Placed largest node first, on one line, else two, else
+  // cut; a label that would overlap one already placed is left out (hover, focus and the table still
+  // name the node), and stays within the gap to the next column.
   const lineHeight = 14 * growth;
   const room = columns > 1 ? step - NODE - 12 : width - NODE - 12;
   const placed: { x0: number; x1: number; y0: number; y1: number }[] = [];

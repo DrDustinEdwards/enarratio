@@ -1,14 +1,12 @@
-// The gallery's own script: enhances the charts, wires Capsomer's site header and theme button,
-// and prints each chart's events under it. Bundled by scripts/gallery.ts into one file, so the
-// page needs no inline script.
+// The gallery's own script: enhances the charts, wires Capsomer's site header and theme button, and
+// prints each chart's events under it. Bundled by scripts/gallery.ts into one file, so the page needs
+// no inline script.
 //
-// A page holds up to forty charts, and enhancing one reads layout and inserts a layer of points,
-// a hint and controls. Done for all of them at once that is one long block of main-thread work
-// before the page can respond, for charts no one is looking at. So a chart is enhanced when it
-// nears the viewport, nearest first and one to a task. The
-// charts are complete and readable without it, as before; a shared link's filter or range, and
-// the chart a #hash names, are enhanced at once. A chart with a narrow drawing swaps it in when it
-// is shown at once on a phone, and enhanced in its turn.
+// A page holds up to forty charts, and enhancing one reads layout and inserts a layer of controls:
+// done for all at once it is one long block of main-thread work for charts no one is looking at. So a
+// chart is enhanced when it nears the viewport, nearest first and one to a task. Charts are readable
+// without it; a shared link's filter or range and the chart a #hash names are enhanced at once, and
+// a chart with a narrow drawing swaps it in at once on a phone.
 import { enhance as enhanceHeader } from "capsomer/behavior/site-header";
 import { enhance as enhanceTheme } from "capsomer/behavior/theme-switch";
 import { parseMarkup } from "../dist/parse.js";
@@ -36,11 +34,7 @@ function start(figure) {
   narrowChart(host, spec.narrow ?? "", OPTIONS);
 }
 
-/**
- * On a phone every chart shows its narrow drawing at once, not when its turn to be enhanced
- * comes: a chart that waits would scroll sideways, then shift the page as it swaps. All the
- * widths are read before any drawing changes, so the swap costs one layout.
- */
+/** On a phone every chart shows its narrow drawing at once: a chart that waits would scroll sideways, then shift the page as it swaps. All widths are read before any drawing changes, so the swap costs one layout. */
 const WIDE_REM = 30;
 /** @type {WeakMap<Element, Element>} each swapped host's server drawing */
 const swapped = new WeakMap();

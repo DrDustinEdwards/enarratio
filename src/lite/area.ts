@@ -32,12 +32,7 @@ export type {
 } from "../render/line-model.js";
 
 /**
- * An area chart over time or any continuous x, drawn without Observable Plot. Several series
- * stack, so the top edge is their total. The same options and output as `areaChart` from
- * `enarratio/plot`, in a bundle small enough for a browser.
- *
- * @example
- * areaChart({ data: monthly, x: "month", y: "hours", series: "activity", alt: "..." });
+ * An area chart without Observable Plot: the same options and output as `areaChart` from `enarratio/plot`.
  */
 export function areaChart<T extends object>(options: AreaChartOptions<T>): string {
   const model = areaModel(options);
@@ -122,7 +117,7 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
       { "fill-opacity": "0" },
       (p) => ({
         cx: x(p.at),
-        // On the band's top edge, where its line is (record 0036).
+        // On the band's top edge, where its line is.
         cy: y(span(p)[1]),
         r: 4,
         fill: color(p),

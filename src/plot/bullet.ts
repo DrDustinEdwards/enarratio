@@ -54,11 +54,10 @@ interface Row {
 }
 
 /**
- * A bullet chart (Few 2013): one row per measure, each a bar for its value, a line across it for
- * the target, and behind it two to five qualitative bands in one hue, darkest for the worst, so a
- * row reads as "value against target, in this band" without color. Rows stack in little room, and
- * each has its own scale from zero unless `sharedScale`; three tick labels mark it. The value is
- * printed at the row's end, and the data table gives value, target and band.
+ * A bullet chart (Few 2013): one row per measure, a bar for its value, a line across it for the
+ * target, and behind it two to five qualitative bands in one hue, darkest for the worst, so a row
+ * reads "value against target, in this band" without color. Each row has its own scale from zero
+ * unless `sharedScale`. The value is printed at the row's end; the table gives value, target and band.
  *
  * @example
  * bulletChart({ data: kpis, label: "measure", value: "actual", target: "goal", alt: "..." });

@@ -27,12 +27,11 @@ const BAND = 0.07;
 const ADVICE = "draw a Sankey diagram or a heatmap of the flows";
 
 /**
- * A chord diagram: flows among up to eight groups (migration between regions, trade between
- * countries, shared authorship between departments). Each group is an arc of the circle as long as
- * what it sends (or, undirected, what it shares), and each pair is a ribbon whose ends are as wide
- * as what flows each way, in the color of the group that sends more. Groups are named outside the
- * circle, and the data table is the matrix of flows with each group's total. Past eight groups it
- * throws: there are eight colors, and the ribbons would not read; draw a Sankey or a heatmap.
+ * A chord diagram: flows among up to eight groups. Each group is an arc as long as what it sends
+ * (or, undirected, shares), and each pair a ribbon whose ends are as wide as what flows each way,
+ * in the color of the group that sends more. Groups are named outside the circle, and the table is
+ * the matrix of flows with each group's total. Past eight groups it throws: there are eight colors
+ * and the ribbons would not read; draw a Sankey or a heatmap.
  *
  * @example
  * chordDiagram({ data: moves, from: "origin", to: "destination", value: "people", alt: "..." });

@@ -53,10 +53,9 @@ interface Candle {
 
 /**
  * A candlestick chart: one candle per period on a time axis, its body from open to close and its
- * wick from low to high. A period that closed above its open is a hollow body outlined in the first
- * series color; one that closed below is a solid body in the second, so rising and falling differ
- * by fill as well as hue (WCAG 1.4.1). Every candle is reached by hover, focus and the keys, the
- * time axis takes the Range control, and the data table gives each period's four prices and change.
+ * wick from low to high. A period that closed above its open is a hollow body in the first series
+ * color; one that closed below is solid in the second, so they differ by fill as well as hue (WCAG
+ * 1.4.1). The time axis takes the Range control; the table gives each period's four prices and change.
  *
  * @example
  * candlestickChart({ data: days, x: "date", open: "o", high: "h", low: "l", close: "c", alt: "..." });

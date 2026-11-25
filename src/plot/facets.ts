@@ -18,7 +18,6 @@ import { planSeries, seriesLegend } from "../render/series.js";
 import { charWidth, DEFAULT_WIDTH, fitTicks, textGrowth, topMargin } from "../render/size.js";
 import { texture } from "../render/texture.js";
 
-/** What every small multiple shares: the facet field and the grid. */
 interface FacetOptions<T extends object> extends FigureOptions, AxisUnits {
   readonly data: readonly T[];
   /** The field splitting the data into panels, one chart each. */
@@ -65,7 +64,6 @@ interface Panel {
   readonly fy: number;
 }
 
-/** Each panel's own model, and the first one's, whose series and formats every panel shares. */
 function panelModels<M>(panels: readonly Panel[], sub: (p: Panel) => M) {
   const models = panels.map((p) => ({ p, m: sub(p) }));
   const first = models[0]?.m;
@@ -74,10 +72,9 @@ function panelModels<M>(panels: readonly Panel[], sub: (p: Panel) => M) {
 }
 
 /**
- * Small multiples: one bar or line chart per group, in a grid, on shared scales, so panels
- * compare by position alone. Each panel is named above it; series keep one color and legend
- * across panels; every value is keyed with its panel; and the data table has a row per panel and
- * x.
+ * Small multiples: one bar or line chart per group, in a grid, on shared scales, so panels compare
+ * by position alone. Each panel is named above it; series keep one color and legend across panels;
+ * every value is keyed with its panel; the table has a row per panel and x.
  *
  * @example
  * smallMultiples({ chart: "line", data: weekly, facet: "region", x: "week", y: "cases", alt: "..." });
@@ -97,8 +94,8 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
   const char = charWidth(width);
   // A panel's column, with the gap after it, at the margins both kinds of panel use.
   const step = (n: number): number => (width - 44 - 20) / (n + 0.12);
-  // `columns` is the most panels to a row: fewer where a panel's name would not fit over it or a
-  // panel would be under 60 units across (a phone's drawing, record 0041).
+  // `columns` is the most panels to a row: fewer where a panel's name would not fit or a panel would be
+  // under 60 units across.
   const longestName = Math.max(...names.map((n) => n.length));
   let columns = asked;
   while (columns > 1 && (step(columns) < longestName * char + 6 || step(columns) * 0.88 < 60)) {
@@ -125,7 +122,7 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
   // Panels 160 high, or shorter where they are narrow, so a column of them is not a tower.
   const panelHeight =
     options.panelHeight ?? Math.round(Math.min(160, Math.max(100, step(columns) * 1.3)));
-  // The y axis title over the first row's panel names, each on its own line (record 0041).
+  // The y axis title over the first row's panel names, each on its own line.
   const marginTop = Math.max(
     28,
     (options.yLabel === null ? 0 : topMargin(0, true, width)) + Math.ceil(16 * textGrowth(width)),
@@ -173,7 +170,7 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
     const points = models.flatMap(({ p, m }) => m.points.map((pt) => ({ ...pt, p })));
     type Bar = BarPoint & { readonly p: Panel };
     const describe = (b: Bar): string => `${b.p.name}, ${first.describe(b)}`;
-    // No bar wider than BAR_MAX (record 0036): each panel's band, at Plot's default right margin.
+    // No bar wider than BAR_MAX: each panel's band, at Plot's default right margin.
     const panel =
       ((width - 44 - 20) * (1 - facetScales.fx.padding)) / (columns + facetScales.fx.padding);
     const barPadding = Math.max(
@@ -199,7 +196,7 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
           domain: xNames,
           label: first.categoryTitle,
           padding: barPadding,
-          // Names that would run into each other under a narrow panel are thinned (record 0041).
+          // Names that would run into each other under a narrow panel are thinned.
           ticks: fitTicks(xNames, (n) => first.tickLabel(n), width, panel),
           tickFormat: first.tickLabel,
         },
@@ -208,7 +205,7 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
           grid: true,
           nice: true,
           zero: true,
-          // Headroom for the values at the tips, under the panel names (record 0036).
+          // Headroom for the values at the tips, under the panel names.
           domain: [0, tallest * 1.15],
         },
         color: { domain: [...allSeries], range: [...plan.range] },
@@ -240,7 +237,7 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
       },
       alt,
     );
-    // Rounded tops and values at the tips, bar by bar in each panel (record 0036).
+    // Rounded tops and values at the tips, bar by bar in each panel.
     const { svg } = finishBars(drawn, first, {
       points,
       keyOf: (b) => markKey((b as Bar).p.name, b.x, b.series),
@@ -271,7 +268,7 @@ export function smallMultiples<T extends object>(options: SmallMultiplesOptions<
         })),
       ),
     };
-    // Panels have no room to name their series, so several series keep the textures (record 0036).
+    // Panels have no room to name their series, so several series keep the textures.
     const several = series !== undefined && allSeries.length > 1;
     return figure(options, {
       kind: "bar",

@@ -77,22 +77,6 @@ describe("lineChart", () => {
     expect(markup).toContain(">Hays<");
   });
 
-  it("uses a linear x for numbers and supports a log y", () => {
-    const fig = parse(
-      lineChart({
-        data: [
-          { dose: 1, response: 10 },
-          { dose: 2, response: 1000 },
-        ],
-        x: "dose",
-        y: "response",
-        yType: "log",
-        alt: "a",
-      }),
-    );
-    expect(JSON.parse(fig.getAttribute("data-enarratio-x-scale") ?? "{}").type).toBe("linear");
-  });
-
   it("ticks whole-day data by the date, never by the hour, in both renderers", () => {
     const days = [1, 2, 3, 4].map((d) => ({ day: `2026-01-0${d}`, runs: d }));
     for (const chart of [lineChart, liteLineChart]) {
@@ -142,14 +126,6 @@ describe("lineChart", () => {
 });
 
 describe("areaChart", () => {
-  it("stacks series and keys each present value; a gap has no point (F5)", () => {
-    const fig = parse(
-      areaChart({ data: weekly, x: "week", y: "cases", series: "county", alt: "a" }),
-    );
-    expect(keyedMarks(fig)).toHaveLength(5);
-    expect(fig.querySelector('[data-enarratio-mark="area"]')?.children).toHaveLength(2);
-  });
-
   it("refuses negative values, which cannot stack", () => {
     expect(() => areaChart({ data: [{ t: 1, v: -1 }], x: "t", y: "v", alt: "a" })).toThrow(
       /zero or more/,

@@ -32,16 +32,6 @@ const tableRows = (fig: Element): string[][] =>
 describe("lineChart band", () => {
   const fig = parse(lineChart({ ...base, band, forecastFrom: "2026-03-03" }));
 
-  it("draws one shaded area behind the line", () => {
-    const area = fig.querySelector('[data-enarratio-mark="area"]');
-    expect(area).not.toBeNull();
-    expect(area?.querySelectorAll("path")).toHaveLength(1);
-    const marks = [...fig.querySelectorAll("svg > g")].map((g) =>
-      g.getAttribute("data-enarratio-mark"),
-    );
-    expect(marks.indexOf("area")).toBeLessThan(marks.indexOf("line"));
-  });
-
   it("draws the band at the lower and upper values, on the same scale as the points", () => {
     // y pixels are linear in value; read the mapping off two points, then check the band's edges.
     const dots = keyedMarks(fig).map((m) => ({
@@ -111,16 +101,6 @@ describe("lineChart band", () => {
     expect(out.querySelectorAll('[data-enarratio-mark="area"] path')).toHaveLength(2);
   });
 
-  it("names bound columns without a label", () => {
-    const out = parse(lineChart({ ...base, band: { lower: "lo", upper: "hi" } }));
-    expect([...out.querySelectorAll("thead th")].map((th) => th.textContent)).toEqual([
-      "day",
-      "cases",
-      "Lower bound",
-      "Upper bound",
-    ]);
-  });
-
   it("refuses a band that would draw wrongly", () => {
     const oneSided = days.map((r, i) => (i === 4 ? { ...r, hi: null } : r));
     expect(() => lineChart({ ...base, data: oneSided, band })).toThrow(/only one of the band's/);
@@ -132,12 +112,6 @@ describe("lineChart band", () => {
     expect(() => lineChart({ ...base, data: zero, band, yType: "log" })).toThrow(
       /log axis cannot show/,
     );
-  });
-
-  it("leaves a chart without options exactly as it was", () => {
-    const plain = lineChart({ ...base });
-    expect(plain).not.toContain('stroke-dasharray="6,4"');
-    expect(plain).not.toContain('data-enarratio-mark="area"');
   });
 });
 

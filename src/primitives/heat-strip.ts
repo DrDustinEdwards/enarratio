@@ -44,7 +44,6 @@ export interface HeatStripOptions extends PrimitiveFigureOptions {
 
 const KIND = "heatStrip";
 
-/** Everything the strip, its text alternative and its companion table are computed from. */
 interface HeatStripValues {
   readonly values: readonly (number | null)[];
   /** The ramp step, 1 to 5, of each cell; 0 for a cell with no data. */
@@ -65,7 +64,6 @@ interface HeatStripValues {
 
 const round = (n: number): number => Math.round(n * 100) / 100;
 
-/** Validates the options and computes the numbers every part of a heat strip is made from. */
 function prepareHeatStrip(options: HeatStripOptions): HeatStripValues {
   const { values } = options;
   if (values.length === 0) throw new Error(`${KIND}: needs at least one value`);
@@ -131,10 +129,10 @@ function prepareHeatStrip(options: HeatStripOptions): HeatStripValues {
 }
 
 /**
- * A one-row strip of cells with no axis, each colored on the theme's sequential ramp by its value:
- * hours of load, days of activity, a sibling of {@link uptimeStrip}. It carries a text alternative
- * summarizing the values, and each cell has hover details. Colors come in five steps, so read the
- * numbers from the hover details or from {@link heatStripTable}.
+ * A one-row strip of cells with no axis, each colored on the theme's sequential ramp by its value,
+ * a sibling of {@link uptimeStrip}. It carries a text alternative summarizing the values and hover
+ * details per cell. Colors come in five steps, so read numbers from the hover details or
+ * {@link heatStripTable}.
  *
  * @example
  * heatStrip({ values: [3, 5, 9, 14, 8, 2], label: "Requests per hour" });
@@ -196,8 +194,8 @@ export function heatStrip(options: HeatStripOptions): string {
 
 /**
  * A heat strip's cells as a table (cell, value and ramp step, `no data` for a gap) and a summary
- * sentence, computed from the same values as the strip so the two cannot disagree. Takes the same
- * options as {@link heatStrip}. The summary is the generated description even when `alt` is given.
+ * sentence computed from the same values, so the two cannot disagree. Takes the same options as
+ * {@link heatStrip}. The summary is the generated description even when `alt` is given.
  *
  * @example
  * const { markup } = heatStripTable({ values: [3, 5, 9], label: "Requests per hour" });

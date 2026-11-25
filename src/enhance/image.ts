@@ -1,7 +1,6 @@
 /**
- * The image files a reader downloads: the drawing as SVG (C3), as PNG, and as a tactile SVG for
- * an embosser or swell paper (B55, record 0030). Loaded only when one of the buttons is pressed,
- * so the enhancement layer's first load stays within its budget. No dependency.
+ * The image files a reader downloads: the drawing as SVG, as PNG, and as a tactile SVG. Loaded only
+ * when one of the buttons is pressed, so the enhancement layer's first load stays within budget.
  */
 
 import { LINE_DASHES } from "../theme/dashes.js";
@@ -32,10 +31,9 @@ const PROPERTIES = [
 const PNG_SCALE = 2;
 
 /**
- * The drawing as a standalone SVG element: computed styles as attributes (attributes, not
- * `style`, so a page under a strict Content-Security-Policy reports nothing), the background
- * painted in, and the enhancement layer's pointer targets and brush left out. `each` sees every
- * original element beside its copy.
+ * The drawing as a standalone SVG element: computed styles as attributes (not `style`, so a strict
+ * CSP reports nothing), the background painted in, and the pointer targets and brush left out.
+ * `each` sees every original element beside its copy.
  */
 function copy(
   svg: SVGSVGElement,
@@ -98,11 +96,7 @@ export async function pngFile(svg: SVGSVGElement): Promise<Blob> {
   );
 }
 
-/**
- * The colors a tactile drawing is printed in: black raises, white stays flat. Every series is
- * black, told apart by textures, dashes and labels, as in forced colors; the sequential ramp is
- * five grays from white to black, and printed values carry what a gray cannot.
- */
+/** The colors a tactile drawing is printed in: black raises, white stays flat. Every series is black, told apart by textures, dashes and labels; the ramp is five grays, and printed values carry what a gray cannot. */
 function tactileColors(): [string, string][] {
   const pairs: [string, string][] = [
     ["background", "#fff"],
@@ -140,13 +134,11 @@ const MARGIN = 48;
 const MIN_LINE = 2.7;
 
 /**
- * The drawing as a tactile SVG, for a braille embosser or swell paper (B55), following the
- * Braille Authority of North America's tactile graphics guidelines (2022) where a drawing can:
- * black on white, scaled to fill an 11 by 11.5 inch page, the title as a heading above it,
- * gridlines left out (they are less than the data, 3.4.3.8), every raised line at least 0.7 mm,
- * series told apart by texture and dash rather than color, textures at full strength, every
- * label horizontal (5.10.1; a turned axis title moves under the heading) and kept as text, so
- * braille translation software or the embosser's own can write it in braille.
+ * The drawing as a tactile SVG, for a braille embosser or swell paper, following the Braille
+ * Authority of North America's tactile graphics guidelines where a drawing can: black on white,
+ * scaled to an 11 by 11.5 inch page, the title as a heading, gridlines left out (3.4.3.8), every
+ * raised line at least 0.7 mm, series told apart by texture and dash, every label horizontal
+ * (5.10.1) and kept as text, so braille translation software can write it.
  */
 export function tactileFile(svg: SVGSVGElement, title: string): Blob {
   const colors = tactileColors();

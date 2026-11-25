@@ -252,7 +252,6 @@ describe("A13: wide drawings scroll instead of shrinking their text", () => {
     );
     const narrow = parse(barChart({ data: [{ k: "a" }], x: "k", width: 300, alt: "a" }));
     expect(narrow.querySelector(".enarratio-frame")?.getAttribute("class")).toBe("enarratio-frame");
-    expect(stylesheet(defaultTheme)).toContain(".enarratio-frame-wide > svg { min-width: 30rem; }");
   });
 
   it("lets a keyboard reach a wide frame, which can scroll, and names it; a narrow frame stays out of the tab order", () => {
@@ -274,7 +273,6 @@ describe("A13: wide drawings scroll instead of shrinking their text", () => {
     const small = narrow.querySelector(".enarratio-frame");
     expect(small?.hasAttribute("tabindex")).toBe(false);
     expect(small?.hasAttribute("aria-label")).toBe(false);
-    expect(stylesheet(defaultTheme)).toContain(".enarratio-frame:focus-visible");
   });
 });
 

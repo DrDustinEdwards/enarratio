@@ -1,10 +1,9 @@
 import { parseHTML } from "linkedom";
 
 /**
- * A document for Observable Plot to draw into, outside a browser. linkedom, because it runs in
- * Node.js, Workers, Deno and Bun. Bundlers that build for browsers use `document.browser.ts`
- * instead (the `browser` condition of the `#document` import in package.json), so linkedom is
- * not shipped to readers.
+ * A document for Observable Plot to draw into, outside a browser: linkedom, which runs in Node.js,
+ * Workers, Deno and Bun. Browser bundles use `document.browser.ts` (the `browser` condition of the
+ * `#document` import), so linkedom is not shipped to readers.
  */
 export function createDocument(): Document {
   const { document } = parseHTML("<!doctype html><html><body></body></html>");

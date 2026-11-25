@@ -61,7 +61,7 @@ export function grid(
 
 /**
  * Tick labels beside the frame, 9 from its edge on value and category axes, as Plot keeps them
- * with no tick marks (record 0036). Figures are proportional: tabular
+ * with no tick marks. Figures are proportional: tabular
  * figures widen the comma in some faces ("1 , 600"), and end-anchored labels need no columns.
  */
 export function axisTickLabels(
@@ -139,7 +139,7 @@ export const labelLines = (ticks: readonly { readonly label: string }[]): number
 
 /**
  * An axis label: centered below the frame for x, or across the top of the tick labels for y, where
- * it reads as the unit (record 0036), as renderPlot has Plot draw them. The position comes from
+ * it reads as the unit, as renderPlot has Plot draw them. The position comes from
  * `frame`; the offset from `inset`, the margins as given.
  */
 export function axisLabel(
@@ -155,7 +155,7 @@ export function axisLabel(
   const horizontal = k === "x" || k === "fx";
   // Below a bottom x axis, the title sits a fixed number of ems under the tick labels' lines, as
   // renderPlot places Plot's (placeXTitle).
-  // A title too long for the drawing moves to its middle or wraps (fitTitle, record 0041).
+  // A title too long for the drawing moves to its middle or wraps (fitTitle).
   if (k === "x" && lines !== undefined && !/[\r\n]/.test(label)) {
     const fit = fitTitle(label, (marginLeft + width - marginRight) / 2, width);
     return el(

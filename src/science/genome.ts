@@ -56,7 +56,6 @@ interface Placed {
 const KIND = "genomeTrack";
 const ROW_SEPARATOR = "\u0000";
 
-/** Greedy interval packing: each feature takes the first lane of its track where it fits. */
 function packLanes(
   features: readonly GenomeFeature[],
   trackOf: (f: GenomeFeature) => string,
@@ -77,7 +76,6 @@ function packLanes(
   return lanes;
 }
 
-/** Pairs of features in the same track that share at least one position. */
 function overlappingPairs(
   features: readonly GenomeFeature[],
   trackOf: (f: GenomeFeature) => string,

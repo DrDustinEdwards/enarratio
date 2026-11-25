@@ -1,5 +1,5 @@
 /**
- * Flows between named things, for the Sankey and chord diagrams (record 0037): links read from
+ * Flows between named things, for the Sankey and chord diagrams: links read from
  * rows, and the Sankey layout.
  */
 
@@ -94,10 +94,10 @@ export interface SankeyLink extends FlowLink {
 }
 
 /**
- * Lays out a Sankey diagram (after d3-sankey's method): each node's column is its longest path
- * from a source, sinks move to the last column, node heights are their values on one scale for
- * the whole drawing, and nodes are moved toward the weighted middle of their neighbors and then
- * apart, in passes both ways, so bands cross less. Throws on a cycle, which a Sankey cannot draw.
+ * Lays out a Sankey diagram (after d3-sankey): each node's column is its longest path from a source,
+ * sinks move to the last column, heights are values on one scale, and nodes move toward the weighted
+ * middle of their neighbors and then apart, in passes both ways, so bands cross less. Throws on a
+ * cycle.
  */
 export function sankeyLayout(
   kind: string,

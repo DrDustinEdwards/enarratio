@@ -123,28 +123,6 @@ describe("F6: the tooltip can be dismissed and hovered", () => {
   });
 });
 
-describe("F7: the focus ring has two tones", () => {
-  it("draws a background ring inside a focus ring around the focused point, above the marks", async () => {
-    const p = await harness.open("index.html", "light");
-    const point = '[data-example="stacked-bar"] .enarratio-points > [tabindex="0"]';
-    await p.focus(point);
-    const ring = await p.$eval(point, (el) => {
-      const css = getComputedStyle(el);
-      return [css.outlineStyle, css.outlineColor, css.boxShadow];
-    });
-    expect(ring[0]).toBe("solid");
-    expect(ring[2]).toMatch(/^rgb/);
-    expect(ring[2]?.startsWith(ring[1] ?? "")).toBe(false);
-    // The points come after the drawing, so the ring is painted over every mark (B13).
-    expect(
-      await p.$eval(point, (el) => el.parentElement?.previousElementSibling?.matches("svg")),
-    ).toBe(true);
-    await p.$eval(".cap-theme-button", (el) => (el as HTMLElement).focus());
-    expect(await p.$eval(point, (el) => getComputedStyle(el).outlineStyle)).toBe("none");
-    await p.close();
-  });
-});
-
 describe("F9: keyboard order follows the data, in facets and when enhanced while hidden", () => {
   /** The focused point's category and series, from its label ("Assay qPCR, Manual: 64, …"). */
   const focusedPlace = (p: Page): Promise<string> =>

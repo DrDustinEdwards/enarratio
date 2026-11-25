@@ -3,17 +3,15 @@
 import { maxOf, minOf } from "./data.js";
 export const DEFAULT_WIDTH = 640;
 export const DEFAULT_HEIGHT = 320;
-/** Drawings this wide or wider scroll in their frame rather than shrink below 30rem (A13). */
+/** Drawings this wide or wider scroll in their frame rather than shrink below 30rem. */
 export const WIDE_WIDTH = 480;
 
 /**
- * The `font-size` every chart's SVG carries (B3, B47): the mark size, which follows the reader's
- * font size, raised as the drawing shrinks so its text never renders below 12 CSS pixels at
- * default zoom. A drawing `width` wide renders at its frame's width (`100cqw`), down to 30rem when
- * wide, or to 288px (a 320px screen less its gutters) when not; text of f user units renders at
- * f × rendered ÷ width. That is a reciprocal CSS cannot write, so the size grows linearly as the
- * frame narrows, reaching the size that renders at 12px at the narrowest; between the two ends
- * the product only rises.
+ * The `font-size` every chart's SVG carries: the mark size, which follows the reader's font size,
+ * raised as the drawing shrinks so its text never renders below 12 CSS pixels at default zoom. A
+ * drawing `width` wide renders at its frame's width (`100cqw`), down to 30rem when wide, or 288px
+ * when not. Text of f user units renders at f x rendered / width, a reciprocal CSS cannot write,
+ * so the size grows linearly as the frame narrows, reaching 12px at the narrowest.
  */
 export function markFontSize(width: number): string {
   const mark = "var(--enarratio-font-size-mark, 0.75rem)";
@@ -23,10 +21,7 @@ export function markFontSize(width: number): string {
   return `clamp(${mark}, calc(${r(12 + (12 * width) / narrowest)}px - ${r(1200 / narrowest)}cqw), ${r((12 * width) / narrowest)}px)`;
 }
 
-/**
- * How much a drawing's text grows, in user units, at its narrowest rendering ({@link markFontSize}):
- * 1 for a drawing no wider than that, more for one that shrinks to it.
- */
+/** How much a drawing's text grows, in user units, at its narrowest rendering ({@link markFontSize}): 1 for one no wider than that. */
 export function textGrowth(width: number): number {
   return Math.max(1, width / (width >= WIDE_WIDTH ? WIDE_WIDTH : 288));
 }
@@ -40,10 +35,9 @@ export function charWidth(width: number): number {
 const NUMERIC = /^[-−+]?[$€£¥]?[\d.,   ]+(?:[%kKMBTGµ]|e[-−+]?\d+)?$/;
 
 /**
- * The left margin a drawing needs for its y tick labels, so they never leave the drawing at a
- * narrow width: the tick gap (9), the widest label, then 3 from the edge. The y axis title sits
- * above the labels (record 0036), so it takes no room here. Only a numeric value axis is fitted;
- * category axes size their margins to their names already.
+ * The left margin a drawing needs for its y tick labels so they never leave it at a narrow width:
+ * the tick gap (9), the widest label, then 3 from the edge. Only a numeric value axis is fitted;
+ * the y axis title sits above the labels and takes no room here.
  */
 export function leftMargin(base: number, labels: readonly string[], width: number): number {
   if (labels.length === 0 || !labels.every((l) => NUMERIC.test(l.trim()))) return base;
@@ -52,28 +46,22 @@ export function leftMargin(base: number, labels: readonly string[], width: numbe
 }
 
 /**
- * The top margin a drawing needs for a y axis title above its tick labels (record 0036): the
- * title's line from 3 units below the top edge, then half a line for the top tick label, which is
- * centered on the frame's edge, and 4 between them, all in text that grows as the drawing shrinks
- * (record 0022). Never less than `base`.
+ * The top margin a drawing needs for a y axis title above its tick labels: the title's line from 3
+ * units below the top edge, half a line for the top tick label (centered on the frame's edge) and
+ * 4 between them, in text that grows as the drawing shrinks. Never less than `base`.
  */
 export function topMargin(base: number, title: boolean, width: number): number {
   return title ? Math.max(base, Math.ceil(3 + 4 + 13 * 1.5 * textGrowth(width))) : base;
 }
 
-/**
- * Where the x axis title's baseline sits, in ems below the first tick label's top, past the tick
- * labels' own lines: about one blank line between them. Both renderers set the title there.
- */
+/** Where the x axis title's baseline sits, in ems below the first tick label's top: about one blank line past the tick labels. */
 export const TITLE_LINES = 1.5;
 
 /**
- * The bottom margin a drawing needs so its x tick labels and, when it has one, the x axis title
- * below them never overlap or leave the drawing at a narrow width: the tick gap and the space
- * below (10 together), then a line of growing text (13 units, room for a site's mark size a
- * little over 12px) for each line of tick label (two on a time axis that names a month, "24"
- * over "Oct"), and TITLE_LINES and a descender's quarter more for the title. Never less than
- * `base`.
+ * The bottom margin a drawing needs so its x tick labels and x axis title never overlap or leave
+ * the drawing at a narrow width: the tick gap and space below (10 together), a line of growing
+ * text (13 units) per line of tick label (two on a time axis that names a month), and
+ * TITLE_LINES and a descender's quarter more for the title. Never less than `base`.
  */
 export function bottomMargin(
   base: number,
@@ -92,7 +80,7 @@ export function bottomMargin(
     );
   }
   // Without a title, tick labels wrapped onto more lines still need their room: the tick gap and
-  // a line of 12 for each (record 0041).
+  // a line of 12 for each.
   return lines > 1 ? Math.max(base, Math.ceil(9 + 12 * lines * textGrowth(width))) : base;
 }
 
@@ -100,7 +88,7 @@ export function bottomMargin(
 export const titleLines = (title: string | null | undefined, width: number): number =>
   title ? fitTitle(title, width / 2, width).lines.length : 1;
 
-/** The line height, in ems, of an x axis title wrapped onto a second line (record 0041). */
+/** The line height, in ems, of an x axis title wrapped onto a second line. */
 export const TITLE_LEADING = 1.2;
 
 /** Text cut to `room` characters, ending in an ellipsis when it was longer. */
@@ -108,10 +96,9 @@ export const cutText = (text: string, room: number): string =>
   text.length <= room ? text : `${text.slice(0, Math.max(1, room - 1)).trimEnd()}…`;
 
 /**
- * An x axis title fitted to a drawing `width` wide at its narrowest (record 0041): centered under
- * the plot at `center` while it fits there, else centered on the drawing, else wrapped at the
- * space that best balances two lines, the second cut short if it still runs past the edges. Each
- * line keeps 3 units from either edge. The table and the text alternative keep the whole title.
+ * An x axis title fitted to a drawing `width` wide at its narrowest: centered under the plot at
+ * `center` while it fits, else on the drawing, else wrapped at the space that best balances two
+ * lines (the second cut short if it still overruns). Each line keeps 3 units from either edge.
  */
 export function fitTitle(
   title: string,
@@ -149,9 +136,8 @@ export function wrapTwo(value: string, room: number): string[] {
 }
 
 /**
- * A group's label on a category axis whose slots are `slot` units apart (record 0041): whole
- * while it fits its slot, else filled word by word onto up to three lines, the last cut short if
- * the name still runs over. Plot and the light charts write a label with line breaks as lines.
+ * A group's label on a category axis whose slots are `slot` units apart: whole while it fits, else
+ * filled word by word onto up to three lines, the last cut short if it still runs over.
  */
 export function axisLabel(name: string, slot: number, width: number): string {
   const room = Math.max(3, Math.floor((slot - 4) / charWidth(width)));
@@ -174,11 +160,10 @@ export function axisLabel(name: string, slot: number, width: number): string {
 }
 
 /**
- * Every nth x tick, starting from the first, so that no two labels overlap and at most `max`
- * print: all of them when they fit. A label is about 7 user units a character at the mark size,
- * more on a drawing whose text grows as it shrinks (record 0022), and needs 12 more between
- * neighbors; n labels need n - 1 such gaps. A step that lands on the last tick is preferred, so
- * 2020 to 2023 thins to 2020 and 2023, not 2020 and 2022.
+ * Every nth x tick, from the first, so that no two labels overlap and at most `max` print. A label
+ * is about 7 user units a character (more where text grows as the drawing shrinks) and needs 12
+ * more between neighbors. A step that lands on the last tick is preferred, so 2020 to 2023 thins
+ * to 2020 and 2023, not 2020 and 2022.
  */
 export function fitTicks<T>(
   ticks: readonly T[],
@@ -203,10 +188,9 @@ export function fitTicks<T>(
 }
 
 /**
- * Month ticks, in milliseconds, for a time axis over `ats` on a plot under 240 across (a phone's),
- * where one tick per 80 pixels prints one or two (record 0041): every month, or every 2, 3, 4, 6
- * or 12, the fewest that leave each label (a month over its year, "Jan" over "2026") room. Null
- * on a wider plot, or for a span under two months, which is labeled by day. Both renderers use it.
+ * Month ticks, in milliseconds, for a time axis over `ats` on a plot under 240 across, where one
+ * tick per 80 pixels prints one or two: every 1, 2, 3, 4, 6 or 12 months, the fewest that leave
+ * each label room. Null on a wider plot or a span under two months, which is labeled by day.
  */
 export function monthTicks(
   ats: readonly number[],
@@ -233,6 +217,6 @@ export function monthTicks(
     out.push(at);
     month += step;
   }
-  // maxXTicks stays the most labels to print (record 0040).
+  // maxXTicks stays the most labels to print.
   return out.length >= 2 && out.length <= (max ?? Infinity) ? out : null;
 }

@@ -23,11 +23,10 @@ export function measureHits(marks: readonly SVGGraphicsElement[]): HitSize[] {
 }
 
 /**
- * An invisible target around each mark smaller than 24 CSS pixels, so it is large enough to point
- * at (WCAG 2.2 SC 2.5.8, A5). Drawn beneath the marks, so a mark still wins where targets
- * overlap in dense charts. Null for a mark big enough already. `sizes` is what
- * {@link measureHits} read before anything was inserted: an insert invalidates layout, so
- * measuring between inserts laid the whole page out once per mark.
+ * An invisible target around each mark smaller than 24 CSS pixels, so it is large enough to point at
+ * (WCAG 2.2 SC 2.5.8), drawn beneath the marks so a mark still wins where targets overlap. `sizes` is
+ * what {@link measureHits} read before anything was inserted: measuring between inserts laid the
+ * whole page out once per mark.
  */
 export function drawHits(
   marks: readonly SVGGraphicsElement[],

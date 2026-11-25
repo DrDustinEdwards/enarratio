@@ -44,10 +44,10 @@ interface Step {
 const KIND = "waterfallChart";
 
 /**
- * A waterfall (bridge) chart: how a starting total becomes an ending one through increases and
- * decreases. Each step floats from the level the last one reached, joined to the next by a
- * dashed connector; totals stand on zero. Increases, decreases and totals differ in color, and
- * every bar is labeled with its signed change or its total, so none relies on color alone.
+ * A waterfall (bridge) chart: how a starting total becomes an ending one. Each step floats from the
+ * level the last one reached, joined by a dashed connector; totals stand on zero. Increases,
+ * decreases and totals differ in color, and every bar is labeled with its signed change or total.
+ *
  *
  * @example
  * waterfallChart({ data: budget, x: "item", y: "amount", total: "isTotal", alt: "..." });
@@ -106,10 +106,8 @@ export function waterfallChart<T extends object>(given: WaterfallChartOptions<T>
   const char = charWidth(width);
   const valueText = (s: Step): string => (s.kind === totalName ? format(s.end) : signed(s.change));
   const widestValue = Math.max(1, maxOf(steps.map((s) => valueText(s).length)));
-  // Upright steps need room under each bar for its name and above it for its value. Where a step's
-  // slot holds neither (a phone's drawing: seven steps in 156 units), the steps run down the
-  // drawing instead, each on its own row with its name beside it and its value past its end, as
-  // horizontal bars are drawn (record 0041).
+  // Upright steps need room under each bar for its name and above it for its value; where a slot holds
+  // neither (a phone's drawing), the steps run down the drawing instead, as horizontal bars are drawn.
   const slot = (width - 52 - 20) / steps.length;
   // Upright, a step's name wraps onto up to three lines of its slot (axisLabel); a word longer
   // than the slot, or a value wider than it, turns the steps across.

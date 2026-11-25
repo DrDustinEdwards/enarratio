@@ -1,10 +1,9 @@
 /**
- * Layout reads batched across every chart on the page. Each chart queues a read and the write
- * that uses it; all reads run before any write, so a page of charts is laid out once, not once
- * per chart (the gallery spent half a second in forced layouts on a phone). The queue empties
- * after the next frame is drawn, when the browser has just laid the page out, so the reads cost
- * nothing; or in the shared resize callback, which runs right after layout too. Until then a chart
- * works by its marks alone: the targets only enlarge them, and the points only place focus rings.
+ * Layout reads batched across every chart on the page. Each chart queues a read and the write that
+ * uses it; all reads run before any write, so a page of charts is laid out once, not once per
+ * chart. The queue empties after the next frame is drawn, when the browser has just laid the page
+ * out, or in the shared resize callback. Until then a chart works by its marks alone: the targets
+ * only enlarge them, and the points only place focus rings.
  */
 
 interface Job {
@@ -38,11 +37,7 @@ export function measure<T>(read: () => T, write: (value: T) => void): void {
 const resized = new Map<Element, () => void>();
 let observer: ResizeObserver | null = null;
 
-/**
- * Calls `run` when `element` changes size, and once when first observed. One observer serves every
- * chart, so the charts that resize together queue their reads in one callback and share one
- * layout. Returns the call that stops observing.
- */
+/** Calls `run` when `element` changes size, and once when first observed. One observer serves every chart, so charts that resize together share one layout. Returns the call that stops observing. */
 export function onResize(element: Element, run: () => void): () => void {
   observer ??= new ResizeObserver((entries) => {
     for (const entry of entries) resized.get(entry.target)?.();

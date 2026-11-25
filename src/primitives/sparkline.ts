@@ -14,7 +14,6 @@ import {
 /** Options for {@link sparkline}. */
 export interface SparklineOptions extends PrimitiveFigureOptions, SparklineDrawingOptions {}
 
-/** The numbers a sparkline is made from, its sentence written by the options' strings. */
 function prepare(options: SparklineOptions) {
   return prepareSparkline(options, primitiveText(options).strings.sparklineSummary);
 }
@@ -40,10 +39,10 @@ export function sparkline(options: SparklineOptions): string {
 }
 
 /**
- * A sparkline's numbers as a table (position and value, `no data` for a gap) and a summary
- * sentence, computed from the same values as the drawing so the two cannot disagree. Takes the
- * same options as {@link sparkline}. The summary is the generated description even when `alt`
- * is given.
+ * A sparkline's numbers as a table and a summary sentence, from the same values as the drawing.
+ * Takes the same options as {@link sparkline}. The summary is the generated description even when
+ * `alt` is given.
+ *
  *
  * @example
  * const { summary, markup } = sparklineTable({ values: [3, 5, 4], label: "Entries per year" });

@@ -57,11 +57,10 @@ interface Curve {
 }
 
 /**
- * Kaplan-Meier survival curves: each group's estimated survival as a step line from 1 at time
- * zero, with a mark at each censored time, its 95% confidence band (log-log, Greenwood's
- * variance) and the number at risk printed beneath the time axis. Groups differ by color, dash
- * and name. The caption gives each group's n, events and median survival; the data table gives
- * every step: time, number at risk, events, censored, survival and its interval.
+ * Kaplan-Meier survival curves: each group's estimated survival as a step line from 1 at time zero,
+ * with a mark at each censored time, its 95% confidence band (log-log, Greenwood's variance) and
+ * the number at risk beneath the time axis. The caption gives each group's n, events and median
+ * survival; the table gives every step.
  *
  * @example
  * survivalPlot({ data: patients, time: "months", event: "died", group: "arm", alt: "..." });
@@ -121,8 +120,7 @@ export function survivalPlot<T extends object>(options: SurvivalPlotOptions<T>):
   const longest = Math.max(...names.map((n) => n.length));
   const marginLeft = Math.max(64, multi && showAtRisk ? longest * 7 + 20 : 0);
   const marginRight = multi ? Math.min(160, longest * 7 + 16) : 24;
-  // About six time ticks, fewer where their labels, and the numbers at risk printed under each,
-  // would come closer than 10 units apart (a phone's drawing, record 0041).
+  // About six time ticks, fewer where their labels and the numbers at risk would come closer than 10 units.
   const char = charWidth(width);
   const widest = Math.max(
     ...curves.map((c) => String(c.estimate.n).length),
@@ -254,7 +252,7 @@ export function survivalPlot<T extends object>(options: SurvivalPlotOptions<T>):
   }
   const atRiskRows = showAtRisk ? curves.length + 1 : 0;
   // The table of numbers at risk starts a line below the time axis title, in text that grows as
-  // the drawing shrinks (record 0041).
+  // the drawing shrinks.
   const head = Math.max(52, Math.ceil(9 + 13 * (2 + TITLE_LINES) * textGrowth(width)) + 4);
   if (showAtRisk) {
     const counts = curves.flatMap((c) => xTicks.map((t) => ({ c, t, n: atRiskAt(c.times, t) })));

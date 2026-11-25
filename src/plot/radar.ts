@@ -37,12 +37,11 @@ export function niceCeil(v: number): number {
 }
 
 /**
- * A radar chart: a few series' profiles over three to twelve measures on one scale (skills, a
- * product's ratings, a sample's composition), one spoke per measure from a zero center. Each series
- * is an outline with a light fill, told apart by color and, from the second on, dash; each value is
- * a point that hover, focus and the keys reach, and the rings are labeled on the top spoke.
- * Profiles are easier to compare than values: a grouped bar chart compares values more precisely.
- * More than four series are reported as an issue, and the data table lists every value.
+ * A radar chart: a few series' profiles over three to twelve measures on one scale, one spoke per
+ * measure from a zero center. Each series is an outline with a light fill, told apart by color and,
+ * from the second on, dash; each value is a point that hover, focus and the keys reach. Profiles
+ * compare more easily than values: a grouped bar chart compares values more precisely. More than
+ * four series are reported as an issue, and the table lists every value.
  *
  * @example
  * radarChart({ data: teams, label: "team", axes: ["speed", "quality", "cost"], alt: "..." });

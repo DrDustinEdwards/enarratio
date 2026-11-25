@@ -1,7 +1,6 @@
 /**
  * Color measurement: WCAG 2 contrast, color-vision-deficiency simulation and CIEDE2000 color
- * difference. Pure functions over hex strings, so they run the same on a server, in CI and in a
- * browser.
+ * difference. Pure functions over hex strings, so they run the same on a server, in CI and in a browser.
  */
 
 import type { HexColor, ThemeColor } from "./types.js";
@@ -11,7 +10,6 @@ export type Rgb = readonly [number, number, number];
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
-/** Whether a string is a hex color Enarratio can measure. */
 function isHexColor(value: string): value is HexColor {
   return HEX.test(value);
 }
@@ -29,10 +27,7 @@ export function hexOf(color: string): HexColor {
   return (TOKEN.exec(color)?.[1] ?? color) as HexColor;
 }
 
-/**
- * Parses `#rgb`, `#rrggbb` or `var(--token, #hex)` (by its fallback) into sRGB channels from 0
- * to 1. Throws on anything else.
- */
+/** Parses `#rgb`, `#rrggbb` or `var(--token, #hex)` (by its fallback) into sRGB channels from 0 to 1. Throws on anything else. */
 function parseHex(value: string): Rgb {
   const color = hexOf(value);
   if (!isHexColor(color)) {
@@ -81,10 +76,7 @@ export type ColorVision = "protanopia" | "deuteranopia" | "tritanopia";
 
 type Matrix = readonly [Rgb, Rgb, Rgb];
 
-/**
- * Machado, Oliveira and Fernandes (2009), "A physiologically-based model for simulation of color
- * vision deficiency", IEEE TVCG 15(6), severity 1.0. Applied to linear RGB.
- */
+/** Machado, Oliveira and Fernandes (2009), "A physiologically-based model for simulation of color vision deficiency", IEEE TVCG 15(6), severity 1.0, applied to linear RGB. */
 const CVD_MATRICES: Readonly<Record<ColorVision, Matrix>> = {
   protanopia: [
     [0.152286, 1.052583, -0.204868],
@@ -117,7 +109,6 @@ export function simulateColorVision(color: string, vision: ColorVision): Rgb {
 /** CIE L*a*b* under the D65 white point. */
 export type Lab = readonly [number, number, number];
 
-/** Converts sRGB channels (0 to 1) to CIE L*a*b*. */
 function rgbToLab(rgb: Rgb): Lab {
   const [r, g, b] = linearize(rgb);
   const x = (0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / 0.95047;
@@ -134,10 +125,7 @@ function rgbToLab(rgb: Rgb): Lab {
 const degrees = (radians: number): number => (radians * 180) / Math.PI;
 const radians = (deg: number): number => (deg * Math.PI) / 180;
 
-/**
- * CIEDE2000 color difference (Sharma, Wu and Dalal 2005). About 1 is a just-noticeable
- * difference; categorical palettes want well over 10 between any two colors.
- */
+/** CIEDE2000 color difference (Sharma, Wu and Dalal 2005). About 1 is a just-noticeable difference; categorical palettes want well over 10. */
 export function deltaE2000(lab1: Lab, lab2: Lab): number {
   const [l1, a1, b1] = lab1;
   const [l2, a2, b2] = lab2;
@@ -194,20 +182,13 @@ export function deltaE2000(lab1: Lab, lab2: Lab): number {
   return Math.sqrt(lTerm ** 2 + cTerm ** 2 + hTerm ** 2 + rT * cTerm * hTerm);
 }
 
-/**
- * The perceived difference between two colors as seen with typical vision or a simulated color
- * vision deficiency, in CIEDE2000 units.
- */
+/** The perceived difference between two colors under typical vision or a simulated deficiency, in CIEDE2000 units. */
 export function colorDifference(a: string, b: string, vision?: ColorVision): number {
   const see = (c: string): Rgb => (vision ? simulateColorVision(c, vision) : parseHex(c));
   return deltaE2000(rgbToLab(see(a)), rgbToLab(see(b)));
 }
 
-/**
- * The color for text printed on a mark: the scheme's text or background color when either reaches
- * 4.5:1 on the mark (the better of the two), otherwise black or white, one of which always does
- * (F8).
- */
+/** The color for text printed on a mark: the scheme's text or background color when either reaches 4.5:1 on it (the better), otherwise black or white, one of which always does. */
 export function labelColor(fill: string, text: ThemeColor, background: ThemeColor): ThemeColor {
   const best = (a: ThemeColor, b: ThemeColor): ThemeColor =>
     contrastRatio(fill, a) >= contrastRatio(fill, b) ? a : b;
@@ -224,12 +205,7 @@ const toHex = (rgb: Rgb): HexColor =>
     )
     .join("")}`;
 
-/**
- * The shade of `color` that reaches `minimum` contrast on `background`: the color itself when it
- * does, otherwise the color mixed toward black on a light background, or white on a dark one, in
- * the least step that reaches it. Used for series names written on the background (4.5:1) and for
- * the edge round a pale ramp step (3:1).
- */
+/** The shade of `color` that reaches `minimum` contrast on `background`: itself when it does, else mixed toward black (light background) or white (dark) in the least step that reaches it. */
 export function readableShade(color: string, background: string, minimum: number): HexColor {
   const hex = hexOf(color);
   if (contrastRatio(hex, background) >= minimum) return hex;

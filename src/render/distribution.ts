@@ -6,10 +6,7 @@
 import { ticks } from "../lite/scale.js";
 import { maxOf, minOf } from "./data.js";
 
-/**
- * The p-quantile of ascending values by linear interpolation between order statistics (Hyndman
- * and Fan's type 7: R's default, d3.quantile and Plot's box mark).
- */
+/** The p-quantile of ascending values by linear interpolation between order statistics (Hyndman and Fan's type 7: R's default, d3.quantile and Plot's box mark). */
 export function quantile(sorted: readonly number[], p: number): number {
   const n = sorted.length;
   if (n === 0) throw new Error("quantile of no values");
@@ -66,10 +63,9 @@ export interface Bin {
 const clean = (n: number): number => Number(n.toPrecision(12));
 
 /**
- * Bins values into a histogram. `thresholds` is a number of bins, as a target (default Sturges'
- * rule, ceil(log2 n) + 1), and the edges are then round numbers covering every value; or it is
- * the ascending edges themselves, which must cover every value. Every bin is half-open except
- * the last, which includes its upper edge, so the maximum is counted.
+ * Bins values into a histogram. `thresholds` is a target number of bins (default Sturges' rule,
+ * ceil(log2 n) + 1), whose edges are round numbers covering every value, or the ascending edges
+ * themselves. Every bin is half-open except the last, which includes its upper edge.
  */
 export function histogramBins(
   values: readonly number[],
@@ -130,11 +126,7 @@ export function histogramBins(
   }));
 }
 
-/**
- * Silverman's rule-of-thumb bandwidth for a Gaussian kernel: 0.9 min(sd, IQR / 1.34) n^(-1/5)
- * (Silverman 1986, eq. 3.31). Falls back to the standard deviation, then to 1, for data too
- * uniform to say.
- */
+/** Silverman's rule-of-thumb bandwidth for a Gaussian kernel: 0.9 min(sd, IQR / 1.34) n^(-1/5) (Silverman 1986, eq. 3.31). Falls back to the standard deviation, then to 1. */
 export function silvermanBandwidth(values: readonly number[]): number {
   const n = values.length;
   const mean = values.reduce((a, b) => a + b, 0) / n;

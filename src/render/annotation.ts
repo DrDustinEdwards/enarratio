@@ -1,10 +1,8 @@
 /**
  * Annotations, for both renderers: text notes, with an arrow when the note is set off from its
  * point, and highlighted ranges along either axis. They are laid out here from the chart's own
- * scales, after layout, so a note lands where the data it names is drawn; the Plot charts turn
- * the shapes into elements and the light charts into markup, so both draw the same SVG. The
- * notes are also added to the chart's text alternative: the drawing is one image to a screen
- * reader.
+ * scales, after layout, so a note lands where its data is drawn, and both renderers draw the same
+ * SVG. The notes are also added to the text alternative: the drawing is one image to a screen reader.
  */
 
 import type { FigureOptions } from "./figure.js";
@@ -106,7 +104,6 @@ export interface AnnotationShapes {
 const position = (v: AnnotationValue): string =>
   v instanceof Date ? v.toISOString().slice(0, 10) : String(v);
 
-/** The pixel position of a value on a scale: a band's center, or its start or end for a range. */
 function place(
   kind: string,
   scale: AnnotationScale | undefined,
@@ -164,7 +161,7 @@ export function annotationShapes(
   swap = false,
   width?: number,
 ): AnnotationShapes {
-  // Text kept inside a drawing `width` wide, at its narrowest (record 0041).
+  // Text kept inside a drawing `width` wide, at its narrowest.
   const char = width === undefined ? 0 : charWidth(width);
   const inside = (left: number, right: number): boolean =>
     width === undefined || (left >= 3 && right <= width - 3);

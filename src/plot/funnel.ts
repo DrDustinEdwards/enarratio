@@ -24,10 +24,11 @@ const BAR = 34;
 const STEP_GAP = 22;
 
 /**
- * A funnel: how many people (or orders, or samples) reached each stage of a process, as bars
- * centered on one axis, widest first. Each bar prints its count and its share of the first stage,
- * and the gap between two bars prints the share of the previous stage that carried on, so the
- * drop at each step reads as a number, not an angle. The data table holds both shares.
+ * A funnel: how many reached each stage of a process, as bars centered on one axis, widest first.
+ * Each bar prints its count and its share of the first stage, and the gap between two bars prints
+ * the share of the previous stage that carried on, so the drop reads as a number, not an angle.
+ * The table holds both shares.
+ *
  *
  * @example
  * funnelChart({ data: signups, stage: "step", value: "people", alt: "..." });
@@ -109,9 +110,8 @@ export function funnelChart<T extends object>(options: FunnelChartOptions<T>): s
     })
     .join("");
 
-  // Where a count and share fit neither in its bar nor beside it, on a phone's drawing, it goes on
-  // the stage's name line, at the right, and the name moves to the left (record 0041). Figures
-  // are measured a tenth wider than letters.
+  // Where a count and share fit neither in its bar nor beside it (a phone), it goes on the stage's name line at
+  // the right and the name moves left. Figures are measured a tenth wider than letters.
   const place = (i: number): "inside" | "right" | "left" | "line" => {
     const w = ((values[i] as number) / max) * plotWidth;
     const wide = shown(i).length * char * 1.1;

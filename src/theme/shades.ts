@@ -11,7 +11,7 @@ const EDGE_MINIMUM = 3;
 
 /**
  * The colors a scheme writes series names on the background in: its own `seriesLabels`, or each
- * series color darkened or lightened until it reaches 4.5:1 (B1).
+ * series color darkened or lightened until it reaches 4.5:1.
  */
 export function seriesLabels(scheme: ColorScheme): readonly ThemeColor[] {
   return (

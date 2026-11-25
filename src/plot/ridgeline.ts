@@ -50,9 +50,9 @@ const KIND = "ridgelinePlot";
 /**
  * A ridgeline plot: one smoothed distribution per row on a shared x scale, the rows overlapping a
  * little, each a Gaussian kernel density estimate (Silverman's bandwidth unless one is given), so
- * many groups' shapes compare in little room. Rows run in the order given; the docs advise a
- * meaningful one. Every row is named at its baseline, and its density at evenly spaced values is
- * reached by hover, focus and the keys and listed in the data table.
+ * many groups' shapes compare in little room. Rows run in the order given; order them by something
+ * meaningful. Every row is named at its baseline, and its density is reached by hover, focus and
+ * the keys and listed in the table.
  *
  * @example
  * ridgelinePlot({ data: temps, x: "celsius", y: "month", alt: "..." });

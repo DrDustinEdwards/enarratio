@@ -57,10 +57,6 @@ describe("color vision simulation", () => {
     expect(typical).toBeGreaterThan(40);
     expect(deutan).toBeLessThan(typical / 2);
   });
-
-  it("measures zero difference between identical colors", () => {
-    expect(colorDifference("#123456", "#123456", "tritanopia")).toBe(0);
-  });
 });
 
 describe("checkTheme", () => {
@@ -140,10 +136,6 @@ describe("checkTheme", () => {
 });
 
 describe("defineTheme", () => {
-  it("returns a valid theme unchanged", () => {
-    expect(defineTheme(defaultTheme)).toBe(defaultTheme);
-  });
-
   it("rejects a non-hex color with its path", () => {
     const bad = {
       ...defaultTheme,

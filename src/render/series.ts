@@ -25,7 +25,6 @@ export function seriesLegend(plan: SeriesPlan, shown: boolean, field: string | u
   };
 }
 
-/** A CSS reference to a palette slot. */
 function slotColor(slot: number): string {
   return `var(--enarratio-series-${slot})`;
 }

@@ -1,8 +1,7 @@
 /**
- * The finish both bar renderers share (record 0036): each bar's outer end rounded, the series
- * named beside the last stack, and values written at the bars' tips. It works on the finished
- * SVG, from the bars' drawn geometry, so `enarratio/plot` and `enarratio/lite` agree by
- * construction, as {@link texture} does for patterns.
+ * The finish both bar renderers share: each bar's outer end rounded, the series named beside the
+ * last stack, and values written at the bars' tips. It works on the finished SVG, from the bars'
+ * drawn geometry, so `enarratio/plot` and `enarratio/lite` agree by construction.
  */
 
 import { escapeHtml, readAttributes, unescapeHtml } from "../html.js";
@@ -21,10 +20,8 @@ const LEADER = [3, 10, 14] as const;
 /** A line of mark text, in user units at full width. */
 const LINE = 14;
 
-/** Which end of a bar is its outer end: away from zero along the value axis. */
 type End = "top" | "bottom" | "left" | "right";
 
-/** A drawn bar: its datum and its box in the drawing's own coordinates. */
 interface Drawn {
   readonly point: BarPoint;
   readonly x: number;
@@ -110,10 +107,6 @@ const offsetOf = (tag: string): [number, number] => {
   return m ? [Number(m[1]), Number(m[2])] : [0, 0];
 };
 
-/**
- * Rounds the bars' outer ends and reads where each bar is drawn, walking the bar group's markup
- * with the facet offsets it nests bars in.
- */
 function shapeBars(
   svg: string,
   model: BarModel,
@@ -180,7 +173,6 @@ function shapeBars(
   return { svg: out + svg.slice(from), drawn };
 }
 
-/** A text element of mark text. */
 function label(
   x: number,
   y: number,
@@ -194,10 +186,9 @@ function label(
 }
 
 /**
- * Rounds each bar's outer end and writes the labels that name what the bars show: the series
- * beside the last stack of a stacked chart, the two series above the last group of a grouped one,
- * and each bar's value (each stack's total) at its tip where every one of them fits. Reports
- * whether every series is named, so the figure knows to fall back on textures (record 0036).
+ * Rounds each bar's outer end and writes the labels that name what the bars show: series beside
+ * the last stack, or above the last group; and each bar's value at its tip where every one fits.
+ * Reports whether every series is named, so the figure knows to fall back on textures.
  */
 export function finishBars(
   svg: string,

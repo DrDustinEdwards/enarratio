@@ -1,11 +1,8 @@
 /**
- * Builds the gallery: one page per theme showing every example in examples/, its source, and the
+ * Builds the gallery: one page per theme showing every example in examples/, its source and the
  * events the enhancement layer fires. Run after `npm run build`; the examples import "enarratio",
- * which resolves to this package's own dist. The page around the charts is Capsomer's (its fonts,
- * tokens, site header, page head, panels and disclosures), and each chart sits in Capsomer's chart
- * frame, as on the family's sites; the charts are drawn in each page's own Enarratio theme, on that
- * theme's background, and one page is Capsomer's own theme. Gallery tooling only: the npm package
- * never imports Capsomer.
+ * which resolves to this package's own dist. The page around the charts is Capsomer's, and one page
+ * is Capsomer's own theme. Gallery tooling only: the npm package never imports Capsomer.
  *
  *   node scripts/gallery.ts [outDir]
  */
@@ -53,13 +50,11 @@ const self = (specifier: string): string => {
   return file ? fileURLToPath(new URL(`../${file}`, import.meta.url)) : specifier;
 };
 /**
- * The width each example is drawn at again for a phone: the frame's on a 320 px screen (the page's
- * gutter, the panel's padding and a scrollbar leave 231). Under 30rem the gallery swaps it in
- * (enarratio/redraw's narrow spec), so the drawing fits its frame with 12 px text instead of
- * scrolling (C12).
+ * The width each example is redrawn at for a phone: the frame's on a 320 px screen. Under 30rem the
+ * gallery swaps it in (enarratio/redraw's narrow spec) so the drawing fits with 12 px text.
  */
 const NARROW_WIDTH = 228;
-/** 30rem at the default 16 px rem: a wide drawing keeps this width in a narrower column (A13). */
+/** 30rem at the default 16 px rem: a wide drawing keeps this width in a narrower column. */
 const WIDE_PX = 480;
 /** A drawing's viewBox size: the svg in its frame, not the toolbar's 16-unit icons ahead of it. */
 function viewBox(markup: string): { width: number; height: number } | undefined {
@@ -70,8 +65,8 @@ function viewBox(markup: string): { width: number; height: number } | undefined 
   return box ? { width: Number(box[1]), height: Number(box[2]) } : undefined;
 }
 /**
- * The height the server's drawing shows in a phone's column (NARROW_WIDTH): a wide drawing keeps
- * 30rem and scrolls, so it shows H * 480 / W; a narrower one scales to the column.
+ * The height the server's drawing shows in a phone's column: a wide drawing keeps 30rem and
+ * scrolls, so it shows H * 480 / W; a narrower one scales to the column.
  */
 function shownHeight(markup: string): number | undefined {
   const box = viewBox(markup);
@@ -80,9 +75,8 @@ function shownHeight(markup: string): number | undefined {
   return Math.round(((box.height * shown) / box.width) * 100) / 100;
 }
 /**
- * The examples whose rows set their height (a label or track per row) and do not fit in the
- * height their wide drawing shows on a phone: drawn shorter, their labels overlap. Their narrow
- * drawing keeps its own height, and the page reserves it (reserveCss).
+ * Examples whose rows set their height and do not fit in the height their wide drawing shows on a
+ * phone. Their narrow drawing keeps its own height, and the page reserves it (reserveCss).
  */
 const KEEP_HEIGHT = new Set([
   "horizontal-bar",
@@ -105,16 +99,15 @@ const KEEP_HEIGHT = new Set([
   "ridgeline",
 ]);
 /**
- * The maps. A map keeps its shape, so drawn 228 wide it is far shorter than its wide drawing shows
- * at 30rem (252 to 458 px): the narrow one keeps its own height, and under 30rem the wide one
- * scales into the column at that height instead of keeping 30rem (reserveCss), so the swap does
- * not move the page and leaves no blank space.
+ * The maps. A map keeps its shape, so drawn 228 wide it is far shorter than its wide drawing at
+ * 30rem: the narrow one keeps its own height, and under 30rem the wide one scales into the column
+ * at that height (reserveCss), so the swap does not move the page.
  */
 const MAPS = new Set(["dot-map", "choropleth"]);
 /**
- * The options an example passes, drawn at NARROW_WIDTH and at the height its wide drawing shows,
- * so swapping one for the other does not move the page (D5, record 0034). A chart that adds to
- * the height it is given (the survival curve's at-risk rows) is drawn again with that much less.
+ * The options an example passes, drawn at NARROW_WIDTH and at the height its wide drawing shows, so
+ * the swap does not move the page. A chart that adds to the height it is given (the survival
+ * curve's at-risk rows) is drawn again with that much less.
  */
 const narrowDraw =
   <O extends object>(draw: (options: O) => string, id: string) =>
@@ -130,8 +123,7 @@ const narrowDraw =
 Object.assign(globalThis, { enarratioGalleryNarrow: narrowDraw });
 registerHooks({
   resolve: (specifier, context, next) => next(self(specifier), context),
-  // An example imported with ?narrow draws its chart through narrowDraw: the options it passes,
-  // with the width and height set. Its source, as the gallery shows it, is unchanged.
+  // An example imported with ?narrow draws through narrowDraw: its options with the width and height set.
   load: (url, context, next) => {
     const loaded = next(url, context);
     if (!url.endsWith("?narrow")) return loaded;
@@ -167,10 +159,7 @@ interface Example {
 const escapeText = (s: string): string =>
   s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] ?? c);
 
-/**
- * Gallery order, with each example's short name for its number and the contents. Every example
- * must be listed, so a new one cannot be left out by accident.
- */
+/** Gallery order, with each example's short name. Every example must be listed, so a new one cannot be left out. */
 const NAMES: Record<string, string> = {
   "stacked-bar": "Stacked bars",
   years: "Bars by year",
@@ -285,10 +274,8 @@ const DOWNLOAD_MENU = '<details class="enarratio-download"';
 const PENDING_EXPAND = `<button type="button" aria-pressed="false" data-enarratio-pending inert><span class="enarratio-icon" data-icon="expand" aria-hidden="true"></span><span class="enarratio-label">${ENHANCE_STRINGS.expand}</span></button>`;
 
 /**
- * A figure's markup with Expand in its toolbar. The figure writes the controls enhance() adds with
- * its default options; the gallery enhances with `expand: true` (site/gallery.js), which puts
- * Expand before the Download menu, so the toolbar is written with it and does not change (D5,
- * records 0034, 0035).
+ * A figure's markup with Expand in its toolbar: the gallery enhances with `expand: true`
+ * (site/gallery.js), so the toolbar is written with it and does not change.
  */
 function withExpand(markup: string): string {
   // A primitive's figure is never expanded (enhance/chart.ts), so it gets no Expand.
@@ -301,11 +288,9 @@ function withExpand(markup: string): string {
 }
 
 /**
- * Under 30rem (the frame is the container, so this is the width gallery.js swaps at), each wide
- * drawing takes the height its narrow drawing will, so the swap does not move the page. A
- * KEEP_HEIGHT example's keeps its scale, centered in the taller box; a map's scales into the column
- * at that height instead of keeping 30rem and scrolling. With scripts on only: without them the
- * drawing is never swapped.
+ * Under 30rem (the frame is the container), each wide drawing takes the height its narrow drawing
+ * will, so the swap does not move the page. A KEEP_HEIGHT example keeps its scale, centered; a
+ * map's scales into the column at that height. Scripts on only.
  */
 function reserveCss(examples: readonly Example[]): string {
   const rules = examples.flatMap((e) => {
@@ -313,13 +298,12 @@ function reserveCss(examples: readonly Example[]): string {
     if (e.fit !== undefined) return [`  ${svg} { min-width: 0; width: 100%; height: ${e.fit}px; }`];
     return e.reserve !== undefined ? [`  ${svg} { min-height: ${e.reserve}px; }`] : [];
   });
-  // Without scripts nothing is swapped, so the wide drawings stay as they are (12 px text, A13).
+  // Without scripts nothing is swapped, so the wide drawings stay as they are.
   return rules.length > 0
     ? `@media (scripting: enabled) {\n@container (width < 30rem) {\n${rules.join("\n")}\n}\n}`
     : "";
 }
 
-/** A chart's drawing, the `.enarratio-frame` that enarratio/redraw swaps. */
 function frameOf(markup: string): string | undefined {
   const start = markup.indexOf('<div class="enarratio-frame');
   const end = markup.indexOf("</svg></div>", start);
@@ -329,10 +313,7 @@ function frameOf(markup: string): string | undefined {
 const packageFile = createRequire(import.meta.url).resolve;
 const capsomerDir = dirname(dirname(packageFile("capsomer/tokens.css")));
 
-/**
- * The Capsomer components the page uses, in the order their CSS loads: then the NASA manual theme
- * the family's public sites share, and the family footer.
- */
+/** The Capsomer components the page uses, in the order their CSS loads, then the NASA manual theme and the family footer. */
 const COMPONENTS = [
   "link",
   "button",
@@ -352,11 +333,8 @@ const COMPONENTS = [
 const FAMILY = "rose";
 
 /**
- * The gallery's own layout, from Capsomer's tokens, in the NASA manual theme: a sign for the running
- * head, the facts in form boxes, the charts as numbered parts in ruled boxes and the contents as a
- * leader index above them. The page is Capsomer's family column (.cap-page), so the letterhead, the
- * charts and the footer line up on every site. The charts' column stays 52rem, so each chart is
- * drawn at the width its stored images were taken at.
+ * The gallery's own layout, from Capsomer's tokens, in the NASA manual theme. The charts' column
+ * stays 52rem, so each chart is drawn at the width its stored images were taken at.
  */
 const GALLERY_CSS = `
 .gallery { padding-block-start: var(--space-6); }
@@ -389,10 +367,6 @@ const GALLERY_CSS = `
 .guide pre { overflow-x: auto; margin: var(--space-3) 0; padding: var(--space-4); border-radius: var(--radius-m); background: var(--sunken); font: 400 var(--fs-detail) / 1.6 var(--mono); }
 `;
 
-/**
- * Capsomer for the whole gallery: the family's faces (capsomer/fonts.css, with its fonts/ copied
- * beside the stylesheet), the tokens and base, then each component's CSS.
- */
 function capsomerCss(fontDir: string, examples: readonly Example[]): string {
   cpSync(join(capsomerDir, "fonts"), fontDir, { recursive: true });
   return [
@@ -417,17 +391,14 @@ interface Adapter {
   readonly values: string;
 }
 
-/** What a gallery page draws its charts in: a theme, or a design system through an adapter. */
 type View = { readonly theme: Theme } | { readonly adapter: Adapter };
 
-/** A link in the header: the theme pages, then the code. */
 interface Link {
   readonly label: string;
   readonly href: string;
   readonly current: boolean;
 }
 
-/** The family letterhead (capsomer/site-header), wired by gallery.js. */
 function siteHeader(links: readonly Link[]): string {
   const current = links.find((l) => l.current)?.label;
   return letterheadHtml({
@@ -459,10 +430,7 @@ const CARD = {
 /** The author, as the structured data names him. */
 const AUTHOR = { "@type": "Person", name: "Dustin Edwards", url: "https://dustinedwards.info" };
 
-/**
- * When the pages last changed, for the sitemap's lastmod: the date of the latest release in CHANGELOG.md, since every page
- * draws its charts with the released library.
- */
+/** When the pages last changed, for the sitemap's lastmod: the latest release in CHANGELOG.md. */
 const RELEASED = /^## \[[\d.]+\] - (\d{4}-\d{2}-\d{2})/m.exec(
   readFileSync(join(root, "CHANGELOG.md"), "utf8"),
 )?.[1];
@@ -476,10 +444,9 @@ const pageHead = defineHead({
 });
 
 /**
- * The head every page shares: Prelum's tags (title, description, canonical, Open Graph and Twitter
- * with the card, and any JSON-LD), Capsomer, then the page's own chart theme, then the remembered
- * theme before first paint. `address` is the page's clean path ("/", "/astro"); the 404 page has
- * none, so it gets a title, a description and noindex, never a canonical.
+ * The head every page shares: Prelum's tags, Capsomer, the page's own chart theme, then the
+ * remembered theme before first paint. `address` is the page's clean path; the 404 page has none,
+ * so it gets no canonical and noindex.
  */
 function head(
   title: string,
@@ -538,7 +505,6 @@ const VERSION = (
   JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { version: string }
 ).version;
 
-/** The family footer every dustinedwards.info site ends with, Enarratio's own part first. */
 function siteFooter(): string {
   const center = `<div class="cap-family-footer-center">
 <div><p class="cap-family-footer-center-name">Enarratio</p><p class="cap-family-footer-about">Accessible charts and scientific figures, drawn on the server into the HTML. Open source, MIT licensed.</p></div>
@@ -551,10 +517,7 @@ function siteFooter(): string {
   return `<footer class="cap-page">${familyFooterHtml({ site: "enarratio", center, statement: ACCESSIBILITY_PATH })}</footer>`;
 }
 
-/**
- * One gallery page. It links its stylesheets and scripts as files, never inline, so the site's
- * Content-Security-Policy can allow scripts and style sheets from its own origin only.
- */
+/** One gallery page. Scripts and stylesheets are linked as files, never inline, so the CSP can allow its own origin only. */
 function page(
   view: View,
   file: string,
@@ -636,8 +599,7 @@ ${galleryScript("gallery.js")}
 }
 
 /**
- * Bundles a script of site/ for the browser, leaving the enhancement layer as the file it is. Capsomer's
- * lazy parts (the site header's search, the shortcuts sheet, the dialog drag) are inlined with
+ * Bundles a script of site/ for the browser. Capsomer's lazy parts are inlined with
  * `codeSplitting: false`, so each page script stays one file with one integrity hash: an import()
  * carries none, and Integrity-Policy would refuse it.
  */
@@ -716,7 +678,7 @@ const drawSample = (size: { width?: number; height?: number } = {}): string =>
     source: "Illustrative data made up for this gallery",
   });
 const sampleChart = withExpand(drawSample());
-/** Its drawing for a phone, swapped in under 30rem as the gallery's examples are (C12, D5). */
+/** Its drawing for a phone, swapped in under 30rem as the gallery's examples are. */
 const sampleShown = shownHeight(sampleChart);
 const sampleNarrow = frameOf(
   drawSample({
@@ -750,7 +712,7 @@ const astroData = graph(
   ),
 );
 
-/** The accessibility statement (devkit-a11y S6): Prelum's, with this site's facts. */
+/** The accessibility statement: Prelum's, with this site's facts. */
 const STATEMENT = accessibilityStatement({
   siteName: "The Enarratio gallery",
   contact: {
@@ -862,12 +824,10 @@ ${galleryScript("gallery.js")}
 }
 
 /**
- * The scripts, bundled before any page is written so each tag carries its file's sha384
- * (site-runtime integrityHash) and crossorigin, which Integrity-Policy needs of every script, a
- * classic one included. gallery.js imports enhance.js, which a modulepreload with its own
- * integrity fetches, so the import finds it already checked. enhance.js imports sound.js when a
- * reader presses Play, and image.js on the first download; an import() carries no integrity, so
- * both (under 2 kB each) are preloaded the same way, fetched but not run until then.
+ * The scripts, bundled before any page is written so each tag carries its sha384 and crossorigin,
+ * which Integrity-Policy needs of every script. gallery.js imports enhance.js, preloaded with its
+ * own integrity; sound.js and image.js load by import(), which carries none, so they are
+ * preloaded the same way and not run until needed.
  */
 const scriptFiles = {
   "gallery.js": await bundle("gallery.js", "esm"),
@@ -882,7 +842,6 @@ const scripts = Object.fromEntries(
   ),
 ) as Record<keyof typeof scriptFiles, string>;
 
-/** The enhancement layer's preload and gallery.js, at `src` (relative on the gallery pages). */
 function galleryScript(src: string): string {
   const at = (file: string): string => new URL(file, new URL(src, `${SITE}/`)).pathname;
   return `<link rel="modulepreload" href="${at("enhance.js")}" integrity="${scripts["enhance.js"]}" crossorigin="anonymous">
@@ -893,20 +852,13 @@ function galleryScript(src: string): string {
 
 const examples = await loadExamples();
 writeFileSync(join(outDir, "capsomer.css"), capsomerCss(join(outDir, "fonts"), examples));
-/**
- * Each page's theme, file and stylesheet, and the theme readers who ask for more contrast get.
- * Capsomer's is the one the family's sites draw with (capsomer/enarratio-theme).
- */
+/** Each page's theme, file and stylesheet, and the theme readers who ask for more contrast get. */
 const pages: [Theme, string, string, Theme][] = [
   [defaultTheme, "index.html", "index.css", highContrastTheme],
   [exampleTheme, "example.html", "example.css", highContrastTheme],
   [capsomerTheme, "capsomer.html", "capsomer-theme.css", capsomerMoreTheme],
 ];
-/**
- * The adapter pages: each draws every example through one of the package's adapters
- * (enarratio/adapters/<name>.css), on that design system's own default values
- * (examples/adapters/<name>.css), with the base rules.
- */
+/** The adapter pages: each draws every example through one adapter, on that design system's own default values. */
 const adapters: Adapter[] = [
   {
     name: "shadcn/ui",
@@ -917,10 +869,7 @@ const adapters: Adapter[] = [
   { name: "Material Design 3", file: "material.css", values: "baseline scheme" },
 ];
 const adapterPage = (a: Adapter): string => a.file.replace(/\.css$/, ".html");
-/**
- * The address a page is linked at: the host (Cloudflare static assets) serves index.html at the
- * directory and other pages without their extension, and redirects the .html form there.
- */
+/** The address a page is linked at: the host serves index.html at the directory and other pages without their extension. */
 const cleanAddress = (file: string): string =>
   file === "index.html" ? "./" : file.replace(/\.html$/, "");
 /** The same address from the site's root, for canonical links and the sitemap. */
@@ -941,9 +890,7 @@ const links = (current: string): Link[] => [
   { label: "Code", href: "https://github.com/DrDustinEdwards/enarratio", current: false },
 ];
 for (const [theme, file, css, highContrast] of pages) {
-  // The Capsomer page loads what the family's sites load, capsomer/enarratio.css (Enarratio's base,
-  // Capsomer's tokens, and a figure's source and Download links in the link system), so it shows
-  // charts exactly as they appear on those sites. The other pages show Enarratio's own themes.
+  // The Capsomer page loads capsomer/enarratio.css, so it shows charts as they appear on the family's sites; the other pages show Enarratio's own themes.
   const themeCss =
     theme === capsomerTheme
       ? inlineCss(packageFile("capsomer/enarratio.css"))
@@ -974,10 +921,7 @@ const addresses = [
   pathOf(ASTRO_PAGE),
   pathOf(STATEMENT_PAGE),
 ];
-// For search engines and language models, from Prelum: the sitemap, robots.txt (the family bot
-// policy; Cloudflare puts its own lines first), ai.txt (citation welcome, training reserved, as the
-// tdm-reservation header in _headers says) and llms.txt (https://llmstxt.org), a short guide; then
-// security.txt (site-runtime) and the IndexNow key file.
+// For search engines and language models, from Prelum: sitemap, robots.txt, ai.txt (citation welcome, training reserved), llms.txt, security.txt and the IndexNow key file.
 mkdirSync(join(outDir, ".well-known"), { recursive: true });
 writeFileSync(
   join(outDir, ".well-known", "security.txt"),
@@ -1090,9 +1034,7 @@ ${galleryScript("/gallery.js")}
 </html>
 `,
 );
-// Served as files beside the pages: the gallery's scripts (Capsomer's behavior bundled in) and the
-// icon. The security and caching headers are site-runtime-headers', from the gallery's registry
-// entry (record 0018), which `npm run gallery` writes into _headers after this.
+// Served as files beside the pages: the gallery's scripts and the icon. Headers come from site-runtime-headers' registry entry, written into _headers by `npm run gallery`.
 for (const [name, code] of Object.entries(scriptFiles)) writeFileSync(join(outDir, name), code);
 // The family icon set (prelum-icons from the mark, in site/icons) at the root, where iconLinks() and the manifest point.
 cpSync(join(root, "site", "icons"), outDir, { recursive: true });

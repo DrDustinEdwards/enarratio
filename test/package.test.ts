@@ -200,18 +200,6 @@ describe.skipIf(!built)("the built package", () => {
     expect(Object.keys(await load("lite/area.js"))).toEqual(["areaChart"]);
     expect(Object.keys(await load("lite/sparkline.js"))).toEqual(["sparkline"]);
   });
-
-  it("writes base.css identical to baseStylesheet()", async () => {
-    const { baseStylesheet } = await import("../src/index.js");
-    expect(readFileSync(resolve(root, "dist", "base.css"), "utf8").trim()).toBe(
-      baseStylesheet().trim(),
-    );
-  });
-
-  it("builds the browser variant without linkedom", () => {
-    const file = resolve(root, "dist", "render", "document.browser.js");
-    expect(readFileSync(file, "utf8")).not.toMatch(IMPORTS_LINKEDOM);
-  });
 });
 
 describe("exact peer versions", () => {

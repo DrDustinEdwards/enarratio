@@ -90,9 +90,8 @@ export function readDate(kind: string, row: object, key: string, index: number):
 
 /**
  * The distinct values of a label field in first-seen order, or ascending when every value is a
- * number (years, doses), or `explicit` when the caller fixed the order. Values are compared as
- * text, so 2022 and "2022" are one category (A8). Throws if data holds a value `explicit` leaves
- * out.
+ * number, or `explicit` when the caller fixed the order. Values are compared as text, so 2022 and
+ * "2022" are one category. Throws if data holds a value `explicit` leaves out.
  */
 export function domainOf(
   kind: string,
@@ -118,10 +117,7 @@ export function domainOf(
   return [...seen.keys()];
 }
 
-/**
- * A mark's key from its parts. JSON, so no part can contain the separator and collide with
- * another mark's key (A9, F14). Keys are opaque: compare them, never parse them.
- */
+/** A mark's key from its parts. JSON, so no part can contain the separator and collide with another key. Keys are opaque: compare, never parse. */
 export function markKey(...parts: readonly (string | number)[]): string {
   return JSON.stringify(parts);
 }
@@ -139,21 +135,21 @@ export function requireRows(
   }
 }
 
-/** The smallest of many numbers, without spreading them onto the stack (F15). */
+/** The smallest of many numbers, without spreading them onto the stack. */
 export function minOf(values: Iterable<number>): number {
   let min = Number.POSITIVE_INFINITY;
   for (const v of values) if (v < min) min = v;
   return min;
 }
 
-/** The largest of many numbers, without spreading them onto the stack (F15). */
+/** The largest of many numbers, without spreading them onto the stack. */
 export function maxOf(values: Iterable<number>): number {
   let max = Number.NEGATIVE_INFINITY;
   for (const v of values) if (v > max) max = v;
   return max;
 }
 
-/** Throws unless a size option is a positive finite number (A7, F15). */
+/** Throws unless a size option is a positive finite number. */
 export function requireSize(kind: string, name: string, value: number | undefined): void {
   if (value !== undefined && !(Number.isFinite(value) && value > 0)) {
     throw new Error(`${kind}: ${name} must be a positive number, is ${value}`);
@@ -164,9 +160,9 @@ export function requireSize(kind: string, name: string, value: number | undefine
 export const DAY = 86_400_000;
 
 /**
- * Dates made at local midnight (`new Date(2025, 0, 6)`) mean a calendar date, but east of UTC
- * that instant falls on the previous UTC day. When every Date is at local midnight and not at
- * UTC midnight, each is moved to UTC midnight of its local date (A3).
+ * Dates made at local midnight (`new Date(2025, 0, 6)`) mean a calendar date, but east of UTC that
+ * instant is the previous UTC day. When every Date is at local midnight and not UTC midnight, each
+ * is moved to UTC midnight of its local date.
  */
 export function calendarDates(dates: Date[]): Date[] {
   const localMidnight = dates.every(
@@ -205,10 +201,7 @@ export function rampLegend(
   }));
 }
 
-/**
- * Four ascending thresholds splitting `min` to `max` into the ramp's five steps: the caller's, or
- * equal intervals. Flat data still gets ascending thresholds, so every value lands in step 1.
- */
+/** Four ascending thresholds splitting `min` to `max` into the ramp's five steps: the caller's, or equal intervals. Flat data still lands in step 1. */
 export function rampThresholds(
   kind: string,
   min: number,
@@ -237,10 +230,9 @@ export function formatInstant(date: Date): string {
 
 /**
  * Allows relative and http(s) links only, so data can never produce a `javascript:` URL. Browsers
- * ignore control characters and spaces inside a scheme, so the scheme is read without them. A
- * leading `//` (or its backslash forms) names another host, so it is refused too (A11), and so is
- * a user or password before the host, which lets `https://trusted.example@other.example/` read as
- * the trusted name.
+ * ignore control characters and spaces inside a scheme, so it is read without them. A leading `//`
+ * (or its backslash forms) names another host, and so does a user or password before the host
+ * (`https://trusted.example@other.example/`), so both are refused.
  */
 export function safeHref(kind: string, href: string): string {
   const compact = Array.from(href)
@@ -269,10 +261,7 @@ function hasUserinfo(compact: string, scheme: string | undefined): boolean {
   }
 }
 
-/**
- * Whether numbers look like years: they print without a thousands separator (F4), and an axis of
- * them needs no title (record 0036).
- */
+/** Whether numbers look like years: they print without a thousands separator, and an axis of them needs no title. */
 export const isYears = (values: readonly number[]): boolean =>
   values.length > 0 && values.every((v) => Number.isInteger(v) && v >= 1000 && v <= 2999);
 

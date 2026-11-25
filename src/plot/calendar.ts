@@ -68,9 +68,9 @@ interface Day {
 /**
  * A calendar heatmap: one cell per day, weeks as columns and weekdays as rows, colored on the
  * theme's sequential ramp in five labeled steps, with the months named above. A day with no value
- * is outlined with a dashed line, never colored as zero. On a narrow drawing the calendar turns, so
- * weeks run down the page and the cells stay large enough to see and touch. Every day with a value
- * is reached by hover, focus and the keys, and the data table gives one row per week.
+ * is outlined with a dashed line, never colored as zero. On a narrow drawing the calendar turns,
+ * weeks running down the page, so cells stay large enough to see and touch. Every day with a value
+ * is reached by hover, focus and the keys; the table gives one row per week.
  *
  * @example
  * calendarHeatmap({ data: daily, date: "day", value: "samples", alt: "..." });

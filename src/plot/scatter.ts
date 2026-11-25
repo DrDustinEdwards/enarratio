@@ -50,11 +50,7 @@ interface ScatterPoint {
   readonly bounds: Bounds | null;
 }
 
-/**
- * A linear axis's domain, widened by a twentieth of its span on each side before Plot rounds it,
- * so the lowest and highest points fall between ticks rather than on the end ticks beside their
- * labels. It never crosses zero. A log axis keeps Plot's domain.
- */
+/** A linear axis's domain, widened by a twentieth of its span on each side before Plot rounds it, so the extreme points fall between ticks, not on the end ticks. Never crosses zero; a log axis keeps Plot's domain. */
 function padded(
   type: string | undefined,
   values: readonly number[],
@@ -201,7 +197,7 @@ export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): str
   const sizes = points.flatMap((p) => (p.size === undefined ? [] : [p.size]));
   const width = options.width ?? DEFAULT_WIDTH;
   // The size legend takes 112 units on the right. Where that would leave the plot under 140 (a
-  // phone's drawing), it is a row under the x axis title instead (record 0041).
+  // phone's drawing), it is a row under the x axis title instead.
   const below = size !== undefined && width - 48 - 112 < 140;
   const rendered = renderPlot(
     {
@@ -338,10 +334,7 @@ export function scatterPlot<T extends object>(given: ScatterPlotOptions<T>): str
   });
 }
 
-/**
- * A legend of three reference bubbles, drawn in the right margin from the chart's own size scale,
- * so the circles a reader compares against are exactly the sizes the points are drawn at.
- */
+/** A legend of three reference bubbles in the right margin, from the chart's own size scale, so they are exactly the sizes the points are drawn at. */
 function sizeLegend(
   title: string,
   sizes: readonly number[],

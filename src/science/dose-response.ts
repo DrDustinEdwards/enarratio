@@ -52,10 +52,9 @@ const KIND = "doseResponse";
 
 /**
  * A dose-response curve: the measured responses as points on a log dose axis, the four-parameter
- * logistic curve through them (fitted by least squares, or drawn from parameters you give), and
- * the EC50 marked by a dashed drop line with its value. Several groups differ by color, symbol and
- * dash. The caption states each fit (EC50 with its 95% interval, Hill slope, bottom and top), and
- * the data table gives every measurement beside the curve's value at that dose.
+ * logistic curve through them (fitted by least squares, or drawn from parameters you give), and the
+ * EC50 marked by a dashed drop line with its value. Groups differ by color, symbol and dash. The
+ * caption states each fit; the table gives every measurement beside the curve's value at that dose.
  *
  * @example
  * doseResponse({ data: wells, dose: "concentration", response: "inhibition", group: "compound", alt: "..." });
@@ -137,7 +136,7 @@ export function doseResponse<T extends object>(options: DoseResponseOptions<T>):
   const whole = (m: (typeof inRange)[number]): string =>
     `${multi ? `${m.name} ` : ""}${midpoint} ${sig(m.fit.ec50)}`;
   // Left of the midpoint while the label fits there, else right of it, else on two lines on the
-  // side with more room (record 0041).
+  // side with more room.
   const sideOf = (m: (typeof inRange)[number]): "left" | "right" =>
     whole(m).length <= roomOf(m, "left") ||
     (whole(m).length > roomOf(m, "right") && roomOf(m, "left") >= roomOf(m, "right"))
@@ -165,9 +164,8 @@ export function doseResponse<T extends object>(options: DoseResponseOptions<T>):
       stroke: "var(--enarratio-text-muted)",
       strokeDasharray: "3,3",
     }),
-    // Labels sit left of and below each midpoint, a line lower for every other curve, so two
-    // curves' labels do not collide; a label that would run off the drawing's left edge sits
-    // right of its midpoint instead (record 0041).
+    // Labels sit left of and below each midpoint, a line lower for every other curve so labels do not collide;
+    // one that would run off the left edge sits right of its midpoint instead.
     ...[0, 1].flatMap((parity) =>
       (["left", "right"] as const)
         // Right-side labels only where there are any, so a wide drawing keeps its two groups.

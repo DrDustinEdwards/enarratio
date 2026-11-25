@@ -20,7 +20,7 @@ export interface ProgressRingOptions extends PrimitiveFigureOptions {
    * Required unless `alt` is given.
    */
   readonly label?: string;
-  /** The text alternative, instead of the one generated from `label` and the values (F18). */
+  /** The text alternative, instead of the one generated from `label` and the values. */
   readonly alt?: string;
   /** The ring's outer diameter in CSS pixels (default 40). */
   readonly size?: number;
@@ -34,7 +34,6 @@ export interface ProgressRingOptions extends PrimitiveFigureOptions {
 
 const round = (n: number): number => Math.round(n * 100) / 100;
 
-/** Everything the ring, its text alternative and its companion table are computed from. */
 interface ProgressRingValues {
   readonly value: number;
   readonly max: number;
@@ -52,7 +51,6 @@ interface ProgressRingValues {
   readonly alt: string;
 }
 
-/** Validates the options and computes the numbers every part of a progress ring is made from. */
 function prepareProgressRing(options: ProgressRingOptions): ProgressRingValues {
   const max = options.max ?? 1;
   const { value } = options;
@@ -75,7 +73,7 @@ function prepareProgressRing(options: ProgressRingOptions): ProgressRingValues {
     }
   }
   if (thickness >= size) throw new Error("progressRing: thickness must be less than size");
-  // The ring can only be full, but the number says how far past the total the value is (A7).
+  // The ring can only be full, but the number says how far past the total the value is.
   const fraction = Math.min(1, value / max);
   const percent = Math.round((value / max) * 100);
   const text = primitiveText(options);
@@ -162,7 +160,7 @@ export function progressRing(options: ProgressRingOptions): string {
               "text-anchor": "middle",
               "dominant-baseline": "central",
               fill: "var(--enarratio-text)",
-              // Never under 12px, and larger with the reader's font size (B3, B47).
+              // Never under 12px, and larger with the reader's font size.
               "font-size": `max(0.75rem, ${round(size * 0.28)}px)`,
               class: "enarratio-numeric",
             },
@@ -177,9 +175,8 @@ export function progressRing(options: ProgressRingOptions): string {
 }
 
 /**
- * A progress ring's numbers as a table (value, total and percentage) and a summary sentence,
- * computed from the same values as the ring so the two cannot disagree. Takes the same options as
- * {@link progressRing}. Without `label` the summary is the given `alt`.
+ * A progress ring's numbers as a table and a summary sentence, from the same values as the ring.
+ * Takes the same options as {@link progressRing}. Without `label` the summary is the given `alt`.
  *
  * @example
  * const { summary } = progressRingTable({ value: 7, max: 12, label: "Chapters drafted" });

@@ -8,7 +8,7 @@ const NUMBER = /-?\d*\.?\d+(?:e[-+]?\d+)?/gi;
 
 /**
  * A path's numbers and the commands between them, so two paths drawn by the same rule (the rounded
- * bars of record 0036) tween number by number. Null when the two do not share their commands.
+ * bars of) tween number by number. Null when the two do not share their commands.
  */
 function pathTween(from: string, to: string): ((t: number) => string) | null {
   const shape = (d: string): string => d.replace(NUMBER, "#");

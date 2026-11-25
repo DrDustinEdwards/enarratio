@@ -5,7 +5,7 @@ const GRIDLINES = new Set(["none", "x", "y", "both"]);
 
 /**
  * Characters that could end a CSS comment, declaration, rule or the surrounding <style> element.
- * A theme's name and fonts are written into CSS, and themes may come from data (F10, A10).
+ * A theme's name and fonts are written into CSS, and themes may come from data.
  */
 const UNSAFE_CSS_TEXT = /[<>{};\\]|\/\*|\*\//;
 
@@ -63,11 +63,9 @@ function assertScheme(themeName: string, which: "light" | "dark", scheme: ColorS
 }
 
 /**
- * Validates a theme's shape and returns it unchanged. TypeScript already checks the shape at
- * compile time; this is for themes built from data at run time (JSON, a CMS), where a typo would
- * otherwise become an invisible chart instead of an error.
- *
- * It does not judge the colors: {@link checkTheme} does that, and reports rather than throws.
+ * Validates a theme's shape and returns it unchanged. TypeScript checks the shape at compile time;
+ * this is for themes built from data at run time, where a typo would otherwise become an invisible
+ * chart. It does not judge the colors: {@link checkTheme} does that.
  */
 export function defineTheme(theme: Theme): Theme {
   if (theme.name.trim() === "") throw new Error("a theme needs a non-empty name");

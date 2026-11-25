@@ -24,7 +24,7 @@ export interface GaugeChartOptions extends FigureOptions {
   readonly max: number;
   /** A target, marked by a tick across the arc. */
   readonly target?: number;
-  /** Two to five qualitative bands along the arc, ascending (record 0038). */
+  /** Two to five qualitative bands along the arc, ascending. */
   readonly bands?: readonly QualitativeBand[];
   /** Whether low values are good, which reverses the bands' shading (dark is always worse). */
   readonly lowerIsBetter?: boolean;
@@ -69,11 +69,9 @@ export function checkBands(
 }
 
 /**
- * A gauge: one value against its scale, as a filled arc with the number printed large in its
- * middle, for a dashboard's single reading (capacity used, a score). Optional qualitative bands
- * run along the outer edge in steps of one hue, dark to light, and a target is a tick across the
- * arc. A bullet chart shows the same in less room and lines several up, so prefer `bulletChart`
- * where there is more than one measure (Few 2013).
+ * A gauge: one value against its scale, as a filled arc with the number printed large in its middle.
+ * Optional qualitative bands run along the outer edge in steps of one hue, and a target is a tick
+ * across the arc. Prefer `bulletChart` for more than one measure (Few 2013).
  *
  * @example
  * gaugeChart({ value: 72, max: 100, label: "Beds occupied (%)", target: 85, alt: "..." });

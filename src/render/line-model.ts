@@ -1,7 +1,6 @@
 /**
- * Everything about a line or area chart except the drawing: reading and checking the rows, the
- * forecast split, hover text, keys and the data table. Shared by the Observable Plot renderer
- * (`enarratio/plot`) and the light one (`enarratio/lite`).
+ * Everything about a line or area chart except the drawing: the rows, the forecast split, hover
+ * text, keys and the data table. Shared by `enarratio/plot` and `enarratio/lite`.
  */
 
 import { type Annotated, withNotes } from "./annotation.js";
@@ -63,45 +62,33 @@ export interface SeriesChartOptions<T extends object> extends SeriesAxesOptions,
   readonly data: readonly T[];
   /**
    * The field along the x axis: dates or numbers. Dates are Date objects or ISO 8601 strings;
-   * epoch milliseconds are numbers, so they need `xType: "time"`. Dates are instants in UTC,
-   * except that when every Date falls at local midnight they are read as calendar dates in the
-   * local time zone, so `new Date(2025, 0, 6)` is 6 January wherever the server runs (A3).
+   * epoch milliseconds need `xType: "time"`. Dates are instants in UTC, except that when every Date
+   * falls at local midnight they are read as calendar dates in the local time zone.
    */
   readonly x: KeysOfType<T, number | Date | string>;
   /** The field for the value. `null` or a missing value is a gap, never zero. */
   readonly y: KeysOfType<T, number | null | undefined>;
   /** A field naming the series each row belongs to. */
   readonly series?: KeysOfType<T, string>;
-  /**
-   * Whether x is time or a number. Inferred from the first row: numbers are linear, Dates and
-   * strings are time.
-   */
+  /** Whether x is time or a number. Inferred from the first row: numbers are linear, Dates and strings are time. */
   readonly xType?: "time" | "linear";
-  /**
-   * Color overrides by series name. A chart without `series` has one series, named by `yLabel`
-   * (or "Value" when the y label is hidden).
-   */
+  /** Color overrides by series name. A chart without `series` has one series, named by `yLabel`. */
   readonly colors?: Readonly<Record<string, SeriesColor>>;
   /**
-   * Formats x values in hover details, the data table and the summary. Dates are written out
-   * for the locale ("October 6, 2025"), with the time and "UTC" added when any value falls
-   * within a day; years print without a thousands separator.
+   * Formats x values in hover details, the data table and the summary. Dates are written out for the
+   * locale, with the time and "UTC" added when any value falls within a day.
    */
   readonly formatX?: (value: number | Date) => string;
   /** Horizontal reference lines, each labeled on the chart. */
   readonly references?: readonly ReferenceLine[];
   /** Vertical event markers, each labeled on the chart. */
   readonly markers?: readonly EventMarker[];
-  /**
-   * The most x tick labels to print. Without it, ticks are thinned to what fits the width, so
-   * labels never overlap on a narrow chart; with it, to the fewer of the two.
-   */
+  /** The most x tick labels to print. Without it, ticks are thinned to what fits the width. */
   readonly maxXTicks?: number;
   /**
    * Name each series at the end of its line or band as well as in the legend (default true when
-   * there are series), so series are told apart by text as well as color (A1, record 0036). An
-   * area chart whose bands are not all named this way (a band empty at the last x, or `false`
-   * here) fills series 2 to 8 with textures instead.
+   * there are series). An area chart whose bands are not all named this way (a band empty at the
+   * last x, or `false`) fills series 2 to 8 with textures instead.
    */
   readonly directLabels?: boolean;
 }
@@ -115,36 +102,29 @@ export interface LineBand<T extends object> {
   readonly lower: KeysOfType<T, number | null | undefined>;
   /** The field for the band's upper bound; never below `lower`. */
   readonly upper: KeysOfType<T, number | null | undefined>;
-  /**
-   * What the band is, e.g. "95% interval". It names the band's data table columns ("95%
-   * interval, lower") and its hover details; without it they say "lower bound" and "upper bound".
-   */
+  /** What the band is, e.g. "95% interval": it names the band's table columns and hover details (default "lower bound" and "upper bound"). */
   readonly label?: string;
 }
 
 /** Options for `lineChart`. */
 export interface LineChartOptions<T extends object> extends SeriesChartOptions<T> {
   /**
-   * A shaded band around each line, from `lower` and `upper` fields (a forecast interval, a
-   * confidence interval). Drawn in the series' color, behind the line, and carried in the data
-   * table as two columns per series. Every row has both bounds or neither.
+   * A shaded band around each line, from `lower` and `upper` fields, drawn in the series' color
+   * behind the line and carried in the data table as two columns per series. Every row has both
+   * bounds or neither.
    */
   readonly band?: LineBand<T>;
   /**
-   * The x after which the data are forecast: the line is dashed from here on, points are drawn
-   * hollow, a labeled rule marks the boundary, and the data table marks the rows after it
-   * (those with x greater than this). Must lie within the data's x range, before its last value.
-   * The forecast itself is computed by the caller.
+   * The x after which the data are forecast: the line is dashed from here on, points are hollow, a
+   * labeled rule marks the boundary, and the data table marks the later rows. Must lie within the
+   * data's x range, before its last value. The caller computes the forecast.
    */
   readonly forecastFrom?: number | Date | string;
   /** The label on the forecast boundary (default "Forecast"). */
   readonly forecastLabel?: string;
   /** Show a dot at every value (default: only when there are 30 or fewer per series). */
   readonly points?: boolean;
-  /**
-   * Use a logarithmic y axis, for values spanning orders of magnitude. Every value must then be
-   * above zero; a zero or negative value throws rather than vanishing from the line (F2).
-   */
+  /** Use a logarithmic y axis. Every value must be above zero; a zero or negative value throws rather than vanishing. */
   readonly yType?: "linear" | "log";
   /** Include zero on the y axis (default true, except on a log axis). */
   readonly zero?: boolean;
@@ -172,7 +152,6 @@ export interface Point {
 
 const isoDate = (d: Date): string => d.toISOString().slice(0, 10);
 
-/** About six whole-year ticks between two years. */
 function yearTicks(from: number, to: number): number[] {
   const span = Math.max(1, to - from);
   const step = [1, 2, 5, 10, 20, 50, 100].find((s) => span / s <= 6) ?? 100;
@@ -183,9 +162,8 @@ function yearTicks(from: number, to: number): number[] {
 
 /**
  * Whole-day x ticks for date-only data drawn `plotWidth` pixels wide, where the axis would
- * otherwise tick by the hour ("12 AM", "12 PM") between dates: one tick a day from the first
- * date to the last. Undefined when the axis would tick by the day or coarser on its own (about
- * one tick per 80 pixels, as Plot and the light charts count them), so those ticks are unchanged.
+ * otherwise tick by the hour between dates. Undefined when the axis already ticks by the day or
+ * coarser (about one tick per 80 pixels, as Plot and the light charts count them).
  */
 export function dayTicks(prepared: Prepared, plotWidth: number): number[] | undefined {
   if (!prepared.dates) return undefined;
@@ -208,7 +186,7 @@ export interface Prepared {
   readonly format: (value: number) => string;
   readonly strings: Strings;
   readonly xLabel: string | null;
-  /** The x axis title drawn: none on a time or year axis, whose ticks say what they are (record 0036). */
+  /** The x axis title drawn: none on a time or year axis, whose ticks say what they are. */
   readonly xTitle: string | null;
   readonly yLabel: string | null;
   /** `forecastFrom` as a number (epoch milliseconds for time), when given. */
@@ -219,7 +197,6 @@ export interface Prepared {
 type Forecastable<T extends object> = SeriesChartOptions<T> &
   Partial<Pick<LineChartOptions<T>, "band" | "forecastFrom" | "yType">>;
 
-/** Reads and checks the rows shared by line and area charts. */
 function prepare<T extends object>(kind: string, options: Forecastable<T>): Prepared {
   const { data, x, y, series } = options;
   validateFigure(kind, options, data);
@@ -283,8 +260,7 @@ function prepare<T extends object>(kind: string, options: Forecastable<T>): Prep
         );
   const rowOf = new Map(seriesNames.map((name, i) => [name, i]));
   const band = options.band;
-  // Rows are identified by the x value itself, not its text, so hourly data with a daily label
-  // (or any coarse formatX) is still distinct (F3).
+  // Rows are identified by the x value itself, not its text, so hourly data with a coarse formatX stays distinct.
   const seen = new Set<string>();
   const points = data.map((row, i): Point => {
     const xv = xs[i] as number | Date;
@@ -360,7 +336,6 @@ function markerPoints(
   }));
 }
 
-/** The data table column for one bound of a band, e.g. "Berlin 95% interval, lower". */
 function boundColumn(
   prepared: Prepared,
   series: string,
@@ -457,7 +432,7 @@ export interface SeriesModel {
   /** The caller's limit on x tick labels, checked. */
   readonly maxXTicks: number | undefined;
   readonly markers: readonly MarkerPoint[];
-  /** The y axis's tick format for huge values, and whether every value is zero (B41). */
+  /** The y axis's tick format for huge values, and whether every value is zero. */
   readonly valueAxis: ReturnType<typeof valueAxis>;
   describe(p: Point): string;
   datum(p: Point): MarkDatum;
@@ -465,7 +440,7 @@ export interface SeriesModel {
   figure(svg: string, x: ScaleDescription | undefined): string;
   /** The text alternative, with the annotations' notes added. */
   readonly alt: string | undefined;
-  /** Whether each series is named at its end (record 0036). */
+  /** Whether each series is named at its end. */
   readonly directLabels: boolean;
 }
 
@@ -534,8 +509,7 @@ function seriesModel<T extends object>(
     alt: noted.alt,
     directLabels,
     figure: (svg, x) => {
-      // Area bands are filled, so they take textures where they are not all named on the
-      // drawing (record 0036); lines are told apart by labels and dashes (B5).
+      // Area bands are filled, so they take textures where not all are named; lines are told apart by labels and dashes.
       const area = finish
         ? finish(svg, plan)
         : figureKind === "area"
@@ -596,8 +570,7 @@ export function lineModel<T extends object>(options: LineChartOptions<T>): LineM
   const present = points.filter((p) => p.value !== null);
   const perSeries = present.length / seriesNames.length;
   const boundary = prepared.forecastAt;
-  // Each series' dashed stretch starts at its last point on or before the boundary, so the line
-  // stays joined where the data change from observed to forecast.
+  // Each series' dashed stretch starts at its last point on or before the boundary, so the line stays joined.
   const dashed =
     boundary === undefined
       ? []
@@ -629,11 +602,9 @@ export function lineModel<T extends object>(options: LineChartOptions<T>): LineM
 }
 
 /**
- * The size and margins a line or area chart is drawn at, by Plot and by `enarratio/lite` alike.
- * The right margin leaves room for the longest series name as a direct label (6 from the line's
- * end, at the text size of the width drawn), else 24. A drawing 480 or wider keeps at least 96,
- * so desktop charts share one gutter; a narrower one takes only what its labels need, and the
- * plot keeps the rest.
+ * The size and margins a line or area chart is drawn at, by Plot and `enarratio/lite` alike. The
+ * right margin leaves room for the longest series name as a direct label, else 24; a drawing 480
+ * or wider keeps at least 96, so desktop charts share one gutter.
  */
 export function seriesMargins(
   model: SeriesModel,
@@ -654,18 +625,14 @@ export function seriesMargins(
 
 const AREA = "areaChart";
 
-/**
- * The fill opacity of an area chart's bands. Light, with a line along each band's top edge,
- * so the gridlines show through and a stack reads as layers rather than one solid block.
- */
+/** The fill opacity of an area chart's bands: light, so the gridlines show through and a stack reads as layers. */
 export const AREA_OPACITY = 0.3;
 
 /** Options for `areaChart`, from `enarratio/plot` or `enarratio/lite`. */
 export interface AreaChartOptions<T extends object> extends SeriesChartOptions<T> {
   /**
    * Stack each x to 100%: every series is drawn, described and tabled as its percentage of that
-   * x's total, for how a whole divides when the total itself changes. The y label defaults to
-   * "Share of total (%)".
+   * x's total. The y label defaults to "Share of total (%)".
    */
   readonly percent?: boolean;
 }
@@ -696,10 +663,7 @@ function checkStackable(kind: string, prepared: Prepared): void {
 
 const STREAM = "streamgraph";
 
-/**
- * Reads and checks a streamgraph's options, which are a series chart's with a `series` field.
- * `finish` names the layers on the drawing and says whether every one is named.
- */
+/** Reads and checks a streamgraph's options, a series chart's with a `series` field; `finish` names the layers. */
 export function streamModel<T extends object>(
   options: SeriesChartOptions<T>,
   finish: (svg: string, plan: SeriesPlan) => { svg: string; labeled: boolean },

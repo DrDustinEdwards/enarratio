@@ -1,6 +1,6 @@
-/** Keeps only what Enarratio's server emits in markup handed to update() (F11). */
+/** Keeps only what Enarratio's server emits in markup handed to update(). */
 
-/** The elements Enarratio's server markup is made of; update() keeps only these (F11). */
+/** The elements Enarratio's server markup is made of; update() keeps only these. */
 const ALLOWED_ELEMENTS = new Set(
   "figure p ul ol li strong span div figcaption details summary table caption thead tbody tr th td svg g rect circle ellipse path line polyline polygon text tspan title a defs clippath pattern".split(
     " ",
@@ -8,7 +8,7 @@ const ALLOWED_ELEMENTS = new Set(
 );
 const LINK_ATTRIBUTES = new Set(["href", "xlink:href", "data-enarratio-href"]);
 
-/** Relative and http(s) links only, with no user or password before the host, as the server allows (A11). */
+/** Relative and http(s) links only, with no user or password before the host, as the server allows. */
 function safeLink(value: string): boolean {
   const compact = Array.from(value)
     .filter((ch) => ch.charCodeAt(0) > 0x20)

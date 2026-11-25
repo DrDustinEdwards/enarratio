@@ -1,7 +1,7 @@
 /**
- * Geometry for the maps (design record 0028): reading the caller's GeoJSON, projecting longitude
- * and latitude onto the drawing, and writing paths. Enarratio ships no boundaries; every shape
- * is the caller's, in WGS 84 longitude and latitude as GeoJSON (RFC 7946) stores it.
+ * Geometry for the maps: reading the caller's GeoJSON, projecting longitude and latitude onto
+ * the drawing, and writing paths. Enarratio ships no boundaries; every shape is the caller's, in
+ * WGS 84 longitude and latitude as GeoJSON (RFC 7946) stores it.
  */
 
 import { num } from "../lite/svg.js";
@@ -10,10 +10,7 @@ import { maxOf, minOf } from "../render/data.js";
 /** A GeoJSON position: longitude, then latitude (any third value is ignored). */
 export type GeoPosition = readonly number[];
 
-/**
- * A GeoJSON geometry. Typed loosely, so a geometry read from a `.json` file (whose `type` is a
- * plain string to TypeScript) is accepted; it is checked as it is read, and a bad one throws.
- */
+/** A GeoJSON geometry, typed loosely so one read from a `.json` file is accepted; it is checked as it is read, and a bad one throws. */
 export interface GeoGeometry {
   readonly type: string;
   readonly coordinates?: unknown;
@@ -186,7 +183,6 @@ export function extentOf(positions: readonly (readonly [number, number])[], pad 
 
 const RAD = Math.PI / 180;
 
-/** The planar projection (y north) for a map of this extent. */
 function planar(
   projection: Projection | undefined,
   extent: GeoExtent,
@@ -218,7 +214,6 @@ export interface Fitted {
   readonly frame: Frame;
 }
 
-/** The planar box of an extent: its corners and the middles of its edges, projected. */
 function planarBox(
   project: (lon: number, lat: number) => readonly [number, number],
   extent: GeoExtent,
@@ -251,10 +246,7 @@ function aspect(projection: Projection | undefined, extent: GeoExtent): number {
   return (b.y1 - b.y0) / (b.x1 - b.x0 || 1);
 }
 
-/**
- * The size of a map drawn `width` wide with `pad` around it and `below` more under it (a key): the
- * caller's height, or one that follows the extent's shape, at most 1.5 times the width.
- */
+/** The size of a map drawn `width` wide with `pad` around it and `below` more under it (a key): the caller's height, or one that follows the extent's shape, at most 1.5 times the width. */
 export function mapSize(
   projection: Projection | undefined,
   extent: GeoExtent,
@@ -269,10 +261,7 @@ export function mapSize(
   return { mapWidth, mapHeight, height: height ?? mapHeight + 2 * pad + below };
 }
 
-/**
- * Fits the extent into the frame without stretching it (one scale for x and y), centered, with
- * north up.
- */
+/** Fits the extent into the frame without stretching it, centered, with north up. */
 export function fitExtent(
   projection: Projection | undefined,
   extent: GeoExtent,
@@ -290,7 +279,6 @@ export function fitExtent(
   return Object.assign(fitted, { frame });
 }
 
-/** Points along a line in the drawing, dropping any within half a unit of the last one kept. */
 function thin(points: readonly (readonly [number, number])[]): [number, number][] {
   const out: [number, number][] = [];
   for (const [x, y] of points) {
@@ -329,7 +317,6 @@ export function polygonPath(
     .join("");
 }
 
-/** A ring's signed area and centroid in the drawing (the shoelace formula). */
 function ringCentroid(r: readonly (readonly [number, number])[]): {
   area: number;
   x: number;
@@ -367,10 +354,7 @@ export function labelPoint(
   return best ? [best.x, best.y] : undefined;
 }
 
-/**
- * Joins lines that meet end to end into longer chains, so a street drawn as many short segments,
- * split at each crossing, can carry one label along its length.
- */
+/** Joins lines that meet end to end into longer chains, so a street drawn as many short segments can carry one label along its length. */
 export function chains(
   lines: readonly (readonly (readonly [number, number])[])[],
 ): [number, number][][] {

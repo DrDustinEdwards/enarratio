@@ -1,7 +1,6 @@
 /**
  * A sparkline's drawing and the numbers and sentence it is made from, in a module that imports
  * neither the figure nor the strings table, so `enarratio/lite/sparkline` bundles only this.
- * `sparkline` in `enarratio` (primitives/sparkline.ts) wraps the same drawing in a figure.
  */
 
 import { element, escapeHtml } from "../html.js";
@@ -65,10 +64,7 @@ export interface SparklineValues {
   readonly alt: string;
 }
 
-/**
- * Validates the options and computes the numbers every part of a sparkline is made from. `sentence`
- * writes the generated description (the strings table's, or {@link englishSparklineSentence}).
- */
+/** Validates the options and computes the numbers a sparkline is made from; `sentence` writes the generated description. */
 export function prepareSparkline(
   options: SparklineDrawingOptions,
   sentence: (s: SparklineSentence) => string,

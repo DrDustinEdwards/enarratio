@@ -4,8 +4,7 @@ import type { Theme } from "../theme/types.js";
  * Enarratio's own theme: neutral surfaces, system fonts, horizontal gridlines, and a series
  * palette chosen to pass {@link checkTheme} in light and dark. Series 1 to 6 differ from each
  * other by at least 10 CIEDE2000 units with typical vision and under simulated protanopia,
- * deuteranopia and tritanopia, in both schemes, and each slot keeps its hue from light to dark
- * (A1).
+ * deuteranopia and tritanopia, in both schemes, and each slot keeps its hue from light to dark.
  */
 export const defaultTheme: Theme = {
   name: "default",

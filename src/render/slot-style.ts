@@ -18,7 +18,7 @@ function cssColor(value: string): string {
 /**
  * Per-figure palette overrides as CSS declarations, or undefined when there are none. Charts carry
  * them in `data-enarratio-colors`, never a `style` attribute; {@link colorStyles} turns them into
- * rules for the page's stylesheet (D4).
+ * rules for the page's stylesheet.
  */
 export function slotStyle(
   colors: ReadonlyMap<number, SeriesColor> | undefined,

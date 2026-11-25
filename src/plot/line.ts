@@ -36,10 +36,7 @@ export type {
   SeriesChartOptions,
 } from "../render/line-model.js";
 
-/**
- * A halo in the background color under rule labels, so a line or point under one does not cut
- * through it (record 0041). The light charts draw the same.
- */
+/** A halo in the background color under rule labels, so a line or point under one does not cut through it. The light charts draw the same. */
 const HALO = {
   fill: "currentColor",
   stroke: "var(--enarratio-background)",
@@ -82,7 +79,6 @@ function annotations(
   return marks;
 }
 
-/** The x scale shared by line and area charts, its ticks thinned to fit the width. */
 function xScale(model: SeriesModel, width: number, plotWidth: number) {
   const { prepared, yearTicks, maxXTicks } = model;
   const base = {
@@ -102,17 +98,16 @@ function xScale(model: SeriesModel, width: number, plotWidth: number) {
     const fitted = fitTicks(days, () => "Jun 07", width, plotWidth, maxXTicks);
     return { ...base, ticks: fitted.map((t) => new Date(t)) };
   }
-  // Plot's own ticks come about one per 80 pixels; a limit lowers the count. A plot under 240
-  // across (a phone's) asks for three, which Plot's one per 80 would cut to one or two labels
-  // (record 0041).
+  // Plot's own ticks come about one per 80 pixels; a limit lowers the count. A plot under 240 across
+  // (a phone's) asks for three, which Plot's one per 80 would cut to one or two labels.
   const ats = prepared.points.map((p) => p.at);
   const months = prepared.time ? monthTicks(ats, width, plotWidth, maxXTicks) : null;
-  // maxXTicks stays the most labels to print (record 0040).
+  // maxXTicks stays the most labels to print.
   if (months) return { ...base, ticks: months.map((t) => new Date(t)) };
   return maxXTicks === undefined ? base : { ...base, ticks: Math.min(maxXTicks, plotWidth / 80) };
 }
 
-/** The y scale's domain when every value is zero, and its tick format for huge values (B41). */
+/** The y scale's domain when every value is zero, and its tick format for huge values. */
 function yAxis(model: SeriesModel) {
   return {
     ...(model.valueAxis.flat ? { domain: [0, 1] } : {}),
@@ -120,7 +115,6 @@ function yAxis(model: SeriesModel) {
   };
 }
 
-/** The labeled rule where observed data end and the forecast begins. */
 function forecastRule(at: number | Date, label: string): Plot.Markish[] {
   const rule = [{ x: at, label }];
   return [
@@ -138,8 +132,7 @@ function forecastRule(at: number | Date, label: string): Plot.Markish[] {
 
 /**
  * A line chart over time or any continuous x: one series or several, with gaps where values are
- * missing, reference lines and event markers. Every value is a keyed point that shows hover
- * details and, once enhanced, can be reached by keyboard and brushed as a range.
+ * missing, reference lines and event markers. Every value is a keyed point with hover details.
  *
  * @example
  * lineChart({
@@ -215,7 +208,7 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
           fill: "series",
           textAnchor: "start",
           dx: 6,
-          // Labels of series that end close together are moved apart (B8).
+          // Labels of series that end close together are moved apart.
           render: (index, scales, values, dimensions, context, next) => {
             const group = next?.(index, scales, values, dimensions, context) ?? null;
             const texts = [...(group?.children ?? [])];
@@ -262,8 +255,8 @@ export function lineChart<T extends object>(options: LineChartOptions<T>): strin
 
 /**
  * An area chart over time or any continuous x. Several series stack, so the top edge is their
- * total, or with `percent` each x stacks to 100%. A missing value is a gap: that series' band breaks there, has no point to hover, and
- * its table cell is blank (F5). Keyed points carry hover details as in {@link lineChart}.
+ * total, or with `percent` each x stacks to 100%. A missing value is a gap: the band breaks there
+ * and its table cell is blank.
  *
  * @example
  * areaChart({ data: monthly, x: "month", y: "hours", series: "activity", alt: "..." });
@@ -310,7 +303,7 @@ export function areaChart<T extends object>(options: AreaChartOptions<T>): strin
             strokeWidth: 2,
           }),
         ),
-        // Each point on its band's top edge, where its line is (record 0036).
+        // Each point on its band's top edge, where its line is.
         Plot.dot(
           points,
           Plot.stackY2({
@@ -349,12 +342,10 @@ export interface StreamgraphOptions<T extends object> extends Omit<
 }
 
 /**
- * A streamgraph: several series over time as layers flowing around a moving center line, ordered
- * from the inside out and stacked on Byron and Wattenberg's "wiggle" baseline, which keeps the
- * layers' slopes small (d3's stackOffsetWiggle with stackOrderInsideOut). It shows how a whole and
- * its parts rise and fall, not exact values, so there is no value axis: each layer is named on the
- * drawing where it is thickest, any it cannot name take their textures, and the data table and
- * hover details give the values. A stacked area chart compares totals more precisely.
+ * A streamgraph: several series over time as layers around a moving center line, on Byron and
+ * Wattenberg's "wiggle" baseline (d3's stackOffsetWiggle with stackOrderInsideOut). It shows how a
+ * whole and its parts rise and fall, not exact values, so there is no value axis: each layer is
+ * named where it is thickest, any it cannot name take textures, and the table gives the values.
  *
  * @example
  * streamgraph({ data: weekly, x: "week", y: "cases", series: "virus", alt: "..." });
@@ -393,7 +384,7 @@ export function streamgraph<T extends object>(options: StreamgraphOptions<T>): s
   const lo = minOf(layout.lower.flat());
   const hi = maxOf(layout.upper.flat());
   // Each layer named where it is thickest, if its name fits inside it there; a layer that cannot
-  // be named takes its texture (record 0036).
+  // be named takes its texture.
   const plotWidth = width - 2 * margin;
   const plotHeight = height - top - bottom;
   const px = (j: number): number =>
@@ -446,8 +437,7 @@ export function streamgraph<T extends object>(options: StreamgraphOptions<T>): s
       marginBottom: bottom,
       x: {
         ...xScale(model, width, plotWidth),
-        // Ticks asked for by width, then thinned to fit: on a phone Plot's own count (one per 80
-        // units) picks quarters and can leave a single tick for half a year.
+        // Ticks asked for by width, then thinned to fit: on a phone Plot's own count picks quarters and can leave a single tick for half a year.
         ...(time && !model.yearTicks
           ? {
               ticks: fitTicks(

@@ -1,7 +1,7 @@
 /**
  * What the server figure and the enhancement layer share: the layer's strings and the toolbar's
  * icons, so the figure can write the controls the layer will add with the same labels and look,
- * and the x scales a range can be picked on (records 0033, 0035). The layer's bundle inlines it.
+ * and the x scales a range can be picked on. The layer's bundle inlines it.
  */
 
 import type { EnhanceStrings } from "./enhance/types.js";
@@ -44,7 +44,7 @@ export const ENHANCE_STRINGS: EnhanceStrings = {
 export const BRUSH_SCALES: readonly string[] = ["linear", "utc", "time", "log", "sqrt", "pow"];
 
 /**
- * The toolbar's icons (record 0035): each a 16-unit path stroked in the text color, beside its
+ * The toolbar's icons: each a 16-unit path stroked in the text color, beside its
  * word, never instead of it. The stylesheet draws them as masks on an empty, hidden span, so no
  * icon is an `<svg>` a page's chart selectors could pick up.
  */
