@@ -4,7 +4,7 @@
     "jscpd": "jscpd@5.4.0"
   },
   "baseline": {
-    "measured_at": "4c0a0de",
+    "measured_at": "f172c24",
     "knip": {},
     "jscpd": {
       "clones": 1,
@@ -17,17 +17,15 @@
       "lines": 0
     },
     "legacy": {},
-    "size": {
-      "src/enhance/chart.ts": 1110
-    },
+    "size": {},
     "tests": {
       "files": 30,
       "cases": 287
     },
     "comments": {
-      "lines": 3866,
-      "code": 30868,
-      "percentage": 11.13
+      "lines": 3865,
+      "code": 30750,
+      "percentage": 11.17
     }
   }
 }
