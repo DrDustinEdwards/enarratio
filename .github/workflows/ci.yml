@@ -90,7 +90,7 @@ jobs:
     concurrency:
       group: deploy
       cancel-in-progress: false
-    uses: DrDustinEdwards/devkit/.github/workflows/worker-deploy.yml@ffdb0473473df6eb30d902a6843107af42a4f706 # v0.59.5
+    uses: DrDustinEdwards/devkit/.github/workflows/worker-deploy.yml@5ced133321446a944c4e0cc98291eaa54d446a56 # v0.60.0
     with:
       worker-name: enarratio
       health-url: https://enarratio.dustinedwards.info/health
@@ -98,7 +98,6 @@ jobs:
         code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://enarratio.dustinedwards.info/ || true);
         echo "home page answered $code";
         if [ "$code" = 200 ]; then exit 0; elif [ "$code" = 000 ]; then exit 3; else exit 1; fi
-      install: PUPPETEER_SKIP_DOWNLOAD=true npm ci
       pre-deploy: npm run build && npm run gallery
       sha-var: DEPLOY_SHA
       # Gradual rollout (devkit D4): the new version takes 10% of traffic for 10 minutes before the live gate judges it and it
