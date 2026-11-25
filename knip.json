@@ -22,6 +22,5 @@
     "examples/**/*.{ts,mjs}",
     "*.{ts,mjs}"
   ],
-  "ignoreDependencies": ["axe-core", "hastscript"],
   "ignoreUnresolved": ["^\\./enhance\\.js$"]
 }
