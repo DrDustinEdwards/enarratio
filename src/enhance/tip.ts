@@ -8,7 +8,7 @@ const HIDE_DELAY_MS = 300;
 /** The tooltip's gap from its mark and from the viewport edge, in CSS pixels. */
 const TIP_GAP = 8;
 
-export function showTip(c: Chart, marks: readonly SVGGraphicsElement[]): void {
+export function showChartTip(c: Chart, marks: readonly SVGGraphicsElement[]): void {
   const tip = c.tooltip;
   if (!tip || marks.length === 0) return;
   clearTimeout(c.hideTimer);
@@ -43,7 +43,7 @@ export function showTip(c: Chart, marks: readonly SVGGraphicsElement[]): void {
   tip.style.top = `${top + scrollY}px`;
 }
 
-export function hideTip(c: Chart): void {
+export function hideChartTip(c: Chart): void {
   clearTimeout(c.hideTimer);
   if (c.tooltip) c.tooltip.hidden = true;
 }
@@ -51,5 +51,5 @@ export function hideTip(c: Chart): void {
 /** Hides the tooltip shortly, unless the pointer reaches it first. */
 export function scheduleHide(c: Chart): void {
   clearTimeout(c.hideTimer);
-  c.hideTimer = setTimeout(() => hideTip(c), HIDE_DELAY_MS);
+  c.hideTimer = setTimeout(() => hideChartTip(c), HIDE_DELAY_MS);
 }
