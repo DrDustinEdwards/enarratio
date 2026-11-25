@@ -15,11 +15,7 @@ const dashGradient = (dash: string): string => {
   return `repeating-linear-gradient(90deg, ${stops.join(", ")})`;
 };
 
-export const CONTROL_RULES = `/* The toolbar above the drawing (record 0035): Sound, Range and Download, each an icon and a
-   word, on one row that never wraps. Its panels (the range form, the Download menu) open under
-   it, over the drawing, so opening one never moves the page. It is the container its narrow rule
-   measures, and sits above the frame so a panel paints over the chart. */
-.enarratio-controls {
+export const CONTROL_RULES = `.enarratio-controls {
   position: relative;
   z-index: var(--enarratio-z-controls, 2);
   display: flex;
@@ -54,8 +50,6 @@ export const CONTROL_RULES = `/* The toolbar above the drawing (record 0035): So
   background: color-mix(in srgb, var(--enarratio-text) 8%, var(--enarratio-background));
 }
 .enarratio-controls > button[aria-pressed="true"] { border-color: var(--enarratio-text-muted); }
-/* Written as svg.enarratio-icon under .enarratio so it outranks the drawing rules above, which set
-   an svg's display, size and font size. */
 .enarratio svg.enarratio-icon {
   flex: none;
   display: inline-block;
@@ -70,7 +64,6 @@ export const CONTROL_RULES = `/* The toolbar above the drawing (record 0035): So
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-/* The two panels: a card under the toolbar, as wide as its content and never wider. */
 .enarratio-panel {
   position: absolute;
   top: calc(100% + var(--enarratio-gap-controls, 0.375em));
@@ -89,7 +82,6 @@ export const CONTROL_RULES = `/* The toolbar above the drawing (record 0035): So
   align-items: flex-end;
   gap: var(--enarratio-gap-row, 0.25em) var(--enarratio-gap-inline, 0.4em);
 }
-/* The range panel is as wide as two date fields and its buttons, or the toolbar when narrower. */
 .enarratio-range > .enarratio-panel { inline-size: min(100%, 34em); }
 .enarratio-range label { display: grid; flex: 1 1 10em; gap: 0.25em; }
 .enarratio-range :is(input, button) {
@@ -126,11 +118,6 @@ export const CONTROL_RULES = `/* The toolbar above the drawing (record 0035): So
 .enarratio-menu > :is(a, button):is(:hover, :focus-visible) {
   background: color-mix(in srgb, var(--enarratio-text) 8%, var(--enarratio-background));
 }
-/* Narrow containers keep the one row, in steps: the buttons tighten; then Download shows its icon
-   and chevron without its word; then, so narrow that even that does not fit (200% text), every
-   control shows its icon alone. A hidden word stays as screen-reader text, so every name stays.
-   The thresholds are where three and four controls stop fitting (Sound, Range, Download, and
-   Expand); a container query cannot read a custom property. */
 @container (width < 23em) {
   .enarratio-controls:not(:has(> :nth-child(4))) { gap: 0.25em; }
   .enarratio-controls:not(:has(> :nth-child(4))) > :is(button, details > summary) { padding-inline: 0.5em; }
@@ -153,8 +140,6 @@ export const CONTROL_RULES = `/* The toolbar above the drawing (record 0035): So
 }
 .enarratio-legend button { min-height: 24px; }
 .enarratio-legend button { box-sizing: border-box; }
-/* The controls the server writes ahead of enhance() (figure.ts): with scripts off, nothing
-   replaces them, so they are not shown. */
 @media (scripting: none) {
   .enarratio [data-enarratio-pending] { display: none; }
 }
@@ -179,7 +164,6 @@ export const CONTROL_RULES = `/* The toolbar above the drawing (record 0035): So
   padding: var(--enarratio-padding-expanded, 1rem);
   background: var(--enarratio-background);
 }
-/* Invisible targets that make small marks at least 24 CSS pixels to point at. */
 .enarratio-hit { fill: transparent; stroke: none; }
 .enarratio svg:focus-visible, .enarratio button:focus-visible, .enarratio-controls summary:focus-visible,
 .enarratio-controls :is(a, input):focus-visible, .enarratio-frame:focus-visible,
@@ -192,9 +176,6 @@ export const CONTROL_RULES = `/* The toolbar above the drawing (record 0035): So
   fill-opacity: var(--enarratio-opacity-brush, 0.15);
   stroke: var(--enarratio-focus);
 }
-/* The timeline's plain list: read by screen readers beside the drawing, and shown in its place
-   when the container has under 30rem. The threshold is a container query, which cannot use a
-   custom property. */
 .enarratio-timeline { container-type: inline-size; }
 .enarratio-timeline-list {
   position: absolute;
@@ -220,7 +201,6 @@ export const CONTROL_RULES = `/* The toolbar above the drawing (record 0035): So
     white-space: normal;
   }
   .enarratio-timeline-list li { margin: 0 0 var(--enarratio-space, 0.5em); }
-  /* Proportional marker figures: a tabular period is a full figure wide ("1 ."). */
   .enarratio-timeline-list li::marker { font-variant-numeric: proportional-nums; }
 }
 @keyframes enarratio-grow { from { transform: scaleY(0); } }
@@ -251,7 +231,6 @@ export const CONTROL_RULES = `/* The toolbar above the drawing (record 0035): So
 @media (prefers-reduced-motion: reduce) {
   .enarratio *, .enarratio-tooltip { animation: none !important; transition: none !important; }
 }
-/* More contrast: full-strength textures, wider gaps, and gridlines in the muted text color (B43). */
 @media (prefers-contrast: more) {
   .enarratio[data-enarratio] .enarratio-texture { stroke-opacity: 1; }
 ${textureRules(".enarratio:has(pattern)")}
@@ -259,12 +238,7 @@ ${textureRules(".enarratio:has(pattern)")}
   .enarratio [data-enarratio-mark$="grid"] { stroke: var(--enarratio-text-muted); }
   .enarratio-swatch { outline: 1px solid var(--enarratio-text); }
 }
-/* Forced colors (Windows High Contrast): every color becomes one of the reader's system colors.
-   Series are all CanvasText, told apart by textures, line dashes, symbols and labels; the
-   sequential ramp becomes steps between Canvas and CanvasText. Set on the drawing and legend
-   themselves, so they win over a theme or a per-chart override set on the figure (B57, D3). */
 @media (forced-colors: active) {
-  /* The icon strokes in the button's text color; a pressed toggle shows by its Highlight border. */
   .enarratio-controls > button[aria-pressed="true"] { border: 2px solid Highlight; }
   .enarratio svg, svg.enarratio { forced-color-adjust: none; }
   .enarratio svg, svg.enarratio, .enarratio-legend, .enarratio-tooltip {
@@ -301,8 +275,6 @@ ${LINE_DASHES.map(
     `  .enarratio-legend[data-enarratio-legend="line"] [data-slot="${i + 2}"] .enarratio-swatch { background: ${dashGradient(dash)}; }`,
 ).join("\n")}
 }
-/* Print: the light scheme, the whole drawing on one page, and no toolbar or interactive overlays
-   (C5). */
 @media print {
   .enarratio, .enarratio-tooltip { color-scheme: light; }
   .enarratio[data-enarratio] .enarratio-texture { stroke-opacity: var(--enarratio-opacity-texture, 0.6); }

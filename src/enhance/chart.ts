@@ -1,104 +1,57 @@
 /** One enhanced chart: tooltips, keyboard navigation, filters, the range brush and updates. */
 
-import { measure, onResize } from "./batch.js";
-import {
-  button,
-  downloadMenu,
-  expander,
-  fill,
-  popover,
-  sortTable,
-  toolbar,
-  toolButton,
-} from "./controls.js";
-import { exportButtons } from "./export.js";
-import {
-  center,
-  invert,
-  label,
-  MARK,
-  parseScale,
-  place,
-  project,
-  readingOrder,
-  SVG_NS,
-  svgPoint,
-  type XScale,
-} from "./marks.js";
+import { measure } from "./batch.js";
+import { fill, sortTable } from "./controls.js";
+import { MARK, parseScale, readingOrder } from "./marks.js";
 import { animateFrom, DURATION, geometry, reducedMotion } from "./motion.js";
-import { crosshair, fillCard, type Picked, Picker } from "./pointer.js";
+import { Picker, type Picked } from "./pointer.js";
 import { sanitize } from "./sanitize.js";
 import { drawHits, measureHits } from "./targets.js";
-import type { BrushDetail, EnhancedChart, ResolvedOptions, SelectDetail } from "./types.js";
+import type { EnhancedChart, ResolvedOptions, SelectDetail } from "./types.js";
 import { parseMarkup } from "../parse.js";
-
-/** How far a pointer moves, in SVG units, before a press becomes a drag (the brush). */
-const DRAG_THRESHOLD = 3;
-/** How long the entrance attribute stays on: longer than the slowest default animation (800ms). */
-const ENTRANCE_MS = 1000;
-/** How much of a chart must be on screen before it animates in. */
-const ENTRANCE_VISIBLE = 0.25;
-/** How long the tooltip waits for the pointer to reach it before hiding (WCAG 1.4.13). */
-const HIDE_DELAY_MS = 300;
-/** The tooltip's gap from its mark and from the viewport edge, in CSS pixels. */
-const TIP_GAP = 8;
-/** How many points Page Up and Page Down jump. */
-const PAGE = 10;
-
-/** Numbers each hint, so its points can point at it with aria-describedby. */
-let hints = 0;
-
-const isTime = (scale: XScale | null): boolean => scale?.type === "utc" || scale?.type === "time";
-
-/** The series a mark belongs to: its series, or its row on charts without series (a heatmap). */
-const seriesOf = (mark: Element): string =>
-  mark.getAttribute("data-enarratio-series") ?? `\u0000${place(mark).row}`;
+import { attachBrush, emitBrush, setRange, showRange } from "./brush.js";
+import { attachPoints, moveFocus, successor } from "./points.js";
+import { hideTip, scheduleHide, showTip } from "./tip.js";
+import { attachControls } from "./bar.js";
+import { attachEntrance, attachLegend, attachPointer, attachSpotlight } from "./view.js";
 
 export class Chart implements EnhancedChart {
   readonly figure: HTMLElement;
   readonly options: ResolvedOptions;
-  private readonly cleanup: (() => void)[] = [];
-  private tooltip: HTMLElement | null = null;
-  private live: HTMLElement | null = null;
-  private marks: SVGGraphicsElement[] = [];
+  readonly cleanup: (() => void)[] = [];
+  tooltip: HTMLElement | null = null;
+  live: HTMLElement | null = null;
+  marks: SVGGraphicsElement[] = [];
   /** One native control per mark, in the same order: what keyboards and screen readers use. */
-  private points: HTMLElement[] = [];
-  /** Each mark's label, read before its title was taken off. */
-  private texts = new Map<Element, string>();
+  points: HTMLElement[] = [];
+  texts = new Map<Element, string>();
   /** Titles taken off the marks, and where they were, for destroy() to put back. */
-  private titles: [Element, Element][] = [];
+  titles: [Element, Element][] = [];
   /** For each mark, the indexes of the marks in its series, in reading order. */
-  private series: number[][] = [];
-  /** The series' index lists, in row order, for moving between series. */
-  private seriesOrder: number[][] = [];
-  private focusIndex = 0;
+  series: number[][] = [];
+  seriesOrder: number[][] = [];
+  focusIndex = 0;
   /** The point focused before the last move, which Backspace returns to. */
-  private lastIndex: number | null = null;
-  private anchorIndex: number | null = null;
-  private selected: { field: string; value: string } | null = null;
-  private range: [number, number] | null = null;
-  private brushRect: SVGRectElement | null = null;
-  private rangeInputs: HTMLInputElement[] = [];
-  private expandButton: HTMLButtonElement | null = null;
-  /** Stops the sound playing, when it is. */
-  private stopSound: (() => void) | null = null;
-  /** Places the points over the marks again, after the drawing moved or resized. */
-  private layout: () => void = () => {};
+  lastIndex: number | null = null;
+  anchorIndex: number | null = null;
+  selected: { field: string; value: string } | null = null;
+  range: [number, number] | null = null;
+  brushRect: SVGRectElement | null = null;
+  rangeInputs: HTMLInputElement[] = [];
+  expandButton: HTMLButtonElement | null = null;
+  stopSound: (() => void) | null = null;
+  layout: () => void = () => {};
   /** Counts teardowns, so a batched read queued before one is dropped (batch.ts). */
-  private runs = 0;
+  runs = 0;
   /** A wide frame whose tab stop attach() removed, given back by destroy(). */
-  private untabbedFrame: HTMLElement | null = null;
-  private hideTimer: ReturnType<typeof setTimeout> | undefined;
-  /** The first end of a range picked by clicking twice. */
-  private rangeStart: number | null = null;
-  /** Finds the column or mark nearest a pointer. */
-  private picker: Picker | null = null;
-  /** Moves the crosshair of a line or area chart, or hides it. */
-  private cross: ((picked: Picked | null) => void) | null = null;
-  /** The kind of pointer that last pressed on the drawing. */
-  private pointerType = "mouse";
+  untabbedFrame: HTMLElement | null = null;
+  hideTimer: ReturnType<typeof setTimeout> | undefined;
+  rangeStart: number | null = null;
+  picker: Picker | null = null;
+  cross: ((picked: Picked | null) => void) | null = null;
+  pointerType = "mouse";
   /** Where the pointer is across the page, so a column's card never sits under it; null by key. */
-  private pointerX: number | null = null;
+  pointerX: number | null = null;
 
   constructor(figure: HTMLElement, options: ResolvedOptions) {
     this.figure = figure;
@@ -109,20 +62,20 @@ export class Chart implements EnhancedChart {
   }
 
   /** The drawing, not an SVG inside the table (a table chart's sparklines and cell bars). */
-  private get svg(): SVGSVGElement | null {
+  get svg(): SVGSVGElement | null {
     return this.figure.querySelector(":scope > .enarratio-frame > svg");
   }
 
-  private get chartId(): string | null {
+  get chartId(): string | null {
     return this.figure.id || null;
   }
 
-  private get strings(): ResolvedOptions["strings"] {
+  get strings(): ResolvedOptions["strings"] {
     return this.options.strings;
   }
 
   /** A layout read and its write, batched with every other chart's and dropped after a teardown. */
-  private later<T>(read: () => T, write: (value: T) => void): void {
+  later<T>(read: () => T, write: (value: T) => void): void {
     const run = this.runs;
     measure(
       () => (run === this.runs ? read() : undefined),
@@ -132,12 +85,12 @@ export class Chart implements EnhancedChart {
     );
   }
 
-  private listen(target: EventTarget, type: string, handler: (event: Event) => void): void {
+  listen(target: EventTarget, type: string, handler: (event: Event) => void): void {
     target.addEventListener(type, handler);
     this.cleanup.push(() => target.removeEventListener(type, handler));
   }
 
-  private attach(): void {
+  attach(): void {
     const svg = this.svg;
     this.figure.setAttribute("data-enarratio-enhanced", "");
     if (this.options.filter) this.figure.setAttribute("data-enarratio-interactive", "");
@@ -151,7 +104,7 @@ export class Chart implements EnhancedChart {
     // A primitive has no points: it gets its toolbar, so its drawing downloads as any chart's does, and nothing else.
     if (this.figure.hasAttribute("data-enarratio-static")) {
       this.figure.removeAttribute("data-enarratio-interactive");
-      this.attachControls();
+      attachControls(this);
       return;
     }
     // A figure that is only a table (tableChart) gets its sortable headers and nothing else.
@@ -163,7 +116,7 @@ export class Chart implements EnhancedChart {
 
     this.marks = readingOrder([...svg.querySelectorAll<SVGGraphicsElement>(MARK)]);
     const frame = this.figure.querySelector<HTMLElement>(":scope > .enarratio-frame");
-    if (this.marks.length > 0) this.attachPoints(svg, frame);
+    if (this.marks.length > 0) attachPoints(this, svg, frame);
 
     if (this.options.tooltips) {
       const tip = document.createElement("div");
@@ -175,9 +128,9 @@ export class Chart implements EnhancedChart {
       // The pointer can move onto the tooltip without it vanishing, and Escape dismisses it
       // wherever focus is (WCAG 1.4.13).
       this.listen(tip, "pointerenter", () => clearTimeout(this.hideTimer));
-      this.listen(tip, "pointerleave", () => this.hideTip());
+      this.listen(tip, "pointerleave", () => hideTip(this));
       this.listen(document, "keydown", (e) => {
-        if ((e as KeyboardEvent).key === "Escape") this.hideTip();
+        if ((e as KeyboardEvent).key === "Escape") hideTip(this);
       });
     }
 
@@ -202,518 +155,20 @@ export class Chart implements EnhancedChart {
       },
     );
 
-    if (marks.length > 0) this.attachPointer(svg);
-    if (this.options.filter) this.attachLegend();
-    this.attachSpotlight();
-    if (this.options.brush && parseScale(this.figure)) this.attachBrush(svg);
-    this.attachControls();
-    if (this.options.entrance) this.attachEntrance();
+    if (marks.length > 0) attachPointer(this, svg);
+    if (this.options.filter) attachLegend(this);
+    attachSpotlight(this);
+    if (this.options.brush && parseScale(this.figure)) attachBrush(this, svg);
+    attachControls(this);
+    if (this.options.entrance) attachEntrance(this);
   }
 
-  /**
-   * Lays a native control over each mark: a button when it filters, else a named image. They take
-   * no pointer events, so pointers keep using the marks; keyboards and screen readers use the
-   * controls. They sit in an application, so screen readers switch to focus mode only once a point
-   * has focus; in browse mode the chart reads as its image, hint and table.
-   */
-  private attachPoints(svg: SVGSVGElement, frame: HTMLElement | null): void {
-    const s = this.strings;
-
-    const lists = new Map<string, number[]>();
-    this.marks.forEach((mark, i) => {
-      const key = seriesOf(mark);
-      lists.set(key, [...(lists.get(key) ?? []), i]);
-    });
-    this.series = this.marks.map((mark) => lists.get(seriesOf(mark)) ?? []);
-    this.seriesOrder = [...lists.values()].sort(
-      (a, b) => this.rowOf(a[0] ?? 0) - this.rowOf(b[0] ?? 0),
-    );
-
-    const layer = document.createElement("div");
-    layer.className = "enarratio-points";
-    layer.setAttribute("role", "application");
-    layer.setAttribute(
-      "aria-label",
-      this.figure.querySelector(".enarratio-title")?.textContent || s.chart,
-    );
-    const hint = document.createElement("p");
-    hint.id = `enarratio-hint-${++hints}`;
-    hint.className = "enarratio-hint";
-    hint.textContent = [
-      s.hint,
-      this.options.filter ? s.hintFilter : "",
-      this.options.brush && parseScale(this.figure) ? s.hintRange : "",
-    ]
-      .filter(Boolean)
-      .join(" ");
-    layer.setAttribute("aria-describedby", hint.id);
-    (frame ?? svg).after(hint);
-
-    this.marks.forEach((mark, i) => {
-      const text = label(mark);
-      this.texts.set(mark, text);
-      const title = mark.querySelector("title");
-      if (title?.parentElement) {
-        this.titles.push([title, title.parentElement]);
-        title.remove();
-      }
-      // A linked bar that filters stays a filter button (the page can follow data-enarratio-href
-      // on enarratio:select); one that does not is its link, outside the SVG.
-      const href = mark.getAttribute("data-enarratio-href");
-      const filterable = this.filters(mark);
-      let point: HTMLElement;
-      if (filterable) {
-        point = button("", () => this.toggleMark(mark));
-        point.setAttribute("aria-pressed", "false");
-      } else if (href !== null) {
-        point = document.createElement("a");
-        point.setAttribute("href", href);
-      } else {
-        point = document.createElement("span");
-        point.setAttribute("role", "img");
-      }
-      const list = this.series[i] ?? [];
-      point.setAttribute(
-        "aria-label",
-        `${text}, ${fill(s.position, { index: list.indexOf(i) + 1, count: list.length })}`,
-      );
-      point.tabIndex = i === 0 ? 0 : -1;
-      this.listen(point, "focus", () => {
-        this.moveFocus(i, false);
-        this.hover(mark);
-      });
-      this.listen(point, "blur", () => this.hover(null));
-      layer.append(point);
-    });
-    this.points = [...layer.children] as HTMLElement[];
-    (frame ?? this.figure).append(layer);
-    this.listen(layer, "keydown", (e) => this.onKey(e as KeyboardEvent));
-
-    // A focused point scrolls the frame into view itself, so the frame's own tab stop would
-    // be a second, empty stop before the data.
-    if (frame?.getAttribute("tabindex") === "0") {
-      frame.removeAttribute("tabindex");
-      this.untabbedFrame = frame;
-    }
-
-    // Every box is read before any style is written, and beside every other chart's (batch.ts),
-    // so the page is laid out once, not once per mark or per chart.
-    const read = () => {
-      const parent = layer.parentElement;
-      if (!parent) return null;
-      return {
-        x: parent.clientLeft - parent.scrollLeft,
-        y: parent.clientTop - parent.scrollTop,
-        base: parent.getBoundingClientRect(),
-        box: svg.getBoundingClientRect(),
-        rects: this.marks.map((mark) => mark.getBoundingClientRect()),
-      };
-    };
-    const write = (boxes: ReturnType<typeof read>): void => {
-      if (!boxes) return;
-      const { x, y, base, box, rects } = boxes;
-      const place = (el: HTMLElement, r: DOMRect, x: number, y: number): void => {
-        el.style.left = `${r.left - x}px`;
-        el.style.top = `${r.top - y}px`;
-        el.style.width = `${r.width}px`;
-        el.style.height = `${r.height}px`;
-      };
-      place(layer, box, base.left + x, base.top + y);
-      rects.forEach((rect, i) => {
-        const point = this.points[i];
-        if (point) place(point, rect, box.left, box.top);
-      });
-    };
-    this.layout = () => {
-      this.picker?.reset();
-      this.later(read, write);
-    };
-    // Also when a chart enhanced while hidden is shown, and when the window resizes.
-    if (typeof ResizeObserver === "function") {
-      this.cleanup.push(onResize(svg, () => this.layout()));
-    } else {
-      this.layout();
-    }
-    this.cleanup.push(() => {
-      layer.remove();
-      hint.remove();
-    });
-  }
-
-  /** Whether a click on the mark filters by its value. */
-  private filters(mark: Element): boolean {
+  filters(mark: Element): boolean {
     return this.options.filter && mark.hasAttribute("data-enarratio-field");
   }
 
-  private rowOf(index: number): number {
-    const mark = this.marks[index];
-    return mark ? place(mark).row : 0;
-  }
-
-  /**
-   * The whole drawing answers a pointer: moving over it picks the nearest column of a bar, line or
-   * area chart, or the nearest mark within reach on others. A finger dragging across scrubs the
-   * same way (the drawing pans only vertically), and a tap shows what is under it.
-   */
-  private attachPointer(svg: SVGSVGElement): void {
-    const picker = new Picker(this.figure, this.marks);
-    this.picker = picker;
-    const kind = this.figure.getAttribute("data-enarratio");
-    if (picker.byColumn && (kind === "line" || kind === "area")) {
-      this.cross = crosshair(svg, picker, this.marks);
-      this.cleanup.push(() => svg.querySelector(".enarratio-crosshair")?.remove());
-    }
-    const at = (event: PointerEvent): void => {
-      this.pointerX = event.clientX;
-      const p = svgPoint(svg, event);
-      const scale = svg.getScreenCTM()?.a ?? 1;
-      this.show(picker.pick(p.x, p.y, scale));
-    };
-    this.listen(svg, "pointermove", (e) => {
-      const event = e as PointerEvent;
-      // A touch moves the view only once pressed; a mouse hovers, and a mouse dragging picks a
-      // range, which the card would cover.
-      if (event.pointerType !== "mouse" && event.buttons === 0) return;
-      if (event.pointerType === "mouse" && event.buttons !== 0) {
-        this.show(null);
-        return;
-      }
-      at(event);
-    });
-    this.listen(svg, "pointerdown", (e) => {
-      const event = e as PointerEvent;
-      this.pointerType = event.pointerType;
-      if (event.pointerType !== "mouse") at(event);
-    });
-    this.listen(svg, "pointerleave", (e) => {
-      if ((e as PointerEvent).pointerType === "mouse") this.show(null);
-    });
-    this.listen(document, "pointerdown", (e) => {
-      if (!this.figure.contains(e.target as Node)) this.show(null);
-    });
-  }
-
-  /** Legend entries spotlight their series while pointed at or focused: everything else fades. A click still filters, where the chart filters. */
-  private attachSpotlight(): void {
-    for (const item of this.figure.querySelectorAll<HTMLElement>(
-      ".enarratio-legend li[data-slot]",
-    )) {
-      const slot = item.getAttribute("data-slot") ?? "";
-      const on = (): void => {
-        if (!this.selected) this.figure.setAttribute("data-enarratio-spotlight", slot);
-      };
-      const off = (): void => this.figure.removeAttribute("data-enarratio-spotlight");
-      this.listen(item, "pointerenter", on);
-      this.listen(item, "pointerleave", off);
-      this.listen(item, "focusin", on);
-      this.listen(item, "focusout", off);
-      this.cleanup.push(off);
-    }
-  }
-
-  /**
-   * The toolbar above the drawing: Sound, Range, Expand when asked for, and the Download menu. It
-   * takes the place of the one the server wrote (figure.ts) and the figure's "Download CSV" link;
-   * destroy() puts both back.
-   */
-  private attachControls(): void {
-    const s = this.strings;
-    const listen = (t: EventTarget, type: string, h: (event: Event) => void): void =>
-      this.listen(t, type, h);
-    if (this.options.table) this.cleanup.push(sortTable(this.figure, s, (m) => this.announce(m)));
-    const bar = document.createElement("div");
-    bar.className = "enarratio-controls";
-    if (this.options.sound && this.marks.length > 1 && "AudioContext" in window) {
-      bar.append(this.playButton());
-    }
-    const scale = parseScale(this.figure);
-    if (this.brushRect && scale) bar.append(this.rangeForm(scale));
-    // A primitive is small and has no points to read up close, so it is never expanded.
-    if (this.options.expand && !this.figure.hasAttribute("data-enarratio-static")) {
-      this.expandButton = expander(this.figure, s, listen);
-      bar.append(this.expandButton);
-    }
-    const csv = this.figure.querySelector<HTMLAnchorElement>(".enarratio-csv");
-    const svg = this.svg;
-    const files = svg
-      ? exportButtons(this.figure, svg, this.options, s, (m) => this.announce(m))
-      : [];
-    const home = csv?.parentNode ? ([csv.parentNode, csv.nextSibling] as const) : null;
-    if (csv || files.length > 0)
-      bar.append(downloadMenu([...(csv ? [csv] : []), ...files], s, listen));
-    const server = this.figure.querySelector<HTMLElement>(":scope > .enarratio-controls");
-    if (bar.childElementCount === 0) {
-      server?.remove();
-      if (server)
-        this.cleanup.push(() =>
-          this.figure
-            .querySelector(":scope > .enarratio-legend, :scope > .enarratio-frame")
-            ?.before(server),
-        );
-      return;
-    }
-    toolbar(bar, s, listen);
-    if (server) server.replaceWith(bar);
-    else {
-      const next = this.figure.querySelector(
-        ":scope > .enarratio-legend, :scope > .enarratio-frame",
-      );
-      if (next) next.before(bar);
-      else this.figure.append(bar);
-    }
-    this.cleanup.push(() => {
-      if (server) bar.replaceWith(server);
-      else bar.remove();
-      if (csv && home) home[0].insertBefore(csv, home[1]);
-    });
-  }
-
-  /** Play: sounds each series in turn, pitch rising with the value, while the tooltip follows. Pressing again, or Escape, stops it. */
-  private playButton(): HTMLButtonElement {
-    const s = this.strings;
-    // The name stays "Sound"; aria-pressed says it is playing (WAI-ARIA APG, toggle button).
-    const set = (stop: (() => void) | null): void => {
-      this.stopSound?.();
-      this.stopSound = stop;
-      toggle.setAttribute("aria-pressed", String(stop !== null));
-      if (!stop) this.hover(null);
-    };
-    const onPlay = async (): Promise<void> => {
-      if (this.stopSound) return set(null);
-      const run = this.runs;
-      const { play } = await import("./sound.js");
-      if (run !== this.runs) return;
-      set(
-        play(
-          this.figure,
-          this.seriesOrder.map((list) => list.flatMap((i) => this.marks[i] ?? [])),
-          (name) => this.announce(fill(s.playing, { series: name })),
-          (mark) => this.hover(mark),
-          () => {
-            this.stopSound = null;
-            set(null);
-          },
-        ),
-      );
-    };
-    const toggle = toolButton("sound", s.sound, () => void onPlay());
-    toggle.setAttribute("aria-pressed", "false");
-    // Anywhere on the page, so a reader can always stop the sound (WCAG 1.4.2).
-    this.listen(document, "keydown", (e) => {
-      if ((e as KeyboardEvent).key === "Escape" && this.stopSound) set(null);
-    });
-    this.cleanup.push(() => set(null));
-    return toggle;
-  }
-
-  /** The range as a form: from and to, in data units, for readers who cannot drag. */
-  private rangeForm(scale: XScale): HTMLElement {
-    const s = this.strings;
-    const time = isTime(scale);
-    const form = document.createElement("form");
-    const [d0, d1] = scale.domain as [number, number];
-    this.rangeInputs = [s.from, s.to].map((text) => {
-      const field = document.createElement("label");
-      const input = document.createElement("input");
-      input.type = time ? "date" : "number";
-      if (!time) input.step = "any";
-      // Both ends are needed: the browser names a blank field and focuses it, where a silent
-      // return left the reader with no sign the form did nothing (WCAG 2.2 SC 3.3.1).
-      input.required = true;
-      input.min = this.format(Math.min(d0, d1));
-      input.max = this.format(Math.max(d0, d1));
-      field.append(`${text} `, input);
-      form.append(field);
-      return input;
-    });
-    const apply = document.createElement("button");
-    apply.textContent = s.apply;
-    form.append(
-      apply,
-      button(s.clear, () => {
-        if (this.range) this.emitBrush(null);
-      }),
-    );
-    this.listen(form, "submit", (e) => {
-      e.preventDefault();
-      const clamp = (n: number): number =>
-        Math.min(Math.max(n, Math.min(d0, d1)), Math.max(d0, d1));
-      const [a, b] = this.rangeInputs.map((input) =>
-        input.value === ""
-          ? Number.NaN
-          : clamp(time ? Date.parse(input.value) : Number(input.value)),
-      ) as [number, number];
-      if (!Number.isFinite(a) || !Number.isFinite(b)) return;
-      this.drawBrush(project(scale, a), project(scale, b));
-      this.emitBrush([Math.min(a, b), Math.max(a, b)]);
-    });
-    return popover("enarratio-range", "range", s.range, form, (t, type, h) =>
-      this.listen(t, type, h),
-    );
-  }
-
-  private format(n: number): string {
-    return isTime(parseScale(this.figure))
-      ? new Date(n).toISOString().slice(0, 10)
-      : String(Math.round(n * 1000) / 1000);
-  }
-
-  private attachLegend(): void {
-    const field = this.figure.getAttribute("data-enarratio-series-field");
-    if (!field) return;
-    for (const item of this.figure.querySelectorAll<HTMLElement>(".enarratio-legend li")) {
-      const value = item.getAttribute("data-enarratio-series") ?? "";
-      const toggle = button("", () => this.toggle(field, value));
-      toggle.setAttribute("aria-pressed", "false");
-      toggle.append(...item.childNodes);
-      item.append(toggle);
-      this.cleanup.push(() => item.replaceChildren(...toggle.childNodes));
-    }
-  }
-
-  private attachBrush(svg: SVGSVGElement): void {
-    const scale = parseScale(this.figure);
-    if (!scale) return;
-    const [r0, r1] = scale.range as [number, number];
-    const view = svg.viewBox.baseVal;
-    let start: number | null = null;
-    const rect = document.createElementNS(SVG_NS, "rect");
-    rect.setAttribute("class", "enarratio-brush");
-    rect.setAttribute("y", "0");
-    rect.setAttribute("height", String(view.height || svg.height.baseVal.value));
-    rect.setAttribute("aria-hidden", "true");
-    rect.style.display = "none";
-    svg.prepend(rect);
-    this.brushRect = rect;
-    this.cleanup.push(() => rect.remove());
-
-    const clampX = (x: number): number => Math.min(Math.max(x, Math.min(r0, r1)), Math.max(r0, r1));
-    let dragging = false;
-    let dragged = false;
-    this.listen(svg, "pointerdown", (e) => {
-      const event = e as PointerEvent;
-      // A finger dragging scrubs instead (attachPointer); a range is the Range form's then.
-      if (event.button !== 0 || event.pointerType === "touch") return;
-      start = clampX(svgPoint(svg, event).x);
-      dragging = false;
-    });
-    this.listen(svg, "pointermove", (e) => {
-      const event = e as PointerEvent;
-      if (start === null) return;
-      const x = clampX(svgPoint(svg, event).x);
-      if (!dragging) {
-        if (Math.abs(x - start) < DRAG_THRESHOLD) return;
-        // Capture only once this is a drag: capturing on pointerdown sent every click to the SVG
-        // instead of the mark under the pointer.
-        dragging = true;
-        svg.setPointerCapture(event.pointerId);
-      }
-      this.drawBrush(start, x);
-    });
-    this.listen(svg, "pointerup", (e) => {
-      if (start === null) return;
-      const from = start;
-      start = null;
-      if (!dragging) return; // A click: the mark under the pointer, or the plot, handles it.
-      dragging = false;
-      dragged = true;
-      const end = clampX(svgPoint(svg, e as PointerEvent).x);
-      this.drawBrush(from, end);
-      this.emitBrush([invert(scale, Math.min(from, end)), invert(scale, Math.max(from, end))]);
-    });
-    // A range without dragging (WCAG 2.2 SC 2.5.7): click the plot once for one end and again
-    // for the other. Clicks on marks filter instead.
-    this.listen(svg, "click", (e) => {
-      const event = e as MouseEvent;
-      if (dragged) {
-        dragged = false;
-        return;
-      }
-      const target = event.target as Element | null;
-      if (target?.closest(`${MARK}, .enarratio-hit`)) return;
-      // A tap reads the column under it (attachPointer) rather than starting a range.
-      if (this.pointerType === "touch") return;
-      const x = svgPoint(svg, event).x;
-      if (x < Math.min(r0, r1) || x > Math.max(r0, r1)) return;
-      if (this.rangeStart === null) {
-        this.rangeStart = x;
-        this.drawBrush(x, x + 1);
-        this.announce(this.strings.rangeStart);
-        return;
-      }
-      const from = this.rangeStart;
-      this.rangeStart = null;
-      this.drawBrush(from, x);
-      this.emitBrush([invert(scale, Math.min(from, x)), invert(scale, Math.max(from, x))]);
-    });
-  }
-
-  private drawBrush(a: number, b: number): void {
-    if (!this.brushRect) return;
-    this.brushRect.style.display = "";
-    this.brushRect.setAttribute("x", String(Math.min(a, b)));
-    this.brushRect.setAttribute("width", String(Math.abs(b - a)));
-  }
-
-  /** Records a range (or none), shows it in the form and the address, and reports it. */
-  private setRange(range: [number, number] | null): void {
-    this.range = range;
-    if (!range && this.brushRect) this.brushRect.style.display = "none";
-    this.rangeInputs.forEach((input, i) => {
-      input.value = range ? this.format(range[i] ?? 0) : "";
-    });
-    this.syncUrl();
-  }
-
-  private emitBrush(range: [number, number] | null): void {
-    this.setRange(range);
-    const s = this.strings;
-    this.announce(
-      range
-        ? fill(s.rangeSelected, { from: this.format(range[0]), to: this.format(range[1]) })
-        : s.rangeCleared,
-    );
-    this.figure.dispatchEvent(
-      new CustomEvent<BrushDetail>("enarratio:brush", {
-        bubbles: true,
-        detail: { chartId: this.chartId, range, time: isTime(parseScale(this.figure)) },
-      }),
-    );
-  }
-
-  private attachEntrance(): void {
-    if (reducedMotion() || typeof IntersectionObserver !== "function") return;
-    const svg = this.svg;
-    if (!svg) return;
-    // Measured before any is written, beside every other chart's, so the lines cost one layout.
-    const paths = [...svg.querySelectorAll<SVGPathElement>('[data-enarratio-mark="line"] > path')];
-    this.later(
-      () => paths.map((path) => Math.ceil(path.getTotalLength())),
-      (lengths) => {
-        paths.forEach((path, i) => {
-          path.style.setProperty("--enarratio-length", String(lengths[i]));
-        });
-      },
-    );
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        observer.disconnect();
-        this.figure.setAttribute("data-enarratio-entering", "");
-        const done = setTimeout(() => {
-          this.figure.removeAttribute("data-enarratio-entering");
-          this.layout();
-        }, ENTRANCE_MS);
-        this.cleanup.push(() => clearTimeout(done));
-      },
-      { threshold: ENTRANCE_VISIBLE },
-    );
-    observer.observe(this.figure);
-    this.cleanup.push(() => observer.disconnect());
-  }
-
   /** A mark with focus, or one the sound is playing: shows its column as a pointer over it would. Null when it leaves. */
-  private hover(mark: SVGGraphicsElement | null): void {
+  hover(mark: SVGGraphicsElement | null): void {
     this.pointerX = null;
     const index = mark ? this.marks.indexOf(mark) : -1;
     const picked =
@@ -725,7 +180,7 @@ export class Chart implements EnhancedChart {
    * Shows what was picked: one tooltip card; on bars the other columns fade, on lines and areas
    * the crosshair moves to it, on other charts the other series fade, while no filter is on.
    */
-  private show(picked: Picked | null): void {
+  show(picked: Picked | null): void {
     const chosen = new Set(picked?.indexes ?? []);
     const series =
       picked && !picked.column
@@ -742,175 +197,27 @@ export class Chart implements EnhancedChart {
       m.toggleAttribute("data-enarratio-faded", fade);
     });
     this.cross?.(picked);
-    if (picked) this.showTip(picked.indexes.flatMap((i) => this.marks[i] ?? []));
-    else this.scheduleHide();
+    if (picked)
+      showTip(
+        this,
+        picked.indexes.flatMap((i) => this.marks[i] ?? []),
+      );
+    else scheduleHide(this);
   }
 
-  private showTip(marks: readonly SVGGraphicsElement[]): void {
-    const tip = this.tooltip;
-    if (!tip || marks.length === 0) return;
-    clearTimeout(this.hideTimer);
-    fillCard(tip, this.figure, marks, this.texts);
-    tip.hidden = false;
-    const boxes = marks.map((m) => m.getBoundingClientRect());
-    const box = {
-      left: Math.min(...boxes.map((b) => b.left)),
-      right: Math.max(...boxes.map((b) => b.right)),
-      top: Math.min(...boxes.map((b) => b.top)),
-      bottom: Math.max(...boxes.map((b) => b.bottom)),
-    };
-    const tipBox = tip.getBoundingClientRect();
-    const page = document.documentElement.clientWidth;
-    let left: number;
-    let top: number;
-    if (marks.length > 1) {
-      // A column: beside it and past the pointer, right where it fits, else left, so the card never covers what is read.
-      const px = this.pointerX;
-      left = Math.max(box.right, px ?? box.right) + TIP_GAP;
-      if (left + tipBox.width > page - TIP_GAP) {
-        left = Math.min(box.left, px ?? box.left) - tipBox.width - TIP_GAP;
-      }
-      top = Math.max(TIP_GAP, box.top);
-    } else {
-      left = box.left + (box.right - box.left) / 2 - tipBox.width / 2;
-      const above = box.top - tipBox.height - TIP_GAP;
-      top = above > 0 ? above : box.bottom + TIP_GAP;
-    }
-    left = Math.min(Math.max(TIP_GAP, left), page - tipBox.width - TIP_GAP);
-    tip.style.left = `${left + scrollX}px`;
-    tip.style.top = `${top + scrollY}px`;
-  }
-
-  private hideTip(): void {
-    clearTimeout(this.hideTimer);
-    if (this.tooltip) this.tooltip.hidden = true;
-  }
-
-  /** Hides the tooltip shortly, unless the pointer reaches it first. */
-  private scheduleHide(): void {
-    clearTimeout(this.hideTimer);
-    this.hideTimer = setTimeout(() => this.hideTip(), HIDE_DELAY_MS);
-  }
-
-  /** The keys. Modified keys and keys the chart does not use pass through, so screen reader and browser shortcuts keep working. */
-  private onKey(event: KeyboardEvent): void {
-    if (event.altKey || event.ctrlKey || event.metaKey || this.marks.length === 0) return;
-    const here = this.focusIndex;
-    const list = this.series[here] ?? [here];
-    const at = list.indexOf(here);
-    let next: number | null | undefined;
-    switch (event.key) {
-      case "ArrowRight":
-      case "ArrowLeft":
-        next = list[at + (event.key === "ArrowRight" ? 1 : -1)];
-        break;
-      case "PageDown":
-      case "PageUp":
-        next =
-          list[
-            Math.min(Math.max(at + (event.key === "PageDown" ? PAGE : -PAGE), 0), list.length - 1)
-          ];
-        break;
-      case "Home":
-        next = list[0];
-        break;
-      case "End":
-        next = list[list.length - 1];
-        break;
-      case "ArrowUp":
-      case "ArrowDown":
-        next = this.across(event.key === "ArrowUp" ? 1 : -1);
-        break;
-      case "Backspace":
-        next = this.lastIndex;
-        break;
-      case "Escape":
-        // Dismisses the tooltip (WCAG 1.4.13) and clears the filter and range. When there
-        // was nothing to clear, Escape goes on to close an expanded view.
-        this.hideTip();
-        if (this.selected || this.range || this.rangeStart !== null) {
-          this.clearAll(true);
-          event.preventDefault();
-        }
-        return;
-      default:
-        return;
-    }
-    event.preventDefault();
-    next ??= here;
-    if (event.shiftKey && this.brushRect && event.key !== "Backspace") {
-      this.anchorIndex ??= here;
-    } else {
-      this.anchorIndex = null;
-    }
-    this.moveFocus(next);
-    if (this.anchorIndex !== null) this.brushBetween(this.anchorIndex, next);
-  }
-
-  private columnOf(index: number): number | null {
-    const mark = this.marks[index];
-    return mark ? place(mark).column : null;
-  }
-
-  /** Up and down: the mark above or below in the same category; where the category holds only this point, the nearest point of the next series. */
-  private across(step: 1 | -1): number {
-    const here = this.focusIndex;
-    const column = this.columnOf(here);
-    if (this.columnOf(here + step) === column) return here + step;
-    if (this.columnOf(here - step) === column) return here;
-    const order = this.seriesOrder;
-    const target = order[order.indexOf(this.series[here] ?? []) + step];
-    if (!target || column === null) return here;
-    const distance = (i: number): number => Math.abs((this.columnOf(i) ?? 0) - column);
-    return target.reduce((best, i) => (distance(i) < distance(best) ? i : best));
-  }
-
-  private moveFocus(index: number, focus = true): void {
-    const to = this.points[index];
-    if (!to) return;
-    if (index !== this.focusIndex) {
-      this.lastIndex = this.focusIndex;
-      this.points[this.focusIndex]?.setAttribute("tabindex", "-1");
-    }
-    to.tabIndex = 0;
-    this.focusIndex = index;
-    if (focus) to.focus();
-  }
-
-  /** The mark to carry the tab stop after an update: the same key, else the first in its category, else the nearest in reading order. */
-  private successor(key: string, x: string | null, index: number): number {
-    const same = this.marks.findIndex((m) => m.getAttribute("data-enarratio-key") === key);
-    if (same !== -1) return same;
-    const column =
-      x === null ? -1 : this.marks.findIndex((m) => m.getAttribute("data-enarratio-x") === x);
-    if (column !== -1) return column;
-    return Math.min(index, this.marks.length - 1);
-  }
-
-  private brushBetween(a: number, b: number): void {
-    const scale = parseScale(this.figure);
-    const ma = this.marks[a];
-    const mb = this.marks[b];
-    if (!scale || !ma || !mb) return;
-    const xa = center(ma).x;
-    const xb = center(mb).x;
-    this.drawBrush(xa, xb);
-    this.emitBrush([invert(scale, Math.min(xa, xb)), invert(scale, Math.max(xa, xb))]);
-  }
-
-  private toggleMark(mark: Element): void {
+  toggleMark(mark: Element): void {
     const field = mark.getAttribute("data-enarratio-field");
     const value = mark.getAttribute("data-enarratio-value");
     if (field === null || value === null) return;
     this.toggle(field, value, mark.getAttribute("data-enarratio-x") ?? undefined);
   }
 
-  private toggle(field: string, value: string, x?: string): void {
+  toggle(field: string, value: string, x?: string): void {
     const same = this.selected?.field === field && this.selected.value === value;
     this.select(same ? null : { field, value }, true, x);
   }
 
-  private select(next: { field: string; value: string } | null, notify: boolean, x?: string): void {
+  select(next: { field: string; value: string } | null, notify: boolean, x?: string): void {
     const previous = this.selected;
     this.selected = next;
     const seriesField = this.figure.getAttribute("data-enarratio-series-field");
@@ -954,14 +261,14 @@ export class Chart implements EnhancedChart {
     );
   }
 
-  private announce(message: string): void {
+  announce(message: string): void {
     // The same message twice is still news: a changed space makes the region speak again.
     if (this.live)
       this.live.textContent = this.live.textContent === message ? `${message} ` : message;
   }
 
   /** Writes the filter and range into the address, when the page asked for it. */
-  private syncUrl(): void {
+  syncUrl(): void {
     const id = this.chartId;
     if (!this.options.url || !id) return;
     const url = new URL(location.href);
@@ -975,7 +282,7 @@ export class Chart implements EnhancedChart {
   }
 
   /** Shows the filter and range a shared link carries, as if a reader had picked them. */
-  private restoreUrl(): void {
+  restoreUrl(): void {
     const id = this.chartId;
     if (!id) return;
     const params = new URLSearchParams(location.search);
@@ -984,12 +291,10 @@ export class Chart implements EnhancedChart {
     if (colon > 0)
       this.select({ field: filter.slice(0, colon), value: filter.slice(colon + 1) }, true);
     const range = (params.get(`${id}-range`) ?? "").split("..").map(Number);
-    const scale = parseScale(this.figure);
     const [lo, hi] = range;
-    if (scale && this.brushRect && range.length === 2 && lo !== undefined && hi !== undefined) {
-      if (!Number.isFinite(lo) || !Number.isFinite(hi)) return;
-      this.drawBrush(project(scale, lo), project(scale, hi));
-      this.emitBrush([lo, hi]);
+    if (range.length === 2 && Number.isFinite(lo) && Number.isFinite(hi)) {
+      if (showRange(this, [lo as number, hi as number]))
+        emitBrush(this, [lo as number, hi as number]);
     }
   }
 
@@ -1001,12 +306,12 @@ export class Chart implements EnhancedChart {
     this.clearAll(false);
   }
 
-  private clearAll(notify: boolean): void {
+  clearAll(notify: boolean): void {
     this.rangeStart = null;
     if (this.selected) this.select(null, notify);
     if (this.brushRect && this.brushRect.style.display !== "none") {
-      if (notify) this.emitBrush(null);
-      else this.setRange(null);
+      if (notify) emitBrush(this, null);
+      else setRange(this, null);
     }
     this.anchorIndex = null;
   }
@@ -1042,14 +347,10 @@ export class Chart implements EnhancedChart {
     this.attach();
     // Restoring the page's own selection is not news to the page, so it fires nothing.
     if (selected) this.select(selected, false);
-    const scale = parseScale(this.figure);
-    if (range && scale && this.brushRect) {
-      this.drawBrush(project(scale, range[0]), project(scale, range[1]));
-      this.setRange(range);
-    }
+    if (range && showRange(this, range)) setRange(this, range);
     if (expanded) this.expandButton?.click();
     if (stopKey !== null && this.marks.length > 0) {
-      this.moveFocus(this.successor(stopKey, stopX, stopIndex), hadFocus);
+      moveFocus(this, successor(this, stopKey, stopX, stopIndex), hadFocus);
     }
     if (!reducedMotion()) {
       animateFrom(this.figure, before);
@@ -1059,7 +360,7 @@ export class Chart implements EnhancedChart {
     this.announce(this.strings.updated);
   }
 
-  private teardown(): void {
+  teardown(): void {
     this.runs++;
     for (const undo of this.cleanup.splice(0)) undo();
     clearTimeout(this.hideTimer);
