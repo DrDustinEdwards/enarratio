@@ -11,7 +11,7 @@ import type { EnhancedChart, ResolvedOptions, SelectDetail } from "./types.js";
 import { parseMarkup } from "../parse.js";
 import { attachBrush, emitBrush, setRange, showRange } from "./brush.js";
 import { attachPoints, moveFocus, successor } from "./points.js";
-import { hideTip, scheduleHide, showTip } from "./tip.js";
+import { hideChartTip, scheduleHide, showChartTip } from "./tip.js";
 import { attachControls } from "./bar.js";
 import { attachEntrance, attachLegend, attachPointer, attachSpotlight } from "./view.js";
 
@@ -128,9 +128,9 @@ export class Chart implements EnhancedChart {
       // The pointer can move onto the tooltip without it vanishing, and Escape dismisses it
       // wherever focus is (WCAG 1.4.13).
       this.listen(tip, "pointerenter", () => clearTimeout(this.hideTimer));
-      this.listen(tip, "pointerleave", () => hideTip(this));
+      this.listen(tip, "pointerleave", () => hideChartTip(this));
       this.listen(document, "keydown", (e) => {
-        if ((e as KeyboardEvent).key === "Escape") hideTip(this);
+        if ((e as KeyboardEvent).key === "Escape") hideChartTip(this);
       });
     }
 
@@ -198,7 +198,7 @@ export class Chart implements EnhancedChart {
     });
     this.cross?.(picked);
     if (picked)
-      showTip(
+      showChartTip(
         this,
         picked.indexes.flatMap((i) => this.marks[i] ?? []),
       );
