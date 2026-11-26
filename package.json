@@ -114,7 +114,7 @@
     "bloat": "devkit-no-bloat"
   },
   "devDependencies": {
-    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.68.2",
+    "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.69.0",
     "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.64.0",
     "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.182.3",
     "@guidepup/guidepup": "0.40.0",
