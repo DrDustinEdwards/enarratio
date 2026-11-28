@@ -115,8 +115,8 @@
   },
   "devDependencies": {
     "@drdustinedwards/site-helpers": "github:DrDustinEdwards/prelum#v0.69.0",
-    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.67.0",
-    "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.183.1",
+    "@dustinedwards/devkit": "github:DrDustinEdwards/devkit#v0.68.0",
+    "@dustinedwards/site-runtime": "github:DrDustinEdwards/site-runtime#v0.183.2",
     "@guidepup/guidepup": "0.40.0",
     "@guidepup/playwright": "0.21.0",
     "@guidepup/setup": "0.29.3",
